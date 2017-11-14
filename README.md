@@ -2,4 +2,4 @@
 
 
 
-![image2](image2.jpg?raw=true)
+![image2](image2.jpg)
