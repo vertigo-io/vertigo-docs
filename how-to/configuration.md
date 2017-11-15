@@ -172,6 +172,6 @@ Une fois cet objet AppConfig créé il est possible de démarrer l'application :
 
 ```java
 try (AutoCloseableApp app = new AutoCloseableApp(appConfig)) {
-	System.in.read();
+	//do whatever you want
 }
 ```
