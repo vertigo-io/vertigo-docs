@@ -9,6 +9,7 @@
   - [Extensions](essentiel/extensions.md)
 - How-to
   - [Configuration](how-to/configuration.md)
+  - [Composants](how-to/composants.md)
   - [MDA](how-to/mda.md)
   - [Accès aux données](how-to/dao.md)
   - [Recherche](how-to/recherche.md)
@@ -39,4 +40,3 @@
   - [Notifications](guide/samples_notifications.md)
   - [Bonnes pratiques](guide/bonnes_pratiques.md)
 
-  
