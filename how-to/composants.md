@@ -59,7 +59,7 @@ private boolean log;
 
 Pour être utilisé par un traitement un composant doit être récupéré dans l'objet nécessitant l'utilisation de ce composant. 
 
-Cet objet est souvent lui même un composant et dans ce cas il est possible d'utiliser l'injection de dépendance pour le récuper et donc l'utiliser.
+Cet objet est souvent lui même un composant et dans ce cas l'injection de dépendances doit être utilisée pour récupérer l'instance et donc appeler les méthodes offertes par le composant.
 
 > Le nom qui doit être utilisé lors de l'injection (Calculator1 dans l'exemple ci-dessous) est le nom simple de l'interface lorsque le composant implémente cette interface ou le nom simple de la classe d'implémentation dans le cas contraire.
 
