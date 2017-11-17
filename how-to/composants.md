@@ -6,10 +6,10 @@ Ils doivent à minima implémenter l'interface `io.vertigo.core.component.Compon
 !> Les composants sont des singletons, ils doivent donc avoir un comportant **threadsafe**. Un moyen simple de s'en assurer est d'en faire des objets totalement **stateless**
 
 Voici les principaux types de composants utilisés dans un projet Vertigo:
-- les *Manager* qui sont les composants interne de vertigo et qui offrent des fonctionnalités essentielles (ex: `StoreManager`,  `AuthorizationManager`, etc...) 
-- les *DAO* qui encapsule l'accès aux données. Ces composants sont en règle générale générés (voir MDA)
-- les *Services* qui comporte la logique métier du projet et offrent donc des services de haut niveau. Les extensions Vertigo proposent également des services métiers.
-- les *WebServices* qui en règle générale consomment les services métiers et les exposent sous forme de webservices REST
+- les **Manager** qui sont les composants interne de vertigo et qui offrent des fonctionnalités essentielles (ex: `StoreManager`,  `AuthorizationManager`, etc...) 
+- les **DAO** qui encapsule l'accès aux données. Ces composants sont en règle générale générés (voir MDA)
+- les **Services** qui comporte la logique métier du projet et offrent donc des services de haut niveau. Les extensions Vertigo proposent également des services de haut niveau.
+- les **WebServices** qui en règle générale consomment les services métiers et les exposent sous forme de webservices REST
 
 
 ## Construction
