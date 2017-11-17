@@ -5,6 +5,12 @@ Ils doivent à minima implémenter l'interface `io.vertigo.core.component.Compon
 
 !> Les composants sont des singletons, ils doivent donc avoir un comportant **threadsafe**. Un moyen simple de s'en assurer est d'en faire des objets totalement **stateless**
 
+Voici les principaux types de composants utilisés dans un projet Vertigo:
+- les *Manager* qui sont les composants interne de vertigo et qui offrent des fonctionnalités essentielles (ex: `StoreManager`,  `AuthorizationManager`, etc...) 
+- les *DAO* qui encapsule l'accès aux données. Ces composants sont en règle générale générés (voir MDA)
+- les *Services* qui comporte la logique métier du projet et offrent donc des services de haut niveau. Les extensions Vertigo proposent également des services métiers.
+- les *WebServices* qui en règle générale consomment les services métiers et les exposent sous forme de webservices REST
+
 
 ## Construction
 
@@ -59,16 +65,16 @@ private boolean log;
 
 Pour être utilisé par un traitement un composant doit être récupéré dans l'objet nécessitant l'utilisation de ce composant. 
 
-Cet objet est souvent lui même un composant et dans ce cas l'injection de dépendances doit être utilisée pour récupérer l'instance et donc appeler les méthodes offertes par le composant.
+Cet objet est souvent lui même un composant et dans ce cas l'injection de dépendances doit être utilisé pour récupérer l'instance et donc appeler les méthodes offertes par le composant.
 
-> Le nom qui doit être utilisé lors de l'injection (Calculator1 dans l'exemple ci-dessous) est le nom simple de l'interface lorsque le composant implémente cette interface ou le nom simple de la classe d'implémentation dans le cas contraire.
+> Le nom qui doit être utilisé lors de l'injection (Calculator1 dans l'exemple ci-dessous) est le nom simple de l'interface lorsque le composant implémente une interface ou le nom simple de la classe d'implémentation dans le cas contraire.
 
 ```java
 @Inject
 private Calculator1 calculator1;
 ```
 
-?> Ce mécanisme est disponible dans la totalité de classes manipulées par le développeur. Il est donc 
+?> Ce mécanisme est disponible dans la totalité de classes manipulées par le développeur. Il est donc à privilégier.
 
 > C'est le cas des DAO qui sont utilisés par les services métiers ou les services métiers eux-même utilisés par les webservices.
 
@@ -118,5 +124,26 @@ public void stop() {
 @Override
 public List<Definition> provideDefinitions(final DefinitionSpace definitionSpace) {
 	return Collections.emptyList();
+}
+```
+
+## Exemple
+
+Voici un exemple de service métier qui peut être implémenté avec Vertigo. Ce dernier utilise un autre composant DAO ainsi qu'un aspect `@Transactional` permettant de gérér la transactionalité des méthodes de services.
+
+```java
+@Transactional
+public class MovieServicesImpl implements MovieServices {
+
+	@Inject
+	private MovieDAO movieDAO;
+
+	@Override
+	public Movie getMovieById(final Long movId) {
+		Assertion.checkNotNull(movId);
+		// ---
+		return movieDAO.get(movId);
+	}
+
 }
 ```
