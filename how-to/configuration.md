@@ -124,6 +124,138 @@ Ces fichiers de configurations sont spécifiés à l'aide du paramètre *boot.ap
 ```
 Il est possible de spécifier plusieurs fichiers en les séparant par des `;`. Les fichiers sont lus séquentiellement. 
 
+### Exemple
+
+Voici un exemple de configuration des composants Vertigo. [managers.xml](https://github.com/KleeGroup/vertigo-university/blob/master/vertigo-demo-struts2/src/main/resources/META-INF/managers.xml)
+
+```xml
+<?xml version =	'1.0' encoding = 'ISO-8859-1'?>
+<!-- Utilisation -->
+<config>
+	<boot locales="fr_FR">
+		<plugin class="io.vertigo.core.plugins.resource.classpath.ClassPathResourceResolverPlugin" />
+		<plugin class="io.vertigo.vega.plugins.webservice.servlet.ServletResourceResolverPlugin" />
+		<plugin class="io.vertigo.core.plugins.param.xml.XmlParamPlugin">
+			<param name="url" value="${boot.configXmlInterne}" />
+		</plugin>
+		<plugin class="io.vertigo.vega.plugins.webservice.servlet.WebAppContextParamPlugin" />
+	</boot>
+	
+	<module name="commons">
+		<component api="ScriptManager" class="io.vertigo.commons.impl.script.ScriptManagerImpl">
+			<plugin class="io.vertigo.commons.plugins.script.janino.JaninoExpressionEvaluatorPlugin" />
+		</component>
+		<component api="AnalyticsManager" class="io.vertigo.commons.impl.analytics.AnalyticsManagerImpl" />
+		<component api="CodecManager" class="io.vertigo.commons.impl.codec.CodecManagerImpl" />
+		<component api="CacheManager" class="io.vertigo.commons.impl.cache.CacheManagerImpl">
+			<plugin class="io.vertigo.commons.plugins.cache.memory.MemoryCachePlugin">
+			</plugin>
+		</component>
+		<component api="VTransactionManager" class="io.vertigo.commons.impl.transaction.VTransactionManagerImpl" />
+		<component api="EventBusManager" class="io.vertigo.commons.impl.eventbus.EventBusManagerImpl" />
+		<component api="DaemonManager" class="io.vertigo.commons.impl.daemon.DaemonManagerImpl" />
+	</module>
+	<module name="database">
+		<component api="SqlDataBaseManager" class="io.vertigo.database.impl.sql.SqlDataBaseManagerImpl">
+			<plugin class="io.vertigo.database.plugins.sql.connection.datasource.DataSourceConnectionProviderPlugin">
+				<param name="source" value="java:/comp/env/jdbc/DataSource" />
+				<param name="classname" value="io.vertigo.database.impl.sql.vendor.h2.H2DataBase" />
+			</plugin>
+		</component>
+	</module>
+	<module name="dynamo">
+		<component api="TaskManager" class="io.vertigo.dynamo.impl.task.TaskManagerImpl" />
+		<component api="KVStoreManager" class="io.vertigo.dynamo.impl.kvstore.KVStoreManagerImpl">
+			<plugin class="io.vertigo.dynamo.plugins.kvstore.berkeley.BerkeleyKVStorePlugin">
+				<param name="collections" value="VActionContext;TTL=43200" /> <!-- 12h -->
+				<param name="dbFilePath" value="${java.io.tmpdir}/ehcache/DemoVActionContext" />
+			</plugin>
+		</component>
+		<component api="StoreManager" class="io.vertigo.dynamo.impl.store.StoreManagerImpl">
+			<plugin class="io.vertigo.dynamo.plugins.store.datastore.sql.SqlDataStorePlugin">
+				<param name="sequencePrefix" value="SEQ_" />
+			</plugin>
+			<plugin class="io.vertigo.demo.services.util.TutoMasterDataStoreStatic"/>
+			<plugin class="io.vertigo.demo.services.util.CommuneStorePlugin"/>
+			
+			<plugin class="io.vertigo.dynamo.plugins.store.filestore.db.DbFileStorePlugin">
+				<param name="storeDtName" value="DT_KX_FILE_INFO" />
+			</plugin>
+		</component>
+		<component api="FileManager" class="io.vertigo.dynamo.impl.file.FileManagerImpl" /> 
+		<component api="CollectionsManager" class="io.vertigo.dynamo.impl.collections.CollectionsManagerImpl">
+			<plugin class="io.vertigo.dynamo.plugins.collections.lucene.LuceneIndexPlugin" />
+		</component>
+	</module>
+	<module name="account">
+		<component api="VSecurityManager" class="io.vertigo.persona.impl.security.VSecurityManagerImpl">
+			<param name="userSessionClassName" value="io.vertigo.demo.services.DemoUserSession" />
+		</component>
+	</module>
+	<module name="struts2">
+	</module>
+	<module name="orchestra">
+		<definitions>
+			<provider class="io.vertigo.dynamo.plugins.environment.DynamoDefinitionProvider" >
+				<resource type ="kpr" path="io/vertigo/orchestra/execution.kpr"/>
+			    <resource type="classes" path="io.vertigo.orchestra.domain.DtDefinitions" />  
+		    </provider>
+		</definitions>   
+		<component api="OrchestraDefinitionManager" class="io.vertigo.orchestra.impl.definitions.OrchestraDefinitionManagerImpl">
+			<plugin class="io.vertigo.orchestra.plugins.definitions.memory.MemoryProcessDefinitionStorePlugin"/>
+		</component>
+		<component api="OrchestraServices" class="io.vertigo.orchestra.impl.services.OrchestraServicesImpl">
+			<plugin class="io.vertigo.orchestra.plugins.services.schedule.memory.MemoryProcessSchedulerPlugin"/>
+			<plugin class="io.vertigo.orchestra.plugins.services.execution.memory.MemoryProcessExecutorPlugin" >
+				<param name="workersCount" value="5" />
+			</plugin>
+		</component>
+	</module>
+</config>
+```
+
+Voici un exemple de configuration des composants d'une application. [demo-services.xml](https://github.com/KleeGroup/vertigo-university/blob/master/vertigo-demo-struts2/src/main/resources/META-INF/demo-services.xml)
+
+```xml
+<?xml version =	'1.0' encoding = 'ISO-8859-1'?>
+<!-- Utilisation -->
+<config>
+	<!-- Aspects declaration -->
+	<module name="aspects" >
+		<aspect class="io.vertigo.commons.impl.transaction.VTransactionAspect"/>
+	</module>
+	
+	<!-- Demo App-->
+	<module name="Demo">
+		<definitions>
+			<provider class="io.vertigo.dynamo.plugins.environment.DynamoDefinitionProvider" >
+				<param name='encoding' value='utf8' />
+				<resource type="classes" path="io.vertigo.demo.domain.DtDefinitions" />
+				<resource type="kpr" path="io/vertigo/demo/execution.kpr" />
+			</provider>
+			<provider class="io.vertigo.persona.plugins.security.loaders.SecurityDefinitionProvider" >
+				<resource type="security" path="/META-INF/demo-auth-config.xml" />
+			</provider>
+		</definitions>
+		<!-- dao -->
+		<component class="io.vertigo.demo.dao.administration.utilisateur.LoginDAO" />
+	    <component class="io.vertigo.demo.dao.administration.utilisateur.RoleDAO" />
+	    <component class="io.vertigo.demo.dao.administration.utilisateur.UtilisateurDAO" />
+	    <component class="io.vertigo.demo.dao.produit.ProduitDAO" />
+	    <!-- services -->
+	    <component api="UtilisateurServices" class="io.vertigo.demo.services.administration.utilisateur.UtilisateurServicesImpl" />
+	    <component api="ProduitServices" class="io.vertigo.demo.services.produit.ProduitServicesImpl" />
+	    <component api="ReferentielServices" class="io.vertigo.demo.services.referentiel.ReferentielServicesImpl" />
+	</module>
+	<init>
+		<initializer class="io.vertigo.demo.boot.initializer.LocaleManagerInitializer"/>
+		<initializer class="io.vertigo.demo.boot.initializer.PersistenceManagerInitializer"/>
+		<initializer class="io.vertigo.demo.boot.initializer.JobManagerInitializer"/>
+		<initializer class="io.vertigo.demo.boot.initializer.SecurityManagerInitializer"/>
+	</init>
+ </config>
+```
+
 
 ## Configuration par features (API Java)
 
