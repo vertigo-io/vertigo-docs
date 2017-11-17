@@ -1,8 +1,8 @@
-- [Home](/)
+- [Accueil](/)
 - Essentiel
   - [Introduction](essentiel/introduction.md)
   - [Philosphie](essentiel/philosophie.md)
-  - [Qu'est-ce qu'une app](essentiel/app.md)
+  - [Qu'est-ce qu'une app?](essentiel/app.md)
   - [Architecture type](essentiel/archi_type.md)
   - [Bénéfices](essentiel/benefices.md)
   - [Modules](essentiel/modules.md)
