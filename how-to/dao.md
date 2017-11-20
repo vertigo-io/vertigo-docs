@@ -146,7 +146,7 @@ create Task TK_GET_ACTORS_IN_MOVIE {
 }
 
 ```
-Cette tâche un fois déclarée et le générateur executé, une nouvelle méthode est disponible dans le DAO associé.
+Cette tâche un fois déclarée et le générateur executé, une nouvelle méthode est disponible dans le DAO associé. Les tâches sont placés dans le DAO de l'objet concerné par les paramètres (en sortie ou en entrée) lorsqu'il n'y a pas ambiguité ou dans un PAO (Package Access Object) dans le cas contraire.
 
 ```java
 public io.vertigo.dynamo.domain.model.DtList<io.vertigo.samples.dao.domain.Actor> getActorsInMovie(final Long movId) {
