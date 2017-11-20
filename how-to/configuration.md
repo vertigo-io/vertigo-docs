@@ -100,21 +100,27 @@ Un fichier de configuration est donc consitué des sections suivantes :
 |   name   |     oui     | le nom du paramètre    |
 |  value   |     oui     | la valeur du paramètre |
 
-En cas de besoin la valeurs des paramètres peut être modifiée par paramètrage à l'aide de la syntaxe suivante `${}`. Il est donc possible d'avoir la configuration suivante permettant une modification par l'intermédiaire d'une fichier de paramétrage.
+En cas de besoin la valeur des paramètres peut être modifiée par paramètrage à l'aide de la syntaxe `${}`. Il est donc possible d'avoir la configuration suivante permettant une modification par l'intermédiaire d'un fichier de paramétrage.
 
 ```xml
 <plugin class="io.vertigo.core.plugins.param.xml.XmlParamPlugin">
 	<param name="url" value="${boot.configXmlInterne}" />
 </plugin>
 ```
-Il est alors possible de changer le paramètre par l'intermédiaire d'un fichier de paramètrage.
+Il est alors possible de changer la configuration par l'intermédiaire d'un fichier de paramètrage.
 
 > La configuration par fichier xml est également décrite par un fichier XSD disponible [ici](https://github.com/KleeGroup/vertigo/blob/master/vertigo-core/src/main/java/io/vertigo/app/config/xml/vertigo_1_0.xsd)
 
-
 ### Utilisation
 
-Ces fichiers de configurations sont spécifiés à l'aide du paramètre *boot.applicationConfiguration*  de la servlet
+Dans le cadre des applications Web, un listener doit être paramétré
+
+```xml
+<listener>
+		<listener-class>io.vertigo.vega.impl.webservice.servlet.AppServletContextListener</listener-class>
+	</listener>
+```
+Ce listener permet lit la configuration de l'application vertigo par l'intermédaires des fichiers de configurations spécifiés à l'aide du paramètre *boot.applicationConfiguration*  de la servlet.
 
 ```xml
 <context-param>

@@ -3,12 +3,12 @@
 Les composants sont des objets offrant des services.
 Ils doivent à minima implémenter l'interface `io.vertigo.core.component.Component` qui n'est rien d'autre qu'un simple marqueur ou bien implémenter une interface métier qui contractualise les services offerts.
 
-!> Les composants sont des singletons, ils doivent donc avoir un comportant **threadsafe**. Un moyen simple de s'en assurer est d'en faire des objets totalement **stateless**
+!> Les composants sont des singletons, ils doivent donc avoir un comportant **threadsafe**. Un moyen simple de s'en assurer est d'en faire des objets totalement **stateless**.
 
 Voici les principaux types de composants utilisés dans un projet Vertigo:
-- les **Manager** qui sont les composants interne de vertigo et qui offrent des fonctionnalités essentielles (ex: `StoreManager`,  `AuthorizationManager`, etc...) 
+- les **Manager** qui sont les composants internes de vertigo et qui offrent des fonctionnalités essentielles (ex: `StoreManager`,  `AuthorizationManager`, etc...) 
 - les **DAO** qui encapsule l'accès aux données. Ces composants sont en règle générale générés (voir MDA)
-- les **Services** qui comporte la logique métier du projet et offrent donc des services de haut niveau. Les extensions Vertigo proposent également des services de haut niveau.
+- les **Services** qui comportent la logique métier du projet et offrent donc des services de haut niveau. Les extensions Vertigo proposent également des services de haut niveau.
 - les **WebServices** qui en règle générale consomment les services métiers et les exposent sous forme de webservices REST
 
 
@@ -67,7 +67,7 @@ Pour être utilisé par un traitement un composant doit être récupéré dans l
 
 Cet objet est souvent lui même un composant et dans ce cas l'injection de dépendances doit être utilisé pour récupérer l'instance et donc appeler les méthodes offertes par le composant.
 
-> Le nom qui doit être utilisé lors de l'injection (Calculator1 dans l'exemple ci-dessous) est le nom simple de l'interface lorsque le composant implémente une interface ou le nom simple de la classe d'implémentation dans le cas contraire.
+> La classe qui doit être utilisée lors de l'injection (Calculator1 dans l'exemple ci-dessous) est l'interface lorsque le composant implémente une interface ou sa classe d'implémentation dans le cas contraire.
 
 ```java
 @Inject
@@ -106,8 +106,8 @@ calculator1.sum(1, 2, 3, 4);
 
 ## Comportement
 
-Il est possible d'ajouter les comportement suivant aux composants :
-- `Activeable` : permet d'avoir des points d'appel aux démarrage et à l'arret du composant
+Il est possible d'ajouter les comportement suivants aux composants :
+- `Activeable` : permet d'avoir des points d'appel aux démarrage et à l'arrêt du composant
 
 ```java
 @Override
