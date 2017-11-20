@@ -113,14 +113,14 @@ Il est alors possible de changer la configuration par l'intermédiaire d'un fich
 
 ### Utilisation
 
-Dans le cadre des applications Web, un listener doit être paramétré
+Dans le cadre des applications Web, un listener doit être paramétré sur la servlet.
 
 ```xml
 <listener>
-		<listener-class>io.vertigo.vega.impl.webservice.servlet.AppServletContextListener</listener-class>
-	</listener>
+	<listener-class>io.vertigo.vega.impl.webservice.servlet.AppServletContextListener</listener-class>
+</listener>
 ```
-Ce listener permet lit la configuration de l'application vertigo par l'intermédaires des fichiers de configurations spécifiés à l'aide du paramètre *boot.applicationConfiguration*  de la servlet.
+Ce listener permet la création de l'application Vertigo. Ce dernier lit la configuration de l'application par l'intermédiaires des fichiers de configurations spécifiés à l'aide du paramètre *boot.applicationConfiguration*  de la servlet.
 
 ```xml
 <context-param>
@@ -128,7 +128,7 @@ Ce listener permet lit la configuration de l'application vertigo par l'interméd
 	<param-value>/META-INF/managers.xml;/META-INF/demo-services.xml</param-value>
 </context-param>
 ```
-Il est possible de spécifier plusieurs fichiers en les séparant par des `;`. Les fichiers sont lus séquentiellement. 
+Il est possible de spécifier plusieurs fichiers en les séparant par des `;`. Les fichiers sont lus séquentiellement pour créer une unique application.
 
 ### Exemple
 
