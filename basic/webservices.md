@@ -137,7 +137,7 @@ Concernant les paramètres d'entrée et de sortie ils peuvent être de différen
 - Des collections d'objets 
 
 
-Concernant les paramètre d'entrée il est possible de les récupérer depuis : 
+Concernant les paramètres d'entrée il est possible de les récupérer depuis : 
 
 - l'url : via l'annotation `@PathParam`
 - les paramètres d'url : via l'annotation `@QueryParam`
@@ -171,3 +171,48 @@ public FacetedQueryResult search(
 
 
 ## Sécurisation du WebService
+
+Il est absolument indispensable de sécuriser les appels de webservices.
+
+Afin de répondre à cet enjeu de sécurité de nombreux mécanismes sont disponibles dans Vega.
+
+Par défaut l'ensemble des WebServices sont accessibles uniquement à utilisateur authentifié. Il s'agit du premier niveau de sécurisation. Evidemment celui-ci est **nécessaire** mais **non suffisant**.
+
+Pour aller plus loin il est possible d'utiliser les fonctionnalités issues du module Vertigo-Account qui propose un modèle de sécurité qu'il est possible d'appliquer aux WebServices.
+
+Il est ainsi possible de vérifier lors d'un appel de WebService :
+
+- Que l'utilisateur authentifié possède un droit parmi les droits nécessaire pour être autorisé à l'appeler
+- Que les entités (objets métiers au sens Vertigo) sont manipulables par l'utilisateur authentifié
+
+```java
+@Secured("CONTACT$READ")
+@GET("/{conId}")
+public Contact read(@PathParam("conId") final long conId) {
+	final Contact contact = contactDao.get(conId);
+	return contact;
+}
+```
+
+> Ici on vérifie que utilisateur connecté possède le droit CONTACT$READ donc la capacité à lire des contacts
+
+```java
+@PUT("/contactView")
+public ContactView updateContactView(
+    @SecuredOperation("WRITE") final ContactView contactView) {
+		return contactView;
+}
+```
+
+> Ici on vérifie que utilisateur connecté possède autorisation d'écriture sur l'entité ContactView. Ce contrôle de sécurité dépend des à la fois des attributs de l'utilisateur et du Contact. Il s'agit donc d'une contrôle de sécurité très fin.
+
+## Pour aller plus loin
+
+Il est possible d'enrichir le comportement d'un Webservice à l'aide de Vega en utilisant les fonctionnalités offertes suivantes :
+
+- **rate-limiting** : Limitation du nombre d'appel autorisé sur une fenêtre de temps glissante
+- **tokens** : generation et consommation de tokens pour sécuriser des opérations critiques
+- **server-side** : conservation d'un état côté serveur pour gérer efficacement certains traitements
+- **etc...**
+
+L'ensemble de ces fonctionnalités et leurs API sont disponibles dans [ce](/advanced/vega) chapitre
