@@ -223,4 +223,4 @@ Grâce à vertigo-ui il est possible de créer simplement des pages dynamiques e
 
 Il est possible d'appeler des méthodes d'un controller via des requêtes XHR en POST qui agissent sur le ViewContext. La méthode du controller n'a alors qu'a retourner le ViewContext qui sera alors automatiquement sérialisé en JSON et ainsi mettre à jour le  `vueData` de l'instance VueJS de la page.
 
-> L'appel de la méthode `postAjax(url, params)`  mise à disposition sur l'instance *VUiPage* par exemple suite un évènement VueJS (@change etc..) depuis un composant VueJS simplifie encore davantage cette cinématique en prenant en charge l'appel XHR et le traitement de la réponse pour mise à jour du `vueData`
+> L'appel de la méthode `httpPostAjax(url, params)`  mise à disposition sur l'instance *VUiPage* par exemple suite un évènement VueJS (@change etc..) depuis un composant VueJS simplifie encore davantage cette cinématique en prenant en charge l'appel XHR et le traitement de la réponse pour mise à jour du `vueData`
