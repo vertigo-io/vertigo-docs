@@ -162,36 +162,39 @@ Pour notre écran de détail créons la vue suivante :
 
 ```html
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" 
-  xmlns:vu="http://www.morphbit.com/thymeleaf/component"
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{templates/mmcDetailNavLayout}"
->
+<html
+	xmlns:th="http://www.thymeleaf.org" 
+  	xmlns:vu="http://www.morphbit.com/thymeleaf/component">
 	<head>
-		<title>Person detail</title>		
+	    <vu:head-meta/>
+	    <meta charset="utf-8"/>
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	    <title>Person detail</title>		
 	</head>
 	
-	<body>
-				<div layout:fragment="content-header-actions">
-					<vu:button-link th:if="${model.modeEdit}"  url="@{/person/} + ${model.person.personId}" :round size="lg" color="primary" icon="fas fa-ban" :flat ariaLabel="Cancel" class="on-left"  />					
-					<vu:button-submit th:if="${model.modeReadOnly}" action="@{_edit}" :round size="lg" color="primary" icon="edit" ariaLabel="Edit" class="on-left"/>
-				</div>
-		</section>
-		
-		<section layout:fragment="content" >
-				<vu:block title="Information">
-					<vu:grid cols="2">
-						<vu:text-field object="person" field="firstName"/>
-						<vu:text-field object="person" field="lastName" />
-						<vu:text-field object="person" field="email" />
-					</vu:grid>
-				</vu:block>
-					
-				<q-page-sticky position="bottom-right">
-					<vu:button-submit th:if="${model.modeEdit}"   icon="save" label="Save" action="@{_save}" size="lg" color="primary" />
-					<vu:button-submit th:if="${model.modeCreate}" icon="save" label="Create" action="@{_create}" size="lg" color="primary"/>
-				</q-page-sticky>				
-		</section>
+	<body class="mat desktop no-touch platform-mat">
+		<vu:page>
+			<div id="page" v-cloak>
+				<vu:form>
+					<div>
+						<vu:button-link th:if="${model.modeEdit}"  url="@{/person/} + ${model.person.personId}" :round size="lg" color="primary" icon="fas fa-ban" :flat ariaLabel="Cancel"   />					
+						<vu:button-submit th:if="${model.modeReadOnly}" action="@{_edit}" :round size="lg" color="primary" icon="edit" ariaLabel="Edit" />
+					</div>
+					<div>
+						<vu:block title="Information">
+								<vu:text-field object="person" field="firstName" />
+								<vu:text-field object="person" field="lastName" />
+								<vu:text-field object="person" field="email" />
+						</vu:block>
+						<div>
+							<vu:button-submit th:if="${model.modeEdit}"   icon="save" label="Save" action="@{_save}" size="lg" color="primary" />
+							<vu:button-submit th:if="${model.modeCreate}" icon="save" label="Create" action="@{_create}" size="lg" color="primary"/>
+						</div>				
+					</div>
+				</vu:form>
+			</div>
+	    </vu:page>
 	</body>
 </html>
 ```
@@ -199,8 +202,8 @@ Pour notre écran de détail créons la vue suivante :
 Nous pouvons ici voir que :
 
 - la vue est un template html thymeleaf standard
-- la vue utilise un layout ou gabarit d'écran afin de se focaliser sur l'essentiel 
-- la vue utilise des composants utilisant le prefix `vu:` qui sont des composants proposé par vertigo-ui et qui couvrent les besoins principaux
+- la vue utilise des composants utilisant le prefix `vu:` qui sont des composants proposés par vertigo-ui et qui couvrent les besoins principaux
+- les composants `vu:head-meta ` et `vu:page` et `vu:form` permettent de gérer le code technique à l'initialisation de la page, import des fichiers javascript, initialisation de l'instance VueJS et doivent-être présents sur la page. Ce code technique peut-être abstrait via l'utilisation de *layouts* (cf [ici](/extensions/ui))
 - la même vue est utilisée pour l'édition et la consultation ce qui permet à la fois d'assurer une cohérence maximale mais également de simplifier le développement
 
 La page est en réalité un template VueJS qui sera interprété côté client. L'instance VueJS de chaque page est accessible simplement via la variable *VUiPage*.
