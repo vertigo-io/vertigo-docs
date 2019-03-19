@@ -19,8 +19,8 @@ Elle inclut de nombreuses fonctionnalités :
 
 ## Donc qu'est-ce-qu'une activité dans Orchestra ?
 
-- Une activité est l'unité d'exécution. C'est elle qui contient le code qui doit être éxecuté.
-- Une activité gére la suite à donner au processus
+- Une activité est l'unité d'exécution. C'est elle qui contient le code qui doit être exécuté.
+- Une activité gère la suite à donner au processus
 - Toutes les activités d'un processus partagent une environnement commun exécution appelé workspace
 
 ## Comment l'utiliser?
