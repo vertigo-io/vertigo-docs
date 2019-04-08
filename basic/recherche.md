@@ -130,14 +130,14 @@ Les indexes sont très puissants et gère des données **documentaire**. Il n'y 
 Très simplement, il s'agit de créer un DtObject mettant les données à plat.
 ```javascript
 create DtDefinition DtEquipmentIndex {
-	field equipmentId {domain: DoId label:"Id" required:"true"}
-	field name {domain: DoLabel label: "Name" required:"false"}
-	field code {domain: DoCode label: "Code" required:"false"}
-	field purchaseDate {domain: DoLocaldate label: "Date of purchase" required:"false"}
-	field description {domain: DoDescription label: "Description" required:"false"}
-	field tags {domain: DoTags label: "Tags" required:"false"}
-	field equipmentTypeName {domain: DoLabel label:"Type" required:"false"}
-	field equipmentCategoryName {domain: DoLabel label:"Category" required:"false"}
+   field equipmentId {domain: DoId label:"Id" required:"true"}
+   field name {domain: DoLabel label: "Name" required:"false"}
+   field code {domain: DoCode label: "Code" required:"false"}
+   field purchaseDate {domain: DoLocaldate label: "Date of purchase" required:"false"}
+   field description {domain: DoDescription label: "Description" required:"false"}
+   field tags {domain: DoTags label: "Tags" required:"false"}
+   field equipmentTypeName {domain: DoLabel label:"Type" required:"false"}
+   field equipmentCategoryName {domain: DoLabel label:"Category" required:"false"}
 }
 ```
 
@@ -150,27 +150,27 @@ Exemple de domain :
 
 ```javascript
 create Domain DoCode {
-	dataType : String
-	formatter : FmtDefault
-	indexType : "code:keyword"
+   dataType : String
+   formatter : FmtDefault
+   indexType : "code:keyword"
 }
 
 create Domain DoLabel {
-	dataType : String
-	formatter : FmtDefault
-	indexType : "text_fr:sortable"
+   dataType : String
+   formatter : FmtDefault
+   indexType : "text_fr:sortable"
 }
 
 create Domain DoDescription {
-	dataType : String
-	formatter : FmtDefault
-	indexType : "text_fr"
+   dataType : String
+   formatter : FmtDefault
+   indexType : "text_fr"
 }
 
 create Domain DoTags {
-	dataType : String
-	formatter : FmtTags
-	indexType : "multiple_code:facetable"
+   dataType : String
+   formatter : FmtTags
+   indexType : "multiple_code:facetable"
 }
 ```
 
@@ -202,17 +202,17 @@ La **FacetDefinition** représente une définition de facette. Il en existe deux
 
 ```javascript
 create FacetDefinition FctEquipmentEquipmentTypeName {
-	dtDefinition:DtEquipmentIndex, fieldName:"equipmentTypeName", label:"Equipment Type"
+   dtDefinition:DtEquipmentIndex, fieldName:"equipmentTypeName", label:"Equipment Type"
 }
 ```
 
 * les facettes **range** qui sont prédéfinies et rassemblent un ensemble de valeurs dans chaque facette.
 ```javascript
 create FacetDefinition FctEquipmentPurchaseDate {
-	dtDefinition:DtEquipmentIndex, fieldName:"purchaseDate", label:"Purchase Date"
-	range r1 { filter:"purchaseDate:[01/01/2008 TO 01/01/2012]", label:"2008-2012"},
-	range r2 { filter:"purchaseDate:[01/01/2012 TO 01/01/2016]", label:"2012-2016"},
-	range r3 { filter:"purchaseDate:[01/01/2016 TO *]", label:"after 2016"}
+   dtDefinition:DtEquipmentIndex, fieldName:"purchaseDate", label:"Purchase Date"
+   range r1 { filter:"purchaseDate:[01/01/2008 TO 01/01/2012]", label:"2008-2012"},
+   range r2 { filter:"purchaseDate:[01/01/2012 TO 01/01/2016]", label:"2012-2016"},
+   range r3 { filter:"purchaseDate:[01/01/2016 TO *]", label:"after 2016"}
 }
 ```
 > Le **filter** de la facette **range** reprend la syntaxe du moteur de recherche utilisé (ici ElasticSearch).
@@ -227,11 +227,11 @@ La **FacetedQueryDefinition** représente une définition de requête de recherc
 * Le pattern de la requête du moteur de recherche
 ```javascript
 create FacetedQueryDefinition QryEquipment {
-	keyConcept : DtEquipment
-	facets : [FctEquipmentEquipmentTypeName, FctEquipmentPurchaseDate ]
-	domainCriteria : DoLabel
-	listFilterBuilderClass : "io.vertigo.dynamox.search.DslListFilterBuilder"  
-	listFilterBuilderQuery : "allText:#+query*#"
+   keyConcept : DtEquipment
+   facets : [FctEquipmentEquipmentTypeName, FctEquipmentPurchaseDate ]
+   domainCriteria : DoLabel
+   listFilterBuilderClass : "io.vertigo.dynamox.search.DslListFilterBuilder"  
+   listFilterBuilderQuery : "allText:#+query*#"
 }
 ```
 Le **DslListFilterBuilder** de Vertigo est préconisé. Il propose de nombreuses fonctionnalités. Consulter la documentation avancée pour plus d'informations ([DslListFilterBuilder]).
@@ -256,19 +256,19 @@ Pour cette opération Vertigo à besoin du service de chargement des données de
  * @author npiedeloup, pchretien
  */
 public interface SearchLoader<K extends KeyConcept, I extends DtObject> extends Component {
-	/**
-	 * Load all data from a list of keyConcepts.
-	 * @param searchChunk the chunk
-	 * @return List of searchIndex
-	 */
-	List<SearchIndex<K, I>> loadData(SearchChunk<K> searchChunk);
+   /**
+    * Load all data from a list of keyConcepts.
+    * @param searchChunk the chunk
+    * @return List of searchIndex
+    */
+   List<SearchIndex<K, I>> loadData(SearchChunk<K> searchChunk);
 
-	/**
-	 * Create a chunk iterator for crawl all keyConcept data.
-	 * @param keyConceptClass keyConcept class
-	 * @return Iterator of chunk
-	 */
-	Iterable<SearchChunk<K>> chunk(final Class<K> keyConceptClass);
+   /**
+    * Create a chunk iterator for crawl all keyConcept data.
+    * @param keyConceptClass keyConcept class
+    * @return Iterator of chunk
+    */
+   Iterable<SearchChunk<K>> chunk(final Class<K> keyConceptClass);
 }
 ```
 
@@ -277,29 +277,29 @@ Exemple :
 ```java
 public final class EquipmentSearchLoader extends AbstractSqlSearchLoader<Long, Equipment, EquipmentIndex> {
 
-	private final EquipmentServices myEquipmentServices;
+   private final EquipmentServices myEquipmentServices;
 
-	@Inject
-	public EquipmentSearchLoader(final TaskManager taskManager, final VTransactionManager transactionManager, final EquipmentServices equipmentServices) {
-		super(taskManager, transactionManager);
-		myEquipmentServices = equipmentServices;
-	}
+   @Inject
+   public EquipmentSearchLoader(final TaskManager taskManager, final VTransactionManager transactionManager, final EquipmentServices equipmentServices) {
+      super(taskManager, transactionManager);
+      myEquipmentServices = equipmentServices;
+   }
 
-	@Override
-	public List<SearchIndex<Equipment, EquipmentIndex>> loadData(final SearchChunk<Equipment> searchChunk) {
-		final SearchIndexDefinition indexDefinition = Home.getApp().getDefinitionSpace().resolve("IdxEquipment", SearchIndexDefinition.class);
-		final List<Long> equipmentIds = new ArrayList<>();
-		for (final UID<Equipment> uid : searchChunk.getAllUIDs()) {
-			equipmentIds.add((Long) uid.getId());
-		}
-		final DtList<EquipmentIndex> equipmentIndexes = basemanagementPAO.loadEquipmentIndex(equipmentIds);
-		final List<SearchIndex<Equipment, EquipmentIndex>> equipmentSearchIndexes = new ArrayList<>(searchChunk.getAllUIDs().size());
-		for (final EquipmentIndex equipmentIndex : equipmentIndexes) {
-			equipmentSearchIndexes.add(SearchIndex.<Equipment, EquipmentIndex> createIndex(indexDefinition,
-					UID.of(indexDefinition.getKeyConceptDtDefinition(), equipmentIndex.getEquipmentId()), equipmentIndex));
-		}
-		return equipmentSearchIndexes;
-	}
+   @Override
+   public List<SearchIndex<Equipment, EquipmentIndex>> loadData(final SearchChunk<Equipment> searchChunk) {
+      final SearchIndexDefinition indexDefinition = Home.getApp().getDefinitionSpace().resolve("IdxEquipment", SearchIndexDefinition.class);
+      final List<Long> equipmentIds = new ArrayList<>();
+      for (final UID<Equipment> uid : searchChunk.getAllUIDs()) {
+         equipmentIds.add((Long) uid.getId());
+      }
+      final DtList<EquipmentIndex> equipmentIndexes = basemanagementPAO.loadEquipmentIndex(equipmentIds);
+      final List<SearchIndex<Equipment, EquipmentIndex>> equipmentSearchIndexes = new ArrayList<>(searchChunk.getAllUIDs().size());
+      for (final EquipmentIndex equipmentIndex : equipmentIndexes) {
+         equipmentSearchIndexes.add(SearchIndex.<Equipment, EquipmentIndex> createIndex(indexDefinition,
+               UID.of(indexDefinition.getKeyConceptDtDefinition(), equipmentIndex.getEquipmentId()), equipmentIndex));
+      }
+      return equipmentSearchIndexes;
+   }
 }
 ```
 
@@ -319,20 +319,20 @@ Il possible de filtrer la liste des KeyConcept à indexer en surchargeant la mé
 Une tache SQL de récupération de l'objet à indexer doit être déclarée :
 ```json
 create Task TkLoadEquipmentIndex {
-	className : "io.vertigo.dynamox.task.TaskEngineSelect",
-	request : "	select 	equ.EQUIPMENT_ID,
-						equ.NAME, 
-						equ.CODE, 
-						equ.PURCHASE_DATE, 
-						equ.TAGS, 
-						equipmentType.LABEL as EQUIPMENT_TYPE_NAME,
-						equipmentCategory.LABEL as EQUIPMENT_CATEGORY_NAME
-				from EQUIPMENT equ
-				join EQUIPMENT_TYPE equipmentType on equipmentType.equipment_type_id = equ.equipment_type_id
-				join EQUIPMENT_CATEGORY equipmentCategory on equipmentCategory.equipment_category_id = equipmentType.equipment_category_id
-				where EQUIPMENT_ID in (#equipmentIds.rownum#);"
-	attribute equipmentIds {domain : DoLongs, required:"true", inOut :"in",} 
-	attribute dtcIndex {domain : DoDtEquipmentIndexDtc, required:"true", inOut :"out",} 
+   className : "io.vertigo.dynamox.task.TaskEngineSelect",
+   request : "   select    equ.EQUIPMENT_ID,
+                  equ.NAME, 
+                  equ.CODE, 
+                  equ.PURCHASE_DATE, 
+                  equ.TAGS, 
+                  equipmentType.LABEL as EQUIPMENT_TYPE_NAME,
+                  equipmentCategory.LABEL as EQUIPMENT_CATEGORY_NAME
+            from EQUIPMENT equ
+            join EQUIPMENT_TYPE equipmentType on equipmentType.equipment_type_id = equ.equipment_type_id
+            join EQUIPMENT_CATEGORY equipmentCategory on equipmentCategory.equipment_category_id = equipmentType.equipment_category_id
+            where EQUIPMENT_ID in (#equipmentIds.rownum#);"
+   attribute equipmentIds {domain : DoLongs, required:"true", inOut :"in",} 
+   attribute dtcIndex {domain : DoDtEquipmentIndexDtc, required:"true", inOut :"out",} 
 }
     
 ```
@@ -357,10 +357,10 @@ Pour lancer une recherche Vertigo a générer du code dans le DAO du KeyConcept 
 
 Exemple :
 ```java
-  	public FacetedQueryResult<EquipmentIndex, SearchQuery> searchEquipments(final String criteria, final SelectedFacetValues selectedFacetValues, final DtListState dtListState) {
-		final SearchQuery searchQuery = equipmentSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues).build();
-		return equipmentSearchClient.loadList(searchQuery, dtListState);
-	}
+     public FacetedQueryResult<EquipmentIndex, SearchQuery> searchEquipments(final String criteria, final SelectedFacetValues selectedFacetValues, final DtListState dtListState) {
+      final SearchQuery searchQuery = equipmentSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues).build();
+      return equipmentSearchClient.loadList(searchQuery, dtListState);
+   }
 ```
 
 L'object de résultat `FacetedQueryResult` fournit de nombreuses informations utiles pour l'affichage :
