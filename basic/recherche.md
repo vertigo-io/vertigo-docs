@@ -22,16 +22,17 @@ Le module de recherche Vertigo supporte les trois cas d'usage principaux :
 
 !> La recherche est un filtre : plus l'utilisateur donne d'informations plus on réduit le champ des résultats.
 
-!> La recherche la plus courante est dite plain-text, ce qui signifie : "cherche un document qui contient un mot qui commence par", *ca ne signifie par "contient"* 
-!> Les performances du moteur sont assurées par un index des mots des documents (comme dans un livre), il faut donc toujours le début du mot pour s'y retrouver dans l'index : pas de recherche `*oitur*`  
+!> La recherche la plus courante est dite plain-text, ce qui signifie : "cherche un document qui contient un mot qui commence par", *ca ne signifie par "contient"*. <br/>
+Les performances du moteur sont assurées par un index des mots des documents (comme dans un livre), il faut donc toujours le début du mot pour s'y retrouver dans l'index : pas de recherche `*oitur*`  
 
 **Moteur utilisé**
-[ElasticSearch](https://www.elastic.co/products/elasticsearch) & [Lucene](https://lucene.apache.org/). 
-Le mécanisme de recherche est le [QueryStringQuery](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html)
 
-ElasticSearch est un moteur de recherche basé sur la librairie Java Lucene.
-Ce moteur est supporté par la société Elastic et est activement et régulièrement mis à jour, la conséquence principale de cette activité est une certaine volatilité de l'API (il y a régulièrement des breaking-changes). 
-C'est l'un des intérêts du module Vertigo : une bonne partie des modifications peuvent être absorbées par le module, ce qui simplifie la montée de version pour les projets.
+[ElasticSearch](https://www.elastic.co/products/elasticsearch) & [Lucene](https://lucene.apache.org/).<br/> 
+Le mécanisme de recherche est le [QueryStringQuery](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html)<br/>
+
+ElasticSearch est un moteur de recherche basé sur la librairie Java Lucene.<br/>
+Ce moteur est supporté par la société Elastic et est activement et régulièrement mis à jour, la conséquence principale de cette activité est une certaine volatilité de l'API (il y a régulièrement des breaking-changes).<br/> 
+C'est l'un des intérêts du module Vertigo : une bonne partie des modifications peuvent être absorbées par le module, ce qui simplifie la montée de version pour les projets.<br/>
 Vertigo maintient deux versions du plugin ElasticSearch : la version courante et la version précédente. 
 
 
@@ -39,7 +40,7 @@ Vertigo maintient deux versions du plugin ElasticSearch : la version courante et
 
 ### Activer le module
 
-Pour commencer il faut activer le module **Dynamo-Search**.
+Pour commencer il faut activer le module **Dynamo-Search** <br/>
 Le module propose deux modes de fonctionnement : 
 - le mode standard utilisant un serveur ElasticSearch distant
 - le mode embedded utilisant un serveur ElasticSearch local démarré en même temps de l'application (utile pour les tests) 
@@ -116,7 +117,7 @@ index :
 ```
 
 
-### Identifier vos **KeyConcept** (*entités métiers clés*)
+### Identifier vos **KeyConcept** *(entités métiers clés)*
 Soit dans vos fichiers **KSP**: 
 ```javascript
 alter DtDefinition DT_MOVIE {
@@ -124,12 +125,12 @@ alter DtDefinition DT_MOVIE {
 }
 ```
 
-Soit dans votre fichier **OOM** : 
+Soit dans votre fichier **OOM** : <br/>
 Sur vos classes indiquer le **Stereotype**: `KeyConcept`
 
 ### Ajout un DtObject représentant vos données d'index
 
-Les indexes sont très puissants et gère des données **documentaire**. Il n'y pas de relationnel, il faut donc convertir votre grappe d'objet partant de votre **KeyConcept** en **Document**.
+Les indexes sont très puissants et gère des données **documentaire**. Il n'y pas de relationnel, il faut donc convertir votre grappe d'objet partant de votre **KeyConcept** en **Document**.<br/>
 Très simplement, il s'agit de créer un DtObject mettant les données à plat.
 ```javascript
 create DtDefinition DtEquipmentIndex {
@@ -144,15 +145,15 @@ create DtDefinition DtEquipmentIndex {
 }
 ```
 
-Il est possible de préciser comment la donnée est indexée par la propriété **indexType** du domaine. 
-Cette propriété permet la conversion du simple **Domain Vertigo**, vers le type ElasticSearch plus complexe.
-Sa syntaxe est la suivante :
-`` indexType : "myAnalyzer{:myDataType}{:stored|notStored}{:sortable|notSortable}{:facetable|notFacetable}" ``
+Il est possible de préciser comment la donnée est indexée par la propriété **indexType** du domaine. <br/>
+Cette propriété permet la conversion du simple **Domain Vertigo**, vers le type ElasticSearch plus complexe.<br/>
+Sa syntaxe est la suivante :<br/>
+``indexType : "myAnalyzer{:myDataType}{:stored|notStored}{:sortable|notSortable}{:facetable|notFacetable}"``
 
-> Les champs ayant l'attribut `sortable`, sont automatiquement doublés avec une version 'keyword' du champ.
+> Les champs ayant l'attribut `sortable`, sont automatiquement doublés avec une version `keyword` du champ.
 > Ce pseudo permet de trier correctement le champ. Vertigo l'utilise de manière transparente pour les tris et les facettes.
-> Il peut être utilisé dans les requêtes : 
-> **Exemple :**
+> Il peut être utilisé dans les requêtes : <br/>
+> **Exemple :**<br/>
 > ``field1.keyword:#query#``
 
 
@@ -187,12 +188,12 @@ create Domain DoTags {
 
 ### Définition des indexes
 
-Les indexes sont déclarés comme des **Definitions** Vertigo. Il est possible de le faire en Java ou en DSL.
+Les indexes sont déclarés comme des **Definitions** Vertigo. Il est possible de le faire en Java ou en DSL.<br/>
 Le plus simple est via le DSL, c'est cette méthode qui est décrite ici.
 
 #### **IndexDefinition**
 
-L'**IndexDefinition** représente un Index. Il n'en faut qu'un seul par KeyConcept. 
+L'**IndexDefinition** représente un Index. Il n'en faut qu'un seul par KeyConcept. <br/>
 *Il est donc parfois nécessaire de créer des KeyConcept agrégeant d'autres KeyConcept.*
 
 **Propriétés**
@@ -210,7 +211,7 @@ create IndexDefinition IdxEquipment {
   indexCopyTo allText { from: "name,code,description,tags,equipmentTypeName,equipmentCategoryName" }
 }
 ```
-> L'attribut `loaderId` pointe sur un Composant Vertigo qui implémente l'interface `SearchLoader<? extends DtObject>` adaptée pour l'objet d'index
+> L'attribut `loaderId` pointe sur un composant Vertigo qui implémente l'interface `SearchLoader<? extends DtObject>` adapté pour l'objet d'index
 
 
 #### **FacetDefinition**
@@ -229,7 +230,7 @@ La **FacetDefinition** représente une définition de facette. Il en existe deux
 
 !> Attention : les facettes multiSelectable impactent les performances 
   
-* les facettes **term** dont les valeurs sont tirées dynamiquement des données de l'index, 
+* les facettes **term** dont les valeurs sont tirées dynamiquement des données de l'index 
 
 ```javascript
 create FacetDefinition FctEquipmentEquipmentTypeName {
@@ -237,7 +238,7 @@ create FacetDefinition FctEquipmentEquipmentTypeName {
 }
 ```
 
-* les facettes **range** qui sont prédéfinies et rassemblent un ensemble de valeurs dans chaque facette.
+* les facettes **range** qui sont prédéfinies et rassemblent un ensemble de valeurs dans chaque facette
 
 ```javascript
 create FacetDefinition FctEquipmentPurchaseDate {
@@ -262,7 +263,7 @@ La **FacetedQueryDefinition** représente une définition de requête de recherc
 - `domainCriteria`* : Nom du domain du critère d'entrée.
 - `facets`* : Liste des facettes activées dans cette recherche
 - `listFilterBuilderClass`* : Nom du moteur permettant la traduction de la query (*io.vertigo.dynamox.search.DslListFilterBuilder* préconisé)
-- `listFilterBuilderQuery`* : Requête de la recherche (voir syntaxe [VertigoSearchDSL])
+- `listFilterBuilderQuery`* : Requête de la recherche (voir syntaxe [VertigoSearchDSL](#syntaxe-vertigosearchdsl))
   
 
 ```javascript
@@ -277,40 +278,31 @@ create FacetedQueryDefinition QryEquipment {
 
 #### **Code généré**
 
-Le module MDA de Vertigo (*Vertigo-Studio*) utilise ces informations pour générer une méthode pour chaque FacetedQueryDefinition dans le DAO du KeyConcept associé.
+Le module [MDA](/basic/mda) de Vertigo (*Vertigo-Studio*) utilise ces informations pour générer une méthode pour chaque FacetedQueryDefinition dans le DAO du KeyConcept associé.
 
 ### Service de chargement des données
 
-Vertigo effectue automatiquement les mises à jour de l'index lorsque les données sont modifiées.
-Pour cela, Vertigo surveille les modifications d'objet qui passent par le DAO de votre KeyConcept, si vous effectuer une mise à jour hors de ce DAO ou sur un autre object que le KeyConcept de l'index, vous devez l'indiquer en utilisant le readOneForUpdate **au début** du service effectuant la modification *(cela pose un lock)*.
+Vertigo effectue automatiquement les mises à jour de l'index lorsque les données sont modifiées.<br/>
+Pour cela, Vertigo surveille les modifications d'objet qui passent par le DAO de votre KeyConcept, si vous effectuez une mise à jour hors de ce DAO ou sur un autre object que le KeyConcept de l'index, vous devez l'indiquer en utilisant le readOneForUpdate **au début** du service effectuant la modification *(cela pose un lock)*.
 
 Pour cette opération Vertigo à besoin du service de chargement des données de l'index :
 
 ```java
-/**
- * Specific SearchIndex loader.
- * @param <K> KeyConcept
- * @param <I> Indexed data's type
- * @author npiedeloup, pchretien
- */
 public interface SearchLoader<K extends KeyConcept, I extends DtObject> extends Component {
    /**
     * Load all data from a list of keyConcepts.
-    * @param searchChunk the chunk
-    * @return List of searchIndex
     */
    List<SearchIndex<K, I>> loadData(SearchChunk<K> searchChunk);
 
    /**
     * Create a chunk iterator for crawl all keyConcept data.
-    * @param keyConceptClass keyConcept class
-    * @return Iterator of chunk
     */
    Iterable<SearchChunk<K>> chunk(final Class<K> keyConceptClass);
 }
 ```
 
 Pour les cas standard, Vertigo propose un `AbstractSqlSearchLoader` a étendre. Il suffit d'implémenter le chargement de la liste des SearchIndex à partir d'une liste d'id.
+
 Exemple :
 ```java
 public final class EquipmentSearchLoader extends AbstractSqlSearchLoader<Long, Equipment, EquipmentIndex> {
@@ -318,7 +310,7 @@ public final class EquipmentSearchLoader extends AbstractSqlSearchLoader<Long, E
    private final EquipmentServices myEquipmentServices;
 
    @Inject
-   public EquipmentSearchLoader(final TaskManager taskManager, final VTransactionManager transactionManager, final EquipmentServices equipmentServices) {
+   public EquipmentSearchLoader(final EquipmentServices equipmentServices, final TaskManager taskManager, final VTransactionManager transactionManager) {
       super(taskManager, transactionManager);
       myEquipmentServices = equipmentServices;
    }
@@ -403,7 +395,7 @@ Exemple :
 
 L'object de résultat `FacetedQueryResult` fournit de nombreuses informations utiles pour l'affichage :
 
-* liste
+* liste des documents correspondant
 * facettes (et pour chaque facette le nombre de document par valeur de facette)
 * highlights (si activé)
 * la searchQuery source de la requête
@@ -420,40 +412,40 @@ Le DslListFilterBuilder vise à construire la requête Lucene de la manière la 
 Voir [Lucene QueryParser](https://lucene.apache.org/core/8_0_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description)
 
 * L'expression subit le moins de modification possible
-* Les critères sont posés en les encapsulant dans des # (Ex: #query#)
+* Les critères sont posés en les encapsulant dans des `#` (Ex: `#query#`)
 * Avec les critères de valeur null soit l'expression complète est retirée, soit le critère est remplacé par la valeur par défaut déclarée.
-* Les opérateurs placés à l'intérieur des # seront reproduit pour chaque mots.
-* Les critères et mots sont en `Optionnel` par défaut (il faut donc préciser le caractère obligatoire des critères/mots avec le préfix `+`)
+* Les opérateurs placés à l'intérieur des `#` seront reproduit pour chaque mots, les opérateurs à l'extérieurs sont repoduit autour du critère complet.
+* Les critères et mots sont en *optionnel* par défaut (il faut donc préciser le caractère obligatoire des critères/mots avec le préfix `+`)
 * L'utilisateur (avancé) peut surcharger le champ de recherche, rajouter des parenthèses ou changer les opérateurs (OR, AND, +, -, ...)
 
 ### Syntaxe de base
 
-Une spécificité forte de la syntaxe de recherche est que les critères sont indépendant : il n'y a pas de notion de OR et AND comme en SQL, le principe chaque critère porte son caractère Obligatoire ou Optionnel.
-Ce principe est bien mieux, puisqu'il simplifie la syntaxe (surtout quand la requête est manipulée dynamiquement) et empêche l'altération des critères système la requête par l'utilisateur.
+> Une spécificité forte de la syntaxe de recherche est que les critères sont indépendant : il n'y a pas de notion de OR et AND comme en SQL, le principe chaque critère porte son caractère *Obligatoire* ou *Optionnel*.
+> Ce principe est intéressant, puisqu'il simplifie la syntaxe (surtout quand la requête est manipulée dynamiquement) et empêche l'altération la partie système de la requête par l'utilisateur.
 
 #### Fields
 * `#query#` : criteria.toString() *(A utiliser quand criteria est directement la chaine de saisie utilisateur)*
 * `#myField#` : criteria.myField
 * `#myField#!(myDefault)` : criteria.myField!=null?criteria.myField:myDefault
 
-*Exemples*
-
 * `field1:#query#` : le champ `field1` doit contenir un des mots de la query, en OR avec les autres critères
 * `+field1:#query#` : idem mais ce critère est obligatoire
 * `-field1:#query#` : idem mais ce critère est interdit
 * `field1:#query#!(inactif)` : si le critère est null, on recherche les documents ou `field1` contient inactif<br/><br/>
+
 * `field1:"#query#"` : le champ `field1` doit contenir la saisie exacte de la query
 * `field1:#+query#` : le champ `field1` doit contenir tous les mots de la query
 * `field1:#-query#` : aucun mots de la query ne doit être dans le champ `field1` de l'index 
-* `+field1:(#+nom# #+prenom#)` : le champ `field1` doit contenir tous les mots du critère `NOM` et du critère `PRENOM`
+* `+field1:(#+nom# #+prenom#)` : le champ `field1` doit contenir tous les mots du critère `nom` et du critère `prenom`
 * `field1:#query*#` : le champ `field1` doit avoir un mot qui commence par un des préfixes de la query
 * `field1:#query#^2` : le champ `field1` à un poids de 2
 * `field1:#query~2#` : le champ `field1` doit contenir un des mots de la query avec une distance de levenshtein de 2 (2 max). **Attention peu performant**.<br/><br/>
-* `+field1:(#+nom*# #+prenom*#)` : le champ `field1` doit contenir des mots avec tous les préfixes du critère `NOM` et ceux du critère `PRENOM`
+
+* `+field1:(#+nom*# #+prenom*#)` : le champ `field1` doit contenir des mots avec tous les préfixes du critère `nom` et ceux du critère `prenom`
 
 #### Modes d'échappements de la saisie utilisateur
 
-Par défaut la saisie utilisateur est très échappée. Il est même permis à l'utilisateur de faire une recherche avancée en utilisant lui-même la syntaxe Lucene.
+Par défaut la saisie utilisateur est très peu échappée. Il est même permis à l'utilisateur de faire une recherche avancée en utilisant lui-même la syntaxe Lucene.
 Il peut ajouter des poids ou du fuzzy, faire une recherche exacte avec " ", ajouter une recherche en OR (ou AND) entre deux termes et même chercher dans un autre champ de l'index avec myOtherField:(mes mots clés).
 Cette fonctionnalité est autorisée car elle ne s'adresse qu'aux utilisateurs avancés et ne permet pas de sortir du périmètre autorisé par la sécurité.
 
@@ -471,18 +463,16 @@ Ceci peut être utile quand les valeurs recherchées contiennent des caractères
 
 #### Range
 
-Les critères de type **range** reprennent la syntaxe Lucene.
-Les bornes utilisent les caractères [ ou { pour indiquer le caractère inclusif.
-L'étoile `*` représente l'infini
+Les critères de type **range** reprennent la syntaxe Lucene.<br/>
+Les bornes utilisent les caractères [ ou { pour indiquer le caractère inclusif.<br/>
+L'étoile `*` représente l'infini<br/>
 Les dates supportent le mot clef `now` et des opérations + ou - des délais
 
-`+date_creation:[#critDateDebut# to #critDateFin#]`: date de création comprise entre deux dates. Si un critère est null il sera remplacé par *
+* `+date_creation:[#critDateDebut# to #critDateFin#]`: date de création comprise entre deux dates. Si un critère est null il sera remplacé par *
+* `+date_debut:[* to #critDateFin#} +date_fin:{#critDateDebut# to *]` : Un document avec une période d'activité est recherché sur l'intersection avec la période du critère. Dans notre exemple les bornes sont exclues
+* `+date_creation:[now-6M to *]`: date de création de moins de 6 mois
 
-`+date_debut:[* to #critDateFin#} +date_fin:{#critDateDebut# to *]` : Un document avec une période d'activité est recherché sur l'intersection avec la période du critère. Dans notre exemple les bornes sont exclues
-
-`+date_creation:[now-6M to *]`: date de création de moins de 6 mois
-
-> Les formats de date acceptés sont : dd/MM/yyyy||strict_date_optional_time||epoch_second
+> Les formats de date acceptés sont : dd/MM/yyyy | strict_date_optional_time | epoch_second
 
 #### Poids des champs :
 `+(title:#query#^2 content:#query#)` : Recherche dans le titre et dans le contenu. Le titre à un poids de 2 par rapport au contenu vis à vis de la pertinence.
@@ -491,7 +481,7 @@ Les dates supportent le mot clef `now` et des opérations + ou - des délais
 `+(content:#query#^4 content:#query*#^2 contentPhonetic:#query#)` : on cherche le maximum de mot dans content avec des poids plus ou moins fort selon le cas.
 
 #### Recherche multi-champs :
-La préconisation Lucene est de créer un champ qui concatène toutes données à recherche (par exemple `nomPrenom`, `codePostalComune`, etc ...)
+La préconisation Lucene est de créer un champ qui concatène toutes données à recherche (par exemple `nomPrenom`, `codePostalComune`, etc ...)<br/>
 La propriété `indexCopyTo` de l'IndexDefinition est utilisée pour ça.
 
 * `+_all:#+query*#` : on recherche dans tous les champs. C'est la préconsiation Lucene : on crée un champ qui concatène les champs de recherche. Ce champ est paramétrable. 
@@ -506,7 +496,7 @@ La propriété `indexCopyTo` de l'IndexDefinition est utilisée pour ça.
 
 Une recherche utilisateur est basé sur l'assemblage entre des critères utilisateurs, **des critères systèmes de filtrage contextuel et un filtre de sécurité**
 
-Pour avoir une meilleure accessibilité, il est préférable de proposer un comportement similaire aux recherches des sites internet grand publique (au hasard Google)
+Pour avoir une meilleure accessibilité, il est préférable de proposer un comportement similaire aux recherches des sites internet grand publique (au hasard Google)<br/>
 En partant du constat que :
 * La recherche est un filtre, plus on donne d'infos, plus on réduit le champ des résultats. 
 * Le KeyConcept indexé peut-être éclaté en plusieurs champs.
@@ -514,10 +504,8 @@ En partant du constat que :
 
 ### Problématique
 
-Globalement, la recherche multifield correspond à ce qui est attendu par l'utilisateur, il veut trouver son entité quel que soit les choix de structure de l'index dont il n'a même pas connaissance.
-
-Le problème est expliqué sur le site d'ElasticSearch [ICI](https://www.elastic.co/guide/en/elasticsearch/guide/master/multi-field-search.html)
-
+Globalement, la recherche multifield correspond à ce qui est attendu par l'utilisateur, il veut trouver son entité quel que soit les choix de structure de l'index dont il n'a même pas connaissance.<br/>
+Le problème est expliqué sur le site d'ElasticSearch [ICI](https://www.elastic.co/guide/en/elasticsearch/guide/master/multi-field-search.html)<br/>
 Les techniques les plus intuitives ne donnent pas de bon résultat: 
 
 La recherche sur différent champs, avec les mots saisis en OU :
@@ -532,14 +520,14 @@ La recherche sur différent champs, avec les mots saisis en ET :
 
 #### copyTo champ custom
 
-> Cette solution est celle préconisée
+?> Cette solution est celle préconisée
 
-ElasticSearch propose des champs custom qui sont l'assemblage de plusieurs champs de l'index. Par exemple le champ `_all` est natif et contient tous les champs tokenizés.
+ElasticSearch propose des champs custom qui sont l'assemblage de plusieurs champs de l'index. Par exemple le champ `_all` est natif et contient tous les champs tokenizés.<br/>
 Il s'agit de la préconisation Lucène en créant des champs qui concatènent toutes données à rechercher (par exemple `nomPrenom`, `codePostalCommune`, etc ...)
 
 ElasticSearch ajoute la possibilité de configurer les champs de ce type par la fonctionalité `copy_to`. (doc ElasticSearch [ici](https://www.elastic.co/guide/en/elasticsearch/guide/master/custom-all.html))
 
-Dans Vertigo vous devez déclarer les instructions `indexCopyTo` dans la définition de l'index. Vous indiquez que l'un des champs de l'index est la copie de un ou plusieurs autres champs de l'index. 
+Dans Vertigo vous devez déclarer les instructions `indexCopyTo` dans la définition de l'index. Vous indiquez que l'un des champs de l'index est la copie de un ou plusieurs autres champs de l'index. <br/>
 Cette copie est effectuée coté ElasticSearch et est plus efficace qu'une copie Java ou SQL.
 
 Exemple de KSP : 
@@ -556,7 +544,7 @@ create IndexDefinition IdxCar {
 
 Cette fonction permet de crée des champs de recherche multichamps, mais peut aussi être utilisée pour peupler des champs proposant un autre analyzer que le champ principal (pour du tri, ou du phonétique par exemple).
 
-Pour utiliser les champs ``copy_to``, il faut que le champ existe dans le Dt de l'index et que les champs copiés dedans aient tous un indexType.
+Pour utiliser les champs ``copy_to``, il faut que le champ existe dans le Dt de l'index et que les champs copiés dedans aient tous un indexType.<br/>
 Pour cela nous préconisons d'ajouter des champs computed :
 ```Json
 computed modelPhonetic { domain:DoPhonetic label:"model sort" expression:"throw new io.vertigo.lang.VSystemException(\"Can't use index copyTo field\");"}
@@ -575,7 +563,7 @@ create Domain DoVisitCount {
 
 #### Recherche multi-champs :
 
-> Cette solution ne convient pas à tous les cas, en revanche elle peut être utilisée pour tester des évolutions de la recherche avant l'ajout d'un custom field
+!> Cette solution ne convient pas à tous les cas, en revanche elle peut être utilisée pour tester des évolutions de la recherche avant l'ajout d'un custom field
 
 Le DslListFilterBuilder permet de faire une recherche sur plusieurs champs : 
 `+[codePostal,commune]:#+query*#` : on recherche les critères dans code postal et commune.
@@ -585,11 +573,13 @@ Cette syntaxe est résolue par Vertigo et reproduit le mécanisme du cross-field
 Par rapport au custom field, cette syntaxe permet un comportement différent par champs : tokenizer utilisé et poids différent.
 
 *Exemple:*
+
 `+[commune,annee,titre^5]:#+query*#` : L'année est bien un nombre et le titre à un poids de 5 par rapport aux autres.
 
 !> Attention: Utiliser cette syntaxe sur un nombre limité de champs, car comme son nom l'indique elle effectue un cross-join des champs avec les mots saisis. ElasticSearch est très performant avec ce type de recherche, mais il est inutile de le pousser aux limites.
 
 *Exemple:*  
+
 `+[codePostal,commune]:#+query*#` 
 avec les mots clés ==92350 Le plessis robinson== devient : 
 ```
@@ -599,12 +589,14 @@ avec les mots clés ==92350 Le plessis robinson== devient :
    +(codePostal:robinson* commune:robinson*) )
 ```
 
-#### Recherche multi-champs (==plus simple, mais à tester==) :
+#### Recherche multi-champs :
 
-Une solution à envisager est le mix des deux solutions présentées ci-dessus :
+?> *(plus simple, mais à tester)*
+
+Une solution à envisager est le mix des deux solutions présentées ci-dessus :<br/>
 On vérifie d'abord la présence des mots clés saisies par l'utilisateur dans `_all` puis on affect le poids à certain champ en OU.
 
-```Json
+```Java
 +_all:#+query*# //_all en obligatoire contient tous les mots saisis par l'utilisateur
 +titre:#query*#^5 //le titre est boosté avec les mots en Optionnel; il n'est pas obliger de contenir tous les termes
 ```
@@ -612,7 +604,7 @@ On vérifie d'abord la présence des mots clés saisies par l'utilisateur dans `
 
 ## Filtre de sécurité
 
-Le filtre de sécurité a vocation à être conservé en session et être ajouté à chaque recherche. 
+Le filtre de sécurité a vocation à être conservé en session et être ajouté à chaque recherche. <br/>
 Le module de sécurité de Vertigo permet de générer le filtre dans différent langage (et notamment Lucene) à partir d'une déclaration unifiée des règles de sécurité.
 
 Il se positionne avec le code suivant :
