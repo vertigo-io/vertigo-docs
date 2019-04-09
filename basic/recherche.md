@@ -8,7 +8,7 @@ L'intégration d'un moteur de recherche est devenu un standard dans les projets 
 
 Le module de recherche Vertigo permet : 
 
-- d'apporter une fonctionnalité de recherche riche et performante (facettes, recherche plein texte, phonétique, compteurs de résultats, tri par pertinence, etc..., tout ca avec des performances de qques millisecondes : incomparables avec des requetes SQL..)
+- d'apporter une fonctionnalité de recherche riche et performante (facettes, recherche plein texte, phonétique, compteurs de résultats, tri par pertinence, etc..., tout ça avec des performances de qques millisecondes : incomparables avec des requetes SQL)
 - de placer la recherche au centre : toutes les entités clés peuvent être indéxées et recherchées par les utilisateurs. C'est un point d'accès privilégié : on entre par la recherche, on navige par la recherche. Les critères restent simples et l'on affine par les facettes.
 - de rendre accéssible l'accès à l'information, l'utilisateur est soit un néophyte soit auto-formé. La recherche proposée reprend les standards actuels du net, et permet une prise en main rapide. 
 - au développeur de paramétrer le mécanisme de recherche. La paramétrage ouvre les posibilités, tout en outillant et stabilisant les composants techniques sous jacents.
@@ -23,7 +23,7 @@ Le module de recherche Vertigo supporte les trois cas d'usage principaux :
 !> La recherche est un filtre : plus l'utilisateur donne d'informations plus on réduit le champ des résultats.
 
 !> La recherche la plus courante est dite plain-text, ce qui signifie : "cherche un document qui contient un mot qui commence par", *ca ne signifie par "contient"* 
-!> Les performances du moteur sont assurées par un index des mots des documents (comme dans un livre), il faut donc toujours le début du mot pour s'y retrouver dans l'index : pas de recherche `*oitur*`  
+!> Les performances du moteur sont assurées par un index des mots des documents (comme dans un livre), il faut donc toujours le début du mot pour s'y retrouver dans l'index : pas de recherche `*oitur`*  
 
 **Moteur utilisé**
 [ElasticSearch](https://www.elastic.co/products/elasticsearch) & [Lucene](https://lucene.apache.org/). 
@@ -196,9 +196,9 @@ L'**IndexDefinition** représente un Index. Il n'en faut qu'un seul par KeyConce
 *Il est donc parfois nécessaire de créer des KeyConcept agrégeant d'autres KeyConcept.*
 
 **Propriétés**
-- `keyConcept*` : Nom du Dt KeyConcept, utilisé pour suivre les modifications et déclencher les réindexations
-- `dtIndex*` : Nom du Dt représentant le document, à la fois les champs recherchés et les champs retournés
-- `searchLoader*` : Nom d'un composant Vertigo utilisé pour recharger les documents à partir d'une liste d'Ids (doit implémenter l'interface SearchLoader<keyConcept, dtIndex>)
+- `keyConcept`* : Nom du Dt KeyConcept, utilisé pour suivre les modifications et déclencher les réindexations
+- `dtIndex`* : Nom du Dt représentant le document, à la fois les champs recherchés et les champs retournés
+- `searchLoader`* : Nom d'un composant Vertigo utilisé pour recharger les documents à partir d'une liste d'Ids (doit implémenter l'interface SearchLoader<keyConcept, dtIndex>)
 - `indexCopyTo` : Ajoute un champ aggrégeant une liste de champ du document, utilise la fonction de copy optimisée du moteur (le champ doit préexister dans le DtIndex)
   - `from` : liste des champs séparés par une virgule
 
@@ -218,14 +218,14 @@ create IndexDefinition IdxEquipment {
 La **FacetDefinition** représente une définition de facette. Il en existe deux types : 
 
 **Propriétés**
-- `dtDefinition*` : Nom du Dt d'index
-- `fieldName*` : Nom du champ portant la facette
-- `label*` : Label de la facette
+- `dtDefinition`* : Nom du Dt d'index
+- `fieldName`* : Nom du champ portant la facette
+- `label`* : Label de la facette
 - `order` : Change le mode de tri de la facette : alpha, count (par défaut pour les terms), definition (pour les ranges)
 - `multiSelectable` : Boolean indiquant que les valeurs de facettes sont multi-selectionnables (false par défaut) 
 - `range` : Ajoute une valeur de facette (pour les facettes **range**), le nom est utilisé comme code
-  - `filter*` : filtre de recherche pour cette valeur. Reprend la syntaxe du moteur de recherche utilisé (ici ElasticSearch).
-  - `label*` : label de cette valeur
+  - `filter`* : filtre de recherche pour cette valeur. Reprend la syntaxe du moteur de recherche utilisé (ici ElasticSearch).
+  - `label`* : label de cette valeur
 
 !> Attention : les facettes multiSelectable impactent les performances 
   
@@ -258,11 +258,11 @@ La **FacetedQueryDefinition** représente une définition de requête de recherc
 * Le pattern de la requête du moteur de recherche
 
 **Propriétés**
-- `keyConcept*` : Nom du Dt du KeyConcept
-- `domainCriteria*` : Nom du domain du critère d'entrée.
-- `facets*` : Liste des facettes activées dans cette recherche
-- `listFilterBuilderClass*` : Nom du moteur permettant la traduction de la query (*io.vertigo.dynamox.search.DslListFilterBuilder* préconisé)
-- `listFilterBuilderQuery*` : Requête de la recherche (voir syntaxe [VertigoSearchDSL])
+- `keyConcept`* : Nom du Dt du KeyConcept
+- `domainCriteria`* : Nom du domain du critère d'entrée.
+- `facets`* : Liste des facettes activées dans cette recherche
+- `listFilterBuilderClass`* : Nom du moteur permettant la traduction de la query (*io.vertigo.dynamox.search.DslListFilterBuilder* préconisé)
+- `listFilterBuilderQuery`* : Requête de la recherche (voir syntaxe [VertigoSearchDSL])
   
 
 ```javascript
@@ -451,11 +451,29 @@ Ce principe est bien mieux, puisqu'il simplifie la syntaxe (surtout quand la req
 * `field1:#query~2#` : le champ `field1` doit contenir un des mots de la query avec une distance de levenshtein de 2 (2 max). **Attention peu performant**.<br/><br/>
 * `+field1:(#+nom*# #+prenom*#)` : le champ `field1` doit contenir des mots avec tous les préfixes du critère `NOM` et ceux du critère `PRENOM`
 
+#### Modes d'échappements de la saisie utilisateur
+
+Par défaut la saisie utilisateur est très échappée. Il est même permis à l'utilisateur de faire une recherche avancée en utilisant lui même la syntaxe Lucene.
+Il peut ajouter des poids ou du fuzzy, faire une recherche exacte avec " ", ajouter une recherche en OR (ou AND) entre deux termes et même chercher dans un autre champ de l'index avec myOtherField:(mes mots clés).
+Cette fonctionnalité est autorisée car elle ne s'adresse qu'aux utilisateurs avancés et ne permet pas de sortir du périmètre autorisée par la sécurité.
+
+Dans tout les cas une syntaxe imcomplète saisie par l'utilisateur sera échapée : les ( ), { } ou [ ] mal fermées, ou les AND OR mal utilisés.
+
+Le développeur peut toutefois agir sur le mode d'échappement lors de l'écriture de la requete, par l'emploi d'un suffix sur la déclaration du champ :
+
+* `removeReserved` : Les caractères réservés sont simplement retirés (syntaxe : myField1:#+query*#removeReserved )
+* `escapeReserved` : Les caractères réservés sont échappés (syntaxe : myField1:#+query*#escapeReserved )
+
+Ceci peut être utile quand les valeurs recherchées contiennent des caractères réservés (par exemple une recherche par IP : 192.168.0.456)
+
+> Les caractères réservés sont : 
+> `+ - = & | > < ! ( ) { } [ ] ^\" ~ * ? : / OR AND`
+
 #### Range
 
 Les critères de type **range** reprennent la syntaxe Lucene.
 Les bornes utilisent les caractères [ ou { pour indiquer le caractère inclusif.
-L'étoile `*` représente l'infini
+L'étoile ``* représente l'infini
 Les dates supportent le mot cléf `now` et des opérations + ou - des délais
 
 `+date_creation:[#critDateDebut# to #critDateFin#]`: date de création comprise entre deux dates. Si un critère est null il sera remplacé par *
@@ -484,9 +502,9 @@ La propriété `indexCopyTo` de l'IndexDefinition est utilisée pour ça.
 !> La recherche multichamp [field1, field2] est moins performante et inadaptée si il y a beaucoup de mots saisi par l'utilisateur (ils sont multipliés par le nombre de champ)
 
 
-## Construire sa recherche
+## Bien construire sa recherche
 
-Une recherche utilisateur est basé sur l'assemblage entre des critères utilisateurs **et des critères systèmes de filtrage contextuel ou de sécurité**
+Une recherche utilisateur est basé sur l'assemblage entre des critères utilisateurs, **des critères systèmes de filtrage contextuel et un filtre de sécurité**
 
 Pour avoir une meilleur accessibilité, il est préférable de proposer un comportement similaire aux recherches des sites internet grand publique (au hasard Google)
 En partant du constat que :
@@ -592,19 +610,7 @@ On vérifie d'abord la présence des mots clés saisies par l'utilisateur dans `
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-## Filtre de sécurité**
+## Filtre de sécurité
 
 Le filtre de sécurité a vocation a être conservé en session et être ajouté à chaque recherche. 
 Le module de sécurité de Vertigo permet de générer le filtre dans différent langage (et notament Lucene) à partir d'une déclaration unifiée des règles de sécurité.
