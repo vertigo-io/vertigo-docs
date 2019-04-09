@@ -8,11 +8,11 @@ L'intégration d'un moteur de recherche est devenu un standard dans les projets 
 
 Le module de recherche Vertigo permet : 
 
-- d'apporter une fonctionnalité de recherche riche et performante (facettes, recherche plein texte, phonétique, compteurs de résultats, tri par pertinence, etc..., tout ça avec des performances de qques millisecondes : incomparables avec des requetes SQL)
-- de placer la recherche au centre : toutes les entités clés peuvent être indéxées et recherchées par les utilisateurs. C'est un point d'accès privilégié : on entre par la recherche, on navige par la recherche. Les critères restent simples et l'on affine par les facettes.
-- de rendre accéssible l'accès à l'information, l'utilisateur est soit un néophyte soit auto-formé. La recherche proposée reprend les standards actuels du net, et permet une prise en main rapide. 
-- au développeur de paramétrer le mécanisme de recherche. La paramétrage ouvre les posibilités, tout en outillant et stabilisant les composants techniques sous jacents.
-- de générer lors du MDA les facades d'appels aux recherches paramétrées, l'usage du moteur de recherche est donc décorélé du paramtrage des recherches mis à disposition.
+- d'apporter une fonctionnalité de recherche **riche et performante** (facettes, recherche plein texte, phonétique, compteurs de résultats, tri par pertinence, etc..., tout ça avec des performances de qques millisecondes : incomparables avec des requetes SQL)
+- de placer la **recherche au centre** : toutes les entités clés peuvent être indéxées et recherchées par les utilisateurs. C'est un point d'accès privilégié : on entre par la recherche, on navige par la recherche. Les critères restent simples et l'on affine par les facettes.
+- de rendre **accessible** l'accès à l'information, l'utilisateur est soit un néophyte soit auto-formé. La recherche proposée reprend les standards actuels du net, et permet une prise en main rapide. 
+- au **développeur de paramétrer le mécanisme** de recherche. La paramétrage ouvre les posibilités, tout en outillant et stabilisant les composants techniques sous jacents.
+- de **générer les facades d'appels aux recherches** paramétrées lors du MDA, l'usage du moteur de recherche est donc décorélé du paramtrage des recherches mis à disposition.
 
 Le module de recherche Vertigo supporte les trois cas d'usage principaux :
 
@@ -23,7 +23,7 @@ Le module de recherche Vertigo supporte les trois cas d'usage principaux :
 !> La recherche est un filtre : plus l'utilisateur donne d'informations plus on réduit le champ des résultats.
 
 !> La recherche la plus courante est dite plain-text, ce qui signifie : "cherche un document qui contient un mot qui commence par", *ca ne signifie par "contient"* 
-!> Les performances du moteur sont assurées par un index des mots des documents (comme dans un livre), il faut donc toujours le début du mot pour s'y retrouver dans l'index : pas de recherche `*oitur`*  
+!> Les performances du moteur sont assurées par un index des mots des documents (comme dans un livre), il faut donc toujours le début du mot pour s'y retrouver dans l'index : pas de recherche `*oitur*`  
 
 **Moteur utilisé**
 [ElasticSearch](https://www.elastic.co/products/elasticsearch) & [Lucene](https://lucene.apache.org/). 
@@ -473,7 +473,7 @@ Ceci peut être utile quand les valeurs recherchées contiennent des caractères
 
 Les critères de type **range** reprennent la syntaxe Lucene.
 Les bornes utilisent les caractères [ ou { pour indiquer le caractère inclusif.
-L'étoile ``* représente l'infini
+L'étoile `*` représente l'infini
 Les dates supportent le mot cléf `now` et des opérations + ou - des délais
 
 `+date_creation:[#critDateDebut# to #critDateFin#]`: date de création comprise entre deux dates. Si un critère est null il sera remplacé par *
