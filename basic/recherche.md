@@ -120,7 +120,7 @@ index :
 ### Identifier vos **KeyConcept** *(entités métiers clés)*
 Soit dans vos fichiers **KSP**: 
 ```javascript
-alter DtDefinition DT_MOVIE {
+alter DtDefinition DtEquipment {
   stereotype : "KeyConcept"
 }
 ```
@@ -350,7 +350,7 @@ Une tache SQL de récupération de l'objet à indexer doit être déclarée :
 ```json
 create Task TkLoadEquipmentIndex {
    className : "io.vertigo.dynamox.task.TaskEngineSelect",
-   request : "   select    equ.EQUIPMENT_ID,
+   request : "   select equ.EQUIPMENT_ID,
                   equ.NAME, 
                   equ.CODE, 
                   equ.PURCHASE_DATE, 
@@ -523,7 +523,7 @@ La recherche sur différent champs, avec les mots saisis en ET :
 ?> Cette solution est celle préconisée
 
 ElasticSearch propose des champs custom qui sont l'assemblage de plusieurs champs de l'index. Par exemple le champ `_all` est natif et contient tous les champs tokenizés.<br/>
-Il s'agit de la préconisation Lucène en créant des champs qui concatènent toutes données à rechercher (par exemple `nomPrenom`, `codePostalCommune`, etc ...)
+Il s'agit de la préconisation Lucene en créant des champs qui concatènent toutes données à rechercher (par exemple `nomPrenom`, `codePostalCommune`, etc ...)
 
 ElasticSearch ajoute la possibilité de configurer les champs de ce type par la fonctionalité `copy_to`. (doc ElasticSearch [ici](https://www.elastic.co/guide/en/elasticsearch/guide/master/custom-all.html))
 
