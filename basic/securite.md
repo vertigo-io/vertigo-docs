@@ -170,7 +170,7 @@ Deux types d'autorisations sont proposées :
 
 > Chaque **Secured Entity Operations** est associée à une authorization générée. Il ainsi possible de vérifier si un utilisateur a *"à priori"* le droit d'éffectuer une opération sur une entité avant même de regarder le contexte de sécurité de l'utilisateur.
 > Ceci est utilisé, notament pour gérer les éléments d'IHM affiché.<br/>
-> *Exemple:* opération
+> *Exemple:* Récupération des opérations possibles sur une entité pour déterminer les menus à proposer
 
 ### Utilisations
 
@@ -222,6 +222,30 @@ Les autorisations sont chargées via un DefinitionProvider dans la Feature du mo
     .addDefinitionResource("security", "mars-auth-config.json")
     .build())
 ```
+
+
+### Exemple pour les règles de sécurité : ENUM et TREE
+
+**ENUM** : Exemple de cas d’usage pour un dossier.<br/>
+Etats possibles : 
+- (ENC) En cours de saisie
+- (SOU) Soumis
+- (ACC) Accepté
+- (REF) Refusé
+- (ARC) Archivé
+
+![](./images/security-enum.png)
+
+
+
+**TREE** : Exemple de cas d’usage pour un dossier.<br/>
+Arbre géographique : 
+- (NAT) National
+- (DEP) Département
+- (COM) Commune
+
+![](./images/security-tree.png)
+
 
 
 
