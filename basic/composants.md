@@ -89,7 +89,7 @@ final Samples sample = new Samples();
 DIInjector.injectMembers(sample, Home.getApp().getComponentSpace());
 ```
 
-## A garder???????????
+## Accès direct au registre de composants
 
 Il est également possible de récupérer le composant directement dans l'espace de composant.
 

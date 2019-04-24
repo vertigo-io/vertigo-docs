@@ -18,7 +18,7 @@ Une application, consomme et fournit des ser
 Afin de créer une application Vertigo il est nécessaire de créer un objet `AppConfig`. Pour y parvenir l'utilisation de la classe `AppConfigBuilder` est nécessaire.
 
 ```java
-final AppConfig appConfig = AppConfig.builder()
+final NodeConfig nodeConfig = NodeConfig.builder()
 	.addModule(new CommonsFeatures().build())
 	.addModule(new VegaFeatures().withEmbeddedServer(8080).build())
 	//-----Declaration of a module named 'Hello' which contains a webservice component.
@@ -34,9 +34,7 @@ final AppConfig appConfig = AppConfig.builder()
 
 L'API fluent de création de la configuration permet d'être guidé dans sa création. Par ce biais il est possible de configurer les éléments suivants :
 
-- **node** : méthodes `withNodeConfig`
-
-- **boot** : méthodes `beginBoot` , `endBoot`
+- **boot** : méthode `beginBoot` , `endBoot`
 
 - **modules** : méthode `addModule`
 
@@ -49,6 +47,12 @@ L'API fluent de création de la configuration permet d'être guidé dans sa cré
     ajout d'un **aspect** : méthode `addAspect`
 
 - **init** : `addInitializer`
+
+- **appName** : méthode `withAppName` (à utiliser en cas d'application multi-noeud)
+
+- **endPoint** : méthode `withEndPoint` (à utiliser en cas d'application multi-noeud)
+
+- **nodeId** : méthode `withNodeId` (à utiliser en cas d'application multi-noeud)
 
 > Lorsque des objets intermédiaires sont requis (par exemple `DefinitionProviderConfig`) il existe toujours un builder associé (`DefinitionProviderConfig.builder()`)
 

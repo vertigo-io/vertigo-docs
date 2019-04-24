@@ -32,7 +32,7 @@ Ainsi créons une classe Main  `my.project.mda.Studio.java`
 ```java
 public class Studio {
 
-	private static AppConfig buildAppConfig() {
+	private static NodeConfig buildNodeConfig() {
 		return AppConfig.builder()
 				.beginBoot()
 				.withLocales("fr_FR")
@@ -69,7 +69,7 @@ public class Studio {
 	private MdaManager mdaManager;
 
 	public static void main(final String[] args) {
-		try (final AutoCloseableApp app = new AutoCloseableApp(buildAppConfig())) {
+		try (final AutoCloseableApp app = new AutoCloseableApp(buildNodeConfig())) {
 			final Studio studio = new Studio();
 			DIInjector.injectMembers(studio, app.getComponentSpace());
 			//-----
@@ -83,7 +83,7 @@ public class Studio {
 	}
 ```
 
-Dans cette classe nous pouvons observer dans la méthode `buildAppConfig` qui permet de spécifier la configuration de la "mini-application vertigo" qui va permettre de lancer la génération de code en partant du modèle.
+Dans cette classe nous pouvons observer dans la méthode `buildNodeConfig` qui permet de spécifier la configuration de la "mini-application vertigo" qui va permettre de lancer la génération de code en partant du modèle.
 
 Dans cette configuration nous pouvons donc retrouver le module Studio qui est à configurer en fonction de ces besoins. Pour le détail des options disponibles dans vertigo-studio vous pouvez vous rapporter à ce [chapitre](/advanced/studio).
 
@@ -93,7 +93,7 @@ On retrouve également un module, dénommé ici "myAppModel" qui permet de charg
 - fichiers oom : fichier de modélisation issu du logiciel PowerAmcDesigner
 - fichiers xmi : fichier de modélisation issu du logiciel EnterpriseArchitect
 
-Cette classe Studio.java contient une méthode main qui crée la "mini-application vertigo" (`new AutoCloseableApp(buildAppConfig()) `), puis de lancer la génération via le `mdaManager`
+Cette classe Studio.java contient une méthode main qui crée la "mini-application vertigo" (`new AutoCloseableApp(buildNodeConfig()) `), puis de lancer la génération via le `mdaManager`
 
 Pour lancer la génération il ne reste plus qu'à lancer cette classe Main par le moyen de votre choix.
 
@@ -116,22 +116,22 @@ Voici le contenu du fichier *model.ksp* (référencé par le fichier kpr ci-dess
 ```json
 package my.project.domain
 
-create DtDefinition DT_COUNTRY {
-  id COU_ID {domain: DO_ID label: "Id" }
-  field NAME {domain: DO_LABEL label: "Nom du pays" required:"false"}
+create DtDefinition DtCountry {
+  id couId 		{domain: DoId 		label: "Id" }
+  field name 	{domain: DoLabel 	label: "Nom du pays" required:"false"}
 }
 
-create Domain DO_ID {
+create Domain DoId {
 	dataType : Long
-	formatter : FMT_DEFAULT
+	formatter : FmtDefault
 }
 
-create Domain DO_LABEL {
+create Domain DoLabel {
 	dataType : String
-	formatter : FMT_DEFAULT
+	formatter : FmtDefault
 }
 
-create Formatter FMT_DEFAULT{
+create Formatter FmtDefault{
 	className : "io.vertigo.dynamox.domain.formatter.FormatterDefault"
 }
 ```

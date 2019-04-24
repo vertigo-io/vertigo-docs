@@ -48,8 +48,8 @@ D'autre part elle permet également l’enchaînement de clauses *et* et *ou* de
 Un criteria est construit de la manière suivante :
 
 ```java
-final Criteria<Movie> criteria = Criterions.startsWith(MovieFields.NAME, title)
-						  .and(Criterions.isEqualTo(MovieFields.YEAR, year));
+final Criteria<Movie> criteria = Criterions.startsWith(MovieFields.name, title)
+						  .and(Criterions.isEqualTo(MovieFields.year, year));
 ```
 
 et s'utilise directement depuis un objet DAO :
@@ -87,7 +87,7 @@ Vertigo embarque un certain nombre de moteurs d'execution. De part la nature des
 Les paramètres d'une tâches sont définies par :
 
 - un nom : utilisable dans la requête sous forme de paramètre bindé
-- un domain : permet de préciser son type (au sens vertigo). Pour les objet ou les liste il existe les domains suivants ( DO\_*NOM_OBJET*\_DTO pour un objet simple et DO\_*NOM_OBJET*\_DTC pour une liste )
+- un domain : permet de préciser son type (au sens vertigo). Pour les objet ou les liste il existe les domains suivants ( Do*NomObjet*Dto pour un objet simple et Do*NomObjet*Dtc pour une liste )
 - le caractère obligatoire
 - s'il s'agit d'un paramètre d'entrée ou de sortie
 
@@ -97,11 +97,11 @@ La requête est un champ texte qui contient le traitement à effectuer.
 
 Ce champ permet, l'utilisation des paramètres d'entrées sous forme de paramètre bindés à l'aide de la syntaxe suivante : 
 
-- *#NOM_PARAMETRE#* : pour un paramètre primitif
+- *#nomParametre#* : pour un paramètre primitif
 
-- *#NOM_PARAMETRE.CHAMP#* : pour un paramètre de type objet et utilisation d'un champ
-- *#NOM_PARAMETRE.INDEX.CHAMP#* : pour un paramètre de type liste d'objet et utilisation d'un champ (à utiliser pour les clauses de type IN
-- *#NOM_PARAMETRE.CHAMP#* : pour un paramètre de type liste et utilisation d'un champ dans le cadre des requête de type batch 
+- *#nomParametre.champ#* : pour un paramètre de type objet et utilisation d'un champ
+- *#nomParametre.index.champ#* : pour un paramètre de type liste d'objet et utilisation d'un champ (à utiliser pour les clauses de type IN
+- *#nomParametre.champ#* : pour un paramètre de type liste et utilisation d'un champ dans le cadre des requête de type batch 
 
 D'autre part il est également possible d'apporter du dynamisme dans les requêtes avec l'utilisation de la syntaxe `<%><%>` qui permet d'intercaler du code Java qui sera interprété à l'exécution. Ceci est notamment utilisé afin d'activer ou désactiver des parties de requêtes.
 
@@ -114,15 +114,15 @@ D'autre part il est également possible d'apporter du dynamisme dans les requêt
         	where 
         	1=1
         	<%if(title != null) {%>
-        	 and mov.NAME like concat(#TITLE#, '%%')
+        	 and mov.NAME like concat(#title#, '%%')
         	<%}%>
         	<%if(year != null) {%>
-        	 and mov.YEAR = #YEAR#
+        	 and mov.YEAR = #year#
         	<%}%>
 			"
-	attribute TITLE	 	{domain : DO_LABEL_LONG 		notNull:"true" 	inOut :"in"}
-	attribute YEAR	 	{domain : DO_YEAR 				notNull:"true" 	inOut :"in"}
-	attribute MOVIES	{domain : DO_DT_MOVIE_DTC 	notNull:"true" 	inOut :"out"}
+	attribute title	 	{domain : DoLabelLong 		notNull:"true" 	inOut :"in"}
+	attribute year	 	{domain : DoYear 			notNull:"true" 	inOut :"in"}
+	attribute movies	{domain : DoDtMovieDtc	 	notNull:"true" 	inOut :"out"}
 }
 ```
 
@@ -139,10 +139,10 @@ create Task TK_GET_ACTORS_IN_MOVIE {
         	select act.*
         	from role rol
         	join actor act on act.ACT_ID = rol.ACT_ID
-        	where rol.MOV_ID = #MOV_ID#
+        	where rol.MOV_ID = #movId#
 			"
-	attribute MOV_ID	{domain : DO_ID 	notNull:"true" 	inOut :"in"}
-	attribute ACTORS	{domain : DO_DT_ACTOR_DTC 	notNull:"true" 	inOut :"out"}
+	attribute movId		{domain : DoId 			notNull:"true" 	inOut :"in"}
+	attribute actors	{domain : DoDtActorDtc 	notNull:"true" 	inOut :"out"}
 }
 
 ```
@@ -150,8 +150,8 @@ Cette tâche un fois déclarée et le générateur executé, une nouvelle métho
 
 ```java
 public io.vertigo.dynamo.domain.model.DtList<io.vertigo.samples.dao.domain.Actor> getActorsInMovie(final Long movId) {
-		final Task task = createTaskBuilder("TK_GET_ACTORS_IN_MOVIE")
-				.addValue("MOV_ID", movId)
+		final Task task = createTaskBuilder("TKGetActorsInMovie")
+				.addValue("movId", movId)
 				.build();
 		return getTaskManager()
 				.execute(task)
