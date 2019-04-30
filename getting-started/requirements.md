@@ -1,4 +1,4 @@
-# Bien démarrer avec Vertigo
+# Démarrer avec Vertigo
 
 Dans ce guide, nous vous aidons à créer votre première application Vertigo, en deux étapes :
 * Comment créer une application minimale et la démarrer
@@ -18,7 +18,9 @@ Pour suivre ce guide, vous aurez besoin :
 
 Nous utiliserons ici Eclipse. A l'heure de la rédaction de ce guide, la version utilisée est la 2018-09.
 
-1. Création du projet Java (méthode 1 : sans archétype Maven)
+
+
+### 1. Création du projet Java (méthode 1 : sans archétype Maven)
 
 Cliquer sur __File > New > Project__. Dans la boîte de dialogue, choisir __Maven > Maven Project__ et cliquer sur __Next__.
 
@@ -31,7 +33,7 @@ Dans "Configure project", renseigner les champs suivants :
 
 Cliquer sur __Finish__.
 
-2. Configuration du fichier pom du projet
+### 2. Configuration du fichier pom du projet
 
 Ouvrir le fichier __pom.xml__ à la racine du projet.
 
@@ -90,7 +92,7 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 </project>
 ```
 
-Une fois le fichier pom.xml complété, cliquer avec le bouton de droite sur le projet getting-started-vertigo puis sur __Maven > Update Projet__.
+Une fois le fichier pom.xml complété, cliquer avec le bouton de droite sur le projet getting-started-vertigo puis sur __Maven > Update Project__.
 Dans la boîte de dialogue, vérifier que les éléments suivants sont cochés :
 * Update project configuration from pom.xml
 * Refresh workspace resources from local filesystem
@@ -99,7 +101,7 @@ Dans la boîte de dialogue, vérifier que les éléments suivants sont cochés :
 Cliquer sur __OK__.
 
 
-3. Création de la structure du projet
+### 3. Création de la structure du projet
 
 Créer l'arborescence de packages et de répertoires suivante :
 
@@ -109,7 +111,7 @@ XXXXXX SCREENSHOT XXXXXXXX
 
 Nous allons ici créer la description des entités métier de l'application. Cette description sera utilisée par l'outil _vertigo-studio_ pour créer les classes Java correspondantes ainsi que les classes d'accès aux données.
 
-1. Créer un fichier __modele.ksp__ dans le répertoire __/src/main/resources/your/group/id/gs/modulemetier1/mda__
+### 1. Créer un fichier __modele.ksp__ dans le répertoire __/src/main/resources/your/group/id/gs/modulemetier1/mda__
 
 Dans ce fichier, insérer les éléments suivants:
 
@@ -141,7 +143,7 @@ create DtDefinition DtMovie {
 }
 ```
 
-2. Créer un fichier __mda.kpr__ dans le répertoire __src/main/resources/your/group/id/gs/modulemetier1/__
+### 2. Créer un fichier __mda.kpr__ dans le répertoire __src/main/resources/your/group/id/gs/modulemetier1/__
 
 Ce fichier contient la ligne suivante, indiquant que le fichier à utiliser pour la génération des classes est le fichier ksp créé ci-dessus
 
@@ -149,7 +151,7 @@ Ce fichier contient la ligne suivante, indiquant que le fichier à utiliser pour
 mda/modele.ksp
 ```
 
-3. Créer une classe nommée __Studio__ dans le package __your/group/id/gs/mda/__
+### 3. Créer une classe nommée __Studio__ dans le package __your/group/id/gs/mda/__
 
 Cette classe comprend l'ensemble des instructions permettant de générer les classes Java et les DAO correspondant aux entités métier à partir des fichiers KSP pointés par le fichier KPR.
 
@@ -219,5 +221,176 @@ Sauvegarder, cliquer avec le bouton de droite sur le fichier __Studio.java__ pui
 
 La génération des fichiers est lancée et les entités générées apparaissent dans le répertoire __src/main/javagen/your/group/id__.
 Ces éléments sont maintenant utilisables pour créer des services puis des écrans.
+
+### 4. Créer la base de données exemple
+
+Nous allons ici créer la structure de la base de données correspondant au modèle créé précédemment.
+
+Pour ce faire :
+* Télécharger l'exécutable H2 : [ici](http://central.maven.org/maven2/com/h2database/h2/1.4.199/h2-1.4.199.jar)
+* Double-cliquer sur le jar téléchargé
+* Renseigner "URL JDBC", ici : 
+	* jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE
+* Cliquer sur __Connecter__
+* Copier / Coller le script SQL de création de la base de données (_src/main/javagen/sqlgen/crebas.sql_) dans la fenêtre de requête
+* Cliquer sur __Exécuter__, la structure de la base est maintenant créée
+
+## Créer un premier écran
+
+Dans cette section, nous allons créer les éléments (services utilisant les classes d'accès aux données) qui nous permettront ensuite de créer notre premier écran.
+
+Le but sera de fournir un écran proposant d'enregistrer un film avec son titre dans la base, puis un écran de visualisation de la liste des films présents dans la base de données.
+
+### 1. Création d'un service métier
+
+Le service métier fournit des fonctionnalités de haut niveau concernant un concept métier donné. Dans ce guide, il s'agit de simples fonctions d'enregistrement et de lecture des entités (ici un "film").
+
+Ce service comprendra les fonctions suivantes :
+* Récupération de la liste globale des films
+* Récupération d'un film
+* Enregistrement d'un film
+
+Créer une classe nommmée `MovieServices` dans le package __your.group.id.gs.modulemetier1.services__
+
+Copier / coller le contenu suivant dans la classe :
+
+```java
+package your.group.id.gs.modulemetier1.services;
+
+import javax.inject.Inject;
+
+import io.vertigo.commons.transaction.Transactional;
+import io.vertigo.core.component.Component;
+import io.vertigo.dynamo.criteria.Criterions;
+import io.vertigo.dynamo.domain.model.DtList;
+import io.vertigo.dynamo.domain.model.DtListState;
+import io.vertigo.lang.Assertion;
+import your.group.id.modulemetier1.dao.MovieDAO;
+import your.group.id.modulemetier1.domain.Movie;
+
+@Transactional
+public class MovieServices implements Component {
+
+	@Inject
+	private MovieDAO movieDAO;
+
+	public Movie getMovieById(final Long movId) {
+		Assertion.checkNotNull(movId);
+		//--- 
+		return movieDAO.get(movId);
+	}
+
+	public DtList<Movie> getAllMovies() {
+		return movieDAO.findAll(Criterions.alwaysTrue(), DtListState.of(100));
+	}
+
+	public Movie save(final Movie movie) {
+		Assertion.checkNotNull(movie);
+		//---
+		return movieDAO.save(movie);
+	}
+}
+```
+
+Remarques :
+* La classe implémente l'interface `Component`qui permet d'identifier les composants d'une application Vertigo
+* L'annotation @Transactional permet de gérer le caractère transactionnel (base de données...) des services que l'on implémente.
+* L'annotion @Inject permet de réaliser l'injection de dépendance, ici nous injectons le composant `MovieDAO` qui réalise l'accès aux données pour l'entité `Movie`.
+
+### 2. Création de l'écran de détail d'un film
+
+#### Création du contrôleur
+
+Créer une classe `MovieDetailController` dans le package __your.group.id.gs.modulemetier1.controllers__
+
+Copier / coller le code suivant dans la classe :
+
+```java
+package your.group.id.gs.modulemetier1.controllers;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import io.vertigo.ui.core.ViewContext;
+import io.vertigo.ui.core.ViewContextKey;
+import io.vertigo.ui.impl.springmvc.argumentresolvers.ViewAttribute;
+import io.vertigo.ui.impl.springmvc.controller.AbstractVSpringMvcController;
+import your.group.id.gs.modulemetier1.services.MovieServices;
+import your.group.id.modulemetier1.domain.Movie;
+
+@Controller
+@RequestMapping("/movie")
+public class MovieDetailController extends AbstractVSpringMvcController {
+
+	private static final ViewContextKey<Movie> movieKey = ViewContextKey.of("movie");
+
+	@Inject
+	private MovieServices movieServices;
+
+	@GetMapping("/{movId}")
+	public void initContext(final ViewContext viewContext, @PathVariable("movId") final Long movId) {
+		viewContext.publishDto(movieKey, movieServices.getMovieById(movId));
+		toModeReadOnly();
+	}
+
+	@GetMapping("/new")
+	public void initContext(final ViewContext viewContext) {
+		viewContext.publishDto(movieKey, new Movie());
+		toModeCreate();
+	}
+
+	@PostMapping("/_edit")
+	public void doEdit() {
+		toModeEdit();
+	}
+
+	@PostMapping("/_save")
+	public String doSave(@ViewAttribute("movie") final Movie movie) {
+		movieServices.save(movie);
+		return "redirect:/movie/" + movie.getMovId();
+	}
+
+}
+```
+
+> A noter : les contrôleurs vertigo-ui utilisent le module SpringMVC enrichi par Vertigo (la classe dérive de la classe AbstractVSpringMvcController).
+
+#### Création de la vue
+
+La vue est constituée par un fichier HTML se référant aux éléments servis par la classe contrôleur.
+
+Ajouter un fichier __movieDetail.html__ dans le dossier __src/main/webapp/WEB-INF/views/modulemetier1__
+
+Dans ce fichier, copier / coller le code suivant:
+
+```html
+
+```
+
+
+### 3. Création de l'écran de liste des films
+
+#### Création du contrôleur
+
+Créer une classe `MovieListController` dans le package __your.group.id.gs.modulemetier1.controllers__
+
+Copier / coller le code suivant dans la classe :
+
+```java
+
+```
+
+> A noter : les contrôleurs vertigo-ui utilisent le module SpringMVC enrichi par Vertigo (la classe dérive de la classe AbstractVSpringMvcController).
+
+#### Création de la vue
+
+
+
+
 
 
