@@ -7,7 +7,7 @@ La configuration d'une application permet de définir l'ensemble de ses élémen
   - définitions 
 
 La configuration de l'application peut s'effectuer selon deux modalités : sous forme de fichiers YAML ou via une API Java
-Ces deux modalités ont pour but de construire un objet Java `AppConfig` qui est utilisé afin de démarrer l'application.
+Ces deux modalités ont pour but de construire un objet Java `NodeConfig` qui est utilisé afin de démarrer l'application.
 
 Une application, consomme et fournit des ser
 
@@ -15,7 +15,7 @@ Une application, consomme et fournit des ser
 
 > La configuration par features via l'API Java est privilégiée pour les tests unitaires ou les applications Java en général.
 
-Afin de créer une application Vertigo il est nécessaire de créer un objet `AppConfig`. Pour y parvenir l'utilisation de la classe `AppConfigBuilder` est nécessaire.
+Afin de créer une application Vertigo il est nécessaire de créer un objet `NodeConfig`. Pour y parvenir l'utilisation de la classe `NodeConfigBuilder` est nécessaire.
 
 ```java
 final NodeConfig nodeConfig = NodeConfig.builder()
@@ -66,7 +66,7 @@ Dans l'exemple il est possible d'activer la fonctionalité **EmbeddedServer** do
 Une fois cet objet AppConfig créé il est possible de démarrer l'application : 
 
 ```java
-try (AutoCloseableApp app = new AutoCloseableApp(appConfig)) {
+try (AutoCloseableApp app = new AutoCloseableApp(nodeConfig)) {
 	//do whatever you want
 }
 ```
