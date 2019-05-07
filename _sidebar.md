@@ -7,10 +7,7 @@
   - [Bénéfices](overview/benefices.md)
   - [Modules](overview/modules.md)
   - [Extensions](overview/extensions.md)
-- Getting-started
-  - [Prérequis](getting-started/requirements.md)
-  - [Installation](getting-started/installation.md)
-  - [Helloworld](getting-started/helloworld.md)
+- [Getting-started](getting-started/requirements.md)  
 - Basique
   - [Configuration](basic/configuration.md)
   - [Composants](basic/composants.md)
@@ -21,7 +18,7 @@
   - [WebServices](basic/webservices.md)
   - [UI](basic/ui.md)
   - [Analytics](basic/analytics.md)
-- Avancé
+- Details des Modules
   - [Core](advanced/core.md)
   - [Commons](advanced/commons.md)
   - [Database](advanced/database.md)

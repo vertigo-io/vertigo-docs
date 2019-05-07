@@ -1,4 +1,4 @@
-#Objectifs
+# Objectifs
 Notre but en construisant vertigo est de proposer un socle applicatif
 
 * Centré sur les besoins
@@ -9,23 +9,23 @@ Notre but en construisant vertigo est de proposer un socle applicatif
 
 A ces fins nous tenons à respecter une ligne de conduite
 
-#Principes de conception
+# Principes de conception
 
 ![](./images/designPrinciples.png)
 
-#Simple
+# Simple
 ![](./images/simple-icon.png)John Maeda, prof de design au MIT a rédigé un petit livre intitulé *The laws of simplicity* où il référence les lois de la simplicité. La dernière loi, forme une synthèse des précédentes.
 
 **Simplicity is about subtracting the obvious, and adding the meaningful.**
 
-#Modular
+# Modular
 ![](./images/modular-icon.png)La modularité est un élément clé des systèmes informatiques, elle est à la base de UNIX ; comme le dit Erich Raymond dans son ouvrage Basics of the Unix Philosophy
 
 **Rule of Modularity : Write simple parts connected by clean interfaces.** 
 
 ![](./images/modularity.png)
 
-#Elastic
+# Elastic
 ![](./images/elastic-icon.png)Capacité du système à distribuer les traitements afin
 
 * d'absorber des charges importantes
@@ -33,7 +33,7 @@ A ces fins nous tenons à respecter une ligne de conduite
 
 ![](./images/elastic.png)
 
-#Fast
+# Fast
 ![](./images/fast-icon.png)Voici selon Jacob Nielsen, référence dans le domaine de l'ergonomie des systèmes informatiques, les 3 délais importants. Notre objectif est de **construire des applications qui répondent instantanément**.
 
 * 0.1 seconds gives the feeling of instantaneous response
@@ -42,5 +42,5 @@ A ces fins nous tenons à respecter une ligne de conduite
 
 ![](./images/fast.png)
 
-#Fluid
+# Fluid
 ![](./images/fluid-icon.png)Parce qu'un application n'est perçue qu'au travers de son interface utilisateur; celle ci doit être fluide et ergonomique.
