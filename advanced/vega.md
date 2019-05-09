@@ -10,14 +10,15 @@ Et propose une publication de l'API par le standard [Swagger](https://swagger.io
 Pour publier les WebServices, il suffit d'un ensemble d'annotations sur une Facade de vos services métiers. Les Annotations sont volontairement une sous partie du standard [JAX-RS](https://javaee.github.io/javaee-spec/javadocs/javax/ws/rs/package-summary.html)
 
 ## Quick start
-1\. Le service doit être déclaré comme un *Composant* Vertigo
-2\. Le service doit implémenter [WebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-api/src/main/java/io/vertigo/vega/webservice/WebServices.java)  
-3\. Ajouter les annotations sur les méthodes, exemple:   
+
+1. Le service doit être déclaré comme un *Composant* Vertigo
+2. Le service doit implémenter [WebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-api/src/main/java/io/vertigo/vega/webservice/WebServices.java)  
+3. Ajouter les annotations sur les méthodes, exemple:   
 ```Java 
 @AnonymousAccessAllowed 
 @GET("/anonymousTest")
 ```
-4\. Ajouter la feature *webservices* dans la configuration :
+4. Ajouter la feature *webservices* dans la configuration :
 
 ```yaml
 modules
@@ -30,12 +31,12 @@ modules
           apiPrefix : /api
 ```
   
-5\. Démmarer l'application
-6\. **C'est bon**. Vous pouvez appeler votre webservice:  [http//:localhost:8088/anonymousTest] (http//:localhost:8088/anonymousTest)
+5. Démmarer l'application
+6. **C'est bon**. Vous pouvez appeler votre webservice:  [http://localhost:8088/anonymousTest](http://localhost:8088/anonymousTest)
 
 Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/impl/webservice/catalog/SwaggerWebServices.java) qui vous donne la vue de l'api des WebServices disponibles.<br/>
-* IHM Swagger :  [http//:localhost:8088/swaggerUi] (http//:localhost:8088/swaggerUi)
-* API Swagger seule : [http//:localhost:8088/swaggerApi] (http//:localhost:8088/swaggerApi)
+* IHM Swagger :  [http://localhost:8088/swaggerUi](http://localhost:8088/swaggerUi)
+* API Swagger seule : [http://localhost:8088/swaggerApi](http://localhost:8088/swaggerApi)
 
 
 ## API
@@ -70,7 +71,7 @@ Vega peuple quelques paramètres implicites (qui ne sont pas envoyé par le clie
 - HttpServletRequest : Requete HTTP
 - HttpServletResponse : Response HTTP
 
-?> Voir les annotations directements pour le détail
+?> Voir les annotations directement pour le détail
 
 ### Objet de retour
 Le resultat de votre service est automatiquement sérialisé en Json.
