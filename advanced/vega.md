@@ -55,6 +55,22 @@ public Contact getContact(@PathParam("conId") final int contactId) {
 Cet exemple accepte les URLs comme `http://localhost:8080/contact/134` ou `http://localhost:8080/contact/756`  
 et appelle le service sous-jacent commme `getContact(134)` ou `getContact(756)`
 
+### Paramètres
+
+Vertigo Vega va automatiquement mapper la requete entrant Json vers votre méthode de WebService. Les annotations positionnés permet d'indiquer comme ce fait ce mapping. 
+Vega est prévu pour gérer un maximum de cas, tout en proposant des optimisations à travers des objets propre à Vertigo (résultat de recherche, état des listes, Optional, ...).
+La plus part du temps il s'agit de surtout indiquer la source de la données (paramètres de l'url, body de requetes, headers, ...).
+Par défaut le contenu est attendu dans le body (**Attention** la norme HTTP indique que les requetes *GET* n'ont pas de body)
+
+Le cas le plus courant est de réceptionner directement un DtObject, dans ce cas Vega s'occupe de formatter le Json en type Java et de valider l'objet vis-à-vis des contraintes des domains.
+Il est possible de récupérer directement la saisie utilisateur en utilisant les objets génériques `UiObject` ou `UiList<MyDto>`.
+
+Vega peuple quelques paramètres implicites (qui ne sont pas envoyé par le client). Ces éléments implicites permettent d'agir plus finement sur le comportement du WebServices. 
+- UiMessageStack : pile des messages à retourner à l'IHM. Avec un états (Success, Info, Warning, Error) et une portée (globale, par objet, par champ)
+- HttpServletRequest : Requete HTTP
+- HttpServletResponse : Response HTTP
+
+?> Voir les annotations directements pour le détail
 
 ### Objet de retour
 Le resultat de votre service est automatiquement sérialisé en Json.
@@ -232,31 +248,35 @@ Response:
 }
 ```
 
-!>
-!> TODO : A traduire
-!>
-
-### AccessToken security
-This feature provides a limited access token. To manage this token developers have to use three annotations :
-* `AccessTokenPublish` : apply on method, it generates a random unique token and sets a response header `x-access-token`.
-* `AccessTokenMandatory` : apply on method, it ensures the client sent a valid `x-access-token` as request header. If not the server sends a `HTTP 403 FORBIDDEN` `Invalid access token` error.
-* `AccessTokenConsume` : same as AccessTokenMandatory, but consumes `x-access-token` at call (token invalidation).
+?> Cette fonction est traitée par [`ServerSideStateWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/plugins/webservice/handler/ServerSideStateWebServiceHandlerPlugin.java)
 
 
+### Sécurité **AccessToken**
+Cette fonctionnalité propose un Token d'acces limité. La gestion de ce Token est géré par le développeur par 3 annotations :
+* `AccessTokenPublish` : posée sur une méthode, il génère un Token unique aléatoire et l'ajoute comme *header* la *Response* `x-access-token`.
+* `AccessTokenMandatory` : posée sur une méthode, il assure que le client a envoyé un *header* de *Request* `x-access-token` valide. Sinon le serveur retourne une erreur `HTTP 403 FORBIDDEN` `Invalid access token`.
+* `AccessTokenConsume` : Idem à `AccessTokenMandatory`, mais consomme le `x-access-token` lors de l'appel (token invalidation).
 
-### Rate-Limit security
-For security purpose all published web-services in _Vertigo-Vega/rest_ are rate-limited. By default, the limit is set at 150 calls per 15 minutes (sliding window) per user. That's one call every 6 seconds. Anonymous users share this limit among them.
-Server sends information in response headers:
-* `X-Rate-Limit-Limit` : the rate limit ceiling for that given request
-* `X-Rate-Limit-Remaining` : the number of requests left for the M minute window
-* `X-Rate-Limit-Reset` : the remaining seconds before the rate limit resets
+### Sécurité **Rate-Limit**
+Pour des raisons de sécurité, tous les WebServices publiés par Vertigo Vega sont protégés (par défaut) contre les appels massifs. La limite est de 150 appels par utilisateur sur des fenètres de 5 minutes, ce qui représente 1 appel toutes les 2 secondes.
+Les utilisateurs anonymes partagent le même compteur de limite.Noté que la limite est comptabilisée par instance serveur.
 
-If limit is exceeded the server issues a `HTTP 429 TOO_MANY_REQUEST` error. Note also this is a per server instance limit.
+Le serveur envoye des informations dans des *headers* de la *Response*
+* `X-Rate-Limit-Limit` : Le maximum d'appel autorisé pour cette requete
+* `X-Rate-Limit-Remaining` : Le nombre d'appel restant dans la fenetre de temps en cours
+* `X-Rate-Limit-Reset` : Le nombre de seconde restant avant une remise à zéro du compteur
 
-### DtListDelta support
-DtListDelta is a specific object supported by _Vertigo-Vega/rest_ for it's web-service.
-It's used for aggregating list modifications : created, updated and deleted objects send from IHM.
-The request Json must respect this format: 
+Si la limite du serveur est dépassée, le serveur retourne une erreur `HTTP 429 TOO_MANY_REQUEST`.
+
+?> Cette fonction est traitée par [`RateLimitingWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/plugins/webservice/handler/RateLimitingWebServiceHandlerPlugin.java)
+?> Le handler propose des paramètres optionels : 
+?> - *windowSeconds* : Taille de la fenètre en seconde
+?> - *limitValue* : Nombre d'appel maximum (dans la durée de la fenètre)
+
+### Objet d'IHM **DtListDelta**
+`DtListDelta` est un objet spécifique utilisé par Vertigo Vega.
+Il est utilisé pour aggréger les modifications apportées à une liste : création, mise à jour ou suppression réalisées coté client et retourné au serveur en 1 appel.
+La requete Json doit respecter ce format : 
 ```Json
 {
 	"collCreates": { 
@@ -275,8 +295,7 @@ The request Json must respect this format:
 }
 ```
 
-
-Example : 
+Exemple : 
 ```Java
 @POST("/contacts/delta")
 @ExcludedFields({ "birthday", "email", "passport" }) // All secret fields are excluded
@@ -287,11 +306,13 @@ public String updateContacts( final DtListDelta<Contacts> contactsDelta) {
 }
 ```
 
-### AutoSortAndPagination support
-AutoSortAndPagination annotation is the simplest way to publish a service with sorting and paging.  
-You just publish a service which return a DtList and add this annotation.  
+?> Il existe un équivalent `UiListDelta` qui permet de récupérer des UiObjects (ie. avant formatage et validation)
 
-Example :
+### Annotation **AutoSortAndPagination**
+L'annotation `AutoSortAndPagination` est le moyen le plus simple pour publier un service en ajoutant le support de la pagination et du tri.
+En partant d'un service métier qui retourne une DtList complète, il suffit d'ajouter un WebService avec cette annotation qui retourne directement le résultat du service.
+
+Exemple :
 ```Java
 @AutoSortAndPagination
 @GET("/contacts")
@@ -301,24 +322,26 @@ public DtList<Contacts> searchContacts( final ContactCriteria contactCriteria) {
 }
 ```
 
-**Vega** will keep a copy of the full list and return :
-* _header_ : `x-total-count` : the total count of this list
-* _header_ : `listServerToken` : the serverSide list's id token, should be resend by client when paging or sorting the list
-* _body_ : the sublist in Json format
+Comment ca marche :<br/>
+**Vega** conserve une copie de la liste coté serveur et retourne :
+* _header_ : `x-total-count` : la taille totale de la liste
+* _header_ : `listServerToken` : le token de la liste coté serveur. Il devra être renvoyé par le client lorsqu'il faudra trier ou filtrer la liste
+* _body_ : la portion de la liste au format Json (triée et filtrée)
 
-When client sort or change page, it should send :
-* _query_ : `top` : max elements to return
-* _query_ : `skip` : offset of first element to return
-* _query_ : `sortFieldName` : field name in camelCase to sort by
-* _query_ : `sortDesc` : true/false for sort order
-* _query_ : `listServerToken` : refering to a serverSide list
-* any payloads do you need, just like other services
+Lorsque l'IHM tri ou change de page, il doit retourner : 
+* _query_ : `top` : nombre max d'élément à retourner
+* _query_ : `skip` : offset du premier élément à retourner
+* _query_ : `sortFieldName` : nom du champ protant le tri
+* _query_ : `sortDesc` : true/false pour l'ordre de tri
+* _query_ : `listServerToken` : token de la liste (issus des précédents appels)
+* n'importe quels autres données nécessaires, comme n'importe quel service
 
-Note that you can do the same thing within your own service.   
-To keep this API, you should just declare a ``` @QueryParam(".") UiListState uiListState``` for your service.   
-UiListState is a representation of sublist state, with `top`, `skip`, `sortFieldName`, `sortDesc` and `listServerToken` fields.   
+Noter que vous pouvez faire la même chose dans vos WebServices sans l'annotation (par exemple pour trier ou paginer dans la couche service ou dans la base de données).
+Pour avoir la même API, vous avez à ajouter un paramètre  ``` @QueryParam(".") DtListState dtListState```
 
-Example :
+DtListState est une représentation de l'état d'une sous liste, avec les champs `top`, `skip`, `sortFieldName`, `sortDesc` et `listServerToken`   
+
+Exemple :
 ```Java
 @GET("/contacts")
 public DtList<Contacts> searchContacts( final ContactCriteria contactCriteria, @QueryParam("") UiListState uiListState) {
@@ -327,53 +350,52 @@ public DtList<Contacts> searchContacts( final ContactCriteria contactCriteria, @
 }
 ```
 
-
 ### HTTP Code
-Vertigo automatically returns HTTP Code :
-* `200 Success` : When things are ok
-* `201 Created` : By convention when things are ok and method name starts with 'create'
-* `204 No Content` : When things are ok but there is no returning data
-* `401 Unauthorized` : No valid session
-* `403 Forbidden` : Not enough rights
-* `404 Not found` : No service found
-* `400 Bad request` : Default returning code
-* `422 Unprocessable entity` : Validations or business error
-* `429 Too many request` : Anti spam security (must wait for next time window)
-* `500 Internal server error` : As it says any server error, should return a message in body
+Vertigo Vega retourne automatiquement les codes HTTP suivant  :
+* `200 Success` : Quand tout va bien
+* `201 Created` : Par convention tout va bien et la méthode commence par 'create'
+* `204 No Content` : Quand tout va bien mais qu'il n'y a aucune donnée en retour (return null ou void)
+* `401 Unauthorized` : Pas de session valide (`SessionException`)
+* `403 Forbidden` : Droits insuffisants (`VSecurityException`)
+* `404 Not found` : Pas de WebService/Resource trouvés
+* `400 Bad request` : Erreur de syntaxe de requête (`JsonSyntaxException`)
+* `422 Unprocessable entity` : Erreur de validation ou de règle métier (`ValidationUserException` ou `VUserException`)
+* `429 Too many request` : Sécurité Anti spam (impose d'attendre la prochaine fenètre) (`TooManyRequestException`)
+* `500 Internal server error` : Erreur interne, doit retourner un message dans le corps de la *Response*
 
 ***
 
-## Annotations reference
+## Référence complète des Annotations
 
-### Classes annotations
-* `PathPrefix` : Used to add a prefix to all route of a class
+### Annotations de class
+* `PathPrefix` : Utilser pour ajouter un préfix commun à toutes les routes de la class
 
-### Methods annotations
-* `Doc` : Adds a documentation to your route. Displayed when calling default `/catalog` url
-* `AnonymousAccessAllowed` : Allows access for anonymous user (Current UserSession.isAuthenticated() == false)
-* `SessionLess` : Don't create a new Session when calling this route
-* `SessionInvalidate` : Invalidates Session on call
-* `GET` : Defines a `GET` route for this method. `GET` is use for load-like services. `GET` should have only query parameters, no body and are idempotent (can be call again with same result, if no concurrency of course).
-* `POST` : Defines a `POST` route for this method. `POST` is used for save-like services and most business services (archive, send, compute, ...). `POST` could have body payload and are not-idempotent (server state is modified). It's a best practice to decide how successive calls from a same origin should behave (browser back feature or user misbehavior like mutiple click). If necessary a business constraint must prevent such executions.
-* `DELETE` : Defines a `DELETE` route for this method. `DELETE` is used for remove-like services. `DELETE` might have body payload and are not-idempotent (it changes the server state).
-* `PUT` : Defines a `PUT` route for this method. `PUT` is used for update-like services. `PUT` could have body payload and are idempotent (can be call again with same result, if no concurrency of course).
-* `ExcludedFields` : Defines fields to be excluded from output response. Use it for security purpose.
-* `IncludedFields` : Defines fields to be included into output response (others are excluded). Use it for security purpose.
-* `AccessTokenPublish` : Returns a new AccessToken as header `x-access-token`. This token may be use for a limited time. The token is bounded to one user and can't be use by others. Use it for security purpose.
-* `AccessTokenMandatory` : Defines this service as **AccessTokenProtected**. The service will require a valid AccessToken from query header `x-access-token`. Use it for security purpose.
-* `AccessTokenConsume` : Defines this service as **AccessTokenProtected**. The service will require a valid AccessToken from query header `x-access-token`. When this service succeeds the token is consumed and can't be reused anymore. Use it for security purpose.
-* `ServerSideSave` : Tells the server to keep a saved version of this object server side. The returned json view is completed with a `serverToken` field. This `serverToken` must be sent back by client when interacting with server for this object.
+### Annotations de méthode
+* `Doc` : Ajoute une documentation à la route. Apparait dans la spécification de l'API (Swagger)
+* `AnonymousAccessAllowed` : Autorise l'accès aux utilisateurs anonymes (Current UserSession.isAuthenticated() == false)
+* `SessionLess` : Indique de ne pas créer de Session HTTP lors de l'appel à cette route (pour les WebServices SI à SI)
+* `SessionInvalidate` : Invalide la Session HTTP lors de l'appel.
+* `GET` : Définit une route en `GET` pour cette méthode. `GET` est utilisé pour les services de type *chargement*. `GET` ne devrait avoir que des paramètres d'url, pas de body et devrait être idempotent (chaque appel donne le même résultat, si il n'y a pas de modification concurentes évidement).
+* `POST` : Définit une route en `POST` pour cette méthode. `POST` est utilisé pour les services de type *enregistrement* et pour la majorité des services métier (archive, send, compute, ...). `POST` peut avoir un contenu dans le body et n'ont pas à être idempotent (l'état serveur est modifié). C'est une bonne pratique de décider comment des appels successifs depuis une même origine doit se comporter (gestion du back navigateur ou le multi-click des utilisateurs). Il parfois plus simple de mettre ne place des contraintes métiers pour éviter ces multiples éxécutions (contraintes d'unicité, vérification des transitions d'états, ...).
+* `DELETE` : Définit une route `DELETE` pour cette méthode. `DELETE` est utilisé pour les services de type *suppression*. `DELETE` devrait rarement avoir un body et ne sont pas idempotent (l'état serveur est modifié).
+* `PUT` : Définit une route `PUT` pour cette méthode. `PUT` est utilisé pour les services de type *création* ou *mise à jour* simple. `PUT` devrait avoir un body et doit être idempotent (chaque appel donne le même résultat, si il n'y a pas de modification concurentes évidement). Les principes **RESTful** sont assez ambigue sur l'utilisation de **PUT** et de **POST**, nous préconisons surtout de nous fier au contrat : **PUT** idempotent, **POST** non.
+* `ExcludedFields` : Définit les champs a exclure de la réponse. A utiliser dans un objectif de sécurité.
+* `IncludedFields` : Définit les champs a inclure dans la réponse (les autres sont exclus). A utiliser dans un objectif de sécurité.
+* `AccessTokenPublish` : Retourne un nouveau Token d'accès sous la forme d'un header `x-access-token`. Ce Token peut être utilisé pour un temps limité. Le Token est lié à un utilisateur et ne peut être utilisé par d'autres. A utiliser dans un objectif de sécurité.
+* `AccessTokenMandatory` : Définit le service comme étant *protégé par AccessToken*. Le service impose la présence d'un AccessToken valide dans le header `x-access-token` de la requête. A utiliser dans un objectif de sécurité.
+* `AccessTokenConsume` : Définit le service comme étant *protégé par AccessToken*. Le service impose la présence d'un AccessToken valide dans le header `x-access-token` de la requête. Quand ce service est appellé et termine sans erreur, le Token est consommé et ne peut plus être utilisé. A utiliser dans un objectif de sécurité.
+* `ServerSideSave` : Indique au serveur de conserver une copie de l'objet complèt coté serveur. L'objet retourné est complété avec un champ `serverToken` avec un identifiant unique. Ce `serverToken` devra être envoyé par le client lorsqu'il intéragit avec le serveur sur cet objet.
 
-### Parameters annotations
-* `PathParam` : maps a parameter from url
-* `QueryParam` : maps a parameter from query. Can be url params : `url?id=12&name=martin` or http form params.
-* `InnerBodyParam` : maps a parameter from a body json field. The body must be a json object.
-* `HeaderParam` : maps a parameter from a header field.
-* `Validate` : defines a list of specific `DtObjectValidator`, which must be passed on modified field before the service call. Errors are added into UiMessageStack and send in a 422 (SC_UNPROCESSABLE_ENTITY) Response.
-* `ExcludedFields` : Defines fields to be excluded from input request. Use it for security purpose.
-* `IncludedFields` : Defines fields to be accept from input request (other are rejected). Use it for security purpose.
-* `ServerSideRead` : Tells the server to read a previously saved object and merge it with incoming updates. The partial json object must defined a `serverToken` field which contains the previously saved object reference token. 
-* `AutoSortAndPagination` : Adds pagination and sort support for a standard `List<?> loadBy(Criteria crit)` service.
+### Annotations de paramètre
+* `PathParam` : Récupère un paramètre depuis une partie de la route (indiqué dans la route avec {myParamName}).
+* `QueryParam` : Récupère un paramètre depuis la requête. Peut être un paramètre dans l'url `url?id=12&name=martin` ou un paramètre de formulaire HTTP (en POST) (l'API Servlet Java ne fait pas la différence)
+* `InnerBodyParam` : Récupère un paramètre depuis un champ du body. Le body doit être un objet Json. *Cette annotation est spécifique à Vega et permet d'éviter des Objets conteneur à usage unique)*
+* `HeaderParam` : Récupère un paramètre depuis le header de la requête.
+* `Validate` : Définit une liste spécifique de `DtObjectValidator`. Ces validators seront passés sur les champs modifiés avant l'appel au service. Les erreurs sont ajoutées à l'UiMessageStack et envoyé avec un code HTTP 422 (SC_UNPROCESSABLE_ENTITY) le cas échéant.
+* `ExcludedFields` : Définit les champs interdits de la request entrante sur un objet. A utiliser dans un objectif de sécurité. Lance une erreur `VSecurityException` si le contrat n'est pas respecté.
+* `IncludedFields` : Définit les champs acceptés de la request entrante sur un objet (les autres sont interdits). A utiliser dans un objectif de sécurité. Lance une erreur `VSecurityException` si le contrat n'est pas respecté.
+* `ServerSideRead` : indique au serveur de recharger la copie sauvegarder d'un objet et de le mettre à jour avec les modifications portées par la request. L'objet Json entrant est partiel et doit définir un champ `serverToken` avec le Token identifiant de l'objet source.
+* `AutoSortAndPagination` : Ajout le support automatique de la pagination et du tri pour un service simple de la forme `List<?> loadBy(Criteria crit)`.
 
-## References
-_Some of motivations and inspirations comes from [OWASP](https://www.owasp.org/index.php/REST_Security_Cheat_Sheet#Input_validation_101) and [@veesahni](http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#rate-limiting)_  
+## Réferences
+*Une partie de la motivation de l'inspiration de ce module vient de l'[OWASP](https://www.owasp.org/index.php/REST_Security_Cheat_Sheet#Input_validation_101) et de [@veesahni](http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#rate-limiting)*
