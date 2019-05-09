@@ -269,10 +269,10 @@ Le serveur envoye des informations dans des *headers* de la *Response*
 
 Si la limite du serveur est dépassée, le serveur retourne une erreur `HTTP 429 TOO_MANY_REQUEST`.
 
-?> Cette fonction est traitée par [`RateLimitingWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/plugins/webservice/handler/RateLimitingWebServiceHandlerPlugin.java)
-?> Le handler propose des paramètres optionels : 
-?> - *windowSeconds* : Taille de la fenètre en seconde
-?> - *limitValue* : Nombre d'appel maximum (dans la durée de la fenètre)
+> Cette fonction est traitée par [`RateLimitingWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/plugins/webservice/handler/RateLimitingWebServiceHandlerPlugin.java)
+> Le handler propose des paramètres optionels : 
+> - *windowSeconds* : Taille de la fenètre en seconde
+> - *limitValue* : Nombre d'appel maximum (dans la durée de la fenètre)
 
 ### Objet d'IHM **DtListDelta**
 `DtListDelta` est un objet spécifique utilisé par Vertigo Vega.
