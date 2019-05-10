@@ -198,7 +198,7 @@ public class Studio {
 				// ---StudioFeature
 				.addModule(new StudioFeatures()							// Configuration du moteur vertigo-Studio
 						.withMasterData()
-						.withMda(Param.of("projectPackageName", "your.group.id"))
+						.withMda(Param.of("projectPackageName", "your.group.id.gs"))
 						.withJavaDomainGenerator(Param.of("generateDtResources", "false"))
 						.withTaskGenerator()
 						.withSqlDomainGenerator(
