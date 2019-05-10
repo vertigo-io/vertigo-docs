@@ -38,7 +38,7 @@ A l'issu de cette création votre fichier __pom.xml__ doit ressembler à ça :
 ## Création du WebService
 
 Pour créer votre webservice rien de plus simple :
-- Créer une classe implémentant l'interface `io.vertigo.vega.webservice.WebServices` (Pas d'inquiétude il s'agit uniquement d'un marqueur...). Par exemple nommez là `io.vertigo.samples.hello.webservices.HelloWebServices`
+- Créer une classe implémentant l'interface `io.vertigo.vega.webservice.WebServices` (Pas d'inquiétude il s'agit uniquement d'un marqueur...). Par exemple nommez la `io.vertigo.samples.hello.webservices.HelloWebServices`
 - Ajouter une méthode annotée qui renvoit sur un appel `GET` sur la route `/hello/` la chaine de caractère `"Hello World!"`
 
 Et voici la classe en question : 
