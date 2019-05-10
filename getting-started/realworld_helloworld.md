@@ -268,7 +268,7 @@ public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1
 
 	@Override
 	protected void buildFeatures() {
-		super.buildFeatures();
+		super.buildFeatures(); // découverte automatique de tous les composants
 		getModuleConfigBuilder()
 				.addDefinitionProvider(DefinitionProviderConfig.builder(DynamoDefinitionProvider.class)
 						.addDefinitionResource("kpr", "your/group/id/gs/modulemetier1/run.kpr") // chargement de notre modèle de donnée
