@@ -1,4 +1,3 @@
-- [Accueil](/)
 - Overview
   - [Introduction](overview/introduction.md)
   - [Philosphie](overview/philosophie.md)
