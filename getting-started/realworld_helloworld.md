@@ -29,8 +29,8 @@ Rajouter les dépendances suivantes dans le fichier pom.xml :
 * Module vertigo-ui (cette dépendance tirera l'ensemble des modules Vertigo requis pour l'application)
 * Module vertigo-studio (celui-ci nous simplifie la tâche en générant des parties de code sans valeur ajoutée)
 * Les dépendances externes vers des outils nécessaires : 
-  * La dépendance `provided` à l'API servelt 3.1 ou supérieure
-  * Une base de donnée H2 (il s'agit d'une base mémoire, facile à utiliser à des fins de tests)
+  * La dépendance `provided` à l'API servlet 3.1 ou supérieure
+  * Une base de données H2 (il s'agit d'une base mémoire, facile à utiliser à des fins de tests)
   * Le gestionnaire de pool de connexions C3P0 pour la connexion à la base de données
 
 Rajouter l'indication que le répertoire contenant les fichiers générés (src/main/javagen) doit faire partie du "Build Path" d'Eclipse.
@@ -40,26 +40,32 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 ```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>your.group.id</groupId>
-  <artifactId>getting-started-vertigo</artifactId>
+  <groupId>test</groupId>
+  <artifactId>test</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
   
   <properties>
   	<maven.compiler.source>1.8</maven.compiler.source>
 	<maven.compiler.target>1.8</maven.compiler.target>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   
   <dependencies>
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>3.1.0</version>
-        <scope>provided</scope>
-      </dependency>
+  		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
 	  <dependency>
 	  	<groupId>io.vertigo</groupId>
 	  	<artifactId>vertigo-ui</artifactId>
+	  	<version>2.0.0-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+	  	<groupId>io.vertigo</groupId>
+	  	<artifactId>vertigo-studio</artifactId>
 	  	<version>2.0.0-SNAPSHOT</version>
 	  </dependency>
 	  <dependency>
@@ -96,6 +102,7 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 		</plugin>
   	</plugins>
   </build>
+  
 </project>
 ```
 
