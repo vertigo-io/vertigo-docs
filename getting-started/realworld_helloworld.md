@@ -58,26 +58,26 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 			<version>3.1.0</version>
 			<scope>provided</scope>
 		</dependency>
-	  <dependency>
-	  	<groupId>io.vertigo</groupId>
-	  	<artifactId>vertigo-ui</artifactId>
-	  	<version>2.0.0-SNAPSHOT</version>
-	  </dependency>
-	  <dependency>
-	  	<groupId>io.vertigo</groupId>
-	  	<artifactId>vertigo-studio</artifactId>
-	  	<version>2.0.0-SNAPSHOT</version>
-	  </dependency>
-	  <dependency>
-	  	<groupId>com.h2database</groupId>
-	  	<artifactId>h2</artifactId>
-	  	<version>1.4.199</version>
-	  </dependency>
-	  <dependency>
-	  	<groupId>com.mchange</groupId>
-	  	<artifactId>c3p0</artifactId>
-	  	<version>0.9.5.3</version>
-	  </dependency>
+		<dependency>
+			<groupId>io.vertigo</groupId>
+			<artifactId>vertigo-ui</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>io.vertigo</groupId>
+			<artifactId>vertigo-studio</artifactId>
+			<version>2.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.199</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mchange</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.5.3</version>
+		</dependency>
   </dependencies>
   
   
@@ -256,10 +256,11 @@ Pour ce faire :
 Configurer notre application va se faire en deux étapes :
 
 - Déclarer notre module métier en créant sa classe de manifeste
-- Créer le fichier de configuration de notre application qui utilisera des module de vertigo ainsi que notre module métier
+- Créer le fichier de configuration de notre application qui utilisera des modules de vertigo ainsi que notre module métier
 
-Pour déclarer notre module métier il suffit de créer la classe suivante à la racine du package de notre module métier : __your.group.id.gs.modulemetier1__
+Pour déclarer notre module métier, il suffit de créer la classe __ModuleMetier1Features__ avec le contenu suivant à la racine du package de notre module métier : __your.group.id.gs.modulemetier1__
 Pour simplifier la configuration nous allons utiliser la découverte automatique des composants à partir d'un package racine en utilisant la classe `ModuleDiscoveryFeatures`
+
 
 ```java
 package your.group.id.gs.modulemetier1;
@@ -341,14 +342,14 @@ modules:
 
 Dans cette section, nous allons créer les éléments (services utilisant les classes d'accès aux données) qui nous permettront ensuite de créer notre premier écran.
 
-Le but sera de fournir un écran proposant d'enregistrer un film avec son titre dans la base, puis un écran de visualisation de la liste des films présents dans la base de données.
+Le but sera de fournir un écran proposant d'enregistrer un film avec son titre dans la base de données, puis un écran de visualisation de la liste des films présents dans la base de données.
 
 ### 1. Création d'un service métier
 
 Le service métier fournit des fonctionnalités de haut niveau concernant un concept métier donné. Dans ce guide, il s'agit de simples fonctions d'enregistrement et de lecture des entités (ici un "film").
 
 Ce service comprendra les fonctions suivantes :
-* Récupération de la liste globale des films
+* Récupération de la liste de tous les films
 * Récupération d'un film
 * Enregistrement d'un film
 
@@ -753,13 +754,13 @@ Copier/Coller le contenu suivant :
 
 
 
-### 5. Lancement de l'application
+## Lancement de l'application
 
 Installer un serveur Tomcat (version 8.5+) dans Eclipse et y ajouter notre projet :
 
-Pour ce faire 
+Pour ce faire :
 
-- Télécharger l'archive sur serveur tomcat depuis le site officiel : http://apache.mediamirrors.org/tomcat/tomcat-8/v8.5.40/bin/apache-tomcat-8.5.40.zip
+- Télécharger l'archive du serveur tomcat depuis le site officiel : http://apache.mediamirrors.org/tomcat/tomcat-8/v8.5.40/bin/apache-tomcat-8.5.40.zip
 - Extraire l'archive à l'endroit de votre convenance. Par exemple __%userprofile%/tomcat__
 - Dans la vue __Servers__ d'Eclipse cliquer sur _No Servers are available. Click this link to create a new server..._
 - Sélectionner Apache->Tomcat v8.5 Server

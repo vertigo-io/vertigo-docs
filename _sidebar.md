@@ -1,4 +1,3 @@
-- [Accueil](/)
 - Overview
   - [Introduction](overview/introduction.md)
   - [Philosphie](overview/philosophie.md)
@@ -12,6 +11,7 @@
   - [Application minimale (comment démarrer le moteur...)](getting-started/helloworld.md)
   - [Application complète (Real world Hello World !)](getting-started/realworld_helloworld.md)  
 - Basique
+  - [Concepts](basic/concepts.md)
   - [Configuration](basic/configuration.md)
   - [Composants](basic/composants.md)
   - [MDA](basic/mda.md)
