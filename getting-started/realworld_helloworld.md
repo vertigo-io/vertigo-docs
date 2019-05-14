@@ -259,6 +259,7 @@ Configurer notre application va se faire en deux étapes :
 - Créer le fichier de configuration de notre application qui utilisera des module de vertigo ainsi que notre module métier
 
 Pour déclarer notre module métier il suffit de créer la classe suivante à la racine du package de notre module métier : __your.group.id.gs.modulemetier1__
+Pour simplifier la configuration nous allons utiliser la découverte automatique des composants à partir d'un package racine en utilisant la classe `ModuleDiscoveryFeatures`
 
 ```java
 package your.group.id.gs.modulemetier1;
@@ -267,10 +268,10 @@ import io.vertigo.app.config.DefinitionProviderConfig;
 import io.vertigo.app.config.discovery.ModuleDiscoveryFeatures;
 import io.vertigo.dynamo.plugins.environment.DynamoDefinitionProvider;
 
-public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1Features> {
+public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1Features> { // nous étendons ModuleDiscoveryFeatures pour activer la découverte automatique
 
 	public ModuleMetier1Features() {
-		super("ModuleMetier1");
+		super("ModuleMetier1"); // Nous donnons un nom signigiant à notre module métier
 	}
 
 	@Override
@@ -285,7 +286,7 @@ public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1
 
 	@Override
 	protected String getPackageRoot() {
-		return this.getClass().getPackage().getName();
+		return this.getClass().getPackage().getName(); // nous utilisons la localisation de la classe de manisfeste comme racine du module
 	}
 
 }
@@ -304,31 +305,31 @@ boot:
   plugins:
     - io.vertigo.core.plugins.resource.classpath.ClassPathResourceResolverPlugin: {}
 modules:
-  io.vertigo.commons.CommonsFeatures:
+  io.vertigo.commons.CommonsFeatures: // utilisation du module vertigo-commons
     features:
       - script:
       - cache:
     featuresConfig:
       - script.janino:
       - cache.memory:
-  io.vertigo.database.DatabaseFeatures:
+  io.vertigo.database.DatabaseFeatures: // utilisation du module vertigo-database pour pouvoir utiliser une base de données
     features:
-      - sql:
+      - sql: // nous activons le support des bases de données SQL
     featuresConfig:
-      - sql.c3p0:
+      - sql.c3p0: // nous utilisons ici le pool de connection C3P0 pour récuperer les connections à la base
           dataBaseClass: io.vertigo.database.impl.sql.vendor.h2.H2DataBase
           jdbcDriver: org.h2.Driver
           jdbcUrl: jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE
-  io.vertigo.dynamo.DynamoFeatures:
+  io.vertigo.dynamo.DynamoFeatures: // utilisation du module vertigo-dynamo
     features:
-      - store:
-      - kvStore:
+      - store: // activation du support du stockage des entités de notre modèle
+      - kvStore: // activation du support du stockage clé/valeur (utilisé pour la conservation des état de écrans)
     featuresConfig:
-      - store.data.sql:
-      - kvStore.berkeley:
+      - store.data.sql: // nous utilisons un store de type SQL (avec notre base H2)
+      - kvStore.berkeley:  // nous utilisons un stockage clé valeur avec la base de donnée BerkeleyDB
           collections: VViewContext;TTL=43200
           dbFilePath: ${java.io.tmpdir}/vertigo-ui/VViewContext
-  your.group.id.gs.modulemetier1.ModuleMetier1Features:
+  your.group.id.gs.modulemetier1.ModuleMetier1Features: // utilisation de notre module métier
 
 ```
 
@@ -469,6 +470,10 @@ La vue est constituée par un fichier HTML se référant aux éléments servis p
 
 Ajouter un fichier __movieDetail.html__ dans le dossier __src/main/webapp/WEB-INF/views/modulemetier1__
 
+> Afin de simplifier la vie du développeur nous préconisons un mapping 1 vue = 1 controller
+> Dans ce même esprit de simplification le lien qui existe entre une vue et un controller est fait par convention de nommage en suivant le partern CoC (Convention Over Configuration)
+> La stratégie de lien est la suivante : un controlleur `your.group.id.gs.modulemetier.controllers.NomController` sera lié à la vue `/modulemetier/nom.html` et un controller `your.group.id.gs.modulemetier.controllers.souspackage.NomController` à la vue `/modulemetier/souspackage/nom.html`
+
 Dans ce fichier, copier / coller le code suivant:
 
 ```html
@@ -535,7 +540,7 @@ import your.group.id.gs.modulemetier1.services.MovieServices;
 
 @Controller
 @RequestMapping("/movies")
-public class MovieDetailController extends AbstractVSpringMvcController {
+public class MovieListController extends AbstractVSpringMvcController {
 
 	private static final ViewContextKey<Movie> moviesKey = ViewContextKey.of("movies");
 
