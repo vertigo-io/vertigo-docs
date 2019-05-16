@@ -61,12 +61,12 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-ui</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-studio</artifactId>
-			<version>2.0.0-SNAPSHOT</version>
+			<version>2.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
