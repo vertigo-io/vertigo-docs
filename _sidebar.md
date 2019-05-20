@@ -1,15 +1,12 @@
 - Overview
   - [Introduction](overview/introduction.md)
   - [Philosphie](overview/philosophie.md)
-  - [Qu'est-ce qu'une app?](overview/app.md)
-  - [Architecture type](overview/archi_type.md)
-  - [Bénéfices](overview/benefices.md)
   - [Modules](overview/modules.md)
   - [Extensions](overview/extensions.md)
 - Getting-started
   - [Prérequis](getting-started/requirements.md)  
-  - [Application minimale (comment démarrer le moteur...)](getting-started/helloworld.md)
-  - [Application complète (Real world Hello World !)](getting-started/realworld_helloworld.md)  
+  - [Comment démarrer le moteur...](getting-started/helloworld.md)
+  - [Real world Hello World !](getting-started/realworld_helloworld.md)  
 - Basique
   - [Concepts](basic/concepts.md)
   - [Configuration](basic/configuration.md)
@@ -22,25 +19,8 @@
   - [UI](basic/ui.md)
   - [Analytics](basic/analytics.md)
 - Details des Modules
-  - [Core](advanced/core.md)
-  - [Commons](advanced/commons.md)
-  - [Database](advanced/database.md)
-  - [Dynamo](advanced/dynamo.md)
   - [Vega](advanced/vega.md)
   - [Account](advanced/account.md)
-  - [Studio](advanced/studio.md)
 - Extensions
   - [Orchestra](extensions/orchestra.md)
-  - [Social](extensions/social.md)
-  - [Audit](extensions/audit.md)
-  - [Struts2](extensions/struts2.md)
-- Ateliers
-  - [HelloWorld](workshops/samples_helloworld.md)
-  - [Composants](workshops/samples_components.md)
-  - [Aspects](workshops/samples_aop.md)
-  - [Stockage](workshops/samples_store.md)
-  - [Accès aux données](workshops/samples_dao.md)
-  - [WebServices](workshops/samples_vega.md)
-  - [Notifications](workshops/samples_notifications.md)
-  - [Bonnes pratiques](workshops/bonnes_pratiques.md)
 
