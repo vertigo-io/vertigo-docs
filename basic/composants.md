@@ -5,29 +5,29 @@ Ils doivent à minima implémenter l'interface `io.vertigo.core.component.Compon
 
 !> Les composants sont des singletons, ils doivent donc avoir un comportant **threadsafe**. Un moyen simple de s'en assurer est d'en faire des objets totalement **stateless**.
 
-Voici les principaux types de composants utilisés dans un projet Vertigo:
-- les **Manager** qui sont les composants internes de vertigo et qui offrent des fonctionnalités essentielles (ex: `StoreManager`,  `AuthorizationManager`, etc...) 
-- les **DAO** qui encapsule l'accès aux données. Ces composants sont en règle générale générés (voir MDA)
+Voici les principaux types de composants utilisés dans un projet Vertigo :
+- les **Manager** qui sont les composants internes de Vertigo et qui offrent des fonctionnalités essentielles (ex: `StoreManager`,  `AuthorizationManager`, etc...) 
+- les **DAO** qui encapsulent l'accès aux données. Ces composants sont en règle générale générés (voir MDA)
 - les **Services** qui comportent la logique métier du projet et offrent donc des services de haut niveau. Les extensions Vertigo proposent également des services de haut niveau.
-- les **WebServices** qui en règle générale consomment les services métiers et les exposent sous forme de webservices REST
+- les **WebServices** qui en règle générale consomment les services métier et les exposent sous forme de webservices REST
 
 
 ## Construction
 
 Les composants sont instantiés par le moteur d'injection et sont utilisables par les autres composants par ce même mécanisme d'injection de dépendances.
 
-Pour être créé un composant doit donc avoir au choix :
+Pour être créé, un composant doit donc avoir au choix :
 
 - aucun constructeur (c'est donc le constructeur par défaut qui sera utilisé)
-- un (et un seul) constructeur public déclaré. Lorqu'un constructeur est déclaré celui-ci doit porter l'annotation `@Inject`. 
+- un (et un seul) constructeur public déclaré. Lorqu'un constructeur est déclaré, celui-ci doit porter l'annotation `@Inject`. 
 
 
-Il est possible d'injecter dans un composant, soit sous la forme de variable d'instance, soit sous la forme de paramètre du constructeur, les éléments suivants :
+Il est possible d'injecter dans un composant, soit sous la forme de variables d'instance, soit sous la forme de paramètres du constructeur, les éléments suivants :
 
 - un paramètre de type primitif portant l'annotation `@Named` afin de spécifier son nom
 - un composant
 - un plugin
-- une liste de plugin du même type 
+- une liste de plugins du même type 
 
 
 ```java
@@ -63,9 +63,9 @@ private boolean log;
 
 ## Utilisation
 
-Pour être utilisé par un traitement un composant doit être récupéré dans l'objet nécessitant l'utilisation de ce composant. 
+Pour être utilisé par un traitement, un composant doit être récupéré dans l'objet nécessitant l'utilisation de ce composant. 
 
-Cet objet est souvent lui même un composant et dans ce cas l'injection de dépendances doit être utilisé pour récupérer l'instance et donc appeler les méthodes offertes par le composant.
+Cet objet est souvent lui-même un composant et dans ce cas l'injection de dépendances doit être utilisée pour récupérer l'instance et donc appeler les méthodes offertes par le composant.
 
 > La classe qui doit être utilisée lors de l'injection (Calculator1 dans l'exemple ci-dessous) est l'interface lorsque le composant implémente une interface ou sa classe d'implémentation dans le cas contraire.
 
@@ -74,11 +74,11 @@ Cet objet est souvent lui même un composant et dans ce cas l'injection de dépe
 private Calculator1 calculator1;
 ```
 
-?> Ce mécanisme est disponible dans la totalité de classes manipulées par le développeur. Il est donc à privilégier.
+?> Ce mécanisme est disponible dans la totalité des classes manipulées par le développeur. Il est donc à privilégier.
 
-> C'est le cas des DAO qui sont utilisés par les services métiers ou les services métiers eux-même utilisés par les webservices.
+> C'est le cas des DAO qui sont utilisés par les services métier ou les services métier eux-même utilisés par les webservices.
 
-Dans le cas où l'objet n'est pas lui même un composant et donc n'est pas créé par le moteur d'injection il est possible d'activer manuellement l'injection de dépedances :
+Dans le cas où l'objet n'est pas lui-même un composant et donc n'est pas créé par le moteur d'injection, il est possible d'activer manuellement l'injection de dépedances :
 - soit lors de la création de l'instance :
 ```java
 DIInjector.newInstance(Samples.class, Home.getApp().getComponentSpace())
@@ -91,12 +91,12 @@ DIInjector.injectMembers(sample, Home.getApp().getComponentSpace());
 
 ## Accès direct au registre de composants
 
-Il est également possible de récupérer le composant directement dans l'espace de composant.
+Il est également possible de récupérer le composant directement dans l'espace des composants.
 
 ```java
 final Calculator2 calculator2 = Home.getApp().getComponentSpace().resolve(Calculator2.class)
 ```
-!> Attention cette pratique n'est à utiliser que dans les cas très particuliers (et extrèmement rares) où l'injection n'est pas disponible.
+!> Attention : cette pratique n'est à utiliser que dans les cas très particuliers (et extrèmement rares) où l'injection n'est pas disponible.
 
 Il est ensuite possible d'utiliser les services offerts par ce composant
 
@@ -106,8 +106,8 @@ calculator1.sum(1, 2, 3, 4);
 
 ## Comportement
 
-Il est possible d'ajouter les comportement suivants aux composants :
-- `Activeable` : permet d'avoir des points d'appel aux démarrage et à l'arrêt du composant
+Il est possible d'ajouter les comportements suivants aux composants :
+- `Activeable` : permet d'avoir des points d'appel au démarrage et à l'arrêt du composant
 
 ```java
 @Override
