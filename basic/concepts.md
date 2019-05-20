@@ -42,13 +42,14 @@ Les `Definitions` servent **à modéliser** le métier. Elles sont uniques, char
 
 ### VUserException, VSystemException, WrappedException *(class)*
 
-Dans son approche *Opinionated Architecture*, **Vertigo** propose une gestion des exceptions dans les applications basée sur des exceptions `Un-checked` (faiblement typées). 
-Globalement, dans une application, les `Exceptions` n'ont jamais à être interceptées par le développeur, le socle s'occupe de tout.
+Dans son approche *Opinionated Architecture*, **Vertigo** propose une gestion des exceptions dans les applications basée sur des exceptions `Un-checked` (Runtime et faiblement typées). 
+Globalement, dans une application, les `Exceptions` n'ont jamais à être interceptées par le développeur, le socle s'occupe de tout, il inclus déjà les interceptions nécessaires aux endroits clés.
 
 Trois types sont utilisés : 
 
 - `VUserException` : Pour les exceptions correspondant à une règle métier (contrôle de surface, validation ou règle de gestion). L'exception est associée à un message et éventuellement un champ de l'écran et sera présentée à l'utilisateur en lui indiquant ce qui s'est passé.
-
+- `VSystemException` : Pour les exceptions correspondant à une erreur système (Assertions, erreurs I/O, etc...) 
+- `WrappedException` : Pour l'encapsulation d'exception technique, permet d'encapsuler une erreur technique tierce afin de la laisser remontée jusqu'à l'interception Vertigo.  
 
 ## Dynamo
 
