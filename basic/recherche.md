@@ -1,28 +1,28 @@
 # Recherche
 
-Dans les projets Vertigo, l'intégration d'un moteur de recherche puissant est simplifiée et pérennisée par l'utilisation du module **Dynamo-search**.
+Dans les projets Vertigo, l'intégration d'un moteur de recherche puissant est simplifiée et pérennisée par l'utilisation du module **dynamo-search**.
 
 ## Principe général
 
-L'intégration d'un moteur de recherche est devenu un standard dans les projets car son apport de valeur est indéniable.
+L'intégration d'un moteur de recherche est devenue un standard dans les projets car son apport de valeur est indéniable.
 
-Le module de recherche Vertigo permet : 
+Le module de recherche Vertigo permet :
 
-- d'apporter une fonctionnalité de recherche **riche et performante** (facettes, recherche plein texte, phonétique, compteurs de résultats, tri par pertinence, etc..., tout ça avec des performances de qques millisecondes : incomparables avec des requêtes SQL)
+- d'apporter une fonctionnalité de recherche **riche et performante** (facettes, recherche plein texte, phonétique, compteurs de résultats, tri par pertinence, etc..., tout cela avec des temps de réponse de quelques millisecondes : incomparables avec des requêtes SQL)
 - de placer la **recherche au centre** : toutes les entités clés peuvent être indexées et recherchées par les utilisateurs. C'est un point d'accès privilégié : on entre par la recherche, on navigue par la recherche. Les critères restent simples et l'on affine par les facettes.
-- de rendre **accessible** l'accès à l'information, l'utilisateur est soit un néophyte soit auto-formé. La recherche proposée reprend les standards actuels du net, et permet une prise en main rapide. 
+- de rendre **accessible** l'information : l'utilisateur est soit un néophyte soit auto-formé. La recherche proposée reprend les standards actuels du net et permet une prise en main rapide. 
 - au **développeur de paramétrer le mécanisme** de recherche. Le paramétrage ouvre les possibilités, tout en outillant et stabilisant les composants techniques sous-jacents.
-- de **générer les façades d'appels aux recherches** paramétrées lors du MDA, l'usage du moteur de recherche est donc décoléré du paramétrage des recherches mis à disposition.
+- de **générer les façades d'appel aux recherches** paramétrées lors du MDA. L'usage du moteur de recherche est donc décorélé du paramétrage des recherches mis à disposition.
 
 Le module de recherche Vertigo supporte les trois cas d'usage principaux :
 
 - recherche d'**un élément** à partir d'**informations connues**
-- recherche d'**un élément** **sans information** connu précisément
-- constitution d'**un ensemble** d'élément pour une action globale **par étapes** successives
+- recherche d'**un élément** **sans information** connue précisément
+- constitution d'**un ensemble** d'éléments pour une action globale **par étapes** successives
 
-!> La recherche est un filtre : plus l'utilisateur donne d'informations plus on réduit le champ des résultats.
+!> La recherche est un filtre : plus l'utilisateur donne d'informations, plus on réduit le champ des résultats.
 
-!> La recherche la plus courante est dite plain-text, ce qui signifie : "cherche un document qui contient un mot qui commence par", *ca ne signifie par "contient"*. <br/>
+!> La recherche la plus courante est dite *plain text*, ce qui signifie : "cherche un document qui contient un mot qui commence par", *ca ne signifie pas "contient"*. <br/>
 Les performances du moteur sont assurées par un index des mots des documents (comme dans un livre), il faut donc toujours le début du mot pour s'y retrouver dans l'index : pas de recherche `*oitur*`  
 
 **Moteur utilisé**
@@ -30,8 +30,8 @@ Les performances du moteur sont assurées par un index des mots des documents (c
 [ElasticSearch](https://www.elastic.co/products/elasticsearch) & [Lucene](https://lucene.apache.org/).<br/> 
 Le mécanisme de recherche est le [QueryStringQuery](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html)<br/>
 
-ElasticSearch est un moteur de recherche basé sur la librairie Java Lucene.<br/>
-Ce moteur est supporté par la société Elastic et est activement et régulièrement mis à jour, la conséquence principale de cette activité est une certaine volatilité de l'API (il y a régulièrement des breaking-changes).<br/> 
+ElasticSearch est un moteur de recherche basé sur la bibliothèque Java Lucene.<br/>
+Ce moteur est supporté par la société Elastic et est activement et régulièrement mis à jour. La conséquence principale de cette activité est une certaine volatilité de l'API (il y a régulièrement des breaking-changes).<br/> 
 C'est l'un des intérêts du module Vertigo : une bonne partie des modifications peuvent être absorbées par le module, ce qui simplifie la montée de version pour les projets.<br/>
 Vertigo maintient deux versions du plugin ElasticSearch : la version courante et la version précédente. 
 
@@ -40,14 +40,14 @@ Vertigo maintient deux versions du plugin ElasticSearch : la version courante et
 
 ### Activer le module
 
-Pour commencer il faut activer le module **Dynamo-Search** <br/>
+Pour commencer, il faut activer le module **dynamo-search** <br/>
 Le module propose deux modes de fonctionnement : 
-- le mode standard utilisant un serveur ElasticSearch distant
-- le mode embedded utilisant un serveur ElasticSearch local démarré en même temps de l'application (utile pour les tests) 
+- le mode *standard* utilisant un serveur ElasticSearch distant
+- le mode *embedded* utilisant un serveur ElasticSearch local, démarré en même temps que l'application (utile pour les tests) 
 
 !> Le mode embedded est déprécié par ElasticSearch depuis la version 5.
 
-Exemple pour le mode Standard :
+Exemple de configuration pour le mode Standard :
 ```yaml
 modules
   io.vertigo.commons.CommonsFeatures:
@@ -63,7 +63,7 @@ modules
           config.file: search/elasticsearch.yml
 ```
 
-Exemple pour le mode Embedded :
+Exemple de configuration pour le mode Embedded :
 ```yaml
 modules
   io.vertigo.commons.CommonsFeatures:
@@ -78,15 +78,15 @@ modules
           config.file: search/elasticsearch.yml
 ```
 
-> Notez que le paramètre `envIndex` permet d'indiquer un préfix des index pour un environnement applicatif, ainsi un même serveur ElasticSearch peut être utilisé pour différents environnements.
-> Les nouvelles versions d'ElasticSearch impose un seul type de document par index.
+> Notez que le paramètre `envIndex` permet d'indiquer un préfixe des index pour un environnement applicatif, ainsi un même serveur ElasticSearch peut être utilisé pour différents environnements.
+> Les nouvelles versions d'ElasticSearch imposent un seul type de documents par index.
 
 ### Configuration ElasticSearch
 
-Le fichier elasticsearch.yml donne la configuration de l'index ElasticSearch, il permet de configurer les types d'analyzers utilisés par l'application et rattachés aux Domaines du modèle.
+Le fichier elasticsearch.yml donne la configuration de l'index ElasticSearch. Il permet de configurer les types d'analyzers utilisés par l'application et rattachés aux Domaines du modèle.
 Cette configuration est envoyée par l'application au serveur ElasticSearch au démarrage.
 
-Exemple de configuration d'analyser, cette configuration conviendra à la plupart des projets :
+Exemple de configuration d'analyser (cette configuration conviendra à la plupart des projets) :
 ```yaml
 index :
     analysis :
@@ -126,11 +126,11 @@ alter DtDefinition DtEquipment {
 ```
 
 Soit dans votre fichier **OOM** : <br/>
-Sur vos classes indiquer le **Stereotype**: `KeyConcept`
+Sur vos classes, indiquer le **Stereotype**: `KeyConcept`
 
 ### Ajout un DtObject représentant vos données d'index
 
-Les indexes sont très puissants et gère des données **documentaire**. Il n'y pas de relationnel, il faut donc convertir votre grappe d'objet partant de votre **KeyConcept** en **Document**.<br/>
+Les index sont très puissants et gèrent des données **documentaires**. Il n'y pas de relationnel, il faut donc convertir votre grappe d'objets partant de votre **KeyConcept** en **Document**.<br/>
 Très simplement, il s'agit de créer un DtObject mettant les données à plat.
 ```javascript
 create DtDefinition DtEquipmentIndex {
@@ -145,7 +145,7 @@ create DtDefinition DtEquipmentIndex {
 }
 ```
 
-Il est possible de préciser comment la donnée est indexée par la propriété **indexType** du domaine. <br/>
+Il est possible de préciser comment la donnée est indexée par la propriété **indexType** du domaine.<br/>
 Cette propriété permet la conversion du simple **Domain Vertigo**, vers le type ElasticSearch plus complexe.<br/>
 Sa syntaxe est la suivante :<br/>
 ``indexType : "myAnalyzer{:myDataType}{:stored|notStored}{:sortable|notSortable}{:facetable|notFacetable}"``
@@ -186,15 +186,15 @@ create Domain DoTags {
 ```
 
 
-### Définition des indexes
+### Définition des index
 
-Les indexes sont déclarés comme des **Definitions** Vertigo. Il est possible de le faire en Java ou en DSL.<br/>
+Les index sont déclarés comme des **Definitions** Vertigo. Il est possible de le faire en Java ou en DSL.<br/>
 Le plus simple est via le DSL, c'est cette méthode qui est décrite ici.
 
 #### **IndexDefinition**
 
-L'**IndexDefinition** représente un Index. Il n'en faut qu'un seul par KeyConcept. <br/>
-*Il est donc parfois nécessaire de créer des KeyConcept agrégeant d'autres KeyConcept.*
+L'**IndexDefinition** représente un Index. Il n'en faut qu'une seule par KeyConcept. <br/>
+*Il est donc parfois nécessaire de créer des KeyConcept agrégeant d'autres KeyConcepts.*
 
 **Propriétés**
 - `keyConcept`* : Nom du Dt KeyConcept, utilisé pour suivre les modifications et déclencher les réindexations
