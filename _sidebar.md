@@ -1,8 +1,10 @@
+<hr/>
 <details>
-<summary>Version 2.0.0</summary>
-	[current](/vertigo-docs/#/overview/introduction.md)
-	[2.0.0](/vertigo-docs/#/v2.0.0/overview/introduction.md)
+	<summary>Version 2.0.0</summary>
+	[current](https://vertigo-io.github.io/vertigo-docs/#/overview/introduction.md)
+	[2.0.0](https://vertigo-io.github.io/vertigo-docs/#/v2.0.0/overview/introduction.md)
 </details>
+<hr/>
 
 - Overview
   - [Introduction](overview/introduction.md)
