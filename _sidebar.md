@@ -32,4 +32,4 @@
   - [Account](advanced/account.md)
 - Extensions
   - [Orchestra](extensions/orchestra.md)
-- [Changelog](_CHANGES.md)
+- [Changelog](_changes.md)
