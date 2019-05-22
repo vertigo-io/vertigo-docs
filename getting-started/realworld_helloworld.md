@@ -245,7 +245,7 @@ Pour ce faire :
 * Télécharger l'exécutable H2 : [ici](http://central.maven.org/maven2/com/h2database/h2/1.4.199/h2-1.4.199.jar)
 * Double-cliquer sur le jar téléchargé
 * Renseigner "URL JDBC", ici : 
-  * jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE
+  * `jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE`
 * Cliquer sur __Connecter__
 * Copier / Coller le script SQL de création de la base de données (_src/main/javagen/sqlgen/crebas.sql_) dans la fenêtre de requête
 * Cliquer sur __Exécuter__, la structure de la base est maintenant créée
