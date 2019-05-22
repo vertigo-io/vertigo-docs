@@ -1,7 +1,7 @@
 <hr/>
 	<h3 class="q-version-select">
 	Vertigo  
-	<select onchange="javascript:location.href=this.value">
+	<select onchange="javascript:location.href=this.value+location.hash">
     <option value="/vertigo-docs/">v2.0.0 (current)</option>
     <option selected value="/vertigo-docs/v2.0.0/">v2.0.0</option>
     </select>
