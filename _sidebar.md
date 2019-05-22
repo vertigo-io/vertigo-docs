@@ -1,9 +1,11 @@
 <hr/>
-<details>
-	<summary>Version 2.0.0</summary>
-	[current](https://vertigo-io.github.io/vertigo-docs/#/overview/introduction.md)
-	[2.0.0](https://vertigo-io.github.io/vertigo-docs/#/v2.0.0/overview/introduction.md)
-</details>
+	<h3 class="q-version-select">
+	Vertigo  
+	<select>
+	<option onclick="javascript:location.href='#/overview/introduction.md'">v2.0.1 (current)</option>
+	<option onclick="javascript:location.href='#/v2.0.0/overview/introduction.md'">v2.0.0</option>
+	</select>
+	</h3>
 <hr/>
 
 - Overview
