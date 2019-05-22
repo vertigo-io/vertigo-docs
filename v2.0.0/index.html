@@ -8,7 +8,7 @@
   <meta name="description" content="Vertigo documentation">
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/docsify/lib/themes/vue.css" title="vue">
-  <link rel="stylesheet" href="/vertigo-docs/docs.css" title="vue">
+  <link rel="stylesheet" href="../vertigo-docs/docs.css" title="vue">
 	
 </head>
 <body>
@@ -19,7 +19,8 @@
       homepage: '/overview/introduction.md',
       name: 'vertigo',
 	  alias: {
-		'/.*/_sidebar.md': '/_sidebar.md',
+		'/.*/_sidebar.md': 'https://raw.githubusercontent.com/vertigo-io/vertigo-docs/v2.0.0/_sidebar.md',
+        '/(.*)': 'https://raw.githubusercontent.com/vertigo-io/vertigo-docs/v2.0.0/$1',
       },
 	  loadSidebar: true,
 	  subMaxLevel: 2,

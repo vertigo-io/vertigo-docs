@@ -1,35 +1,36 @@
 <hr/>
+<!-- next step : use include to gets all versions -->
 	<h3 class="q-version-select">
 	Vertigo  
 	<select onchange="javascript:location.href=this.value">
     <option value="#/overview/introduction.md">v2.0.0 (current)</option>
-    <option selected value="#/v2.0.0/overview/introduction.md">v2.0.0</option>
+    <option value="#/v2.0.0/overview/introduction.md">v2.0.0</option>
     </select>
 	</h3>
 <hr/>
 
 - Overview
-  - [Introduction](v2.0.0/overview/introduction.md)
-  - [Philosphie](v2.0.0/overview/philosophie.md)
-  - [Modules](v2.0.0/overview/modules.md)
+  - [Introduction](overview/introduction.md)
+  - [Philosphie](overview/philosophie.md)
+  - [Modules](overview/modules.md)
 - Getting-started
-  - [Prérequis](v2.0.0/getting-started/requirements.md)  
-  - [Comment démarrer le moteur...](v2.0.0/getting-started/helloworld.md)
-  - [Real world Hello World !](v2.0.0/getting-started/realworld_helloworld.md)  
+  - [Prérequis](getting-started/requirements.md)  
+  - [Comment démarrer le moteur...](getting-started/helloworld.md)
+  - [Real world Hello World !](getting-started/realworld_helloworld.md)  
 - Basique
-  - [Concepts](v2.0.0/basic/concepts.md)
-  - [Configuration](v2.0.0/basic/configuration.md)
-  - [Composants](v2.0.0/basic/composants.md)
-  - [MDA](v2.0.0/basic/mda.md)
-  - [Accès aux données](v2.0.0/basic/dao.md)
-  - [Recherche](v2.0.0/basic/recherche.md)
-  - [Sécurité](v2.0.0/basic/securite.md)
-  - [WebServices](v2.0.0/basic/webservices.md)
-  - [UI](v2.0.0/basic/ui.md)
-  - [Analytics](v2.0.0/basic/analytics.md)
+  - [Concepts](basic/concepts.md)
+  - [Configuration](basic/configuration.md)
+  - [Composants](basic/composants.md)
+  - [MDA](basic/mda.md)
+  - [Accès aux données](basic/dao.md)
+  - [Recherche](basic/recherche.md)
+  - [Sécurité](basic/securite.md)
+  - [WebServices](basic/webservices.md)
+  - [UI](basic/ui.md)
+  - [Analytics](basic/analytics.md)
 - Details des Modules
-  - [Vega](v2.0.0/advanced/vega.md)
-  - [Account](v2.0.0/advanced/account.md)
+  - [Vega](advanced/vega.md)
+  - [Account](advanced/account.md)
 - Extensions
-  - [Orchestra](v2.0.0/extensions/orchestra.md)
+  - [Orchestra](extensions/orchestra.md)
 
