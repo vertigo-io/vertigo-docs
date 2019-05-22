@@ -3,7 +3,7 @@
 	Vertigo  
 	<select onchange="javascript:location.href=this.value">
     <option value="/vertigo-docs/">v2.0.0 (current)</option>
-    <option value="/vertigo-docs/v2.0.0/">v2.0.0</option>
+    <option selected value="/vertigo-docs/v2.0.0/">v2.0.0</option>
     </select>
 	</h3>
 <hr/>
