@@ -32,5 +32,4 @@
   - [Account](advanced/account.md)
 - Extensions
   - [Orchestra](extensions/orchestra.md)
-- [Changelog](https://raw.githubusercontent.com/vertigo-io/vertigo/master/CHANGES.md)
-
+- [Changelog](_CHANGES.md)
