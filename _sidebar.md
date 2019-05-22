@@ -2,7 +2,7 @@
 	<h3 class="q-version-select">
 	Vertigo  
 	<select onchange="javascript:location.href=this.value">
-    <option value="#/overview/introduction.md">v2.0.1 (current)</option>
+    <option value="#/overview/introduction.md">v2.0.0 (current)</option>
     <option value="#/v2.0.0/overview/introduction.md">v2.0.0</option>
     </select>
 	</h3>

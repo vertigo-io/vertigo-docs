@@ -1,4 +1,14 @@
 /****** Sidebar Toggle ******/
+
+nav.app-nav li ul {
+    min-width: 100px;
+}
+	
+.q-version-select {
+    margin: 0 0 0 15px;
+    padding: 0;
+}
+	
 .sidebar-toggle {
   cursor: pointer;
 }
