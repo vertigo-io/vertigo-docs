@@ -1,3 +1,9 @@
+<details>
+<summary>Version 2.0.0</summary>
+	[current](/vertigo-docs/#/overview/introduction.md)
+	[2.0.0](/vertigo-docs/#/v2.0.0/overview/introduction.md)
+</details>
+
 - Overview
   - [Introduction](overview/introduction.md)
   - [Philosphie](overview/philosophie.md)
