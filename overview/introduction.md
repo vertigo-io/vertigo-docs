@@ -2,6 +2,8 @@
 
 ?> Boost your apps, ou comment créer de la valeur dans vos projet, mieux et plus vite
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+
 **Vertigo** est une plateforme Java pour construire des applications ou SI métier modernes, complets, maintenables et évolutifs.
 
 Elle est conçue pour maximiser l'ajout de valeur : 
