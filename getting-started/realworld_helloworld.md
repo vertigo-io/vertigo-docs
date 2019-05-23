@@ -10,7 +10,11 @@ Nous utiliserons ici Eclipse. A l'heure de la rédaction de ce guide, la version
 
 Cliquer sur __File > New > Project__. Dans la boîte de dialogue, choisir __Maven > Maven Project__ et cliquer sur __Next__.
 
+![](./images/getting-started-1.png)
+
 Dans l'écran "Select project name and location", cocher l'option _Create a simple project (skip archetype selection)_ et cliquer sur __Next__.
+
+![](./images/getting-started-3.png)
 
 Dans "Configure project", renseigner les champs suivants :
 * Group ID : your.group.id (ou autre chose de plus signifiant pour vous !)
@@ -18,6 +22,8 @@ Dans "Configure project", renseigner les champs suivants :
 * Packaging : War
 
 Cliquer sur __Finish__.
+
+![](./images/getting-started-2.png)
 
 ### 2. Configuration du fichier pom du projet
 
@@ -114,12 +120,13 @@ Dans la boîte de dialogue, vérifier que les éléments suivants sont cochés :
 
 Cliquer sur __OK__.
 
+![](./images/getting-started-5.png)
 
 ### 3. Création de la structure du projet
 
 Créer l'arborescence de packages et de répertoires suivante :
 
-XXXXXX SCREENSHOT XXXXXXXX
+![](./images/getting-started-4.png)
 
 ## Phase de modélisation
 
@@ -237,6 +244,8 @@ Sauvegarder, cliquer avec le bouton de droite sur le fichier __Studio.java__ pui
 La génération des fichiers est lancée et les entités générées apparaissent dans le répertoire __src/main/javagen/your/group/id__.
 Ces éléments sont maintenant utilisables pour créer des services puis des écrans.
 
+![](./images/getting-started-6.png)
+
 ### 4. Créer la base de données exemple
 
 Nous allons ici créer la structure de la base de données correspondant au modèle créé précédemment.
@@ -247,9 +256,16 @@ Pour ce faire :
 * Renseigner "URL JDBC", ici : 
   * `jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE`
 * Cliquer sur __Connecter__
+
+![](./images/getting-started-7.png)
+
 * Copier / Coller le script SQL de création de la base de données (_src/main/javagen/sqlgen/crebas.sql_) dans la fenêtre de requête
 * Cliquer sur __Exécuter__, la structure de la base est maintenant créée
+
+![](./images/getting-started-8.png)
+
 * Cliquer sur le bouton __Déconnecter__
+
 
 ### 5. Configuration de l'application
 
