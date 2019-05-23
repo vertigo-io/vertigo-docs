@@ -36,7 +36,7 @@ C'est l'un des intérêts du module Vertigo : une bonne partie des modifications
 Vertigo maintient deux versions du plugin ElasticSearch : la version courante et la version précédente. 
 
 *Ecran de recherche d'équipement dans l'application démo [Mars](https://github.com/vertigo-io/vertigo-university/tree/master/mars)*
-![](./images/search - mars.png)
+![](./images/search-mars.png)
 
 ## Configuration
 
