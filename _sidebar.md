@@ -10,7 +10,7 @@
 
 - Overview
   - [Introduction](overview/introduction.md)
-  - [Philosphie](overview/philosophie.md)
+  - [Philosophie](overview/philosophie.md)
   - [Modules](overview/modules.md)
 - Getting-started
   - [Prérequis](getting-started/requirements.md)  
