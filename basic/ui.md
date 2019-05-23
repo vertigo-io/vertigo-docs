@@ -4,6 +4,9 @@ L'extension Vertigo-ui permet la création d'écrans riches, de manière simple 
 
 Pour ce faire elle s'appuie sur deux frameworks du marché (SpingMVC et VueJS) auxquels elle adjoint la philosophie de Vertigo : simplicité et robustesse.
 
+*Ecran de détail d'une base dans l'application démo [Mars](https://github.com/vertigo-io/vertigo-university/tree/master/mars)*
+![](./images/ui - mars.png)
+
 ## Principe général
 
 Vertigo propose des écrans et interfaces utilisateurs en utilisant le paradigme MPA ou Multiple Page Application et en suivant le pattern MVC.
@@ -54,7 +57,6 @@ public class MarsVSpringWebConfig extends VSpringWebConfig {
 	
 }
 ```
-
 
 
 **MyProjectVSpringWebApplicationInitializer**
