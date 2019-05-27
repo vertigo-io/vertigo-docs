@@ -9,13 +9,11 @@ La configuration d'une application permet de définir l'ensemble de ses élémen
 La configuration de l'application peut s'effectuer selon deux modalités : sous forme de fichiers YAML ou via une API Java
 Ces deux modalités ont pour but de construire un objet Java `NodeConfig` qui est utilisé afin de démarrer l'application.
 
-Une application, consomme et fournit des ser
-
 ## Configuration par features (API Java)
 
 > La configuration par features via l'API Java est privilégiée pour les tests unitaires ou les applications Java en général.
 
-Afin de créer une application Vertigo il est nécessaire de créer un objet `NodeConfig`. Pour y parvenir l'utilisation de la classe `NodeConfigBuilder` est nécessaire.
+Afin de créer une application Vertigo, il est nécessaire de créer un objet `NodeConfig`. Pour y parvenir, l'utilisation de la classe `NodeConfigBuilder` est nécessaire.
 
 ```java
 final NodeConfig nodeConfig = NodeConfig.builder()
@@ -28,11 +26,11 @@ final NodeConfig nodeConfig = NodeConfig.builder()
 	.build();
 ```
 
-?> L'exemple de configuration ci-dessous permet la création d'une application fournissant un WebServices   REST 'HelloWorld' sur le port 8080.
+?> L'exemple de configuration ci-dessus permet la création d'une application fournissant un WebService REST 'HelloWorld' sur le port 8080.
 
 
 
-L'API fluent de création de la configuration permet d'être guidé dans sa création. Par ce biais il est possible de configurer les éléments suivants :
+L'API fluent de création de la configuration permet d'être guidé dans sa création. Par ce biais, il est possible de configurer les éléments suivants :
 
 - **boot** : méthode `beginBoot` , `endBoot`
 
@@ -56,14 +54,14 @@ L'API fluent de création de la configuration permet d'être guidé dans sa cré
 
 > Lorsque des objets intermédiaires sont requis (par exemple `DefinitionProviderConfig`) il existe toujours un builder associé (`DefinitionProviderConfig.builder()`)
 
-Afin d'aider à la construction des modules, chaque module ou extension de Vertigo contient une classe Java nommée *NomDuModule*__Features__ située à la racine du package du dit module.
-Cette classe permet une configuration plus aisée d'un module en abstrayant le choix des composants et des plugins par une activation/desactivation de fonctionalités.
+Afin d'aider à la construction des modules, chaque module ou extension de Vertigo contient une classe Java nommée *NomDuModule*__Features__ située à la racine du package dudit module.
+Cette classe permet une configuration plus aisée d'un module en abstrayant le choix des composants et des plugins par une activation / desactivation de fonctionalités.
 
-Dans l'exemple il est possible d'activer la fonctionalité **EmbeddedServer** donc un serveur web embarqué uniquement en appelant une méthode et en fournissant le port.
+Dans l'exemple, il est possible d'activer la fonctionalité **EmbeddedServer** (donc un serveur web embarqué) uniquement en appelant une méthode et en fournissant le port.
 
-> Il est possible de créer autant de classe de Features que souhaité. La configuration des modules métiers des applications peut-être réalisée selon la même procédure.
+> Il est possible de créer autant de classes de Features que souhaité. La configuration des modules métier des applications peut être réalisée selon la même procédure.
 
-Une fois cet objet AppConfig créé il est possible de démarrer l'application : 
+Une fois cet objet AppConfig créé, il est possible de démarrer l'application : 
 
 ```java
 try (AutoCloseableApp app = new AutoCloseableApp(nodeConfig)) {
@@ -75,18 +73,18 @@ try (AutoCloseableApp app = new AutoCloseableApp(nodeConfig)) {
 
 ## Configuration YAML
 
-> La configuration sous forme de fichiers YAML est privilégiée pour la configuration d'applications webs.
+> La configuration sous forme de fichiers YAML est privilégiée pour la configuration d'applications web.
 
-La configuration par fichier YAML s'appuie in fine sur la configuration Java présentée ci-dessus. Elle permet via un fichier texte de configurer les différents modules de l'application en activant les fonctionnalités souhaitées et en les paramétrant selon les besoins de chaque projet.
+La configuration par fichier YAML s'appuie *in fine* sur la configuration Java présentée ci-dessus. Elle permet via un fichier texte de configurer les différents modules de l'application en activant les fonctionnalités souhaitées et en les paramétrant selon les besoins de chaque projet.
 
 La structure des fichiers YAML de configuration est la suivante : 
 
 ```yaml
 ---
 node: // optionel : uniquement requis dans un système consitué de plusieurs noeuds
-	appName : // le nom de l'application dont fait parti le noeud
-	nodeId : // optionnel : l'id du noeud courant. En général il s'agit d'un paramètre évalué de type ${nomDuParamètre}. Par défaut un UUID est généré. L'id doit être unique au sein du cluster
-	endPoint : // optionnel : permet de spécifier l'url racine permettant d'interroger le noeud sur ses capacités et sa configuration
+	appName : // le nom de l'application dont fait partie le noeud
+	nodeId : // optionnel : l'id du noeud courant. En général, il s'agit d'un paramètre évalué de type ${nomDuParamètre}. Par défaut, un UUID est généré. L'id doit être unique au sein du cluster
+	endPoint : // optionnel : spécifie l'url racine permettant d'interroger le noeud sur ses capacités et sa configuration
 boot:
   params:
  	// paramètres du boot
@@ -96,7 +94,7 @@ boot:
     	// paramètres d'un plugin
     	paramName : paramValue
 modules:
-  // map des modules identifié par leurs classes de manifest
+  // map des modules identifiés par leurs classes de manifest
   my.module.MyModuleFeatures:
     features:
       // liste des fonctionalités activées. Une fonctionnalité est identifiée par son nom
@@ -112,7 +110,7 @@ modules:
         // paramètres d'un plugin
         paramName : paramValue
 initializers:
-  // liste d'initializer identifiés par leur nom complet de classe 
+  // liste d'initializers identifiés par leur nom complet de classe 
   - my.module.Initializer:
 
 ```
@@ -122,34 +120,34 @@ initializers:
 Un fichier de configuration est donc constitué des sections suivantes :
 
 - **node** : permet de spécifier la configuration d'un nœud en cas d'application multi-nœuds
-- **boot** : permet de lister l'ensemble des plugins utilisables par les composants du noyaux (LocaleManager, ResourceManager)
+- **boot** : permet de lister l'ensemble des plugins utilisables par les composants du noyau (LocaleManager, ResourceManager)
 - **modules** listant les différents modules présents dans l'application. Ces modules offrent des fonctionnalités (Managers) et différentes manières de les mettre en œuvre (Plugin).
   Il faut ainsi définir pour chaque module :
   - **features** : indiquant la liste des fonctionnalités activées
   - **featuresConfig** : indiquant les choix de mise en œuvre
 - **initializers** : listant des composants ephémères d'initialisation
 
-!> L'ordre de déclaration des modules est important car les composants sont resolus dynamiquement au cours du démarrage de l'application. L'ordre de déclaration dans un module n'a en revanche pas d'importance.
+!> L'ordre de déclaration des modules est important car les composants sont résolus dynamiquement au cours du démarrage de l'application. L'ordre de déclaration dans un module n'a en revanche pas d'importance.
 
 
 
 ### Flags
 
-Avec la configuration YAML il est possible de positionner des *flags* sur les différents éléments de la configuration. Ces *flags* permettent de spécifier les conditions à remplir pour qu'un élément de configuration soit pris en compte.
+Avec la configuration YAML, il est possible de positionner des *flags* sur les différents éléments de la configuration. Ces *flags* permettent de spécifier les conditions à remplir pour qu'un élément de configuration soit pris en compte.
 
 A l'aide d'un flag il est possible d'activer ou de désactiver :  
 
 - Un module complet 
-- Une fonctionnalité (plus risqué car il faut dans ce cas s'assurer de la cohérence des pré-requis  entre fonctionnalités)
+- Une fonctionnalité (**attention** : il faut dans ce cas s'assurer de la cohérence des pré-requis entre fonctionnalités)
 - Un paramétrage de fonctionnalité
 - Un plugin additionnel
 - Un initializer
 
-Au démarrage de l'application la liste des flags actifs doit être fournie via l'intermédiaire du paramètre *boot.activeFlags* qui est une liste de chaines de caractères séparée par des `;`
+Au démarrage de l'application, la liste des flags actifs doit être fournie via l'intermédiaire du paramètre *boot.activeFlags*, qui est une liste de chaînes de caractères séparées par des `;`
 
-Au sein de la configuration YAML les flags sont associés au éléments de configuration via intermédiaire d'un paramètre spécial *\_\_flags\_\_* qui est un tableau de chaines de caractères. L'opérateur **ou** s'applique entre les différents éléments de la liste des flags. Si le paramètre spécial *\_\_flags\_\_* n'est pas positionné l'élément de configuration sera toujours activé. 
+Au sein de la configuration YAML, les flags sont associés aux éléments de configuration via intermédiaire d'un paramètre spécial *\_\_flags\_\_* qui est un tableau de chaines de caractères. L'opérateur **ou** s'applique entre les différents éléments de la liste des flags. Si le paramètre spécial *\_\_flags\_\_* n'est pas positionné, l'élément de configuration sera toujours activé. 
 
-Les flags s'intègrent comme suit dans la configuration et permettent par exemple 
+Les flags s'intègrent comme suit dans la configuration et permettent par exemple
 
 ```yaml
 ---
@@ -180,7 +178,7 @@ initializers:
 
 ```
 
-Dans l'exemple ci-dessous :
+Dans l'exemple ci-dessus :
 
 - Le plugin *my.boot.Plugin* est activé lorsque le *flag1* **ou** le *flag2* est positionné
 - Le module MyModule dont la classe de Manifest est *my.module.MyModuleFeatures* est activé lorsque le *flag3* est positionné
@@ -197,14 +195,14 @@ Il est alors possible de changer la configuration par l'intermédiaire d'un fich
 
 ### Utilisation
 
-Dans le cadre des applications Web, un listener doit être paramétré sur la servlet.
+Dans le cadre des applications Web, un *listener* doit être paramétré sur la servlet.
 
 ```xml
 <listener>
 	<listener-class>io.vertigo.vega.impl.webservice.servlet.AppServletContextListener</listener-class>
 </listener>
 ```
-Ce listener permet la création de l'application Vertigo. Ce dernier lit la configuration de l'application par l'intermédiaires des fichiers de configurations spécifiés à l'aide du paramètre *boot.applicationConfiguration*  de la servlet.
+Ce listener permet la création de l'application Vertigo. Ce dernier lit la configuration de l'application par l'intermédiaire des fichiers de configuration spécifiés à l'aide du paramètre *boot.applicationConfiguration*  de la servlet.
 
 ```xml
 <context-param>
@@ -214,7 +212,7 @@ Ce listener permet la création de l'application Vertigo. Ce dernier lit la conf
 ```
 Il est possible de spécifier plusieurs fichiers en les séparant par des `;`. Les fichiers sont lus séquentiellement pour créer une unique application.
 
-Concernant les flags actifs ils peuvent être fournis à l'aide du paramètre *boot.activeFlags*  de la servlet.
+Les flags actifs peuvent être fournis à l'aide du paramètre *boot.activeFlags*  de la servlet.
 
 ```xml
 <context-param>
@@ -227,7 +225,7 @@ Concernant les flags actifs ils peuvent être fournis à l'aide du paramètre *b
 
 ### Exemple
 
-Voici un exemple de configuration de l'application blanche vertigo de Vertigo : [configuration.yaml](https://github.com/KleeGroup/vertigo-university/blob/develop/mars/src/main/resources/boot/mars.yaml) qui met en œuvre un grand nombre de modules et extensions.
+Voici un exemple de configuration de l'application blanche de Vertigo : [configuration.yaml](https://github.com/KleeGroup/vertigo-university/blob/develop/mars/src/main/resources/boot/mars.yaml) qui met en œuvre un grand nombre de modules et extensions.
 
 ```yaml
 ---

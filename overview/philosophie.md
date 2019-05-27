@@ -1,5 +1,5 @@
 # Objectifs
-Notre but en construisant vertigo est de proposer un socle applicatif
+Notre but en construisant vertigo est de proposer un socle applicatif :
 
 * Centré sur les besoins
 * Issu de l’expérience
@@ -7,29 +7,29 @@ Notre but en construisant vertigo est de proposer un socle applicatif
 * Simple, les choses simples doivent se faire aisément
 * Ouvert, les choses moins simples doivent être possibles
 
-A ces fins nous tenons à respecter une ligne de conduite
+A cette fin, vertigo respecte la ligne de conduite décrite ci-dessous
 
 # Principes de conception
 
 ![](./images/designPrinciples.png)
 
 # Simple
-![](./images/simple-icon.png)John Maeda, prof de design au MIT a rédigé un petit livre intitulé *The laws of simplicity* où il référence les lois de la simplicité. La dernière loi, forme une synthèse des précédentes.
+![](./images/simple-icon.png)John Maeda, professeur de design au MIT, a rédigé un petit livre intitulé *The laws of simplicity* où il référence les lois de la simplicité. La dernière loi, forme une synthèse des précédentes.
 
 **Simplicity is about subtracting the obvious, and adding the meaningful.**
 
 # Modular
-![](./images/modular-icon.png)La modularité est un élément clé des systèmes informatiques, elle est à la base de UNIX ; comme le dit Erich Raymond dans son ouvrage Basics of the Unix Philosophy
+![](./images/modular-icon.png)La modularité est un élément clé des systèmes informatiques, elle est à la base d'UNIX ; comme le dit Erich Raymond dans son ouvrage Basics of the Unix Philosophy,
 
 **Rule of Modularity : Write simple parts connected by clean interfaces.** 
 
 ![](./images/modularity.png)
 
 # Elastic
-![](./images/elastic-icon.png)Capacité du système à distribuer les traitements afin
+![](./images/elastic-icon.png)Capacité du système à distribuer les traitements afin :
 
 * d'absorber des charges importantes
-* de confiner certaines taches sur des serveurs dédiés
+* de confiner certaines tâches sur des serveurs dédiés
 
 ![](./images/elastic.png)
 
@@ -43,4 +43,4 @@ A ces fins nous tenons à respecter une ligne de conduite
 ![](./images/fast.png)
 
 # Fluid
-![](./images/fluid-icon.png)Parce qu'un application n'est perçue qu'au travers de son interface utilisateur; celle ci doit être fluide et ergonomique.
+![](./images/fluid-icon.png)Parce qu'une application n'est perçue qu'au travers de son interface utilisateur, celle-ci doit être fluide et ergonomique.

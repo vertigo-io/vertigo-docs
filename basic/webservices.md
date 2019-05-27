@@ -206,6 +206,13 @@ public ContactView updateContactView(
 
 > Ici on vérifie que utilisateur connecté possède autorisation d'écriture sur l'entité ContactView. Ce contrôle de sécurité dépend des à la fois des attributs de l'utilisateur et du Contact. Il s'agit donc d'une contrôle de sécurité très fin.
 
+## SwaggerApi
+
+L'api ainsi crée avec ce module est exposée au format standard Swagger. Vertigo inclus la mise à disposition de l'Api via l'UI standard de Swagger.
+Il suffit d'ajouter la facade webService : `io.vertigo.vega.impl.webservice.catalog.SwaggerWebServices`
+
+![](./images/swaggerUi.png)
+
 ## Pour aller plus loin
 
 Il est possible d'enrichir le comportement d'un Webservice à l'aide de Vega en utilisant les fonctionnalités offertes suivantes :

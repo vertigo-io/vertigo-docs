@@ -8,6 +8,7 @@ Evidemment lorsque des problématiques sont très proches celles-ci sont encapsu
 Les modules listés ici sont ceux qui font partie du noyau central de Vertigo. Ils ont vocations à être utilisés ensemble pour fournir une ensemble cohérent pour créer une application Java. Il s'agit des éléments minimum à mettre en œuvre dans une **vraie** application métier.
 
 > Il existe une dépendance linéaire maîtrisée entre ces modules pour une évolutivité aisée.
+> 
 > **core** <--(uses)-- **commons** <--(uses)-- **database** <--(uses)-- **dynamo** <--(uses)-- **vega** <--(uses)-- **studio** 
 
 Chaque module apportent donc des solutions à un ou plusieurs enjeux liés à une application métier.

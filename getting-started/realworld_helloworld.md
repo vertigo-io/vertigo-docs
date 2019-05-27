@@ -10,7 +10,11 @@ Nous utiliserons ici Eclipse. A l'heure de la rédaction de ce guide, la version
 
 Cliquer sur __File > New > Project__. Dans la boîte de dialogue, choisir __Maven > Maven Project__ et cliquer sur __Next__.
 
+![](./images/getting-started-1.png)
+
 Dans l'écran "Select project name and location", cocher l'option _Create a simple project (skip archetype selection)_ et cliquer sur __Next__.
+
+![](./images/getting-started-3.png)
 
 Dans "Configure project", renseigner les champs suivants :
 * Group ID : your.group.id (ou autre chose de plus signifiant pour vous !)
@@ -18,6 +22,8 @@ Dans "Configure project", renseigner les champs suivants :
 * Packaging : War
 
 Cliquer sur __Finish__.
+
+![](./images/getting-started-2.png)
 
 ### 2. Configuration du fichier pom du projet
 
@@ -29,8 +35,8 @@ Rajouter les dépendances suivantes dans le fichier pom.xml :
 * Module vertigo-ui (cette dépendance tirera l'ensemble des modules Vertigo requis pour l'application)
 * Module vertigo-studio (celui-ci nous simplifie la tâche en générant des parties de code sans valeur ajoutée)
 * Les dépendances externes vers des outils nécessaires : 
-  * La dépendance `provided` à l'API servelt 3.1 ou supérieure
-  * Une base de donnée H2 (il s'agit d'une base mémoire, facile à utiliser à des fins de tests)
+  * La dépendance `provided` à l'API servlet 3.1 ou supérieure
+  * Une base de données H2 (il s'agit d'une base mémoire, facile à utiliser à des fins de tests)
   * Le gestionnaire de pool de connexions C3P0 pour la connexion à la base de données
 
 Rajouter l'indication que le répertoire contenant les fichiers générés (src/main/javagen) doit faire partie du "Build Path" d'Eclipse.
@@ -48,30 +54,36 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
   <properties>
   	<maven.compiler.source>1.8</maven.compiler.source>
 	<maven.compiler.target>1.8</maven.compiler.target>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   
   <dependencies>
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>javax.servlet-api</artifactId>
-        <version>3.1.0</version>
-        <scope>provided</scope>
-      </dependency>
-	  <dependency>
-	  	<groupId>io.vertigo</groupId>
-	  	<artifactId>vertigo-ui</artifactId>
-	  	<version>2.0.0-SNAPSHOT</version>
-	  </dependency>
-	  <dependency>
-	  	<groupId>com.h2database</groupId>
-	  	<artifactId>h2</artifactId>
-	  	<version>1.4.199</version>
-	  </dependency>
-	  <dependency>
-	  	<groupId>com.mchange</groupId>
-	  	<artifactId>c3p0</artifactId>
-	  	<version>0.9.5.3</version>
-	  </dependency>
+  		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.vertigo</groupId>
+			<artifactId>vertigo-ui</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.vertigo</groupId>
+			<artifactId>vertigo-studio</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.199</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mchange</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.5.3</version>
+		</dependency>
   </dependencies>
   
   
@@ -96,6 +108,7 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 		</plugin>
   	</plugins>
   </build>
+  
 </project>
 ```
 
@@ -107,12 +120,13 @@ Dans la boîte de dialogue, vérifier que les éléments suivants sont cochés :
 
 Cliquer sur __OK__.
 
+![](./images/getting-started-5.png)
 
 ### 3. Création de la structure du projet
 
 Créer l'arborescence de packages et de répertoires suivante :
 
-XXXXXX SCREENSHOT XXXXXXXX
+![](./images/getting-started-4.png)
 
 ## Phase de modélisation
 
@@ -230,6 +244,8 @@ Sauvegarder, cliquer avec le bouton de droite sur le fichier __Studio.java__ pui
 La génération des fichiers est lancée et les entités générées apparaissent dans le répertoire __src/main/javagen/your/group/id__.
 Ces éléments sont maintenant utilisables pour créer des services puis des écrans.
 
+![](./images/getting-started-6.png)
+
 ### 4. Créer la base de données exemple
 
 Nous allons ici créer la structure de la base de données correspondant au modèle créé précédemment.
@@ -238,20 +254,29 @@ Pour ce faire :
 * Télécharger l'exécutable H2 : [ici](http://central.maven.org/maven2/com/h2database/h2/1.4.199/h2-1.4.199.jar)
 * Double-cliquer sur le jar téléchargé
 * Renseigner "URL JDBC", ici : 
-  * jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE
+  * `jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE`
 * Cliquer sur __Connecter__
+
+![](./images/getting-started-7.png)
+
 * Copier / Coller le script SQL de création de la base de données (_src/main/javagen/sqlgen/crebas.sql_) dans la fenêtre de requête
 * Cliquer sur __Exécuter__, la structure de la base est maintenant créée
+
+![](./images/getting-started-8.png)
+
 * Cliquer sur le bouton __Déconnecter__
+
 
 ### 5. Configuration de l'application
 
 Configurer notre application va se faire en deux étapes :
 
 - Déclarer notre module métier en créant sa classe de manifeste
-- Créer le fichier de configuration de notre application qui utilisera des module de vertigo ainsi que notre module métier
+- Créer le fichier de configuration de notre application qui utilisera des modules de vertigo ainsi que notre module métier
 
-Pour déclarer notre module métier il suffit de créer la classe suivante à la racine du package de notre module métier : __your.group.id.gs.modulemetier1__
+Pour déclarer notre module métier, il suffit de créer la classe __ModuleMetier1Features__ avec le contenu suivant à la racine du package de notre module métier : __your.group.id.gs.modulemetier1__
+Pour simplifier la configuration nous allons utiliser la découverte automatique des composants à partir d'un package racine en utilisant la classe `ModuleDiscoveryFeatures`
+
 
 ```java
 package your.group.id.gs.modulemetier1;
@@ -260,10 +285,10 @@ import io.vertigo.app.config.DefinitionProviderConfig;
 import io.vertigo.app.config.discovery.ModuleDiscoveryFeatures;
 import io.vertigo.dynamo.plugins.environment.DynamoDefinitionProvider;
 
-public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1Features> {
+public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1Features> { // nous étendons ModuleDiscoveryFeatures pour activer la découverte automatique
 
 	public ModuleMetier1Features() {
-		super("ModuleMetier1");
+		super("ModuleMetier1"); // Nous donnons un nom signigiant à notre module métier
 	}
 
 	@Override
@@ -278,7 +303,7 @@ public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1
 
 	@Override
 	protected String getPackageRoot() {
-		return this.getClass().getPackage().getName();
+		return this.getClass().getPackage().getName(); // nous utilisons la localisation de la classe de manisfeste comme racine du module
 	}
 
 }
@@ -297,31 +322,31 @@ boot:
   plugins:
     - io.vertigo.core.plugins.resource.classpath.ClassPathResourceResolverPlugin: {}
 modules:
-  io.vertigo.commons.CommonsFeatures:
+  io.vertigo.commons.CommonsFeatures: // utilisation du module vertigo-commons
     features:
       - script:
       - cache:
     featuresConfig:
       - script.janino:
       - cache.memory:
-  io.vertigo.database.DatabaseFeatures:
+  io.vertigo.database.DatabaseFeatures: // utilisation du module vertigo-database pour pouvoir utiliser une base de données
     features:
-      - sql:
+      - sql: // nous activons le support des bases de données SQL
     featuresConfig:
-      - sql.c3p0:
+      - sql.c3p0: // nous utilisons ici le pool de connection C3P0 pour récuperer les connections à la base
           dataBaseClass: io.vertigo.database.impl.sql.vendor.h2.H2DataBase
           jdbcDriver: org.h2.Driver
           jdbcUrl: jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE
-  io.vertigo.dynamo.DynamoFeatures:
+  io.vertigo.dynamo.DynamoFeatures: // utilisation du module vertigo-dynamo
     features:
-      - store:
-      - kvStore:
+      - store: // activation du support du stockage des entités de notre modèle
+      - kvStore: // activation du support du stockage clé/valeur (utilisé pour la conservation des état de écrans)
     featuresConfig:
-      - store.data.sql:
-      - kvStore.berkeley:
+      - store.data.sql: // nous utilisons un store de type SQL (avec notre base H2)
+      - kvStore.berkeley:  // nous utilisons un stockage clé valeur avec la base de donnée BerkeleyDB
           collections: VViewContext;TTL=43200
           dbFilePath: ${java.io.tmpdir}/vertigo-ui/VViewContext
-  your.group.id.gs.modulemetier1.ModuleMetier1Features:
+  your.group.id.gs.modulemetier1.ModuleMetier1Features: // utilisation de notre module métier
 
 ```
 
@@ -333,14 +358,14 @@ modules:
 
 Dans cette section, nous allons créer les éléments (services utilisant les classes d'accès aux données) qui nous permettront ensuite de créer notre premier écran.
 
-Le but sera de fournir un écran proposant d'enregistrer un film avec son titre dans la base, puis un écran de visualisation de la liste des films présents dans la base de données.
+Le but sera de fournir un écran proposant d'enregistrer un film avec son titre dans la base de données, puis un écran de visualisation de la liste des films présents dans la base de données.
 
 ### 1. Création d'un service métier
 
 Le service métier fournit des fonctionnalités de haut niveau concernant un concept métier donné. Dans ce guide, il s'agit de simples fonctions d'enregistrement et de lecture des entités (ici un "film").
 
 Ce service comprendra les fonctions suivantes :
-* Récupération de la liste globale des films
+* Récupération de la liste de tous les films
 * Récupération d'un film
 * Enregistrement d'un film
 
@@ -462,6 +487,10 @@ La vue est constituée par un fichier HTML se référant aux éléments servis p
 
 Ajouter un fichier __movieDetail.html__ dans le dossier __src/main/webapp/WEB-INF/views/modulemetier1__
 
+> Afin de simplifier la vie du développeur nous préconisons un mapping 1 vue = 1 controller
+> Dans ce même esprit de simplification le lien qui existe entre une vue et un controller est fait par convention de nommage en suivant le partern CoC (Convention Over Configuration)
+> La stratégie de lien est la suivante : un controlleur `your.group.id.gs.modulemetier.controllers.NomController` sera lié à la vue `/modulemetier/nom.html` et un controller `your.group.id.gs.modulemetier.controllers.souspackage.NomController` à la vue `/modulemetier/souspackage/nom.html`
+
 Dans ce fichier, copier / coller le code suivant:
 
 ```html
@@ -528,7 +557,7 @@ import your.group.id.gs.modulemetier1.services.MovieServices;
 
 @Controller
 @RequestMapping("/movies")
-public class MovieDetailController extends AbstractVSpringMvcController {
+public class MovieListController extends AbstractVSpringMvcController {
 
 	private static final ViewContextKey<Movie> moviesKey = ViewContextKey.of("movies");
 
@@ -741,13 +770,13 @@ Copier/Coller le contenu suivant :
 
 
 
-### 5. Lancement de l'application
+## Lancement de l'application
 
 Installer un serveur Tomcat (version 8.5+) dans Eclipse et y ajouter notre projet :
 
-Pour ce faire 
+Pour ce faire :
 
-- Télécharger l'archive sur serveur tomcat depuis le site officiel : http://apache.mediamirrors.org/tomcat/tomcat-8/v8.5.40/bin/apache-tomcat-8.5.40.zip
+- Télécharger l'archive du serveur tomcat depuis le site officiel : http://apache.mediamirrors.org/tomcat/tomcat-8/v8.5.40/bin/apache-tomcat-8.5.40.zip
 - Extraire l'archive à l'endroit de votre convenance. Par exemple __%userprofile%/tomcat__
 - Dans la vue __Servers__ d'Eclipse cliquer sur _No Servers are available. Click this link to create a new server..._
 - Sélectionner Apache->Tomcat v8.5 Server

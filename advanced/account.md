@@ -1,7 +1,7 @@
 # Account
 
 Le module **Account** de Vertigo permet la gestion simplifiée des comptes utilisateurs. 
-Ce module permet avant tout la mise à disposition aux autres modules de la notion transverse de compte utilisateur. Ceci permet à Vertigo de proposer des extensions comme **"notifications"** ou **"commentaires"**. 
+Ce module permet avant tout la mise à disposition des autres modules de la notion transverse de compte utilisateur. Ceci permet à Vertigo de proposer des extensions comme **"notifications"** ou **"commentaires"**. 
 
 Ce module propose des fonctionnalités de gestion des utilisateurs réparties sur trois axes orthogonaux :
 - **Authentication** : Gestion de l'authentification
@@ -11,8 +11,8 @@ Ce module propose des fonctionnalités de gestion des utilisateurs réparties su
 
 ## Configuration
 
-Afin d'utiliser les fonctionnalités de **Account** il convient d'ajouter ce module à la configuration de l'application.
-Pour plus de détail vous pouvez vous rapporter au chapitre dédié à la [configuration](/basic/configuration) de l'application.
+Afin d'utiliser les fonctionnalités de **Account** il est nécessaire d'ajouter ce module à la configuration de l'application.
+Pour plus de détails, vous pouvez vous rapporter au chapitre dédié à la [configuration](/basic/configuration) de l'application.
 
 
 Voici une configuration typique d'une application utilisant le module Account
@@ -63,8 +63,8 @@ modules
   - groupFilePath : Chemin du fichier des *AccountGroup* 
   - groupFilePattern :  RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508) : id, displayName, accountIds)
 - **account.store.loader** : Stockage des *Account* délégué à un loader spécifique *(implements [AccountLoader](https://github.com/vertigo-io/vertigo/blob/master/vertigo-account-impl/src/main/java/io/vertigo/account/plugins/account/store/loader/AccountLoader.java))*
-- **account.cache.memory** : Active le cache mémoire (**Attention** pas de purge automatique)
-- **account.cache.redis** : Active le cache Redis via le *RedisConnector* (**Attention** pas de purge automatique)
+- **account.cache.memory** : Active le cache mémoire (**Attention** : pas de purge automatique)
+- **account.cache.redis** : Active le cache Redis via le *RedisConnector* (**Attention** : pas de purge automatique)
 
 #### Authorization
 ?> Pas de configuration particulière. Le comportement de ce composant est porté par le fichier de configuration des règles des **Autorisations**. 
@@ -74,27 +74,27 @@ modules
 
 ### Principe
 
-L'authentification dans une application métier est basé sur le rapprochement d'un moyen d'Authentification avec une source d'authentification.
+L'authentification dans une application métier est basée sur le rapprochement d'un moyen d'Authentification avec une source d'authentification.
 
 - **AuthenticationToken** représente le moyen d'authentification. 
-- Les **AuthenticationPlugin** représentent les sources d'authentification autorisé par le développeur.
+- Les **AuthenticationPlugin** représentent les sources d'authentification autorisées par le développeur.
 
 ### Configuration 
 
-Vertigo propose de base, deux types de moyen d'authentification :
-- **UsernameAuthenticationToken** : Une seule information text représentant le *Login* de l'utilisateur
-- **UsernamePasswordAuthenticationToken** : Deux informations text, de type *Login* / *Password*
+Vertigo propose, de base, deux types de moyens d'authentification :
+- **UsernameAuthenticationToken** : Une seule information texte représentant le *Login* de l'utilisateur
+- **UsernamePasswordAuthenticationToken** : Deux informations texte, de type *Login* / *Password*
 
 Vertigo propose quatre types de source d'authentification :
 - **LdapAuthenticationPlugin** : Authentification par Login/Password au près d'un LDAP. 
   - Si authentifié retourne le Login.
 - **StoreAuthenticationPlugin** : Authentification par Login/Password ou Login seul au près de la base de données.
   - Si authentifié peut retourner une autre colonne de la table (pour un token de sécurité par exemple)
-  - Le Password doit être salé et hashé par le `PasswordHelper` de Vergito (ie : PBKDF2)
-- **TextAuthenticationPlugin** : Authentification par Login/Password ou Login seul à partir d'un fichier text.
+  - Le Password doit être salé et hashé par le `PasswordHelper` de Vertigo (ie : PBKDF2)
+- **TextAuthenticationPlugin** : Authentification par Login/Password ou Login seul à partir d'un fichier texte.
   - Si authentifié retourne la clé du compte
-  - Le Password doit être salé et hashé par le `PasswordHelper` de Vergito (ie : PBKDF2)
-- **MockAuthenticationPlugin** : Authentification par Login/Password ou Login, utilisé pour les Tests tous comptes authorisés.
+  - Le Password doit être salé et hashé par le `PasswordHelper` de Vertigo (ie : PBKDF2)
+- **MockAuthenticationPlugin** : Authentification par Login/Password ou Login, utilisé pour les tests (tous comptes autorisés).
 
 
 **Configuration de la *Feature* (Yaml)**
@@ -110,12 +110,12 @@ Vertigo propose quatre types de source d'authentification :
   - userTokenIdField : Nom du champ *authToken* (champ utilisé pour le lien vers *Account*)
 ?> Le hash des mots de passe utilise l'algorithme [PBKDF2WithHmacSHA256](https://en.wikipedia.org/wiki/PBKDF2)
 
-- **authentication.ldap** : Permet l'authentification déporté sur un LDAP
+- **authentication.ldap** : Permet l'authentification déportée sur un LDAP
   - userLoginTemplate : Template du DN de l'utilisateur (contient {0} pour fusionner le login)
   - ldapServerHost : Nom du serveur LDAP
   - ldapServerPort : Port du serveur LDAP
   
-- **authentication.mock** : Pour les tests, authentification toujours vrai
+- **authentication.mock** : Pour les tests, authentification toujours réussie
 
 
 ### Utilisations
@@ -141,16 +141,17 @@ public void login(final String login, final String password) {
   //Load Profil and authorizations
   getUserSession().setCurrentProfile("Administrator");
 }
-  
+```
+
 ## Autorisations
 
 ### Principes
 
-Dans une application métier on considère en générale que tous les utilisateurs n'auront pas accès à tout. Vertigo propose un mécanisme de sécurité qui permet de protéger les éléments de l'application qui doivent l'être.
+Dans une application métier, on considère en général que tous les utilisateurs n'auront pas accès à tout. Vertigo propose un mécanisme de sécurité qui permet de protéger les éléments de l'application qui doivent l'être.
 
-D'un point de vue technique le mécanisme permet de sécuriser des éléments fins de l'application (que l'on nomme *Ressource*) : des pages, des services, des données ou autres. 
+D'un point de vue technique, le mécanisme permet de sécuriser des éléments fins de l'application (que l'on nomme *Ressource*) : des pages, des services, des données ou autres.
 Il peut aussi s'agir de quelque chose de plus abstrait comme un caractère **confidentiel** transverse à l'application.<br/>
-Mais pour rester compréhensible le développeur va paramétrer le mécanisme de sécurité pour englober ces *Ressources* dans des *Authorization* qui correspondent à des fonctionnalités proposées par l'application 
+Mais pour rester compréhensible, le développeur va paramétrer le mécanisme de sécurité pour englober ces *Ressources* dans des *Authorizations* qui correspondent à des fonctionnalités proposées par l'application 
 (*Consulter les dossiers*, *Déposer un dossier*, *Valider les dossiers*, ...)
 
 Le mécanisme de sécurité de Vertigo est assez *bas niveau*. Vertigo ne connait que la notion d' **Authorization** : soit globales, soit portées par une entité (les `SecuredEntity`).
@@ -160,9 +161,9 @@ La liste des *Profils* associés à un utilisateur est spécifique à l'applicat
 Un *Profil* étant une liste d'**Authorizations** rattaché à un **Périmètre** applicatif.
 
 **Note**<br/>
-La bonne pratique dans ce domaine est que si l'utilisateur a plusieurs **Profils**, il devra n'en avoir qu'un seul actif à la fois (il pourra en changer pendant sa session), 
-ceci afin d'éviter des collisions (intersections) de règles de sécurité difficiles à comprendre, à implémenter de manières performantes et à tester.<br/>
-Dans un système où la gestion des utilisateurs est centralisée, le **Profil** utilisateur peut être géré par le système centralisé (il fournit le **Profil** par utilisateur par appli) 
+La bonne pratique dans ce domaine est que si l'utilisateur a plusieurs **Profils**, il ne devra en avoir qu'un seul actif à la fois (il pourra en changer pendant sa session), 
+ceci afin d'éviter des collisions (intersections) de règles de sécurité difficiles à comprendre, à implémenter de manière performante et à tester.<br/>
+Dans un système où la gestion des utilisateurs est centralisée, le **Profil** utilisateur peut être géré par le système centralisé (il fournit le **Profil** par utilisateur par appli).
 
 ### Notion de *contexte de sécurité*
 
@@ -188,18 +189,18 @@ Pour rester compatible avec le mécanisme prévu par Vertigo, l'application doit
 
 ### Types d'autorisation
 
-Deux types d'autorisations sont proposées :
-- **Global Authorizations** : Autorisations globales utilisées pour protéger des fonctions de l'application (écrans, bouttons, traitements, ...)
+Deux types d'autorisations sont proposés :
+- **Global Authorizations** : Autorisations globales utilisées pour protéger des fonctions de l'application (écrans, boutons, traitements, ...)
   - name : Code de l'autorisation
   - label : Libellé de l'autorisation
 
 - **Secured Entity Operations** : Autorisations pour une opération sur une entité sécurisée
   - entity : Nom de l'entité protégé
   - securityFields : Liste des champs participant aux contraintes de sécurité (ie : critères de filtrage)
-  - securityDimensions : Listes de dimensions de sécurité (pseudo champs de sécurité déduit d'autres champs de l'entité)
+  - securityDimensions : Liste de dimensions de sécurité (pseudo champs de sécurité déduit d'autres champs de l'entité)
     - name : Nom de la dimension
     - type : Type de la dimension (ENUM : pour une énumération ordonnée, TREE : pour une structure hiérarchique)
-    - values *(Type:ENUM)* : Liste ordonnées des valeurs possibles
+    - values *(Type:ENUM)* : Liste ordonnée des valeurs possibles
     - fields *(Type:TREE)* : Liste des champs ordonnés (et à plat) de l'arborescence
   - operations : Liste des opérations possibles sur l'entité
     - __comment : Permet de placer un commentaire dans la configuration
@@ -214,8 +215,8 @@ Deux types d'autorisations sont proposées :
       - Ecriture simple pour les axes **TREE** : GEO <= ${geo} : On sélectionne les `SecuredEntities` *inférieur ou égale* dans le périmètre géographique de l'utilisateur (Ex: toutes les communes ou dans le département d'un responsable départementale)
       - Ecriture simple pour les axes **ENUM** : etaCd>=PUB AND etaCd<ARC (Ex : tous les `SecuredEntities` dont l'état est *supérieur ou égale* à 'PUB'*lié* et *strictement inférieur* à 'ARC'*hivé*)
 
-> Chaque **Secured Entity Operations** est associée à une authorization générée. Il ainsi possible de vérifier si un utilisateur a "à priori" le droit d'éffectuer une opération sur une entité avant même de regarder le contexte de sécurité de l'utilisateur.
-> Ceci est utilisé, notament pour gérer les éléments d'IHM affiché.<br/>
+> Chaque **Secured Entity Operation** est associée à une authorization générée. Il ainsi possible de vérifier si un utilisateur a "à priori" le droit d'éffectuer une opération sur une entité avant même de regarder le contexte de sécurité de l'utilisateur.
+> Ceci est utilisé, notamment pour gérer les éléments d'IHM affiché.<br/>
 > **Exemple:** Récupération des opérations possibles sur une entité pour déterminer les menus à proposer
 
 ### Utilisations
@@ -224,13 +225,13 @@ La force du modèle de sécurité de Vertigo, est de permettre une unique défin
 
 #### API
 
-L'API proposée permet de gérer la plus part des cas d'usages rencontrés.
+L'API proposée permet de gérer la plupart des cas d'usages rencontrés.
 
-- **hasAuthorization(AuthorizationName...)** : Vérifie que l'utilisateur à l'une des autorisations passé en paramètre
+- **hasAuthorization(AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre
 - **isAuthorized(KeyConcept, OperationName)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
-- **getCriteriaSecurity(Class<KeyConcept>, OperationName)** : Génère un [Criteria] valable pour l'utilisateur connecté, un type d'entité et une opération. Le Criteria permet de nombreux usage, voir détail plus bas.
+- **getCriteriaSecurity(Class<KeyConcept>, OperationName)** : Génère un [Criteria] valable pour l'utilisateur connecté, un type d'entité et une opération. Le Criteria permet de nombreux usages, voir détails plus bas.
 - **getSearchSecurity(Class<KeyConcept>, OperationName)** : Génère le filtre de sécurité dans la syntaxe ElasticSearch applicable pour l'utilisateur connecté, un type d'entité et une opération.
-- **getAuthorizedOperations(KeyConcept)** : Liste des opérations possibles par l'utilisateur connecté sur l'entité passé en paramètre (utilisé par la couche IHM pour adapter les actions possibles)
+- **getAuthorizedOperations(KeyConcept)** : Liste des opérations possibles par l'utilisateur connecté sur l'entité passée en paramètre (utilisé par la couche IHM pour adapter les actions possibles)
 
 #### Criteria
 
@@ -239,21 +240,21 @@ Le Criteria Vertigo est un élément transverse représentant un filtre, qui peu
 > Peut être utilisé directement dans le DAO.findAll
 
 - **toPredicate** : Conversion en Predicat Java (pour les stream, ou un test localisé)
-- **toSQL** : Conversion en clause Where pour une requète SQL (préférer l'usage par le DAO)
+- **toSQL** : Conversion en clause WHERE pour une requète SQL (préférer l'usage par le DAO)
 
 
 #### Aspect
 
-!> Bien que pratique, le controle de sécurité par aspect n'est pas préconisé, à cause du caractère non systématique de cette technique. A réserver aux développeurs avertis.
+!> Bien que pratique, le controle de sécurité par aspect n'est pas préconisé, à cause du caractère non-systématique de cette technique. A réserver aux développeurs avertis.
 
 **Vertigo Authorization** propose deux annotations permettant l'implémentation des controles de sécurité par AOP.
 
 - **@Secured({`liste de nom d'authorization`})** : Permet de sécuriser une *méthode* seule ou toute une *class* en vérifiant que l'utilisateur a l'une des autorisations
-- **@SecuredOperation(`nom d'authorization`)** : Permet de sécuriser une `SecuredEntity` passé en paramètre en vérifiant que l'utilisateur est autorisé à réaliser cette opération sur l'entité 
+- **@SecuredOperation(`nom d'authorization`)** : Permet de sécuriser une `SecuredEntity` passée en paramètre en vérifiant que l'utilisateur est autorisé à réaliser cette opération sur l'entité
 
 > `@SecuredOperation` nécessite que la méthode soit annotée par `@Secured`
 
-!> Attention : les annotations sont vérifiées par AOP, ce mode de contrôle est donc **non réentrant**
+!> Attention : les annotations sont vérifiées par AOP, ce mode de contrôle est donc **non-réentrant**
 
 !> Re-attention : Le `@SecuredOperation` nécessite l'entité, ce qui signifie qu'elle doit déjà être chargée (du coup avant le check de sécurité)
 
@@ -297,14 +298,14 @@ Arbre géographique :
 ### Principe
 
 Vertigo propose un manager de haut niveau pour simplifier la synchronisation des comptes utilisateurs de l'application avec un source d'identité externe (**IdP** ou **Id**entity **P**rovider).
-Typiquement l'api proposée permet de récupérer les utilisateurs au format de l'Entity gérée localement.
+Typiquement, l'API proposée permet de récupérer les utilisateurs au format de l'Entity gérée localement.
  - soit utilisateur par utilisateur à partir de son TokenAuthentification (récupéré par le `AuthenticationManager`)
  - soit la photo seule d'un utilisateur
  - soit par la liste des utilisateurs
 
 ### Configuration
 
-Vertigo propose de base trois types de source d'identité :
+Vertigo propose de base trois types de sources d'identité :
 
 **Configuration de la *Feature* IdentityProvider (Yaml)**
 
@@ -322,8 +323,8 @@ Vertigo propose de base trois types de source d'identité :
   - ldapUserAuthAttribute : Attribut LDAP utilisé pour retrouver un user par son *authToken*
   - userIdentityEntity : Nom de l'entité portant l'identité (ie: du User au sens application)
   - ldapUserAttributeMapping : Mapping des champs du LDAP vers l'entité d'identité
-- **identityProvider.text** : Provision des *Identités* depuis un fichier text
-  - identityFilePath : Chemin du fichier des *Identité* 
+- **identityProvider.text** : Provision des *Identités* depuis un fichier texte
+  - identityFilePath : Chemin du fichier des *Identités* 
   - identityFilePattern : RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508))
   - userAuthField : Nom du champ relié à l'authentification *(authToken)*
   - userIdentityEntity : Nom de l'entité portant l'identité (ie: du User au sens application)

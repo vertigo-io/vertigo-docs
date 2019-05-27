@@ -3,14 +3,14 @@
 	Vertigo  
 	<select onchange="javascript:location.href=this.value+location.hash">
     <option value="/vertigo-docs/">v2.0.0 (current)</option>
-    <!-- <option value="/vertigo-docs/v2.0.0/">v2.0.0</option> -->
+    <option selected value="/vertigo-docs/v2.0.0/">v2.0.0</option>
     </select>
 	</h3>
 <hr/>
 
 - Overview
   - [Introduction](overview/introduction.md)
-  - [Philosophie](overview/philosophie.md)
+  - [Philosphie](overview/philosophie.md)
   - [Modules](overview/modules.md)
 - Getting-started
   - [Prérequis](getting-started/requirements.md)  
@@ -33,3 +33,4 @@
 - Extensions
   - [Orchestra](extensions/orchestra.md)
 - [Changelog](changes.md)
+
