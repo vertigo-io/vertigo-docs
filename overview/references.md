@@ -1,6 +1,6 @@
 # Vertigo en chiffre
 
-Vertigo s'est forgé, enrichi, démontré, à travers plus de
+Vertigo s'est forgé, enrichi, démontré, à travers
 
 ![](./images/vertigo_chiffres.png)
 
