@@ -11,6 +11,8 @@
 - Overview
   - [Introduction](overview/introduction.md)
   - [Philosophie](overview/philosophie.md)
+  - [Références](overview/references.md)
+  - [Ecosystème](overview/ecosystem.md)
   - [Modules](overview/modules.md)
 - Getting-started
   - [Prérequis](getting-started/requirements.md)  
