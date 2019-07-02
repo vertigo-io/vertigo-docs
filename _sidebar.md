@@ -33,5 +33,6 @@
   - [Vega](advanced/vega.md)
   - [Account](advanced/account.md)
 - Extensions
+  - [UI](extensions/ui.md)
   - [Orchestra](extensions/orchestra.md)
 - [Changelog](changes.md)

@@ -2,7 +2,7 @@
 
 L'extension vertigo-ui permet la création d'écrans riches, de manière simple et sécurisée.
 
-Pour ce faire, elle s'appuie sur deux frameworks du marché (SpingMVC et Vue.js) auxquels elle adjoint la philosophie de Vertigo : simplicité et robustesse.
+Pour ce faire, elle s'appuie sur deux frameworks du marché (SpringMVC et Vue.js) auxquels elle adjoint la philosophie de Vertigo : simplicité et robustesse.
 
 *Ecran de détail d'une base dans l'application démo [Mars](https://github.com/vertigo-io/vertigo-university/tree/master/mars)*
 ![](./images/ui-mars.png)
