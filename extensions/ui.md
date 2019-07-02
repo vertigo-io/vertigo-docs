@@ -154,7 +154,7 @@ Nécessite :
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 ```
 
-- **<head>**
+- **head**
 - **layout:decorate**
 - **layout:fragment**
 
