@@ -141,9 +141,11 @@ La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/
 - **th:with="var1=${...}, var2=${...}"**
 - **th:attr**
 - **th:text**
+- **th:each(abc : bcd)**
 - **th:replace**
 - **th:include**
 - **th:remove**
+- **th:fragment**
 
 
 ## Moteur de layout : Thymeleaf Layout
