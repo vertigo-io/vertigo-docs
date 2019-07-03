@@ -121,6 +121,7 @@ La documentation de Quasar sur [quasar.dev](https://v0-17.quasar-framework.org/g
 - **q-item**
 - **q-popover**
 - **q-page-sticky**
+- **q-icon**
 
 ## Moteur de templating : Thymeleaf
 
