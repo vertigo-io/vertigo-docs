@@ -99,14 +99,13 @@ La documentation de Vue.js sur [vuejs.org](https://vuejs.org/v2/guide/)
 
 Vue.js propose une approche WebComponent avec une IHM réactive mappée sur un model de vue, selon le pattern Observer/Observable. 
 
-- **inline {{abc}}**
-- **prefix :**
-- **|abc|** 
-- **v-if**
-- **v-for**
-- **v-model**
-- **@click**
-- **v-cloak**
+- **inline {{abc}}** : L'utilisation des *moustaches* permet d'ajouter directement la valeur de abc dans le DOM. La valeur est *réactive* et encodé en HTML. 
+- **prefix :** : Ce préfix indique que Vue.js doit interpréter l'attribut qui suit. Cela permet de faire du Vue.js sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
+- **v-if="abc"** : Donne la condition d'affichage sur un noeud du DOM. La condition peut-être une variable du vueData ou une expression a évaluer
+- **v-for="item in items"** : L'élément sur lequel est posé le `v-for` est dupliqué pour chaque élément. La variable de boucle peut-être utilisé pour changer le rendu de chaque boucle.
+- **v-model** :
+- **@click** : précise une action a réaliser sur l'évenement `click` du composant. Il existe une variante `@click.native` pour mapper directement le onClick du composant HTML.
+- **v-cloak** : indique a vue que cette partie du DOM doit être caché jusqu'a ce qu'il soit interprété par Vue. Permet d'éviter des "scintillements" lors de l'affichage de la page.
 
 ## Bibliothèque de composant : Quasar
 
@@ -131,7 +130,8 @@ Nécessite :
 ```
 La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html)
 
-- **inline __${abc}__**
+- **inline `__${abc}__`**
+- **inline `|abc|`** : Literal substition. Permet d'écrire une chaine contenant des parties à évaluer, c'est un moyen de simplifier l'écriture et évite des concaténations de chaine.
 - **prefix th:**
 - **abc?:bcd**
 - **${abc}**
@@ -165,6 +165,13 @@ Nécessite :
 
 Les composants Vertigo-ui utilise le templating Thymeleaf, chaque composant est en fait un th:replace avec un peu d'intelligence complémentaire.
 Le principe (et du code) est repris de [thymeleaf-component-dialect](https://github.com/Serbroda/thymeleaf-component-dialect)
+
+Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués coté serveur et plusieurs encapsule ainsi un composant vue.js ou quasar.
+Vertigo-ui n'a pas vocation à encampusler ainsi tous les composants d'ihm, la stratégie sur les composants vertigo-ui est étudiée en fonction des points suivants :
+
+- le composant est un composant de haut-niveau représentant un composant logique. Sous jacent il y aura plusieurs composants d'ihm, un comportement enrichi, des choix ergonomiques adaptés à notre contexte.
+- le composant nécessite des interacations particulières avec le contexte. Par exemple pour selectionner les données à intégrer dans vueData, et parfois pour les encoder de manière spécifique.
+- le composant propose une API plus user-friendly, plus adapatée ou moins verbeuse pour le développeur
 
 Nécessite : 
 ```HTML
