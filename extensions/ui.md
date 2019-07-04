@@ -98,9 +98,9 @@ La documentation de Vue.js sur [vuejs.org](https://vuejs.org/v2/guide/)
 
 Vue.js propose une approche WebComponent avec une IHM réactive mappée sur un model de vue, selon le pattern Observer/Observable. 
 
-- `inline {{abc}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de abc dans le DOM. La valeur est *réactive* et encodé en HTML
-- `prefix :` : Ce préfix indique que Vue.js doit interpréter l'attribut qui suit. Cela permet de faire du Vue.js sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
-- `v-if="abc"` : Donne la condition d'affichage sur un noeud du DOM. La condition peut-être une variable du vueData ou une expression a évaluer
+- **inline** `{{...}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de abc dans le DOM. La valeur est *réactive* et encodé en HTML
+- **prefix** `:` : Ce préfix indique que Vue.js doit interpréter l'attribut qui suit. Cela permet de faire du Vue.js sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
+- `v-if="..."` : Donne la condition d'affichage sur un noeud du DOM. La condition peut-être une variable du vueData ou une expression a évaluer. Attention l'élément disparait du DOM, mais est présent coté client, ne convient pas à la mise ne place de la sécurité.
 - `v-for="item in items"` : L'élément sur lequel est posé le `v-for` est dupliqué pour chaque élément. La variable de boucle peut-être utilisé pour changer le rendu de chaque boucle
 - `v-model` : Indique la donnée du vueData bindé sur le composant
 - `@click` : Précise une action a réaliser sur l'évenement `click` du composant. Il existe une variante `@click.native` pour mapper directement le onClick du composant HTML
@@ -129,15 +129,15 @@ Nécessite :
 ```
 La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html)
 
-- **inline `__${abc}__`**
-- **inline `|abc|`** : Literal substition. Permet d'écrire une chaine contenant des parties à évaluer, c'est un moyen de simplifier l'écriture et évite des concaténations de chaine.
-- `prefix th:`
-- `abc?:bcd`
-- `${abc}`
-- `@{abc}`
-- `~{abc::bcd}`
-- `th:if`
-- `th:with="var1=${...}, var2=${...}"`
+- **inline** `__${...}__` : Préprocesseur. Indique à Thymeleaf que cette portion doit-être préprocessée. C'est utilisé pour des expressions à l'interieur d'autre expression plus globale.
+- **inline** `|...|` : Literal substition. Permet d'écrire une chaine contenant des parties à évaluer, c'est un moyen de simplifier l'écriture et évite des concaténations de chaine.
+- **prefix** `th:` : Ce préfix indique que Thymeleaf doit interpréter l'attribut qui suit. Cela permet de faire du Thymeleaf sur des attributs HTML standards. Sur les tags, cela correspond au namespace des tags spécifiques Thymeleaf.
+- `abc?:bcd` : Souvant utilisé pour simplifier l'écriture, équivalent de `abc!=null?abc:bcd`
+- `${...}` : Evalue une expression de variable. Ex : `${name}` ou `${user.name}`
+- `@{...}` : Reconstruit l'url d'un lien.
+- `~{abc::bcd}` : Selectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le selector est soit le nom d'un fragment, soit un selector javascript standard (`#id`, `.class`, ...)
+- `th:if` : Donne la condition d'affichage sur un tag (et son body). Le filtre est effectué coté serveur et convient pour la sécurité.
+- `th:with="var1=${...}, var2=${...}"` : Déclare des variables locales. Le scope est le contenu du tag, même hors du fichier : lorsqu'on include d'autres fragments la variable reste accessible. 
 - `th:attr`
 - `th:text`
 - `th:each(abc : bcd)`
