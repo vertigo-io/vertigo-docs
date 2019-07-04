@@ -3,11 +3,11 @@ Notre but en construisant vertigo est de proposer un socle applicatif :
 
 * Centré sur les besoins
 * Issu de l’expérience
-* Cohérent, non uniforme
+* Cohérent, non-uniforme
 * Simple, les choses simples doivent se faire aisément
 * Ouvert, les choses moins simples doivent être possibles
 
-A cette fin, vertigo respecte la ligne de conduite décrite ci-dessous
+A cette fin, vertigo respecte la ligne de conduite décrite ci-dessous.
 
 # Principes de conception
 

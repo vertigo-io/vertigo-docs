@@ -11,6 +11,8 @@
 - Overview
   - [Introduction](overview/introduction.md)
   - [Philosophie](overview/philosophie.md)
+  - [Références](overview/references.md)
+  - [Ecosystème](overview/ecosystem.md)
   - [Modules](overview/modules.md)
 - Getting-started
   - [Prérequis](getting-started/requirements.md)  
@@ -31,5 +33,6 @@
   - [Vega](advanced/vega.md)
   - [Account](advanced/account.md)
 - Extensions
+  - [UI](extensions/ui.md)
   - [Orchestra](extensions/orchestra.md)
 - [Changelog](changes.md)
