@@ -34,7 +34,7 @@ Ci-dessous les annotations que l'on utilise le plus souvant :
 ### Annotations Vertigo-ui
 
 - `@ViewAttribute("nomDuParam")` : Map une variable de type objet, avec les données de formulaire lors d'un POST. Le nom doit correspondre à une clé du context (voir [ViewContextKey](#ViewContextKey)). L'objet est récupéré du context, mis à jour par les données du POST, validées puis passées à la méthode.
-- `@QueryParam("paramName")` : Utiliser dans quelques cas pour indiquer le nom du paramètre de la request. Typiquement pour opérations sur les fichiers ([VFile](VFile) et [FileInfoURI](FileInfoURI)
+- `@QueryParam("paramName")` : Utiliser dans quelques cas pour indiquer le nom du paramètre de la request. Typiquement pour opérations sur les fichiers ([VFile](VFile) et [FileInfoURI](FileInfoURI))
 
 ### ArgumentResolver Vertigo-ui
 
