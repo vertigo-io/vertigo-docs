@@ -77,7 +77,7 @@ API du **ViewContext**
 - `getBoolean` : Récupère un Boolean du context
 - `getSelectedFacetValues` : Récupère la liste des facettes séléctionnées depuis l'IHM de la recherche à facette.
 
-## IMH : Comment lire ?
+## IHM : Comment lire ?
 
 Comme nous l'avons déjà présenté, l'IHM est la composition de plusieurs briques : Vue.js, Quasar, Thymeleaf et Vertigo-ui.
 Avant de rentrer dans le détail de chacune de ces briques, voici quelques éléments pour s'y retrouver.
