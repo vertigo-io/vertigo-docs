@@ -174,16 +174,16 @@ Vertigo-ui n'a pas vocation à encampusler ainsi tous les composants d'ihm, la s
 
 Nécessite : 
 ```HTML
-<html xmlns:vu="http://www.morphbit.com/thymeleaf/component>
+<html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
 ```
 
-**Paramètres de composant**
+### Paramètres de composant
 - `abc_slot` : Permet de récupérer un vu:slot dans le body du tag appelant et de le placer dans le composant (Ex: vu:table)
 - `abc_attrs` : Aggrégation de tous les paramètres préfixés par `abs_` passés lors de l'appel. Permet de les passer des attributs standards sur des tags inclus (Ex: `tr_attrs`, permet de placer des attributs sur le tag `tr` inclus dans `vu:table`, on les passent avec tr_class par exemple). *Evite de prévoir tous les cas lors de la conception du composant.*
 - `other_attrs` : Aggrégation de tous les paramètres non identifié comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round` donnera `<q-input round`)
 - `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de contentItem. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. ContentItem permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocks et `vu:grid-cell` possède un comportement particulier)
 
-**Composant Vertigo-UI : layout**
+### Composants Vertigo-UI : layout
 - `vu:page` : Composant obligatoire encadrant la zone sur laquelle Vue.js est actif.
 - `vu:head`
 - `vu:form`
@@ -200,7 +200,7 @@ Nécessite :
     - name
 - `vu:content-item`
 
-**Composant Vertigo-UI : utils**
+### Composants Vertigo-UI : utils
 - `vu:include-data` : 
   - object
   - field
@@ -209,7 +209,7 @@ Nécessite :
 <!-- - `vu:vue-data` : Pose les données de vue pour Vue.js. **Ne doit pas être utilisé directement**, il est posé par `vu:page` -->
 
 
-**Composant Vertigo-UI : inputs**
+### Composants Vertigo-UI : inputs
 - `vu:label`
 - `vu:text-field`
 - `vu:text-area`
@@ -224,7 +224,7 @@ Nécessite :
 - `vu:chips-autocomplete`
 - `vu:fileupload`
 
-**Composant Vertigo-UI : collections**
+### Composants Vertigo-UI : collections
 - `vu:cards`
 <!-- - `vu:collection` -->
 - `vu:field-read`
@@ -233,7 +233,7 @@ Nécessite :
 - `vu:facets`
 
 
-**Composant Vertigo-UI : tables**
+### Composants Vertigo-UI : tables
 - `vu:table`
   - list
   - componentId
@@ -260,7 +260,7 @@ Nécessite :
   - class
   - td_attrs
 
-**Composant Vertigo-UI : buttons**
+### Composants Vertigo-UI : buttons
 - `vu:button-link` : Pose un bouton de type lien (tag `<q-btn type="a"`)
   - label : libellé du bouton
   - icon : icon du bouton
