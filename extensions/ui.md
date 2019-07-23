@@ -192,20 +192,57 @@ Nécessite :
 - `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de contentItem. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. ContentItem permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocks et `vu:grid-cell` possède un comportement particulier)
 
 ### Composants Vertigo-UI : layout
-- `vu:page` : Composant obligatoire encadrant la zone sur laquelle Vue.js est actif.
-- `vu:head`
-- `vu:form`
-- `vu:block`
-- `vu:grid`
-  - cols
-  - contentTags
-- `vu:grid-cell`
-- `vu:messages`
-- `vu:modal`
+- `vu:page` : Composant obligatoire encadrant la zone sur laquelle VueJS est actif.
+  - `content` : Le body du tag est conservé
+- `vu:head` : Pose le tag head et les méta du head html
+  - `title`* : Titre de la page
+  - `content` : Le body du tag est conservé
+- `vu:head-meta` : Composant obligatoire posant les éléments **méta** du head (script js, css, ...)
+- `vu:form` : Pose un formulaire et référence le context de page associé
+  - `content` : Le body du tag est conservé
+- `vu:block` : Composant de block (visible graphiquement), représenté sous forme de card
+  - `title` : Titre du block
+  - `subtitle` : Sous titre du block
+  - `icon` : Icon du block
+  - `withFab` **boolean** : Ajoute la class `withFab` si nécessaire
+  - `header_attrs` : Listes des attributs à ajouter sur le header du block (tag `<div>`)
+  - `content_attrs` : Listes des attributs à ajouter sur le corps du block (tag `<div class="q-card-main">`)
+  - `card_attrs` : Listes des attributs à ajouter sur le parent du block (tag `<div class="q-card">`)
+- `vu:grid` : Déclare une mise en page de grille
+  - `cols` : Nombre de colonne. Par défaut : 2
+  - `contentTags` : Le contenu du tag est conservé. Chaque éléments est posé dans un `<div>` avec la largeur attendue. (on force une seule colonne sous le breakpoint **xs**)
+- `vu:grid-cell` : Déclare une cellule spécifique d'une **grid**
+  - `col` : Nombre de colonne de la cellule
+  - `class` : Class CSS de la cellule  
+  - `div_attrs` : Listes des attributs à ajouter sur le corps de la cellule (tag `<div>`)
+  - `content` : Le body du tag est conservé	
+- `vu:messages` : Composant ajoutant la liste des messages globaux issus d'un traitement qui ont été ajoutés dans le context (**uiMessageStack** avec Errors, Warnings, Info et Success)  
+- `vu:modal` : Pose le conteneur de modal, pouvant être utilisée ensuite dans l'écran. 
+  - `componentId` : Nom du composant, utilisé pour cibler la modale en Js
+  - `title` : Titre de la modale
+  - `closeLabel` : Libellé de la fermeture de la modale
+  - `srcUrl` : Url de la modale (optionnel, habituellement passé par le script d'ouverture)	
+  - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
+  - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
+  
+Exemple d'utilisation sur un click sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-university/blob/master/mars/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
+```HTML
+  <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
+
+  <vu:modal componentId="workOrderEditModal" title="Work Order" iframe_width="800" iframe_height="400"  />
+			
+  <script type="text/javascript">
+    function onWorkOrderSuccess() {
+      componentStates.workOrderEditModal.opened = false;
+      VUi.methods.httpPostAjax("[[@{/maintenance/ticket/_reloadWorkOrders}]]", {});
+    }
+  </script>
+```
+
 - `vu:slot`
 - `vu:content`
 - `vu:content-slot`
-    - name
+    - `name`
 - `vu:content-item`
 
 ### Composants Vertigo-UI : utils
@@ -214,7 +251,7 @@ Nécessite :
   - field
 - `vu:include-data-primitive`
 - `vu:include-data-protected`
-<!-- - `vu:vue-data` : Pose les données de vue pour Vue.js. **Ne doit pas être utilisé directement**, il est posé par `vu:page` -->
+<!-- - `vu:vue-data` : Pose les données de vue pour VueJS. **Ne doit pas être utilisé directement**, il est posé par `vu:page` -->
 
 
 ### Composants Vertigo-UI : inputs
