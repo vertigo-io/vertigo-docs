@@ -79,27 +79,27 @@ API du **ViewContext**
 
 ## IHM : Comment lire ?
 
-Comme nous l'avons déjà présenté, l'IHM est la composition de plusieurs briques : Vue.js, Quasar, Thymeleaf et Vertigo-ui.
+Comme nous l'avons déjà présenté, l'IHM est la composition de plusieurs briques : VueJS, Quasar, Thymeleaf et Vertigo-ui.
 Avant de rentrer dans le détail de chacune de ces briques, voici quelques éléments pour s'y retrouver.
 
-- La page est rendue en deux endroits : sur le serveur par Thymeleaf et les composants Vertigo-ui, et sur le client par Vue.js et Quasar.
+- La page est rendue en deux endroits : sur le serveur par Thymeleaf et les composants Vertigo-ui, et sur le client par VueJS et Quasar.
 - le préfix `th:` indique à thymeleaf d'interpréter le composant ou l'attribut
-- le préfix `:` indique à vue.js d'interpréter le composant ou l'attribut
-- le préfix `th::` est la somme des deux : thymeleaf interpretera et laissera le `:` pour vue.js
+- le préfix `:` indique à VueJS d'interpréter le composant ou l'attribut
+- le préfix `th::` est la composition de `th:` et `:` -> thymeleaf interpretera et laissera le `:` pour VueJS
 - le préfix `layout:` est une extension thymeleaf qui propose du templating comme *Tiles*.
-- les attributs commencant par `v-` sont des directives Vue.js
+- les attributs commencant par `v-` sont des directives VueJS
 - les tags commencant par `<q-` sont des composants Quasar.  
 - les tags commencant par `<vu:` sont des composants Vertigo-ui.  
 
 
-## Moteur de rendu : Vue.js
+## Moteur de rendu : VueJS
 
-La documentation de Vue.js sur [vuejs.org](https://vuejs.org/v2/guide/)
+La documentation de VueJS sur [vuejs.org](https://vuejs.org/v2/guide/)
 
-Vue.js propose une approche WebComponent avec une IHM réactive mappée sur un model de vue, selon le pattern Observer/Observable. 
+VueJS propose une approche WebComponent avec une IHM réactive mappée sur un model de vue, selon le pattern Observer/Observable. 
 
 - **inline** `{{...}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de abc dans le DOM. La valeur est *réactive* et encodé en HTML
-- **prefix** `:` : Ce préfix indique que Vue.js doit interpréter l'attribut qui suit. Cela permet de faire du Vue.js sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
+- **prefix** `:` : Ce préfix indique que VueJS doit interpréter l'attribut qui suit. Cela permet de faire du VueJS sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
 - `v-if="..."` : Donne la condition d'affichage sur un noeud du DOM. La condition peut-être une variable du vueData ou une expression a évaluer. Attention l'élément disparait du DOM, mais est présent coté client, ne convient pas à la mise ne place de la sécurité.
 - `v-for="item in items"` : L'élément sur lequel est posé le `v-for` est dupliqué pour chaque élément. La variable de boucle peut-être utilisé pour changer le rendu de chaque boucle
 - `v-model` : Indique la donnée du vueData bindé sur le composant
@@ -138,13 +138,15 @@ La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/
 - `~{abc::bcd}` : Selectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le selector est soit le nom d'un fragment, soit un selector javascript standard (`#id`, `.class`, ...)
 - `th:if` : Donne la condition d'affichage sur un tag (et son body). Le filtre est effectué coté serveur et convient pour la sécurité.
 - `th:with="var1=${...}, var2=${...}"` : Déclare des variables locales. Le scope est le contenu du tag, même hors du fichier : lorsqu'on include d'autres fragments la variable reste accessible. 
-- `th:attr`
-- `th:text`
-- `th:each(abc : bcd)`
-- `th:replace`
-- `th:include`
-- `th:remove`
-- `th:fragment`
+- `th:attr="var1=${...}, var2=${...}"` : Déclare des variables globales. A utiliser avec attention.
+- `th:text` : Evalue le contenu de l'attribut et l'ajoute dans le body du tag. 
+- `th:each="abc : bcd"` : Permet de créer une boucle sur le tag qui le porte. Boucle sur `bcd`, élément courant dans la variable `abc`.
+- `th:include="abc::bcd"` : Composant de base du templating thymeleaf. Le body du tag du template est recopié dans le tag portant l'attribut, le tag du template est perdu. La syntaxe est la même que pour le selecteur de fragment `~{abc::bcd}`. 
+- `th:replace="abc::bcd"` : Composant du templating thymeleaf. Le tag portant l'attribut est remplacé par celui du template. La syntaxe est la même que pour le selecteur de fragment `~{abc::bcd}`. 
+- `th:remove="*mode*"` : Retire des tags du DOM, en fonction du mode. Les plus courants sont : 
+  - `all` retire le tag et ses enfants
+  - `tag` retire le tag et conserve ses enfants
+- `th:fragment="fragName"` : Composant de base du templating thymeleaf. Utilisé pour nommer un template réutilisable.
 
 
 ## Moteur de layout : Thymeleaf Layout
@@ -156,16 +158,22 @@ Nécessite :
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 ```
 
-- `head`
-- `layout:decorate`
-- `layout:fragment`
+- `<head>` :  Les attributs du `<head>` sont automatiquements fusionnés entre la page et son layout. Certains sont surchargés (comme `<title>`) , d'autres concaténés (comme les `<script>`).
+- `layout:decorate` : Ajouté sur le tag `<html>` du contenu, il permet de préciser quel layout ce contenu utilise (il le *décore*). 
+- `layout:fragment` : Ajouté sur les tags internes du contenu, il permet d'indiquer dans quel fragment du layout est posé ce contenu spécifique. 
+
+> Les layouts peuvent hériter d'autres layout.
+
+Les layouts permettent de mutualiser tout la partie récurente des pages : bandeau, menu, footer, ...
+L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-university/tree/master/mars/src/main/webapp/WEB-INF/views/templates) qui peuvent être adapatés et réutilisés.
+
 
 ## Composants nommés Vertigo-ui
 
 Les composants Vertigo-ui utilise le templating Thymeleaf, chaque composant est en fait un th:replace avec un peu d'intelligence complémentaire.
 Le principe (et du code) est repris de [thymeleaf-component-dialect](https://github.com/Serbroda/thymeleaf-component-dialect)
 
-Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués coté serveur et plusieurs encapsule ainsi un composant vue.js ou quasar.
+Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués coté serveur et plusieurs encapsule ainsi un composant VueJS ou quasar.
 Vertigo-ui n'a pas vocation à encampusler ainsi tous les composants d'ihm, la stratégie sur les composants vertigo-ui est étudiée en fonction des points suivants :
 
 - le composant est un composant de haut-niveau représentant un composant logique. Sous jacent il y aura plusieurs composants d'ihm, un comportement enrichi, des choix ergonomiques adaptés à notre contexte.
@@ -273,7 +281,7 @@ Nécessite :
   - ariaLabel : libellé aria pour l'accessibilité
   - other_attrs : tous autres attribut. Posés sur le `<q-btn`
 
-## Composants Vue.js Vertigo-ui
+## Composants VueJS Vertigo-ui
 
 - `vueData`
 - `v-notifications`
