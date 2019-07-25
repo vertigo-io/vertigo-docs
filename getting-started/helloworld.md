@@ -5,7 +5,7 @@ Pour illustrer ce propos nous allons construire une application mettant à dispo
 
 ## Création du projet Maven
 
-Pour créer ce projet vous pouvez soit utiliser l'assitant de d'un IDE pour vous assister ou via tout autre méthode, l'essentiel est de :
+Pour créer ce projet vous pouvez soit utiliser l'assitant d'un IDE pour vous assister ou via tout autre méthode, l'essentiel est de :
 
 - Spécifier la version de Java a utiliser via les propriétés Maven
 - Ajouter la dépendance vers __vertigo-vega__ (l'ensemble des dépendances nécessaires sont transitives et donc récupérer automatiquement via maven)
@@ -14,32 +14,32 @@ A l'issu de cette création votre fichier __pom.xml__ doit ressembler à ça :
 
 ```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>your.group.id</groupId>
-  <artifactId>helloworld-vertigo</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  
-  <properties>
-  	<maven.compiler.source>1.8</maven.compiler.source>
-	<maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
-  
-  <dependencies>
-	<dependency>
-	  <groupId>io.vertigo</groupId>
-	  <artifactId>vertigo-vega</artifactId>
-	  <version>2.0.0</version>
-	</dependency>
-  </dependencies>
- 
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>your.group.id</groupId>
+	<artifactId>helloworld-vertigo</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+	
+	<dependencies>
+		<dependency>
+			<groupId>io.vertigo</groupId>
+			<artifactId>vertigo-vega</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+	</dependencies>
+	
 </project>
 ```
 
 ## Création du WebService
 
 Pour créer votre webservice rien de plus simple :
-- Créer une classe implémentant l'interface `io.vertigo.vega.webservice.WebServices` (Pas d'inquiétude il s'agit uniquement d'un marqueur...). Par exemple nommez la `io.vertigo.samples.hello.webservices.HelloWebServices`
+- Créer une classe implémentant l'interface `io.vertigo.vega.webservice.WebServices` (Pas d'inquiétude il s'agit uniquement d'un marqueur...). Par exemple nommez-la `io.vertigo.samples.hello.webservices.HelloWebServices`
 - Ajouter une méthode annotée qui renvoit sur un appel `GET` sur la route `/hello/` la chaine de caractère `"Hello World!"`
 
 Et voici la classe en question : 
