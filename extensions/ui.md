@@ -182,36 +182,79 @@ Vertigo-ui n'a pas vocation à encampusler ainsi tous les composants d'ihm, la s
 
 Nécessite : 
 ```HTML
-<html xmlns:vu="http://www.morphbit.com/thymeleaf/component>
+<html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
 ```
 
-- `abc_slot`
-- `abc_attrs`
-- `other_attrs`
-- `contentTags`
+### Paramètres de composant
+- `abc_slot` : Permet de récupérer un vu:slot dans le body du tag appelant et de le placer dans le composant (Ex: vu:table)
+- `abc_attrs` : Aggrégation de tous les paramètres préfixés par `abs_` passés lors de l'appel. Permet de les passer des attributs standards sur des tags inclus (Ex: `tr_attrs`, permet de placer des attributs sur le tag `tr` inclus dans `vu:table`, on les passent avec tr_class par exemple). *Evite de prévoir tous les cas lors de la conception du composant.*
+- `other_attrs` : Aggrégation de tous les paramètres non identifié comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round` donnera `<q-input round`)
+- `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de contentItem. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. ContentItem permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocks et `vu:grid-cell` possède un comportement particulier)
 
+### Composants Vertigo-UI : layout
+- `vu:page` : Composant obligatoire encadrant la zone sur laquelle VueJS est actif.
+  - `content` : Le body du tag est conservé
+- `vu:head` : Pose le tag head et les méta du head html
+  - `title`* : Titre de la page
+  - `content` : Le body du tag est conservé
+- `vu:head-meta` : Composant obligatoire posant les éléments **méta** du head (script js, css, ...)
+- `vu:form` : Pose un formulaire et référence le context de page associé
+  - `content` : Le body du tag est conservé
+- `vu:block` : Composant de block (visible graphiquement), représenté sous forme de card
+  - `title` : Titre du block
+  - `subtitle` : Sous titre du block
+  - `icon` : Icon du block
+  - `withFab` **boolean** : Ajoute la class `withFab` si nécessaire
+  - `header_attrs` : Listes des attributs à ajouter sur le header du block (tag `<div>`)
+  - `content_attrs` : Listes des attributs à ajouter sur le corps du block (tag `<div class="q-card-main">`)
+  - `card_attrs` : Listes des attributs à ajouter sur le parent du block (tag `<div class="q-card">`)
+- `vu:grid` : Déclare une mise en page de grille
+  - `cols` : Nombre de colonne. Par défaut : 2
+  - `contentTags` : Le contenu du tag est conservé. Chaque éléments est posé dans un `<div>` avec la largeur attendue. (on force une seule colonne sous le breakpoint **xs**)
+- `vu:grid-cell` : Déclare une cellule spécifique d'une **grid**
+  - `col` : Nombre de colonne de la cellule
+  - `class` : Class CSS de la cellule  
+  - `div_attrs` : Listes des attributs à ajouter sur le corps de la cellule (tag `<div>`)
+  - `content` : Le body du tag est conservé	
+- `vu:messages` : Composant ajoutant la liste des messages globaux issus d'un traitement qui ont été ajoutés dans le context (**uiMessageStack** avec Errors, Warnings, Info et Success)  
+- `vu:modal` : Pose le conteneur de modal, pouvant être utilisée ensuite dans l'écran. 
+  - `componentId` : Nom du composant, utilisé pour cibler la modale en Js
+  - `title` : Titre de la modale
+  - `closeLabel` : Libellé de la fermeture de la modale
+  - `srcUrl` : Url de la modale (optionnel, habituellement passé par le script d'ouverture)	
+  - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
+  - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
+  
+Exemple d'utilisation sur un click sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-university/blob/master/mars/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
+```HTML
+  <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
 
-- `vu:page`
-- `vu:include-data`
+  <vu:modal componentId="workOrderEditModal" title="Work Order" iframe_width="800" iframe_height="400"  />
+			
+  <script type="text/javascript">
+    function onWorkOrderSuccess() {
+      componentStates.workOrderEditModal.opened = false;
+      VUi.methods.httpPostAjax("[[@{/maintenance/ticket/_reloadWorkOrders}]]", {});
+    }
+  </script>
+```
+
+- `vu:slot`
+- `vu:content`
+- `vu:content-slot`
+    - `name`
+- `vu:content-item`
+
+### Composants Vertigo-UI : utils
+- `vu:include-data` : 
   - object
   - field
 - `vu:include-data-primitive`
 - `vu:include-data-protected`
-- `vu:slot`
+<!-- - `vu:vue-data` : Pose les données de vue pour VueJS. **Ne doit pas être utilisé directement**, il est posé par `vu:page` -->
 
 
-- `vu:page`
-- `vu:head`
-- `vu:block`
-- `vu:form`
-- `vu:grid`
-  - cols
-  - contentTags
-- `vu:grid-cell`
-- `vu:messages`
-- `vu:modal`
-
-
+### Composants Vertigo-UI : inputs
 - `vu:label`
 - `vu:text-field`
 - `vu:text-area`
@@ -226,8 +269,16 @@ Nécessite :
 - `vu:chips-autocomplete`
 - `vu:fileupload`
 
+### Composants Vertigo-UI : collections
 - `vu:cards`
+<!-- - `vu:collection` -->
 - `vu:field-read`
+- `vu:list`
+- `vu:search`
+- `vu:facets`
+
+
+### Composants Vertigo-UI : tables
 - `vu:table`
   - list
   - componentId
@@ -245,16 +296,27 @@ Nécessite :
   - tr_attrs
   - other_attrs
 - `vu:column`
-- `vu:list`
-- `vu:search`
-- `vu:facets`
-- `vu:content`
-- `vu:content-slot`
-    - name
-- `vu:content-item`
+  - list
+  - field
+  - name
+  - label
+  - align
+  - sortable
+  - class
+  - td_attrs
 
-- `vu:button-link`
-- `vu:button-submit`
+### Composants Vertigo-UI : buttons
+- `vu:button-link` : Pose un bouton de type lien (tag `<q-btn type="a"`)
+  - label : libellé du bouton
+  - icon : icon du bouton
+  - url : url du lien
+  - ariaLabel : libellé aria pour l'accessibilité
+  - other_attrs : tous autres attribut. Posés sur le `<q-btn`
+- `vu:button-submit` : Pose un bouton de type submit (tag `<q-btn type="submit"`)
+  - label : libellé du bouton
+  - icon : icon du bouton
+  - ariaLabel : libellé aria pour l'accessibilité
+  - other_attrs : tous autres attribut. Posés sur le `<q-btn`
 
 ## Composants VueJS Vertigo-ui
 
