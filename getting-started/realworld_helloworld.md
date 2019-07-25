@@ -45,20 +45,20 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 
 ```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>your.group.id</groupId>
-  <artifactId>getting-started-vertigo</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
-  
-  <properties>
-  	<maven.compiler.source>1.8</maven.compiler.source>
-	<maven.compiler.target>1.8</maven.compiler.target>
-	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  
-  <dependencies>
-  		<dependency>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>your.group.id</groupId>
+	<artifactId>getting-started-vertigo</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+	
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	
+	<dependencies>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
@@ -84,31 +84,31 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 			<artifactId>c3p0</artifactId>
 			<version>0.9.5.3</version>
 		</dependency>
-  </dependencies>
-  
-  
-  <build>
-  	<plugins>
-  		<plugin>
-			<groupId>org.codehaus.mojo</groupId>
-			<artifactId>build-helper-maven-plugin</artifactId>
-			<executions>
-				<execution>
-					<phase>generate-sources</phase>
-					<goals>
-						<goal>add-source</goal>
-					</goals>
-					<configuration>
-						<sources>
-							<source>src/main/javagen</source>
-						</sources>
-					</configuration>
-				</execution>
-			</executions>
-		</plugin>
-  	</plugins>
-  </build>
-  
+	</dependencies>
+	
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/main/javagen</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	
 </project>
 ```
 
@@ -228,20 +228,28 @@ public class Studio {
 	
 	// Méthode main à lancer pour générer les éléments du projet à partir du modèle 
 	public static void main(String[] args) {
-        // Création de l'application vertigo-studio avec la configuration ci-dessus
+		// Création de l'application vertigo-studio avec la configuration ci-dessus
 		try (final AutoCloseableApp app = new AutoCloseableApp(buildNodeConfig())) {	
 			final MdaManager mdaManager = app.getComponentSpace().resolve(MdaManager.class);
 			//-----
-			mdaManager.clean();											// Nettoyage des générations précédentes
-			mdaManager.generate().displayResultMessage(System.out);		// Lancement de la génération
+			// Nettoyage des générations précédentes
+			mdaManager.clean();
+			// Lancement de la génération
+			mdaManager.generate().displayResultMessage(System.out);
 		}
 	}
 
 }
 ```
+
+> Attention le cas échéant à adapter le code pour correspondre à votre nom de package 
+
 Sauvegarder, cliquer avec le bouton de droite sur le fichier __Studio.java__ puis sur __Run as > Java Application__.
 
 La génération des fichiers est lancée et les entités générées apparaissent dans le répertoire __src/main/javagen/your/group/id__.
+
+__Note__ : Sous Eclipse, il est nécessaire de raffraichir la liste des fichiers du projet pour les voir apparaître (Clic-droit sur le projet > Refresh).
+
 Ces éléments sont maintenant utilisables pour créer des services puis des écrans.
 
 ![](./images/getting-started-6.png)
@@ -322,35 +330,34 @@ boot:
   plugins:
     - io.vertigo.core.plugins.resource.classpath.ClassPathResourceResolverPlugin: {}
 modules:
-  io.vertigo.commons.CommonsFeatures: // utilisation du module vertigo-commons
+  io.vertigo.commons.CommonsFeatures: # utilisation du module vertigo-commons
     features:
       - script:
       - cache:
     featuresConfig:
       - script.janino:
       - cache.memory:
-  io.vertigo.database.DatabaseFeatures: // utilisation du module vertigo-database pour pouvoir utiliser une base de données
+  io.vertigo.database.DatabaseFeatures: # utilisation du module vertigo-database pour pouvoir utiliser une base de données
     features:
-      - sql: // nous activons le support des bases de données SQL
+      - sql: # nous activons le support des bases de données SQL
     featuresConfig:
-      - sql.c3p0: // nous utilisons ici le pool de connection C3P0 pour récuperer les connections à la base
+      - sql.c3p0: # nous utilisons ici le pool de connection C3P0 pour récuperer les connections à la base
           dataBaseClass: io.vertigo.database.impl.sql.vendor.h2.H2DataBase
           jdbcDriver: org.h2.Driver
           jdbcUrl: jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE
-  io.vertigo.dynamo.DynamoFeatures: // utilisation du module vertigo-dynamo
+  io.vertigo.dynamo.DynamoFeatures: # utilisation du module vertigo-dynamo
     features:
-      - store: // activation du support du stockage des entités de notre modèle
-      - kvStore: // activation du support du stockage clé/valeur (utilisé pour la conservation des état de écrans)
+      - store: # activation du support du stockage des entités de notre modèle
+      - kvStore: # activation du support du stockage clé/valeur (utilisé pour la conservation des état de écrans)
     featuresConfig:
-      - store.data.sql: // nous utilisons un store de type SQL (avec notre base H2)
-      - kvStore.berkeley:  // nous utilisons un stockage clé valeur avec la base de donnée BerkeleyDB
+      - store.data.sql: # nous utilisons un store de type SQL (avec notre base H2)
+      - kvStore.berkeley:  # nous utilisons un stockage clé valeur avec la base de donnée BerkeleyDB
           collections: VViewContext;TTL=43200
           dbFilePath: ${java.io.tmpdir}/vertigo-ui/VViewContext
-  your.group.id.gs.modulemetier1.ModuleMetier1Features: // utilisation de notre module métier
+  
+  your.group.id.gs.modulemetier1.ModuleMetier1Features: # utilisation de notre module métier
 
 ```
-
-
 
 
 
@@ -497,13 +504,13 @@ Dans ce fichier, copier / coller le code suivant:
 <!DOCTYPE html>
 <html
 	xmlns:th="http://www.thymeleaf.org" 
-  	xmlns:vu="http://www.morphbit.com/thymeleaf/component">
+	xmlns:vu="http://www.morphbit.com/thymeleaf/component">
 	<head>
-	    <vu:head-meta/>
-	    <meta charset="utf-8"/>
-	    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	    <title>Movie detail</title>		
+		<vu:head-meta/>
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Movie detail</title>
 	</head>
 	
 	<body class="mat desktop no-touch platform-mat">
@@ -511,7 +518,7 @@ Dans ce fichier, copier / coller le code suivant:
 			<div id="page" v-cloak>
 				<vu:form>
 					<div>
-						<vu:button-link th:if="${model.modeEdit}"  url="@{/movie/} + ${model.movie.movId}" :round size="lg" color="primary" icon="fas fa-ban" :flat ariaLabel="Cancel"   />					
+						<vu:button-link th:if="${model.modeEdit}"  url="@{/movie/} + ${model.movie.movId}" :round size="lg" color="primary" icon="fas fa-ban" :flat ariaLabel="Cancel"   />
 						<vu:button-submit th:if="${model.modeReadOnly}" action="@{_edit}" :round size="lg" color="primary" icon="edit" ariaLabel="Edit" />
 					</div>
 					<div>
@@ -522,11 +529,11 @@ Dans ce fichier, copier / coller le code suivant:
 						<div>
 							<vu:button-submit th:if="${!model.modeReadOnly}"   icon="save" label="Save" action="@{_save}" size="lg" color="primary" />
 							<vu:button-link th:if="${model.modeReadOnly}" url="@{/movies/}" label="Go to movies" size="lg" color="secondary" />
-						</div>				
+						</div>
 					</div>
 				</vu:form>
 			</div>
-	    </vu:page>
+		</vu:page>
 	</body>
 </html>
 ```
@@ -570,7 +577,6 @@ public class MovieListController extends AbstractVSpringMvcController {
 		toModeReadOnly();
 	}
 
-
 }
 ```
 
@@ -586,13 +592,13 @@ Dans ce fichier, copier / coller le code suivant:
 <!DOCTYPE html>
 <html
 	xmlns:th="http://www.thymeleaf.org" 
-  	xmlns:vu="http://www.morphbit.com/thymeleaf/component">
+	xmlns:vu="http://www.morphbit.com/thymeleaf/component">
 	<head>
-	    <vu:head-meta/>
-	    <meta charset="utf-8"/>
-	    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	    <title>Movie List</title>		
+		<vu:head-meta/>
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Movie List</title>
 	</head>
 	
 	<body class="mat desktop no-touch platform-mat">
@@ -604,7 +610,7 @@ Dans ce fichier, copier / coller le code suivant:
 				</vu:table>
 				<vu:button-link url="@{/movie/new}" icon="add" round size="lg" color="primary" />
 			</div>
-	    </vu:page>
+		</vu:page>
 	</body>
 </html>
 ```
