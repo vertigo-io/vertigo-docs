@@ -225,7 +225,7 @@ Nécessite :
   - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
   - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
   
-Exemple d'utilisation sur un click sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-university/blob/master/mars/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
+Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-university/blob/master/mars/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
 ```HTML
   <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
 
