@@ -106,6 +106,10 @@ VueJS propose une approche WebComponent avec une IHM réactive mappée sur un mo
 - `@click` : Précise une action a réaliser sur l'évenement `click` du composant. Il existe une variante `@click.native` pour mapper directement le onClick du composant HTML
 - `v-cloak` : Indique a vue que cette partie du DOM doit être caché jusqu'a ce qu'il soit interprété par Vue. Permet d'éviter des "scintillements" lors de l'affichage de la page
 
+!> Sous IE, il y a parfois un soucis avec les composants vueJs *closed inline* : comme `<myComposant />`. Dans certains cas le composant n'est pas reconnu.
+!>
+!> Il est préférable d'avoir le tag ouvrant et fermant : `<myComposant ></myComposant>`
+
 ## Bibliothèque de composant : Quasar
 
 La documentation de Quasar sur [quasar.dev](https://v0-17.quasar-framework.org/guide/)
@@ -239,11 +243,15 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
   </script>
 ```
 
-- `vu:slot`
-- `vu:content`
-- `vu:content-slot`
-    - `name`
-- `vu:content-item`
+- `vu:content` : Tag utilisé dans les composants pour marquer l'insertion du `content` (ie : le body du tag lors de l'utilisation de ce composant). Le body peut-être utilisé pour définir le rendu par défaut.
+- `vu:content-item` : Tag utilisé dans les composants pour marquer l'insertion du `contentItem`. Utilisé dans les cas particulier ou les composants placé dans le corps d'un autre composant doivent être interprétés séparément. Le cas d'exemple est le composant `grid`. Pour être utilisé correctement, il faut que le composant parent ait un attribut contentTags, pose une boucle dessus avec pour nom d'item `contentItem`. (cf. [grid](https://raw.githubusercontent.com/vertigo-io/vertigo-extensions/master/vertigo-ui/src/main/resources/io/vertigo/ui/components/layout/grid.html) )
+- `vu:slot` *tag* : Composant permettant de passer le contenu d'un slot au composant parent. Les slots du composant parent sont référencés par le suffix `_slot`.
+  - `name` : Nom du slot
+  - `content` : Le body du tag est passé au composant parent et sera inséré soit avec l'attribut `vu:slot` soit le tag `<vu:content-slot />`	
+- `vu:slot` *attribute* : Attribut utilisé dans les composants pour marquer l'insertion du slot. Le tag est conservé. Equivalent d'un `th:include="${my_slot}"`.
+  - `value` : Nom du slot (Ex: `vu:slot="top_left_slot"`)
+ - `vu:content-slot` : Tag utilisé dans les composants pour marquer l'insertion du `slot`. Ce tag est remplacé par le slot. Le body peut-être utilisé pour définir le rendu par défaut.
+    - `name` : Nom du slot
 
 ### Composants Vertigo-UI : utils
 - `vu:include-data` : 
