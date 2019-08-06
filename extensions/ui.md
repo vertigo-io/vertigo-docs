@@ -254,11 +254,26 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
     - `name` : Nom du slot
 
 ### Composants Vertigo-UI : utils
-- `vu:include-data` : 
-  - object
-  - field
-- `vu:include-data-primitive`
-- `vu:include-data-protected`
+
+Ces composants sont des composants techniques. 
+Les composants ìnclude-data-*` ont tous le même rôle : ils indiquent au server de transferer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
+Cette stratégie permet d'assurer que seules les données utiles sont poussées coté client. La pluspart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
+Ils restent utile pour ajouter précisément des données dans le `vueData`, pour des composants vue spécifiques par exemple. 
+
+- `vu:include-data` : Inclus le champ d'un objet 
+  - `object` : Nom de l'objet du context
+  - `field` : Nom du champ
+- `vu:include-data-primitive` : Inclus une donnée primitive du context
+  - `key` : Clé de la donnée
+- vu:include-data-map` : Inclus le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
+  - `object` : Nom de l'objet du context
+  - `field` : Nom du champ
+  - `list` : Liste du mapping à appliquer
+  - `listKey` : Champ clé de la liste du mapping
+  - `listDisplay` : Champ libellé de la liste du mapping 
+- `vu:include-data-protected` : Inclus le champ d'un objet. La valeur posée coté client est protégée (non en clair et non modifiable), la valeur réelle reste coté serveur. Ce système est utilisé pour les identifiants de fichier par exemple.
+  - `object` : Nom de l'objet du context
+  - `field` : Nom du champ
 <!-- - `vu:vue-data` : Pose les données de vue pour VueJS. **Ne doit pas être utilisé directement**, il est posé par `vu:page` -->
 
 
