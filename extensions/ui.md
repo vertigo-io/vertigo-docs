@@ -256,7 +256,7 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
 ### Composants Vertigo-UI : utils
 
 Ces composants sont des composants techniques. 
-Les composants ìnclude-data-*` ont tous le même rôle : ils indiquent au server de transferer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
+Les composants `include-data-*` ont tous le même rôle : ils indiquent au server de transferer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
 Cette stratégie permet d'assurer que seules les données utiles sont poussées coté client. La pluspart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
 Ils restent utile pour ajouter précisément des données dans le `vueData`, pour des composants vue spécifiques par exemple. 
 
