@@ -219,13 +219,13 @@ Nécessite :
   - `col` : Nombre de colonne de la cellule
   - `class` : Class CSS de la cellule  
   - `div_attrs` : Listes des attributs à ajouter sur le corps de la cellule (tag `<div>`)
-  - `content` : Le body du tag est conservé	
+  - `content` : Le body du tag est conservé  
 - `vu:messages` : Composant ajoutant la liste des messages globaux issus d'un traitement qui ont été ajoutés dans le context (**uiMessageStack** avec Errors, Warnings, Info et Success)  
 - `vu:modal` : Pose le conteneur de modal, pouvant être utilisée ensuite dans l'écran. 
   - `componentId` : Nom du composant, utilisé pour cibler la modale en Js
   - `title` : Titre de la modale
   - `closeLabel` : Libellé de la fermeture de la modale
-  - `srcUrl` : Url de la modale (optionnel, habituellement passé par le script d'ouverture)	
+  - `srcUrl` : Url de la modale (optionnel, habituellement passé par le script d'ouverture)  
   - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
   - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
   
@@ -234,7 +234,7 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
   <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
 
   <vu:modal componentId="workOrderEditModal" title="Work Order" iframe_width="800" iframe_height="400"  />
-			
+      
   <script type="text/javascript">
     function onWorkOrderSuccess() {
       componentStates.workOrderEditModal.opened = false;
@@ -247,7 +247,7 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
 - `vu:content-item` : Tag utilisé dans les composants pour marquer l'insertion du `contentItem`. Utilisé dans les cas particulier ou les composants placé dans le corps d'un autre composant doivent être interprétés séparément. Le cas d'exemple est le composant `grid`. Pour être utilisé correctement, il faut que le composant parent ait un attribut contentTags, pose une boucle dessus avec pour nom d'item `contentItem`. (cf. [grid](https://raw.githubusercontent.com/vertigo-io/vertigo-extensions/master/vertigo-ui/src/main/resources/io/vertigo/ui/components/layout/grid.html) )
 - `vu:slot` *tag* : Composant permettant de passer le contenu d'un slot au composant parent. Les slots du composant parent sont référencés par le suffix `_slot`.
   - `name` : Nom du slot
-  - `content` : Le body du tag est passé au composant parent et sera inséré soit avec l'attribut `vu:slot` soit le tag `<vu:content-slot />`	
+  - `content` : Le body du tag est passé au composant parent et sera inséré soit avec l'attribut `vu:slot` soit le tag `<vu:content-slot />`  
 - `vu:slot` *attribute* : Attribut utilisé dans les composants pour marquer l'insertion du slot. Le tag est conservé. Equivalent d'un `th:include="${my_slot}"`.
   - `value` : Nom du slot (Ex: `vu:slot="top_left_slot"`)
  - `vu:content-slot` : Tag utilisé dans les composants pour marquer l'insertion du `slot`. Ce tag est remplacé par le slot. Le body peut-être utilisé pour définir le rendu par défaut.
@@ -278,7 +278,15 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
 
 
 ### Composants Vertigo-UI : inputs
-- `vu:label`
+
+Ces composants sont les composants principaux de construction des formulaires des applications.
+Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin de proposer un rendu dépendant du mode `Edit` ou du mode `ReadOnly` 
+
+- `vu:label` :
+  - `object`
+  - `field`
+  - `label`
+  - `other_attrs`
 - `vu:text-field`
 - `vu:text-area`
 - `vu:autocomplete`
@@ -291,6 +299,23 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
 - `vu:slider`
 - `vu:chips-autocomplete`
 - `vu:fileupload`
+
+
+> Pour adapter leur rendu ces composants utilisent des mecanismes particuliers.
+> Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi : 
+```XML
+<th:block th:fragment="label-edit(object,field, label, other_attrs)" vu:alias="label" vu:selector="${viewMode=='edit'}" >
+  <vu:content/>
+</th:block> 
+
+<th:block th:fragment="label-read(object, field, label, other_attrs)" vu:alias="label" vu:selector="${viewMode=='read'}" >
+  <vu:content/>
+</th:block> 
+```
+> - Le `th:fragment` nomme le composant particulier et ses paramètres.
+> - le `vu:alias` nomme l'alias du composant, c'est souvant ce nom qui est utilisé dans les pages
+> - le `vu:selector` est une expression qui est évaluée dans le contexte du composant et permet de sélectionner le fragment à utiliser lorsque l'on utilise l'alias
+
 
 ### Composants Vertigo-UI : collections
 - `vu:cards`
