@@ -106,8 +106,7 @@ VueJS propose une approche WebComponent avec une IHM réactive mappée sur un mo
 - `@click` : Précise une action a réaliser sur l'évenement `click` du composant. Il existe une variante `@click.native` pour mapper directement le onClick du composant HTML
 - `v-cloak` : Indique a vue que cette partie du DOM doit être caché jusqu'a ce qu'il soit interprété par Vue. Permet d'éviter des "scintillements" lors de l'affichage de la page
 
-!> Sous IE, il y a parfois un soucis avec les composants vueJs *closed inline* : comme `<myComposant />`. Dans certains cas le composant n'est pas reconnu.
-!> Il est préférable d'avoir le tag ouvrant et fermant : `<myComposant ></myComposant>`
+!> Sous IE, il y a parfois un soucis avec les composants vueJs *closed inline* : comme `<myComposant />`. Dans certains cas le composant n'est pas reconnu. <br/>Il est préférable d'avoir le tag ouvrant et fermant : `<myComposant ></myComposant>`
 
 ## Bibliothèque de composant : Quasar
 
