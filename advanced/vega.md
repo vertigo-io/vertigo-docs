@@ -11,9 +11,9 @@ Pour publier les WebServices, il suffit d'un ensemble d'annotations sur une faç
 
 ## Quick start
 
-1. Le service doit être déclaré comme un *Composant* Vertigo
-2. Le service doit implémenter [WebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-api/src/main/java/io/vertigo/vega/webservice/WebServices.java)  
-3. Ajouter les annotations sur les méthodes, exemple:   
+1. La classe du webservice doit implémenter l'interface [WebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-api/src/main/java/io/vertigo/vega/webservice/WebServices.java)
+2. La classe doit être déclaré comme un *Composant* Vertigo, concrètement, cela est fait par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application) 
+3. Ajouter les annotations sur les méthodes, exemple:
 ```Java 
 @AnonymousAccessAllowed 
 @GET("/anonymousTest")
@@ -21,23 +21,38 @@ Pour publier les WebServices, il suffit d'un ensemble d'annotations sur une faç
 4. Ajouter la feature *webservices* dans la configuration :
 
 ```yaml
-modules
+modules:
   io.vertigo.commons.CommonsFeatures:
   io.vertigo.vega.VegaFeatures:
     features:
-      - webservices
+      - webservices:
     featuresConfig:
-      - webservices.apiPrefix
-          apiPrefix : /api
+      - webservices.apiPrefix:
+          apiPrefix: /api
 ```
-  
-5. Démarrer l'application
-6. **C'est bon**. Vous pouvez appeler votre webservice :  [http://localhost:8088/anonymousTest](http://localhost:8088/anonymousTest)
+
+5. Déclarer le filtre dans le fichier *web.xml*
+
+```xml
+	<filter>
+		<filter-name>VegaSparkFilter</filter-name>
+		<filter-class>io.vertigo.vega.plugins.webservice.webserver.sparkjava.VegaSparkFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>VegaSparkFilter</filter-name>
+		<url-pattern>/api/*</url-pattern>
+	</filter-mapping>
+```
+ 
+6. Démarrer l'application
+7. **C'est bon**. Vous pouvez appeler votre webservice :  [http://localhost:8080/*maWebApp*/api/anonymousTest](http://localhost:8080/*maWebApp*/api/anonymousTest)
 
 Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/impl/webservice/catalog/SwaggerWebServices.java) qui vous donnent la vue de l'API des WebServices disponibles.<br/>
-* IHM Swagger :  [http://localhost:8088/swaggerUi](http://localhost:8088/swaggerUi)
-* API Swagger seule : [http://localhost:8088/swaggerApi](http://localhost:8088/swaggerApi)
+* IHM Swagger :  [http://localhost:8080/*maWebApp*/api/swaggerUi](http://localhost:8080/*maWebApp*/api/swaggerUi)
+* API Swagger seule : [http://localhost:8080/*maWebApp*/api/swaggerApi](http://localhost:8080/*maWebApp*/api/swaggerApi)
 
+
+?> Vega peux être lancé en mode serveur intégré avec le paramètre *webservices.embeddedServer*, dans ce cas, il est inutile de spécifier un filtre dans le *web.xml* 
 
 ## API
 
@@ -46,14 +61,14 @@ De nombreux exemples complets sont présents dans les tests de Vertigo sur GitHu
 
 ### Syntaxe des routes
 Lors de la définition des routes, vous pouvez utiliser `{myParamName}` pour déclarer une variable de l'URL qui est utilisée comme paramètre du service.  
-Example:
+Exemple:
 ```Java
 @GET("/contact/{id}")
 public Contact getContact(@PathParam("conId") final int contactId) {
 ...
 }
 ```
-Cet exemple accepte les URLs comme `http://localhost:8080/contact/134` ou `http://localhost:8080/contact/756`  
+Cet exemple accepte les URLs comme `http://localhost:8080/*maWebApp*/api/contact/134` ou `http://localhost:8080/*maWebApp*/api/contact/756`  
 et appelle le service sous-jacent comme `getContact(134)` ou `getContact(756)`
 
 ### Paramètres
@@ -217,7 +232,7 @@ public Contact updateFirstNameContact(
 }
 ```
 
-Request: `GET http://localhost:8088/contact/1`
+Request: `GET http://localhost:8080/*maWebApp*/api/contact/1`
 
 Response:
 ```Json
@@ -231,7 +246,7 @@ Response:
 ```
 
 
-Request: `PUT http://localhost:8088/contact/1`
+Request: `PUT http://localhost:8080/*maWebApp*/api/contact/1`
 ```Json
 {
 	"firstName":"Jean-denis",

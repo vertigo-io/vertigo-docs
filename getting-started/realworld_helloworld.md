@@ -261,8 +261,9 @@ Nous allons ici créer la structure de la base de données correspondant au mod�
 Pour ce faire :
 * Télécharger l'exécutable H2 : [ici](http://central.maven.org/maven2/com/h2database/h2/1.4.199/h2-1.4.199.jar)
 * Double-cliquer sur le jar téléchargé
-* Renseigner "URL JDBC", ici : 
-  * `jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE`
+* Renseigner "URL JDBC", comme ceci : 
+    * `jdbc:h2:~/vertigo/getting-started`
+* Laisser le champ "Nom d'utilisateur" vide
 * Cliquer sur __Connecter__
 
 ![](./images/getting-started-7.png)
@@ -344,7 +345,7 @@ modules:
       - sql.c3p0: # nous utilisons ici le pool de connection C3P0 pour récuperer les connections à la base
           dataBaseClass: io.vertigo.database.impl.sql.vendor.h2.H2DataBase
           jdbcDriver: org.h2.Driver
-          jdbcUrl: jdbc:h2:~/vertigo/getting-started;AUTO_SERVER=TRUE
+          jdbcUrl: jdbc:h2:~/vertigo/getting-started
   io.vertigo.dynamo.DynamoFeatures: # utilisation du module vertigo-dynamo
     features:
       - store: # activation du support du stockage des entités de notre modèle
