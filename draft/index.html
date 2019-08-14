@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vertigo-docs</title>
+  <link rel="icon" href="_media/favicon.ico">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Vertigo documentation">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/docsify/lib/themes/vue.css" title="vue">
+  <link rel="stylesheet" href="../docs.css" title="vue">
+	
+</head>
+<body>
+  <div id="app">Loading ...</div>
+  <script>
+    window.$docsify = {
+	  homepage: '/overview/introduction.md',
+	  basePath: 'https://raw.githubusercontent.com/vertigo-io/vertigo-docs/master/',
+      name: 'vertigo',
+	  alias: {
+		'.*/_sidebar.md': 'https://raw.githubusercontent.com/vertigo-io/vertigo-docs/gh-pages/draft/_sidebar.md',
+		'/changes': 'https://raw.githubusercontent.com/vertigo-io/vertigo/master/CHANGES.md',
+      },
+	  loadSidebar: true,
+	  subMaxLevel: 2,
+	  auto2top : true,
+      search: {
+		noData: {
+          '/': 'Aucun resultat!'
+        },
+        paths: 'auto',
+        placeholder: {
+          '/': 'Recherche'
+        }
+      },
+      formatUpdated: '{DD}/{MM} {HH}:{mm}',
+	  plugins: [
+        function (hook, vm) {
+          hook.beforeEach(function (html) {
+            if (/githubusercontent\.com/.test(vm.route.file)) {
+              url = vm.route.file
+                .replace('raw.githubusercontent.com', 'github.com')
+                .replace(/\/master/, '/blob/master')
+            } else {
+              url = 'https://github.com/vertigo-io/vertigo-docs/blob/master/' + vm.route.file
+            }
+            var editHtml = '> [:memo: Aidez à rendre cette documentation meilleure](' + url + ')\n'
+
+            return editHtml + html;
+          })
+        }
+	  ]
+    }
+  </script>
+  <script src="https://unpkg.com/docsify/lib/docsify.min.js"></script>
+  <script src="https://unpkg.com/docsify/lib/plugins/search.min.js"></script>
+  <script src="https://unpkg.com/prismjs/components/prism-markdown.min.js"></script>
+  <script src="https://unpkg.com/prismjs/components/prism-java.min.js"></script>
+  <script src="https://unpkg.com/prismjs/components/prism-yaml.min.js"></script>
+  <script src="https://unpkg.com/prismjs/components/prism-json.min.js"></script>
+</body>
+</html>
