@@ -280,9 +280,9 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
 ### Composants Vertigo-UI : inputs
 
 Ces composants sont les composants principaux de construction des formulaires des applications.
-Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin de proposer un rendu dépendant du mode `Edit` ou du mode `ReadOnly` 
+Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly** 
 
-- `vu:label` :
+- `vu:label` : Composant label 
   - `object`
   - `field`
   - `label`
@@ -318,7 +318,7 @@ Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin 
 
 
 ### Composants Vertigo-UI : collections
-- `vu:cards`
+- `vu:cards` : Génère une liste de card. Lors du rendu d'une card, vous pouvez utiliser l'attribut vueJS `item` pour récupérer l'objet courant. 
 <!-- - `vu:collection` -->
 - `vu:field-read`
 - `vu:list`
@@ -327,7 +327,7 @@ Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin 
 
 
 ### Composants Vertigo-UI : tables
-- `vu:table`
+- `vu:table` : Génère un tableau. Lors du rendu d'une ligne, vous pouvez utiliser l'attribut vueJS `props.row` pour récupérer l'objet courant. 
   - list
   - componentId
   - selectable
