@@ -134,10 +134,10 @@ La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/
 - **inline** `__${...}__` : Préprocesseur. Indique à Thymeleaf que cette portion doit-être préprocessée. C'est utilisé pour des expressions à l'interieur d'autre expression plus globale.
 - **inline** `|...|` : Literal substitution. Permet d'écrire une chaîne contenant des parties à évaluer, c'est un moyen de simplifier l'écriture et évite des concaténations de chaîne.
 - **prefix** `th:` : Ce préfix indique que Thymeleaf doit interpréter l'attribut qui suit. Cela permet de faire du Thymeleaf sur des attributs HTML standards. Sur les tags, cela correspond au namespace des tags spécifiques Thymeleaf.
-- `abc?:bcd` : Souvent utilisé pour simplifier l'écriture, équivalent de `abc!=null?abc:bcd`
+- `abc?:bcd` : Souvent utilisé pour simplifier l'écriture, équivalent de `abc != null ? abc : bcd`
 - `${...}` : Evalue une expression de variable. Ex : `${name}` ou `${user.name}`
 - `@{...}` : Reconstruit l'url d'un lien.
-- `~{abc::bcd}` : Selectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le selector est soit le nom d'un fragment, soit un selector javascript standard (`#id`, `.class`, ...)
+- `~{abc::bcd}` : Sélectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le selector est soit le nom d'un fragment, soit un selector javascript standard (`#id`, `.class`, ...)
 - `th:if` : Donne la condition d'affichage sur un tag (et son body). Le filtre est effectué coté serveur et convient pour la sécurité.
 - `th:with="var1=${...}, var2=${...}"` : Déclare des variables locales. Le scope est le contenu du tag, même hors du fichier : lorsqu'on include d'autres fragments la variable reste accessible. 
 - `th:attr="var1=${...}, var2=${...}"` : Déclare des variables globales. A utiliser avec attention.
@@ -172,10 +172,10 @@ L'application de démo Mars fait une proposition de [layout](https://github.com/
 
 ## Composants nommés Vertigo-ui
 
-Les composants Vertigo-ui utilise le templating Thymeleaf, chaque composant est en fait un th:replace avec un peu d'intelligence complémentaire.
+Les composants Vertigo-ui utilisent le templating Thymeleaf, chaque composant est en fait un `th:replace` avec un peu d'intelligence complémentaire.
 Le principe (et du code) est repris de [thymeleaf-component-dialect](https://github.com/Serbroda/thymeleaf-component-dialect)
 
-Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués coté serveur et plusieurs encapsule ainsi un composant VueJS ou quasar.
+Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués coté serveur et plusieurs d'entre eux encapsulent ainsi un composant VueJS ou quasar.
 Vertigo-ui n'a pas vocation à encapsuler ainsi tous les composants d'ihm, la stratégie sur les composants vertigo-ui est étudiée en fonction des points suivants :
 
 - le composant est un composant de haut-niveau représentant un composant logique. Sous jacent il y aura plusieurs composants d'ihm, un comportement enrichi, des choix ergonomiques adaptés à notre contexte.
@@ -188,10 +188,10 @@ Nécessite :
 ```
 
 ### Paramètres de composant
-- `abc_slot` : Permet de récupérer un vu:slot dans le body du tag appelant et de le placer dans le composant (Ex: vu:table)
-- `abc_attrs` : Agrégation de tous les paramètres préfixés par `abs_` passés lors de l'appel. Permet de les passer des attributs standards sur des tags inclus (Ex: `tr_attrs`, permet de placer des attributs sur le tag `tr` inclus dans `vu:table`, on les passent avec tr_class par exemple). *Evite de prévoir tous les cas lors de la conception du composant.*
+- `abc_slot` : Permet de récupérer un `vu:slot` dans le body du tag appelant et de le placer dans le composant (Ex: `vu:table`)
+- `abc_attrs` : Agrégation de tous les paramètres préfixés par `abc_` passés lors de l'appel du composant. Ex: sur `vu:table` on peux passer l'attribut `tr_class`, le paramètre `class` (avec sa valeur) sera récupérée dans le composant par le paramètre `tr_attrs` pour le placer sur le tag `tr` interne. *Evite de prévoir tous les cas lors de la conception du composant.*
 - `other_attrs` : Agrégation de tous les paramètres non identifié comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifiés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round` donnera `<q-input round`)
-- `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de contentItem. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. ContentItem permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocks et `vu:grid-cell` possède un comportement particulier)
+- `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de `contentItem`. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. `contentItem` permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocks et `vu:grid-cell` possède un comportement particulier)
 
 ### Composants Vertigo-UI : layout
 - `vu:page` : Composant obligatoire encadrant la zone sur laquelle VueJS est actif.
@@ -210,6 +210,7 @@ Nécessite :
   - `header_attrs` : Listes des attributs à ajouter sur le header du block (tag `<div>`)
   - `content_attrs` : Listes des attributs à ajouter sur le corps du block (tag `<div class="q-card-main">`)
   - `card_attrs` : Listes des attributs à ajouter sur le parent du block (tag `<div class="q-card">`)
+  - `content` : Le body du tag est conservé
 - `vu:grid` : Déclare une mise en page de grille
   - `cols` : Nombre de colonne. Par défaut : 2
   - `contentTags` : Le contenu du tag est conservé. Chaque éléments est posé dans un `<div>` avec la largeur attendue. (on force une seule colonne sous le breakpoint **xs**)
@@ -254,8 +255,8 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
 ### Composants Vertigo-UI : utils
 
 Ces composants sont des composants techniques. 
-Les composants `include-data-*` ont tous le même rôle : ils indiquent au server de transferer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
-Cette stratégie permet d'assurer que seules les données utiles sont poussées coté client. La pluspart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
+Les composants `include-data-*` ont tous le même rôle : ils indiquent au server de transférer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
+Cette stratégie permet d'assurer que seules les données utiles sont poussées coté client. La plupart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
 Ils restent utile pour ajouter précisément des données dans le `vueData`, pour des composants vue spécifiques par exemple. 
 
 - `vu:include-data` : Inclus le champ d'un objet 
@@ -263,7 +264,7 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
   - `field` : Nom du champ
 - `vu:include-data-primitive` : Inclus une donnée primitive du context
   - `key` : Clé de la donnée
-- vu:include-data-map` : Inclus le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
+- `vu:include-data-map` : Inclus le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
   - `object` : Nom de l'objet du context
   - `field` : Nom du champ
   - `list` : Liste du mapping à appliquer
@@ -278,7 +279,7 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
 ### Composants Vertigo-UI : inputs
 
 Ces composants sont les composants principaux de construction des formulaires des applications.
-Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly** 
+Pour simplifier l'écriture des écrans, la plupart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly** 
 
 - `vu:label` : Composant label 
   - `object`
@@ -299,7 +300,7 @@ Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin 
 - `vu:fileupload`
 
 
-> Pour adapter leur rendu ces composants utilisent des mecanismes particuliers.
+> Pour adapter leur rendu ces composants utilisent des mécanismes particuliers.
 > Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi : 
 
 ```XML
@@ -313,7 +314,7 @@ Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin 
 ```
 
 > - Le `th:fragment` nomme le composant particulier et ses paramètres.
-> - le `vu:alias` nomme l'alias du composant, c'est souvant ce nom qui est utilisé dans les pages
+> - le `vu:alias` nomme l'alias du composant, c'est souvent ce nom qui est utilisé dans les pages
 > - le `vu:selector` est une expression qui est évaluée dans le contexte du composant et permet de sélectionner le fragment à utiliser lorsque l'on utilise l'alias
 
 
