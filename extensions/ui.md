@@ -106,6 +106,10 @@ VueJS propose une approche WebComponent avec une IHM réactive mappée sur un mo
 - `@click` : Précise une action a réaliser sur l'évenement `click` du composant. Il existe une variante `@click.native` pour mapper directement le onClick du composant HTML
 - `v-cloak` : Indique a vue que cette partie du DOM doit être caché jusqu'a ce qu'il soit interprété par Vue. Permet d'éviter des "scintillements" lors de l'affichage de la page
 
+!> Sous IE, il y a parfois un soucis avec les composants vueJs *closed inline* : comme `<myComposant />`. Dans certains cas le composant n'est pas reconnu.
+!>
+!> Il est préférable d'avoir le tag ouvrant et fermant : `<myComposant ></myComposant>`
+
 ## Bibliothèque de composant : Quasar
 
 La documentation de Quasar sur [quasar.dev](https://v0-17.quasar-framework.org/guide/)
@@ -215,22 +219,22 @@ Nécessite :
   - `col` : Nombre de colonne de la cellule
   - `class` : Class CSS de la cellule  
   - `div_attrs` : Listes des attributs à ajouter sur le corps de la cellule (tag `<div>`)
-  - `content` : Le body du tag est conservé	
+  - `content` : Le body du tag est conservé  
 - `vu:messages` : Composant ajoutant la liste des messages globaux issus d'un traitement qui ont été ajoutés dans le context (**uiMessageStack** avec Errors, Warnings, Info et Success)  
 - `vu:modal` : Pose le conteneur de modal, pouvant être utilisée ensuite dans l'écran. 
   - `componentId` : Nom du composant, utilisé pour cibler la modale en Js
   - `title` : Titre de la modale
   - `closeLabel` : Libellé de la fermeture de la modale
-  - `srcUrl` : Url de la modale (optionnel, habituellement passé par le script d'ouverture)	
+  - `srcUrl` : Url de la modale (optionnel, habituellement passé par le script d'ouverture)  
   - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
   - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
   
-Exemple d'utilisation sur un click sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-university/blob/master/mars/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
+Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-university/blob/master/mars/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
 ```HTML
   <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
 
   <vu:modal componentId="workOrderEditModal" title="Work Order" iframe_width="800" iframe_height="400"  />
-			
+      
   <script type="text/javascript">
     function onWorkOrderSuccess() {
       componentStates.workOrderEditModal.opened = false;
@@ -239,23 +243,50 @@ Exemple d'utilisation sur un click sur Mars [ticketDetail.html](https://github.c
   </script>
 ```
 
-- `vu:slot`
-- `vu:content`
-- `vu:content-slot`
-    - `name`
-- `vu:content-item`
+- `vu:content` : Tag utilisé dans les composants pour marquer l'insertion du `content` (ie : le body du tag lors de l'utilisation de ce composant). Le body peut-être utilisé pour définir le rendu par défaut.
+- `vu:content-item` : Tag utilisé dans les composants pour marquer l'insertion du `contentItem`. Utilisé dans les cas particulier ou les composants placé dans le corps d'un autre composant doivent être interprétés séparément. Le cas d'exemple est le composant `grid`. Pour être utilisé correctement, il faut que le composant parent ait un attribut contentTags, pose une boucle dessus avec pour nom d'item `contentItem`. (cf. [grid](https://raw.githubusercontent.com/vertigo-io/vertigo-extensions/master/vertigo-ui/src/main/resources/io/vertigo/ui/components/layout/grid.html) )
+- `vu:slot` *tag* : Composant permettant de passer le contenu d'un slot au composant parent. Les slots du composant parent sont référencés par le suffix `_slot`.
+  - `name` : Nom du slot
+  - `content` : Le body du tag est passé au composant parent et sera inséré soit avec l'attribut `vu:slot` soit le tag `<vu:content-slot />`  
+- `vu:slot` *attribute* : Attribut utilisé dans les composants pour marquer l'insertion du slot. Le tag est conservé. Equivalent d'un `th:include="${my_slot}"`.
+  - `value` : Nom du slot (Ex: `vu:slot="top_left_slot"`)
+ - `vu:content-slot` : Tag utilisé dans les composants pour marquer l'insertion du `slot`. Ce tag est remplacé par le slot. Le body peut-être utilisé pour définir le rendu par défaut.
+    - `name` : Nom du slot
 
 ### Composants Vertigo-UI : utils
-- `vu:include-data` : 
-  - object
-  - field
-- `vu:include-data-primitive`
-- `vu:include-data-protected`
+
+Ces composants sont des composants techniques. 
+Les composants `include-data-*` ont tous le même rôle : ils indiquent au server de transferer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
+Cette stratégie permet d'assurer que seules les données utiles sont poussées coté client. La pluspart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
+Ils restent utile pour ajouter précisément des données dans le `vueData`, pour des composants vue spécifiques par exemple. 
+
+- `vu:include-data` : Inclus le champ d'un objet 
+  - `object` : Nom de l'objet du context
+  - `field` : Nom du champ
+- `vu:include-data-primitive` : Inclus une donnée primitive du context
+  - `key` : Clé de la donnée
+- vu:include-data-map` : Inclus le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
+  - `object` : Nom de l'objet du context
+  - `field` : Nom du champ
+  - `list` : Liste du mapping à appliquer
+  - `listKey` : Champ clé de la liste du mapping
+  - `listDisplay` : Champ libellé de la liste du mapping 
+- `vu:include-data-protected` : Inclus le champ d'un objet. La valeur posée coté client est protégée (non en clair et non modifiable), la valeur réelle reste coté serveur. Ce système est utilisé pour les identifiants de fichier par exemple.
+  - `object` : Nom de l'objet du context
+  - `field` : Nom du champ
 <!-- - `vu:vue-data` : Pose les données de vue pour VueJS. **Ne doit pas être utilisé directement**, il est posé par `vu:page` -->
 
 
 ### Composants Vertigo-UI : inputs
-- `vu:label`
+
+Ces composants sont les composants principaux de construction des formulaires des applications.
+Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly** 
+
+- `vu:label` : Composant label 
+  - `object`
+  - `field`
+  - `label`
+  - `other_attrs`
 - `vu:text-field`
 - `vu:text-area`
 - `vu:autocomplete`
@@ -269,8 +300,25 @@ Exemple d'utilisation sur un click sur Mars [ticketDetail.html](https://github.c
 - `vu:chips-autocomplete`
 - `vu:fileupload`
 
+
+> Pour adapter leur rendu ces composants utilisent des mecanismes particuliers.
+> Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi : 
+```XML
+<th:block th:fragment="label-edit(object,field, label, other_attrs)" vu:alias="label" vu:selector="${viewMode=='edit'}" >
+  <vu:content/>
+</th:block> 
+
+<th:block th:fragment="label-read(object, field, label, other_attrs)" vu:alias="label" vu:selector="${viewMode=='read'}" >
+  <vu:content/>
+</th:block> 
+```
+> - Le `th:fragment` nomme le composant particulier et ses paramètres.
+> - le `vu:alias` nomme l'alias du composant, c'est souvant ce nom qui est utilisé dans les pages
+> - le `vu:selector` est une expression qui est évaluée dans le contexte du composant et permet de sélectionner le fragment à utiliser lorsque l'on utilise l'alias
+
+
 ### Composants Vertigo-UI : collections
-- `vu:cards`
+- `vu:cards` : Génère une liste de card. Lors du rendu d'une card, vous pouvez utiliser l'attribut vueJS `item` pour récupérer l'objet courant. 
 <!-- - `vu:collection` -->
 - `vu:field-read`
 - `vu:list`
@@ -279,7 +327,7 @@ Exemple d'utilisation sur un click sur Mars [ticketDetail.html](https://github.c
 
 
 ### Composants Vertigo-UI : tables
-- `vu:table`
+- `vu:table` : Génère un tableau. Lors du rendu d'une ligne, vous pouvez utiliser l'attribut vueJS `props.row` pour récupérer l'objet courant. 
   - list
   - componentId
   - selectable
