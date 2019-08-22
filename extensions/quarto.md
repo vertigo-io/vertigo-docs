@@ -33,7 +33,7 @@ Ce module n’est composé que d’un seul service homonyme.
 
   ![](./images/publisher-1.png)
 
-> Le document en sortie de fusion est donc dans le même format que le modèle. Ce document peut être converti dans un autre format grâce au module [Converter].
+!> Le document en sortie de fusion est donc dans le même format que le modèle. Ce document peut être converti dans un autre format grâce au module [Converter].
 
 ### Création du modèle
 
