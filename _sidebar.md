@@ -35,4 +35,5 @@
 - Extensions
   - [UI](extensions/ui.md)
   - [Orchestra](extensions/orchestra.md)
+  - [Quarto](extensions/quarto.md)
 - [Changelog](changes.md)

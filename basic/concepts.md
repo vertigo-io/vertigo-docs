@@ -115,3 +115,22 @@ Elle a vocation a être positionnée sur les façades de services et se comporte
 La notion de `MDA' (pour *Model Driven Architecture*) décrit le fait de partir de la déclaration des données comme structure portante de l'application. 
 **Vertigo** guide les développements vers une approche de ce type, la structure déclarative du **Model** (ce qui touche aux données) soutient le reste de l'application : la séparation en modules (découpage fonctionnel) et en couches (découpage technique).
 **Vertigo** propose un module de génération de code qui permet de mettre en pratique ce principe de manière rapide, homogène et reproductible : le code généré n'est pas modifié par le développeur, il est toujours maintenu cohérent avec la déclaration du modèle. 
+
+
+### KSP *(fichier)*
+
+Les fichiers KSP sont des fichiers texte permettant aux développeurs de déclarer la définition du **Model**. Ces fichiers viennent en complément des fichiers déclarant le structure objet de la base de données (OOM ou XMI celon l'outil).
+Les fichiers KSP reprennent une syntaxe proche du Json afin de rester lisible et flexible, y compris par quelqu'un d'externe au projet ou non développeur comme le chef de projet, ou un DBA.
+Globalement ils permettent de déclarer toutes les définitions de Vertigo.
+
+Les éléments du **Modèle** le plus souvant déclarés en fichier *KSP* sont :
+
+- Domain
+- Formatter
+- Constraint
+- DtObject : les objets non persistés comme les objets d'IHM, les autres sont plutôt dans le modèle de données (OOM ou XMI)
+- Task : Les requêtes SQL restent ainsi hors du code, indentées correctement et lisibles.
+
+### KPR *(fichier)*
+
+Les fichiers KPR sont des fichiers texte permettant de référencer d'autres fichiers KPR ou KSP. Ceux-ci permettent de maitriser le découpage des fichiers KSP.
