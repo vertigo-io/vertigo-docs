@@ -166,6 +166,7 @@ public final class MyPublisherDefinitionProvider implements SimpleDefinitionProv
 				.add(createTestEnquete())
 				.build();
 	}
+}
 ```
 
 ### Mise en place
@@ -225,15 +226,16 @@ Pour l'utilisation du plugin OpenOfficeLocalConverterPlugin (gestion de l'ODT en
 
 Le cas d'usage le plus simple suit les étapes suivantes :
 
-1- Récupération des données
-2- Création d'un PublisherData correspondant au modèle
-3- Peuplement du PublisherData à partir des données de la base
-4- Récupération du Model de document
-5- Création du document à partir du modèle et des données
-6- Sauvegarde du document résultat
+1. Récupération des données
+2. Création d'un PublisherData correspondant au modèle
+3. Peuplement du PublisherData à partir des données de la base
+4. Récupération du Model de document
+5. Création du document à partir du modèle et des données
+6. Sauvegarde du document résultat
 
 Voici le code résultant :
-```Java
+
+```java
 public void testMergerSimple() {
   final MyData myData= loadMyData();
   final PublisherData publisherData = createPublisherData("PuMyPublish");
