@@ -10,26 +10,26 @@ Nous présentons ici, les éléments plus spécifiques qui aident à la prise en
 
 La documentation de SpringMVC sur [docs.spring.io](https://docs.spring.io/spring/docs/3.2.x/spring-framework-reference/html/mvc.html)
 
-Le fonctionnement principale de SpringMVC est de permettre de mapper simplement des requetes HTTP vers des méthodes Java.
+Le fonctionnement principal de SpringMVC est de permettre de mapper simplement des requêtes HTTP vers des méthodes Java.
 Pour cela deux mécanismes cohabitent : 
 
 - par annotations Java pour décrire le comportement et le mapping mis en place
-- par paramétrage dans la configuration Spring de `Resolver` automatique (`ReturnValueHandler` et `ArgumentResolver`) spécifiques réalisant la conversion des données entrantes ou sortantes de manière transparente
+- par paramétrage dans la configuration Spring de resolvers automatique spécifiques réalisant la conversion des données entrantes ou sortantes de manière transparente (`ReturnValueHandler` et `ArgumentResolver`)
 
 Pour fluidifier les développements Vertigo-ui utilise et complète ces deux mécanismes de SpringMVC par défaut avec des annotations spécifiques et des resolvers spécifiques.
 
-Ci-dessous les annotations que l'on utilise le plus souvant :
+Ci-dessous les annotations que l'on utilise le plus souvent :
 
 ### Annotations SpringMVC
 
 - `@Controller` : Indique que le Bean est un controller. Doit hériter de `AbstractVSpringMvcController`
 - `@RequestMapping` : Préfix des urls de ce Controller. Doit respecter le nommage *moduleApplicatif*/*EntitéMétier*, ce nommage se retrouve partout : Url, packages java, répertoires des vues, déclaration du model, etc...
-- `@Inject` : Mécanisme d'injection standard. On ne doit injecter dans des controllers que des Services (ou exceptionnellemnt un autre controller, lorsqu'il y a des éléments du context, ou des actions, en commun par exemple pour les bandeaux de page de détail)
+- `@Inject` : Mécanisme d'injection standard. On ne doit injecter dans des controllers que des Services (ou exceptionnellement un autre controller, lorsqu'il y a des éléments du context, ou des actions, en commun par exemple pour les bandeaux de page de détail)
 - `@GetMapping("myUrl")` : Déclare l'url en GET. Elle représente le point d'entrée sur le controller. Par convention la méthode est nommée `initContext`, prend l'object [ViewContext](#ViewContext) et les paramètres d'entrée nécessaires (bindé avec @PathVariable ou @RequestParam par exemple)
 - `@PostMapping("/_myAction")` : Déclare l'url en POST. Elle représente le point d'action sur le controller. Par convention l'url est préfixée par `_` et la méthode par `do`. La méthode prend les données attendues annotées avec `@ViewAttribute("nomDuParam")`.
 - `@DeleteMapping("_myAction")` : Déclare l'url en DELETE.
 - `@PathVariable("paramName")` : Map une variable avec une portion de l'url du service. Ex: `https://localhost:8080/base/12/mainPicture`, méthode du controller annotée : `@GetMapping("{baseId}/mainPicture")`, le paramètre de la méthode est annoté : `@PathVariable("baseId") final Long baseId` 
-- `@RequestParam("paramName")` : Map une variable avec un paramètre de la request. Ex: `https://localhost:8080/base/myUrl?baseId=12`, méthode du controller annotée : `@GetMapping("myUrl")`, le paramètre de la méthode est annoté : `@RequestParam("baseId") final Long baseId`. Ce cas est finallement rarement mis en place, car on préfère une approche *REST-like* ou les identifiants sont dans le path de l'url, ou bien on passe des objets complèts (mappés par @ViewAttribute).
+- `@RequestParam("paramName")` : Map une variable avec un paramètre de la request. Ex: `https://localhost:8080/base/myUrl?baseId=12`, méthode du controller annotée : `@GetMapping("myUrl")`, le paramètre de la méthode est annoté : `@RequestParam("baseId") final Long baseId`. Ce cas est finalement rarement mis en place, car on préfère une approche *REST-like* ou les identifiants sont dans le path de l'url, ou bien on passe des objets complets (mappés par @ViewAttribute).
 
 ### Annotations Vertigo-ui
 
@@ -47,7 +47,7 @@ Ci-dessous les annotations que l'on utilise le plus souvant :
 
 ### ReturnValueHandler Vertigo-ui
 
-- `void` : Lorsqu'une méthode du controller mappée en POST ou autre ne retourne rien (`void`), la page est rafraichit en prenant en compte les modifications du context effectuées dans la méthode du controller. *(ce évidement pas vraiment un ReturnValueHandler)*
+- `void` : Lorsqu'une méthode du controller mappée en POST ou autre ne retourne rien (`void`), la page est rafraîchit en prenant en compte les modifications du context effectuées dans la méthode du controller. *(ce évidement pas vraiment un ReturnValueHandler)*
 - `ViewContext` : Retourne spécifiquement un viewContext mis à jour. Ceci est utilisé dans le cas des appels Ajax, qui ne doivent recevoir en retour que des données Json et non la page HTML.
 - `FileInfoURI` : Permet d'envoyer une uri fichier. L'uri est protégée (transformée) et n'est pas envoyée en clair.
 - `VFile` : Permet d'envoyer un fichier.
@@ -75,7 +75,7 @@ API du **ViewContext**
 - `getLong` : Récupère un Long du context
 - `getInteger` : Récupère un Integer du context
 - `getBoolean` : Récupère un Boolean du context
-- `getSelectedFacetValues` : Récupère la liste des facettes séléctionnées depuis l'IHM de la recherche à facette.
+- `getSelectedFacetValues` : Récupère la liste des facettes sélectionnées depuis l'IHM de la recherche à facette.
 
 ## IHM : Comment lire ?
 
@@ -85,11 +85,11 @@ Avant de rentrer dans le détail de chacune de ces briques, voici quelques élé
 - La page est rendue en deux endroits : sur le serveur par Thymeleaf et les composants Vertigo-ui, et sur le client par VueJS et Quasar.
 - le préfix `th:` indique à thymeleaf d'interpréter le composant ou l'attribut
 - le préfix `:` indique à VueJS d'interpréter le composant ou l'attribut
-- le préfix `th::` est la composition de `th:` et `:` -> thymeleaf interpretera et laissera le `:` pour VueJS
+- le préfix `th::` est la composition de `th:` et `:`, thymeleaf interprétera et laissera le `:` pour VueJS
 - le préfix `layout:` est une extension thymeleaf qui propose du templating comme *Tiles*.
-- les attributs commencant par `v-` sont des directives VueJS
-- les tags commencant par `<q-` sont des composants Quasar.  
-- les tags commencant par `<vu:` sont des composants Vertigo-ui.  
+- les attributs commençant par `v-` sont des directives VueJS
+- les tags commençant par `<q-` sont des composants Quasar.  
+- les tags commençant par `<vu:` sont des composants Vertigo-ui.  
 
 
 ## Moteur de rendu : VueJS
@@ -98,17 +98,15 @@ La documentation de VueJS sur [vuejs.org](https://vuejs.org/v2/guide/)
 
 VueJS propose une approche WebComponent avec une IHM réactive mappée sur un model de vue, selon le pattern Observer/Observable. 
 
-- **inline** `{{...}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de abc dans le DOM. La valeur est *réactive* et encodé en HTML
+- **inline** `{{abc}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de `abc` dans le DOM. La valeur est *réactive* et encodé en HTML
 - **prefix** `:` : Ce préfix indique que VueJS doit interpréter l'attribut qui suit. Cela permet de faire du VueJS sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
-- `v-if="..."` : Donne la condition d'affichage sur un noeud du DOM. La condition peut-être une variable du vueData ou une expression a évaluer. Attention l'élément disparait du DOM, mais est présent coté client, ne convient pas à la mise ne place de la sécurité.
+- `v-if="..."` : Donne la condition d'affichage sur un noeud du DOM. La condition peut-être une variable du vueData ou une expression a évaluer. Attention l'élément disparaît du DOM, mais est présent coté client, ne convient pas à la mise ne place de la sécurité.
 - `v-for="item in items"` : L'élément sur lequel est posé le `v-for` est dupliqué pour chaque élément. La variable de boucle peut-être utilisé pour changer le rendu de chaque boucle
 - `v-model` : Indique la donnée du vueData bindé sur le composant
 - `@click` : Précise une action a réaliser sur l'évenement `click` du composant. Il existe une variante `@click.native` pour mapper directement le onClick du composant HTML
 - `v-cloak` : Indique a vue que cette partie du DOM doit être caché jusqu'a ce qu'il soit interprété par Vue. Permet d'éviter des "scintillements" lors de l'affichage de la page
 
-!> Sous IE, il y a parfois un soucis avec les composants vueJs *closed inline* : comme `<myComposant />`. Dans certains cas le composant n'est pas reconnu.
-!>
-!> Il est préférable d'avoir le tag ouvrant et fermant : `<myComposant ></myComposant>`
+!> Sous IE, il y a parfois un soucis avec les composants vueJs *closed inline* : comme `<myComposant />`. Dans certains cas le composant n'est pas reconnu. <br/>Il est préférable d'avoir le tag ouvrant et fermant : `<myComposant ></myComposant>`
 
 ## Bibliothèque de composant : Quasar
 
@@ -134,19 +132,19 @@ Nécessite :
 La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html)
 
 - **inline** `__${...}__` : Préprocesseur. Indique à Thymeleaf que cette portion doit-être préprocessée. C'est utilisé pour des expressions à l'interieur d'autre expression plus globale.
-- **inline** `|...|` : Literal substition. Permet d'écrire une chaine contenant des parties à évaluer, c'est un moyen de simplifier l'écriture et évite des concaténations de chaine.
+- **inline** `|...|` : Literal substitution. Permet d'écrire une chaîne contenant des parties à évaluer, c'est un moyen de simplifier l'écriture et évite des concaténations de chaîne.
 - **prefix** `th:` : Ce préfix indique que Thymeleaf doit interpréter l'attribut qui suit. Cela permet de faire du Thymeleaf sur des attributs HTML standards. Sur les tags, cela correspond au namespace des tags spécifiques Thymeleaf.
-- `abc?:bcd` : Souvant utilisé pour simplifier l'écriture, équivalent de `abc!=null?abc:bcd`
+- `abc?:bcd` : Souvent utilisé pour simplifier l'écriture, équivalent de `abc != null ? abc : bcd`
 - `${...}` : Evalue une expression de variable. Ex : `${name}` ou `${user.name}`
 - `@{...}` : Reconstruit l'url d'un lien.
-- `~{abc::bcd}` : Selectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le selector est soit le nom d'un fragment, soit un selector javascript standard (`#id`, `.class`, ...)
+- `~{abc::bcd}` : Sélectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le selector est soit le nom d'un fragment, soit un selector javascript standard (`#id`, `.class`, ...)
 - `th:if` : Donne la condition d'affichage sur un tag (et son body). Le filtre est effectué coté serveur et convient pour la sécurité.
 - `th:with="var1=${...}, var2=${...}"` : Déclare des variables locales. Le scope est le contenu du tag, même hors du fichier : lorsqu'on include d'autres fragments la variable reste accessible. 
 - `th:attr="var1=${...}, var2=${...}"` : Déclare des variables globales. A utiliser avec attention.
 - `th:text` : Evalue le contenu de l'attribut et l'ajoute dans le body du tag. 
 - `th:each="abc : bcd"` : Permet de créer une boucle sur le tag qui le porte. Boucle sur `bcd`, élément courant dans la variable `abc`.
-- `th:include="abc::bcd"` : Composant de base du templating thymeleaf. Le body du tag du template est recopié dans le tag portant l'attribut, le tag du template est perdu. La syntaxe est la même que pour le selecteur de fragment `~{abc::bcd}`. 
-- `th:replace="abc::bcd"` : Composant du templating thymeleaf. Le tag portant l'attribut est remplacé par celui du template. La syntaxe est la même que pour le selecteur de fragment `~{abc::bcd}`. 
+- `th:include="abc::bcd"` : Composant de base du templating thymeleaf. Le body du tag du template est recopié dans le tag portant l'attribut, le tag du template est perdu. La syntaxe est la même que pour le sélecteur de fragment `~{abc::bcd}`. 
+- `th:replace="abc::bcd"` : Composant du templating thymeleaf. Le tag portant l'attribut est remplacé par celui du template. La syntaxe est la même que pour le sélecteur de fragment `~{abc::bcd}`. 
 - `th:remove="*mode*"` : Retire des tags du DOM, en fonction du mode. Les plus courants sont : 
   - `all` retire le tag et ses enfants
   - `tag` retire le tag et conserve ses enfants
@@ -162,27 +160,27 @@ Nécessite :
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 ```
 
-- `<head>` :  Les attributs du `<head>` sont automatiquements fusionnés entre la page et son layout. Certains sont surchargés (comme `<title>`) , d'autres concaténés (comme les `<script>`).
+- `<head>` :  Les attributs du `<head>` sont automatiquement fusionnés entre la page et son layout. Certains sont surchargés (comme `<title>`) , d'autres concaténés (comme les `<script>`).
 - `layout:decorate` : Ajouté sur le tag `<html>` du contenu, il permet de préciser quel layout ce contenu utilise (il le *décore*). 
 - `layout:fragment` : Ajouté sur les tags internes du contenu, il permet d'indiquer dans quel fragment du layout est posé ce contenu spécifique. 
 
 > Les layouts peuvent hériter d'autres layout.
 
-Les layouts permettent de mutualiser tout la partie récurente des pages : bandeau, menu, footer, ...
-L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-university/tree/master/mars/src/main/webapp/WEB-INF/views/templates) qui peuvent être adapatés et réutilisés.
+Les layouts permettent de mutualiser tout la partie récurrente des pages : bandeau, menu, footer, ...
+L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-university/tree/master/mars/src/main/webapp/WEB-INF/views/templates) qui peuvent être adaptés et réutilisés.
 
 
 ## Composants nommés Vertigo-ui
 
-Les composants Vertigo-ui utilise le templating Thymeleaf, chaque composant est en fait un th:replace avec un peu d'intelligence complémentaire.
+Les composants Vertigo-ui utilisent le templating Thymeleaf, chaque composant est en fait un `th:replace` avec un peu d'intelligence complémentaire.
 Le principe (et du code) est repris de [thymeleaf-component-dialect](https://github.com/Serbroda/thymeleaf-component-dialect)
 
-Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués coté serveur et plusieurs encapsule ainsi un composant VueJS ou quasar.
-Vertigo-ui n'a pas vocation à encampusler ainsi tous les composants d'ihm, la stratégie sur les composants vertigo-ui est étudiée en fonction des points suivants :
+Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués coté serveur et plusieurs d'entre eux encapsulent ainsi un composant VueJS ou quasar.
+Vertigo-ui n'a pas vocation à encapsuler ainsi tous les composants d'ihm, la stratégie sur les composants vertigo-ui est étudiée en fonction des points suivants :
 
 - le composant est un composant de haut-niveau représentant un composant logique. Sous jacent il y aura plusieurs composants d'ihm, un comportement enrichi, des choix ergonomiques adaptés à notre contexte.
-- le composant nécessite des interacations particulières avec le contexte. Par exemple pour selectionner les données à intégrer dans vueData, et parfois pour les encoder de manière spécifique.
-- le composant propose une API plus user-friendly, plus adapatée ou moins verbeuse pour le développeur
+- le composant nécessite des interactions particulières avec le contexte. Par exemple pour sélectionner les données à intégrer dans vueData, et parfois pour les encoder de manière spécifique.
+- le composant propose une API plus user-friendly, plus adaptée ou moins verbeuse pour le développeur
 
 Nécessite : 
 ```HTML
@@ -190,10 +188,10 @@ Nécessite :
 ```
 
 ### Paramètres de composant
-- `abc_slot` : Permet de récupérer un vu:slot dans le body du tag appelant et de le placer dans le composant (Ex: vu:table)
-- `abc_attrs` : Aggrégation de tous les paramètres préfixés par `abs_` passés lors de l'appel. Permet de les passer des attributs standards sur des tags inclus (Ex: `tr_attrs`, permet de placer des attributs sur le tag `tr` inclus dans `vu:table`, on les passent avec tr_class par exemple). *Evite de prévoir tous les cas lors de la conception du composant.*
-- `other_attrs` : Aggrégation de tous les paramètres non identifié comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round` donnera `<q-input round`)
-- `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de contentItem. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. ContentItem permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocks et `vu:grid-cell` possède un comportement particulier)
+- `abc_slot` : Permet de récupérer un `vu:slot` dans le body du tag appelant et de le placer dans le composant (Ex: `vu:table`)
+- `abc_attrs` : Agrégation de tous les paramètres préfixés par `abc_` passés lors de l'appel du composant. Ex: sur `vu:table` on peux passer l'attribut `tr_class`, le paramètre `class` (avec sa valeur) sera récupérée dans le composant par le paramètre `tr_attrs` pour le placer sur le tag `tr` interne. *Evite de prévoir tous les cas lors de la conception du composant.*
+- `other_attrs` : Agrégation de tous les paramètres non identifié comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifiés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round` donnera `<q-input round`)
+- `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de `contentItem`. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. `contentItem` permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocks et `vu:grid-cell` possède un comportement particulier)
 
 ### Composants Vertigo-UI : layout
 - `vu:page` : Composant obligatoire encadrant la zone sur laquelle VueJS est actif.
@@ -212,6 +210,7 @@ Nécessite :
   - `header_attrs` : Listes des attributs à ajouter sur le header du block (tag `<div>`)
   - `content_attrs` : Listes des attributs à ajouter sur le corps du block (tag `<div class="q-card-main">`)
   - `card_attrs` : Listes des attributs à ajouter sur le parent du block (tag `<div class="q-card">`)
+  - `content` : Le body du tag est conservé
 - `vu:grid` : Déclare une mise en page de grille
   - `cols` : Nombre de colonne. Par défaut : 2
   - `contentTags` : Le contenu du tag est conservé. Chaque éléments est posé dans un `<div>` avec la largeur attendue. (on force une seule colonne sous le breakpoint **xs**)
@@ -256,8 +255,8 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
 ### Composants Vertigo-UI : utils
 
 Ces composants sont des composants techniques. 
-Les composants `include-data-*` ont tous le même rôle : ils indiquent au server de transferer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
-Cette stratégie permet d'assurer que seules les données utiles sont poussées coté client. La pluspart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
+Les composants `include-data-*` ont tous le même rôle : ils indiquent au server de transférer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
+Cette stratégie permet d'assurer que seules les données utiles sont poussées coté client. La plupart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
 Ils restent utile pour ajouter précisément des données dans le `vueData`, pour des composants vue spécifiques par exemple. 
 
 - `vu:include-data` : Inclus le champ d'un objet 
@@ -265,7 +264,7 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
   - `field` : Nom du champ
 - `vu:include-data-primitive` : Inclus une donnée primitive du context
   - `key` : Clé de la donnée
-- vu:include-data-map` : Inclus le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
+- `vu:include-data-map` : Inclus le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
   - `object` : Nom de l'objet du context
   - `field` : Nom du champ
   - `list` : Liste du mapping à appliquer
@@ -280,7 +279,7 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
 ### Composants Vertigo-UI : inputs
 
 Ces composants sont les composants principaux de construction des formulaires des applications.
-Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly** 
+Pour simplifier l'écriture des écrans, la plupart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly** 
 
 - `vu:label` : Composant label 
   - `object`
@@ -301,8 +300,9 @@ Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin 
 - `vu:fileupload`
 
 
-> Pour adapter leur rendu ces composants utilisent des mecanismes particuliers.
+> Pour adapter leur rendu ces composants utilisent des mécanismes particuliers.
 > Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi : 
+
 ```XML
 <th:block th:fragment="label-edit(object,field, label, other_attrs)" vu:alias="label" vu:selector="${viewMode=='edit'}" >
   <vu:content/>
@@ -312,8 +312,9 @@ Pour simplifier l'écriture des écrans, la pluspart gèrent le `viewMode` afin 
   <vu:content/>
 </th:block> 
 ```
+
 > - Le `th:fragment` nomme le composant particulier et ses paramètres.
-> - le `vu:alias` nomme l'alias du composant, c'est souvant ce nom qui est utilisé dans les pages
+> - le `vu:alias` nomme l'alias du composant, c'est souvent ce nom qui est utilisé dans les pages
 > - le `vu:selector` est une expression qui est évaluée dans le contexte du composant et permet de sélectionner le fragment à utiliser lorsque l'on utilise l'alias
 
 
