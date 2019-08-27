@@ -1,10 +1,31 @@
 <hr/>
 	<h3 class="q-version-select">
 	Vertigo  
-	<select onchange="javascript:location.href=this.value+location.hash">
+	<select id="versions" onchange="javascript:location.href=this.value+location.hash">
     <option value="/vertigo-docs/">v2.0.0 (current)</option>
     <!-- <option value="/vertigo-docs/v2.0.0/">v2.0.0</option> -->
-    </select>
+  </select>
+  <script>
+   var $select = $('#versions');
+      $.ajax({
+        url: 'https://api.github.com/repos/vertigo-io/vertigo-docs/tags',
+      }).then(function(options) {
+        options.map(function(option) {
+          var $option = $('<option>');
+          $option
+            .val('/vertigo-docs/'+option['name'])
+            .text(option['name']);          
+          $select.append($option);
+        });
+        var extractFromLocation = window.location.href.substring(window.location.origin.length,window.location.href.indexOf('/#/')+1);
+        if(extractFromLocation.contains('draft') {
+          $select.append('<option selected value="/vertigo-docs/draft/">draft</option>');
+        }
+        $select.val(extractFromLocation);
+        
+      });
+    });
+  </script>
 	</h3>
 <hr/>
 
