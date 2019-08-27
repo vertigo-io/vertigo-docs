@@ -11,19 +11,21 @@
 		  $.ajax({
 			url: 'https://api.github.com/repos/vertigo-io/vertigo-docs/tags',
 		  }).then(function(options) {
+			var i = 0;
 			options.map(function(option) {
 			  var $option = $('<option>');
+			
 			  $option
-				.val('/vertigo-docs/'+option['name'])
-				.text(option['name']);          
+				.val('/vertigo-docs/'+(i>0)?option['name']:'')
+				.text(option['name']+(i>0)?'':' (current)');          
 			  $select.append($option);
+			  i++;
 			});
 			var extractFromLocation = window.location.href.substring(window.location.origin.length,window.location.href.indexOf('/#/')+1);
-			if(extractFromLocation.contains('draft') {
+			if(extractFromLocation.includes('draft')) {
 			  $select.append('<option selected value="/vertigo-docs/draft/">draft</option>');
 			}
-			$select.val(extractFromLocation);
-			
+			$select.val(extractFromLocation);			
 		  });
 		});
 	});
