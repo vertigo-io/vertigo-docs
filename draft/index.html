@@ -60,8 +60,8 @@
 					  var $option = $('<option>');
 					
 					  $option
-						.val('/vertigo-docs/'+(i>0)?option['name']:'')
-						.text(option['name']+(i>0)?'':' (current)');          
+						.val('/vertigo-docs/'+((i>0)?option['name']:''))
+						.text(option['name']+((i>0)?'':' (current)'));          
 					  $select.append($option);
 					  i++;
 					});
