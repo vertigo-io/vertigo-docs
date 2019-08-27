@@ -6,7 +6,7 @@
     <!-- <option value="/vertigo-docs/v2.0.0/">v2.0.0</option> -->
   </select>
   <script>
-	$( document ).ready({
+	$( document ).ready(function() {
 		var $select = $('#versions');
 		  $.ajax({
 			url: 'https://api.github.com/repos/vertigo-io/vertigo-docs/tags',
@@ -28,7 +28,6 @@
 			$select.val(extractFromLocation);			
 		  });
 		});
-	});
   </script>
 	</h3>
 <hr/>
