@@ -18,6 +18,7 @@ Pour plus de détails, vous pouvez vous rapporter au chapitre dédié à la [con
 Voici une configuration typique d'une application utilisant le module Account
 
 ```yaml
+
 modules
   io.vertigo.account.AccountFeatures:
     features:
@@ -47,7 +48,7 @@ modules
 - **authorization** : Active les fonctionnalités liées aux autorisations
 - **identityProvider** : Active les fonctionnalités de fournisseur d'identité
 
-### Configurations 
+### Paramètres des Features 
 
 #### Account
 - **account.store.store** : Stockage des *Account* par le *StoreManager*
@@ -67,7 +68,7 @@ modules
 - **account.cache.redis** : Active le cache Redis via le *RedisConnector* (**Attention** : pas de purge automatique)
 
 #### Authorization
-?> Pas de configuration particulière. Le comportement de ce composant est porté par le fichier de configuration des règles des **Autorisations**. 
+?> Pas de configuration particulière. Le comportement de ce composant est porté par le fichier de configuration des règles des [Autorisations](#Autorisations). 
 
 
 ## Authentification
