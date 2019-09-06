@@ -50,7 +50,7 @@
             return editHtml + html;
           });
 		
-			hook.ready(function() {
+			hook.doneEach(function() {
 				var $select = $('#versions');
 				$.ajax({
 					url: 'https://api.github.com/repos/vertigo-io/vertigo-docs/tags',
