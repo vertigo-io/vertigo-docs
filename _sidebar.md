@@ -32,6 +32,7 @@
 - Details des Modules
   - [Vega](advanced/vega.md)
   - [Account](advanced/account.md)
+  - [Commons](advanced/commons.md)
 - Extensions
   - [UI](extensions/ui.md)
   - [Orchestra](extensions/orchestra.md)
