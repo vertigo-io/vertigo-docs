@@ -2,8 +2,7 @@
 	<h3 class="q-version-select">
 	Vertigo  
 	<select id="versions" onchange="javascript:location.href=this.value+location.hash">
-    <!-- <option value="/vertigo-docs/">v2.0.0 (current)</option>
-    <option value="/vertigo-docs/v2.0.0/">v2.0.0</option> -->
+    <!-- <option value="/vertigo-docs/v2.1.0/">v2.1.0 (current)</option> -->
   </select>
 	</h3>
 <hr/>
@@ -36,5 +35,6 @@
 - Extensions
   - [UI](extensions/ui.md)
   - [Orchestra](extensions/orchestra.md)
-  - [Quarto](extensions/quarto.md)
+  - [Quarto](extensions/quarto.md
 - [Changelog](changes.md)
+- [Changelog-extensions](changes-extensions.md)
