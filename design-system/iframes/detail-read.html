@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
+<head>
+    <title>Bases</title>
+    
+		<link href="io/vertigo/ui/static/3rdParty/materialIcons/v50/css/materialIcons.css" rel="stylesheet" type="text/css"/>
+		<link href="io/vertigo/ui/static/3rdParty/roboto/v20/css/roboto.css" rel="stylesheet" type="text/css"/>
+		<link href="io/vertigo/ui/static/3rdParty/use.fontawesome.com/releases/v5.7.1/css/all.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/ionicons@4.6.2/dist/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/@mdi/font@3.4.93/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/animate.css@3.7.0/animate.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.min.css" rel="stylesheet" type="text/css"/>
+		<link href="io/vertigo/ui/static/css/vertigo-ui.css" rel="stylesheet" type="text/css"/>
+		
+		<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.ie.polyfills.umd.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"> </script>
+		<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1/dist/vue-resource.min.js"></script>
+		<style type="text/css">
+		[v-cloak] {
+		  display: none;
+		}
+		#view-flexbox{margin-top:30px;max-width:95vw}#view-flexbox .column>div>div,#view-flexbox .flex>div>div,#view-flexbox .row>div>div{padding:10px;border-radius:3px;background:hsla(31,15%,50%,.1);text-align:center}#view-flexbox.with-border .column,#view-flexbox.with-border .flex,#view-flexbox.with-border .row{border:2px solid teal}#view-flexbox.with-border .column>div,#view-flexbox.with-border .flex>div,#view-flexbox.with-border .row>div{border:1px dashed orange}
+		</style>
+		<script>
+			var VUiExtensions = { dataX : {}, methods : {} };
+		</script>
+
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Demo Application of Vertigo UI powered by SpringMvc, Thymeleaf and Quasar Framework"/>
+    <meta name="author" content="Klee Group"/>
+    
+  	<!--link rel="stylesheet" href="/mars/static/css/mars.css"/-->
+	<link rel="icon" href="/mars/static/img/favicon.ico"/>
+
+	<script src="io/vertigo/ui/static/js/v-components/v-scroll-spy.js"></script>
+</head>
+
+<body class="mat desktop no-touch platform-mat">
+	<q-layout view="hHh LpR fff" id="page" v-cloak>
+		<q-page-container class="row justify-center q-pb-lg" >
+			<section class="col container-bottom-padding">
+				<section class="col-12" v-minify="{topOffsetEl:'.q-header', leftOffsetEl:'.q-drawer--left'}">
+					<div class="row justify-between items-center bg-secondary header-content" >
+						<div id="baseImg">
+							<img src="/mars/basemanagement/base/1006/mainPicture" class="detailImg gt-md" alt="Main picture"/>
+						</div>
+						<!-- Brand and toggle get grouped for better mobile display -->
+						<div class="col column ">
+							<div class="row col">
+								<div class="detailTitle q-px-md self-center text-secondary-inverted" id="baseTitle">
+									<span class="text-bigger">Proxima (Barcelona)</span> <br />
+									<span class="text-smaller ne-mini">Barcelona-Proxima</span> <br class="ne-mini" />
+									<span class="text-smaller">Hydroponic</span>
+								</div>
+								<div class="row self-center ne-mini justify-end col">
+									<form action="#" method="post" autocomplete="off" spellcheck="false" accept-charset="UTF-8">
+										<div class="primary">
+											<q-btn type="submit" icon="edit" formaction="_edit" aria-label="Edit" title="Edit" size="lg" color="primary" class="on-left" :round="true"></q-btn>
+											<q-btn type="a" icon="fas fa-rocket" href="/mars/basemanagement/equipments/" aria-label="See all equipments" title="See all equipments" color="primary" size="lg" class="on-left gt-sm" :round="true"></q-btn>
+											<q-btn type="a" icon="fas fa-rocket" href="/mars/basemanagement/equipment/new" aria-label="Add equipment" title="Add equipment" color="primary" size="lg" class="on-left gt-sm" :round="true">+</q-btn>
+											<q-btn type="a" icon="fas fa-image" href="/mars/basemanagement/newPicture" aria-label="Add photo" title="Add photo" color="primary" size="lg" class="on-left gt-md" :round="true">+</q-btn>
+											<q-btn type="submit" icon="fas fa-archive" formaction="_archive" aria-label="Archive base" title="Archive base" color="primary" size="lg" class="on-left gt-md" :round="true"></q-btn>
+											<q-btn type="submit" icon="fas fa-trash-alt" formaction="_delete" aria-label="Delete base" title="Delete base" color="primary" size="lg" class="on-left gt-md" :round="true"></q-btn>
+											<q-btn round size="lg" color="primary" icon="more_horiz" direction="down" aria-label="More actions" title="More actions" class="on-left lt-lg">
+												<q-menu>
+													<q-list class="column items-center">
+														<q-item class="lt-md">
+															<q-btn type="a" label="See all equipments" icon="fas fa-rocket" href="/mars/basemanagement/equipments/" aria-label="See all equipments" title="See all equipments" color="primary" size="md" class="on-left" :round="false"></q-btn>
+														</q-item>
+													</q-list>
+													<q-list class="column items-center">
+														<q-item class="lt-md">
+															<q-btn type="a" label="Add equipment" icon="fas fa-rocket" href="/mars/basemanagement/equipment/new" aria-label="Add equipment" title="Add equipment" color="primary" size="md" class="on-left" :round="false">+</q-btn>
+														</q-item>
+													</q-list>
+													<q-list class="column items-center">
+														<q-item class="lt-lg">
+															<q-btn type="a" label="Add photo" icon="fas fa-image" href="/mars/basemanagement/newPicture" aria-label="Add photo" title="Add photo" color="primary" size="md" class="on-left" :round="false">+</q-btn>
+														</q-item>
+													</q-list>
+													<q-list class="column items-center">
+														<q-item class="lt-lg">
+															<q-btn type="submit" label="Archive base" icon="fas fa-archive" formaction="_archive" aria-label="Archive base" title="Archive base" color="primary" size="md" class="on-left" :round="false"></q-btn>
+														</q-item>
+													</q-list>
+													<q-list class="column items-center">
+														<q-item class="lt-lg">
+															<q-btn type="submit" label="Delete base" icon="fas fa-trash-alt" formaction="_delete" aria-label="Delete base" title="Delete base" color="primary" size="md" class="on-left" :round="false"></q-btn>
+														</q-item>
+													</q-list>
+												</q-menu>
+											</q-btn>
+										</div>
+										<input type="hidden" name="CTX" v-bind:value="vueData.CTX">
+									</form>
+								</div>
+							</div>
+							<div class="row bg-accent text-accent-inverted items-end header-tabs ne-mini">
+								<q-btn type="a" label="Base Information" href="/mars/basemanagement/base/information/1006" aria-label="Base Information" title="Base Information" :flat="true" class="active"></q-btn>
+								<q-btn type="a" label="Equipment" href="/mars/basemanagement/base/equipment/1006" aria-label="Equipment" title="Equipment" :flat="true"></q-btn>
+								<q-btn type="a" label="VR View" href="/mars/basemanagement/base/vr/1006" aria-label="VR View" title="VR View" :flat="true"></q-btn>
+							</div>
+						</div>
+					</div>
+				</section>
+				<q-page padding class="row col-12 q-gutter-md">
+					<div class="col-2 gt-md">
+						<nav v-scroll-spy="{offset:0, padding:20}">
+							<q-list link class="column items-stretch" style="height:100%">
+								<section>
+									<q-item tag="a" href="#health">Health Condition</q-item>
+									<q-item tag="a" href="#general">General Information</q-item>
+									<q-item tag="a" href="#views">Views</q-item>
+									<q-item tag="a" href="#financial">Financial value</q-item>
+								</section>
+							</q-list>
+						</nav>
+					</div>
+					<div class="col content-body">
+						<form action="#" method="post" autocomplete="off" spellcheck="false" accept-charset="UTF-8">
+							<!-- withFields unsupported yet -->
+							<!-- isNotify unsupported yet -->
+							<div v-if="uiMessageStack.globalErrors.length > 0" class="q-card bg-negative text-white col">
+								<div class="q-card-main">
+									<div class="q-list">
+										<div v-for="message in uiMessageStack.globalErrors" class="q-item">
+											<div class="q-item-main">
+												<div class="q-item-label" >{{message}}</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div v-if="uiMessageStack.globalWarnings.length > 0" class="q-card bg-warning text-white col">
+								<div class="q-card-main">
+									<div class="q-list">
+										<div v-for="message in uiMessageStack.globalWarnings" class="q-item">
+											<div class="q-item-main">
+												<div class="q-item-label" >{{message}}</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div v-if="uiMessageStack.globalInfos.length > 0" class="q-card bg-info text-white col">
+								<div class="q-card-main">
+									<div class="q-list">
+										<div v-for="message in uiMessageStack.globalInfos" class="q-item">
+											<div class="q-item-main">
+												<div class="q-item-label" >{{message}}</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div v-if="uiMessageStack.globalSuccess.length > 0" class="q-card bg-positive text-white col">
+								<div class="q-card-main">
+									<div class="q-list">
+										<div v-for="message in uiMessageStack.globalSuccess" class="q-item">
+											<div class="q-item-main">
+												<div class="q-item-label" >{{message}}</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<section class="row q-col-gutter-md">
+								<div id="health" class="col-md-3 col-xs-12">
+									<q-card class="bg-white text-center">
+										<q-card-section class="indicator-title text-faded">Health</q-card-section>
+										<q-card-section>
+											<q-knob :value="70" :min="0" :max="100" color="positive" :readonly="true" show-value size="80px" :thickness="0.15"></q-knob>
+										</q-card-section>
+									</q-card>
+								</div>
+								<div class="col-md-9 col-xs-12">
+									<q-card class="bg-white row justify-around items-center" style="height:100%;">
+										<div class="text-center">
+											<span class="indicator text-secondary" >148</span><br />
+											<span class="indicator-title text-faded">Equipment(s)</span>
+										</div>
+										<div class="text-center">
+											<span class="indicator text-secondary" >63</span><br />
+											<span class="indicator-title text-faded">Open Tickets(s)</span>
+										</div>
+										<div class="text-center">
+											<span class="indicator text-secondary" >0</span><br />
+											<span class="indicator-title text-faded">Work Order(s) in progress</span>
+										</div>
+									</q-card>
+								</div>
+								<div class="col-12">
+									<div class="q-card bg-white " id="general">
+										<div class="q-card__section no-padding">
+											<q-item>
+												<q-item-section>
+													<div class="text-h6" >General Information</div>
+													<div class="text-subtitle2" ></div>
+												</q-item-section>
+												<q-item-section side>
+													<q-icon th-if="${icon != null}" name=""></q-icon>
+												</q-item-section>
+											</q-item>
+										</div>
+										<div class="q-separator q-separator--horizontal"></div>
+										<div class="q-card__section">
+											<div class="row q-col-gutter-md" >
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Name"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>Proxima (Barcelona)</span><span></span>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Code"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>Barcelona-Proxima</span><span></span>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Base Manager"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>Two</span><span></span>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Base Geosector"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>Promethei Mons</span>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Geographic Location"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>{ &quot;lon&quot;: 2.166117778 , &quot;lat&quot; : 41.38961111 }</span><span></span>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Base Type"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>Hydroponic</span>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Creation Date"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>23/10/2010</span><span></span>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Tags"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<q-chip v-for="value in vueData.base.tags" dense>{{value}}</q-chip>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-12 ">
+													<q-input 
+														autogrow
+														v-model="vueData.base.description" 
+														name="vContext[base][description]"
+														label="Description"
+														orientation="vertical"
+														stack-label
+														borderless
+														>
+													</q-input>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-12">
+									<div class="q-card bg-white " id="views">
+										<div class="q-card__section no-padding">
+											<q-item>
+												<q-item-section>
+													<div class="text-h6" >Views</div>
+													<div class="text-subtitle2" ></div>
+												</q-item-section>
+												<q-item-section side>
+													<q-icon th-if="${icon != null}" name=""></q-icon>
+												</q-item-section>
+											</q-item>
+										</div>
+										<div class="q-separator q-separator--horizontal"></div>
+										<div class="q-card__section">
+											<q-carousel v-model="componentStates.basePicturesCarousel.current" control-color="primary" arrows navigation style="height:300px;" color="grey" class="image-gallery">
+												<q-carousel-slide
+													v-for="(item, index) in vueData.basePictures" class="  showButtonOnHover" :name="index" >
+													<img 
+														:src="&#39;/mars/basemanagement/base/picture/&#39;+item.picturefileId"
+														@click="componentStates.basePictureZoomDialog.opened = true;componentStates.basePictureZoomDialog.imgSrc = item.picturefileId" style="max-width: 100%;" :alt="'base picture ' + index "/>
+													<q-btn color="primary" round icon="fullscreen" class="absolute-center bg-grey" aria-label="Zoom picture" title="Zoom picture"></q-btn>
+												</q-carousel-slide>
+											</q-carousel>
+											<q-dialog v-model="componentStates.basePictureZoomDialog.opened" class="image-gallery-modal"><img v-if="componentStates.basePictureZoomDialog.imgSrc" :src="&#39;/mars/basemanagement/base/picture/&#39;+componentStates.basePictureZoomDialog.imgSrc"
+												style="width: 50vw; object-fit: contain;" /></q-dialog>
+										</div>
+									</div>
+								</div>
+								<div class="col-12">
+									<div class="q-card bg-white " id="financial">
+										<div class="q-card__section no-padding">
+											<q-item>
+												<q-item-section>
+													<div class="text-h6" >Financial value</div>
+													<div class="text-subtitle2" ></div>
+												</q-item-section>
+												<q-item-section side>
+													<q-icon th-if="${icon != null}" name=""></q-icon>
+												</q-item-section>
+											</q-item>
+										</div>
+										<div class="q-separator q-separator--horizontal"></div>
+										<div class="q-card__section">
+											<div class="row q-col-gutter-md" >
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Current base assets value"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>36 593,36</span><span> €</span>
+													</q-field>
+												</div>
+												<div class="col-xs-12 col-md-6">
+													<q-field
+														:label-width="2"
+														label="Renting Fee"
+														orientation="vertical"
+														stack-label
+														readonly
+														borderless
+														>
+														<span>2 992,92</span><span> €</span>
+													</q-field>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<q-page-sticky position="bottom-right">  </q-page-sticky>
+							</section>
+							<input type="hidden" name="CTX" v-bind:value="vueData.CTX">
+						</form>
+					</div>
+				</q-page>
+			</section>
+		</q-page-container>
+	</q-layout>
+	
+	<script>
+	  window.quasarConfig = {
+	    loadingBar: { 'skip-hijack' : true } // disable quasar's ajaxbar
+	  }
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.umd.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/lang/en-us.umd.min.js"></script>
+	
+    <script>
+       	var vueData = {"CTX":"3be66e66-1e1e-402b-8e30-ad7a8b71227e","basePictures":[{"picturefileId":"Prot-1018-Prot"},{"picturefileId":"Prot-1019-Prot"},{"picturefileId":"Prot-1020-Prot"}],"connectedUser":{"personId":1000},"base":{"description":"The Proxima base is managed by Barcelona. The first settlers, led by William Adama, planted the flag in Olympus Mons.\r\nThe base offers a wonderful landscape around the Olympus Mons which offers a natural watchtower.\r\nThe place is used as a refinery thanks to blast furnaces.","tags":["#cnsa","#mountain","#gas"]}};
+       	var componentStates = {"basePictureZoomDialog":{"opened":false,"imgSrc":""},"navDrawer":{"mini":false},"basePicturesCarousel":{"current":0},"botDrawer":{"open":false}};
+       	var uiMessageStack = {"globalErrors":[],"globalWarnings":[],"globalInfos":[],"globalSuccess":[],"objectFieldErrors":{},"objectFieldWarnings":{},"objectFieldInfos":{}};
+	</script>
+
+	<script src="io/vertigo/ui/static/js/vertigo-ui.js"></script>
+	<script src="io/vertigo/ui/static/js/vertigo-ui-lang-en-us.js"></script>
+	<script>
+		Quasar.lang.set(Quasar.lang.enUs)
+		var data = {
+				  vueData : vueData,
+				  componentStates : componentStates,
+				  uiMessageStack: uiMessageStack,
+				  dataX : VUiExtensions.dataX
+			  };
+		
+		var VUiPage = new Vue({
+		  el: '#page',
+		  data: data,
+		  methods: Vue.util.extend(VUi.methods, VUiExtensions.methods ||  {}) 
+		});
+
+		// fixes wrong components states due to firefox bfcache (back-forward cache)
+		//https://developer.mozilla.org/en-US/docs/Archive/Misc_top_level/Working_with_BFCache
+		window.addEventListener('pageshow', function(event) {
+			VUiPage.$forceUpdate();
+		});
+	</script>
+
+	<div>
+	</div>
+			
+</body>
+</html>
