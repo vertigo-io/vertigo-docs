@@ -15,7 +15,6 @@
   - [Ecosystème](overview/ecosystem.md)
   - [Modules](overview/modules.md)
 - Getting-started
-  - [Design Sytem](/getting-started/design-system/search.html)
   - [Prérequis](getting-started/requirements.md)  
   - [Comment démarrer le moteur...](getting-started/helloworld.md)
   - [Real world Hello World !](getting-started/realworld_helloworld.md)  
@@ -41,7 +40,7 @@
 - Design System
   - [Introduction](design-system/intro.md)
   - [Atomes](design-system/atoms.md)
-  - [Molecules](design-system/molecules.md)
+  - Molecules
     - [Boutons](design-system/molecules/buttons.md)
     - [Formulaires](design-system/molecules/form.md)
     - [Grille](design-system/molecules/grid.md)
@@ -51,13 +50,15 @@
     - [Saisie de date](design-system/molecules/date-input.md)
     - [Selection](design-system/molecules/select-input.md)
     - [Géolocalisation](design-system/molecules/geolocation-input.md)
-  - [Organismes](design-system/organismes.md)
+  - Organismes
     - [Blocs](design-system/organismes/block.md)
     - [Collections](design-system/organismes/collections.md)
     - [Liste de cartes](design-system/organismes/cards.md)
-	- [Liste d'éléments](design-system/organismes/items.md)
+    - [Liste d'éléments](design-system/organismes/items.md)
     - [Tableau](design-system/organismes/table.md)
-  - [Templates](design-system/templates.md)
+    - [Menu](design-system/organismes/menu.md)
+  - Templates
+    - [Structure générale](design-system/templates/structure.md)
     - [Onglets](design-system/templates/tab.md)
     - [Edition/Consultation](design-system/templates/read-edit.md)
     - [Recherche](design-system/templates/search.md)
