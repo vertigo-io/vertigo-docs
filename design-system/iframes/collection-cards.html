@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
+<head>
+    <title>Bases</title>
+    
+		<link href="io/vertigo/ui/static/3rdParty/materialIcons/v50/css/materialIcons.css" rel="stylesheet" type="text/css"/>
+		<link href="io/vertigo/ui/static/3rdParty/roboto/v20/css/roboto.css" rel="stylesheet" type="text/css"/>
+		<link href="io/vertigo/ui/static/3rdParty/use.fontawesome.com/releases/v5.7.1/css/all.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/ionicons@4.6.2/dist/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/@mdi/font@3.4.93/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/animate.css@3.7.0/animate.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.min.css" rel="stylesheet" type="text/css"/>
+		<link href="io/vertigo/ui/static/css/vertigo-ui.css" rel="stylesheet" type="text/css"/>
+		
+		<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.ie.polyfills.umd.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"> </script>
+		<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1/dist/vue-resource.min.js"></script>
+		<style type="text/css">
+		[v-cloak] {
+		  display: none;
+		}
+		#view-flexbox{margin-top:30px;max-width:95vw}#view-flexbox .column>div>div,#view-flexbox .flex>div>div,#view-flexbox .row>div>div{padding:10px;border-radius:3px;background:hsla(31,15%,50%,.1);text-align:center}#view-flexbox.with-border .column,#view-flexbox.with-border .flex,#view-flexbox.with-border .row{border:2px solid teal}#view-flexbox.with-border .column>div,#view-flexbox.with-border .flex>div,#view-flexbox.with-border .row>div{border:1px dashed orange}
+		</style>
+		<script>
+			var VUiExtensions = { dataX : {}, methods : {} };
+		</script>
+
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Demo Application of Vertigo UI powered by SpringMvc, Thymeleaf and Quasar Framework"/>
+    <meta name="author" content="Klee Group"/>
+    
+  	<!--link rel="stylesheet" href="/mars/static/css/mars.css"/-->
+	<link rel="icon" href="/mars/static/img/favicon.ico"/>
+</head>
+
+<body class="mat desktop no-touch platform-mat">
+	<q-layout view="hHh LpR fff" id="page" v-cloak>
+		<q-page-container class="row justify-center q-pb-lg" >
+			<section class="col container-bottom-padding">
+				<q-page padding class="row col-12">			
+					<section class="col content-body">
+						<div class="m-title text-h6 q-mb-md">{{vueData.bases.length}} Bases</div>
+						<div class="row wrap justify-start q-col-gutter-md">
+							<div v-for="item in paginatedData(&#39;bases&#39;, &#39;baseCards&#39; )" :key="item.baseId" class="marsCard col-lg-3 col-md-6 col-xs-12">
+								<q-card>
+									<div class="nav" @click="goTo(&#39;/mars/basemanagement/base/information/&#39;+item.baseId)">
+										<q-img :src="&#39;/mars/basemanagement/base/&#39;+item.baseId+&#39;/mainPicture&#39;"></q-img>
+										<q-card-section class="row" >
+											<div class="col-4 q-mr-sm" style="max-width: 100px;" >
+												<div>
+													<q-knob
+														  show-value
+														  :value="item.healthLevel"
+														  :min="0" :max="100"
+														  color="positive" track-color="grey-2" size="80px"
+														  :thickness="0.15"
+														  :readonly="true" >
+														  <q-icon name="fas fa-dice-d20" size="2rem" color="primary" ></q-icon>
+													</q-knob>
+												</div>
+											</div>
+											<div class="col ellipsis" >
+												<span class="text-primary small-caps text-bigger">{{item.name}}</span><br/>
+												<span >{{item.code}}</span><br/>
+													{{item.baseTypeId_display}}
+													<br/>
+													Created : {{item.creationDate}}<br/>
+													<q-icon name="location_on" size="25px"></q-icon>
+													{{item.geosectorId_display}}<br/>
+											</div>
+										</q-card-section>
+									</div>
+									<q-separator></q-separator>
+									<q-card-actions>
+										<q-chip v-for="tag in item.tags" :hide-underline="true" >{{tag}}</q-chip>
+									</q-card-actions>
+								</q-card>
+							</div>
+						</div>
+						<div class="row justify-center">
+							<q-btn flat color="primary" class="q-my-md" v-if="componentStates.baseCards.pagination.rowsNumber &gt; componentStates.baseCards.pagination.rowsPerPage" label="Show more" @click="showMore(&#39;baseCards&#39;)"></q-btn>
+						</div>
+					</section>
+				</q-page>
+			</section>
+		</q-page-container>
+	</q-layout>
+	
+	<script>
+	  window.quasarConfig = {
+	    loadingBar: { 'skip-hijack' : true } // disable quasar's ajaxbar
+	  }
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.umd.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/lang/en-us.umd.min.js"></script>
+	
+    <script>
+       	var vueData = {"bases":[{"healthLevel":70,"code":"Barcelona-Proxima","name":"Proxima (Barcelona)","geosectorId_display":"Promethei Mons","baseId":1006,"creationDate":"23\/10\/2010","baseTypeId_display":"Hydroponic","geosectorId":1016,"tags":["#cnsa","#mountain","#gas"]},{"healthLevel":0,"code":"Copenhagen-Cygnus","name":"Cygnus (Copenhagen)","geosectorId_display":"Mount Sharp","baseId":1003,"creationDate":"27\/08\/2011","baseTypeId_display":"Hydroponic","geosectorId":1010,"tags":["#cnes","#seaside","#hollidays"]},{"healthLevel":62,"code":"Hamburg-Cassiopeiae","name":"Cassiopeiae (Hamburg)","geosectorId_display":"Labeatis Mons","baseId":1007,"creationDate":"07\/10\/2013","baseTypeId_display":"Dwelling Complex","geosectorId":1026,"tags":["#roscomos","#maritime","#hollidays"]},{"healthLevel":95,"code":"London-Andromeda","name":"Andromeda (London)","geosectorId_display":"Malea Patera","baseId":1005,"creationDate":"20\/03\/2010","baseTypeId_display":"Hydroponic","geosectorId":1024,"tags":["#esa","#powerplant","#energy"]},{"healthLevel":10,"code":"Moscow-Persei","name":"Persei (Moscow)","geosectorId_display":"Chronius Mons","baseId":1008,"creationDate":"29\/05\/2010","baseTypeId_display":"Mining Complex","geosectorId":1017,"tags":["#roscosmos","#crater","#mine"]},{"healthLevel":29,"code":"Munich-Pegasus","name":"Pegasus (Munich)","geosectorId_display":"Elysium Mons","baseId":1009,"creationDate":"21\/07\/2010","baseTypeId_display":"Dwelling Complex","geosectorId":1003,"tags":["#nasa","#flat","#farming"]},{"healthLevel":4,"code":"Oslo-Centauri","name":"Centauri (Oslo)","geosectorId_display":"Pavonis Mons ","baseId":1001,"creationDate":"16\/08\/2009","baseTypeId_display":"Dwelling Complex","geosectorId":1002,"tags":["#esa","#flat","#agriculture"]},{"healthLevel":42,"code":"Paris-Aldebaran","name":"Aldebaran (Paris)","geosectorId_display":"Peneus Patera","baseId":1000,"creationDate":"27\/03\/2011","baseTypeId_display":"Dwelling Complex","geosectorId":1025,"tags":["#cnes","#crater","#mine"]},{"healthLevel":26,"code":"Roma-Dragon","name":"Dragon (Roma)","geosectorId_display":"Mount Sharp","baseId":1004,"creationDate":"10\/02\/2016","baseTypeId_display":"Dwelling Complex","geosectorId":1010,"tags":["#cnsa","#crater","#mine"]},{"healthLevel":85,"code":"Stockholm-Pisces","name":"Pisces (Stockholm)","geosectorId_display":"Pindus Mons","baseId":1002,"creationDate":"02\/06\/2016","baseTypeId_display":"Mining Complex","geosectorId":1028,"tags":["#esa","#mountain","#refinery"]}],"CTX":"86d37010-640e-4175-a884-bb559a7db2fb","connectedUser":{"personId":1000}};
+       	var componentStates = {"navDrawer":{"mini":false},"baseCards":{"pagination":{"sortUrl":"\/mars\/basemanagement\/bases\/_sort","componentId":"baseCards","rowsNumber":10,"listKey":"bases","page":1,"rowsPerPage":8},"loading":false,"selected":[]},"botDrawer":{"open":false}};
+       	var uiMessageStack = {"globalErrors":[],"globalWarnings":[],"globalInfos":[],"globalSuccess":[],"objectFieldErrors":{},"objectFieldWarnings":{},"objectFieldInfos":{}};
+	</script>
+
+	<script src="io/vertigo/ui/static/js/vertigo-ui.js"></script>
+	<script src="io/vertigo/ui/static/js/vertigo-ui-lang-en-us.js"></script>
+	<script>
+		Quasar.lang.set(Quasar.lang.enUs)
+		var data = {
+				  vueData : vueData,
+				  componentStates : componentStates,
+				  uiMessageStack: uiMessageStack,
+				  dataX : VUiExtensions.dataX
+			  };
+		
+		var VUiPage = new Vue({
+		  el: '#page',
+		  data: data,
+		  methods: Vue.util.extend(VUi.methods, VUiExtensions.methods ||  {}) 
+		});
+
+		// fixes wrong components states due to firefox bfcache (back-forward cache)
+		//https://developer.mozilla.org/en-US/docs/Archive/Misc_top_level/Working_with_BFCache
+		window.addEventListener('pageshow', function(event) {
+			VUiPage.$forceUpdate();
+		});
+	</script>
+
+	<div>
+	</div>
+			
+</body>
+</html>

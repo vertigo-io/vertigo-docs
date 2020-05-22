@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
+<head>
+    <title>Bases</title>
+    
+		<link href="/design-system/iframes/io/vertigo/ui/static/3rdParty/materialIcons/v50/css/materialIcons.css" rel="stylesheet" type="text/css"/>
+		<link href="/design-system/iframes/io/vertigo/ui/static/3rdParty/roboto/v20/css/roboto.css" rel="stylesheet" type="text/css"/>
+		<link href="/design-system/iframes/io/vertigo/ui/static/3rdParty/use.fontawesome.com/releases/v5.7.1/css/all.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/ionicons@4.6.2/dist/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/@mdi/font@3.4.93/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/animate.css@3.7.0/animate.min.css" rel="stylesheet" type="text/css"/>
+		<link href="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.min.css" rel="stylesheet" type="text/css"/>
+		<link href="/design-system/iframes/io/vertigo/ui/static/css/vertigo-ui.css" rel="stylesheet" type="text/css"/>
+		
+		<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.ie.polyfills.umd.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"> </script>
+		<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1/dist/vue-resource.min.js"></script>
+		<style type="text/css">
+		[v-cloak] {
+		  display: none;
+		}
+		#view-flexbox{margin-top:30px;max-width:95vw}#view-flexbox .column>div>div,#view-flexbox .flex>div>div,#view-flexbox .row>div>div{padding:10px;border-radius:3px;background:hsla(31,15%,50%,.1);text-align:center}#view-flexbox.with-border .column,#view-flexbox.with-border .flex,#view-flexbox.with-border .row{border:2px solid teal}#view-flexbox.with-border .column>div,#view-flexbox.with-border .flex>div,#view-flexbox.with-border .row>div{border:1px dashed orange}
+		</style>
+		<script>
+			var VUiExtensions = { dataX : {}, methods : {} };
+		</script>
+
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    
+  	<!--link rel="stylesheet" href="/mars/static/css/mars.css"/-->
+	<script src="/design-system/iframes/io/vertigo/ui/static/js/v-components/v-facets.js"></script>
+</head>
+
+<body class="mat desktop no-touch platform-mat">
+	<q-layout view="hHh LpR fff" id="page" v-cloak>
+		<q-page-container class="row justify-center q-pb-lg" >
+			<section class="col container-bottom-padding">
+				<q-page class="q-layout-padding">
+					<form action="#" method="post" autocomplete="off" spellcheck="false" accept-charset="UTF-8">
+						<div class="bg-white q-pa-md">
+							<p class="text-subtitle2 q-pt-md">Single line text</p>
+							<div class="row q-col-gutter-md" >
+								<div class="col-xs-12 col-md-6">
+									<q-input 
+										v-model="vueData.base.healthLevel" 
+										name="vContext[base][healthLevel]"
+										:label-width="2"
+										label="Health Level"
+										:error="hasFieldsError(&#39;base&#39;, &#39;healthLevel&#39;)"
+										:error-message="getErrorMessage(&#39;base&#39;, &#39;healthLevel&#39;)"
+										orientation="vertical"
+										stack-label
+										>
+									</q-input>
+								</div>
+								<div class="col-xs-12 col-md-6">
+									<q-field
+										:label-width="2"
+										label="Health Level"
+										orientation="vertical"
+										stack-label
+										readonly
+										borderless
+										>
+										<span>42</span><span></span>
+									</q-field>
+								</div>
+							</div>
+							<p class="text-subtitle2 q-pt-md">Knob</p>
+							<div class="row q-col-gutter-md" >
+								<div class="col-xs-12 col-md-6">
+									<q-field
+										:label-width="2"
+										label="Health Level"
+										:error="hasFieldsError(&#39;base&#39;, &#39;healthLevel&#39;)"
+										:error-message="getErrorMessage(&#39;base&#39;, &#39;healthLevel&#39;)"
+										orientation="vertical"
+										stack-label
+										borderless
+										>
+										<q-knob
+											v-model="vueData.base.healthLevel" 
+											show-value
+											:min="0.0"
+											:max="100.0"
+											:step="0.5"
+											></q-knob>
+									</q-field>
+									<input type="hidden" name="vContext[base][healthLevel]" v-bind:value="vueData.base.healthLevel" />
+								</div>
+								<div class="col-xs-12 col-md-6">
+									<q-field
+										:label-width="2"
+										label="Health Level"
+										orientation="vertical"
+										stack-label
+										readonly
+										borderless
+										>
+										<span>42</span><span></span>
+									</q-field>
+								</div>
+							</div>
+							<p class="text-subtitle2 q-pt-md">Slider</p>
+							<div class="row q-col-gutter-md" >
+								<div class="col-xs-12 col-md-6">
+									<q-field
+										:label-width="2"
+										label="Health Level"
+										:error="hasFieldsError(&#39;base&#39;, &#39;healthLevel&#39;)"
+										:error-message="getErrorMessage(&#39;base&#39;, &#39;healthLevel&#39;)"
+										orientation="vertical"
+										stack-label
+										borderless
+										>
+										<q-slider
+											v-model="vueData.base.healthLevel" 
+											:min="0.0"
+											:max="100.0"
+											:step="0.5"
+											label
+											></q-slider>
+									</q-field>
+									<input type="hidden" name="vContext[base][healthLevel]" v-bind:value="vueData.base.healthLevel" />
+								</div>
+								<div class="col-xs-12 col-md-6">
+									<q-field
+										:label-width="2"
+										label="Health Level"
+										orientation="vertical"
+										stack-label
+										readonly
+										borderless
+										>
+										<span>42</span><span></span>
+									</q-field>
+								</div>
+							</div>
+						</div>
+					</form>
+				</q-page>
+			</section>
+		</q-page-container>
+	</q-layout>
+	
+	<script>
+	  window.quasarConfig = {
+	    loadingBar: { 'skip-hijack' : true } // disable quasar's ajaxbar
+	  }
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.umd.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/lang/en-us.umd.min.js"></script>
+	
+    <script>
+       	var vueData = {
+  "bases": [
+    {
+      "code": "Paris-Aldebaran",
+      "geosectorId_display": "Ulysses Tholus",
+      "description": "The Aldebaran base was the first base of the MMC and managed by Paris. The first settlers, led by James T. Kirk, planted the flag in a crater, near a frozen lake.\nThe crater is one kilometer deep, which offers a mountain-like landscape.\nThe place is rich in minerals, especially in antimony.",
+      "baseId": 1000,
+      "creationDate": "22/03/2012",
+      "rentingFee": 2083.58,
+      "tags": [
+        "#cnes",
+        "#crater",
+        "#mine"
+      ],
+      "healthLevel": 42,
+      "geoLocation": {
+        "lon": 2.333333,
+        "lat": 48.866667
+      },
+      "name": "Aldebaran (Paris)",
+      "baseTypeId": "DWELLING",
+      "baseTypeId_display": "Dwelling Complex",
+      "assetsValue": 95872.14,
+      "geosectorId": 1009
+    },
+    {
+      "code": "Oslo-Centauri",
+      "geosectorId_display": "Chronius Mons",
+      "description": "The Centauri base is managed by Oslo. The first settlers, led by John König, planted the flag near Utopia Planitia.\nThe area is flat and several kilometers long.\nThe place is ideal for agriculture, with a soil rich in potassium.",
+      "baseId": 1001,
+      "creationDate": "12/08/2010",
+      "rentingFee": 1107.58,
+      "tags": [
+        "#esa",
+        "#flat",
+        "#agriculture"
+      ],
+      "healthLevel": 4,
+      "geoLocation": {
+        "lon": 10.752245399999993,
+        "lat": 59.9138688
+      },
+      "name": "Centauri (Oslo)",
+      "baseTypeId": "DWELLING",
+      "baseTypeId_display": "Dwelling Complex",
+      "assetsValue": 92095.13,
+      "geosectorId": 1017
+    },
+    {
+      "code": "Stockholm-Pisces",
+      "geosectorId_display": "Uranius Mons",
+      "description": "The Pisces base is managed by Stockholm. The first settlers, led by Jean-Luc Picard, planted the flag in Olympus Mons.\nThe base offers a wonderful landscape around the Olympus Mons which offers a natural watchtower.\nThe place is used as a refinery thanks to blast furnaces.",
+      "baseId": 1002,
+      "creationDate": "29/05/2017",
+      "rentingFee": 2832.48,
+      "tags": [
+        "#esa",
+        "#mountain",
+        "#refinery"
+      ],
+      "healthLevel": 85,
+      "geoLocation": {
+        "lon": 18.06216022,
+        "lat": 59.3294824
+      },
+      "name": "Pisces (Stockholm)",
+      "baseTypeId": "MINE",
+      "baseTypeId_display": "Mining Complex",
+      "assetsValue": 74735.39,
+      "geosectorId": 1011
+    },
+    {
+      "code": "Copenhagen-Cygnus",
+      "geosectorId_display": "Issedon Paterae",
+      "description": "The Cygnus base is managed by Copenhagen. The first settlers, led by Darth Vader, planted the flag in Tharsis.\nThe base offers a wonderful maritime landscape and is well-known for its seaside resort and its retirement house\nThe place is used as a rest place.",
+      "baseId": 1003,
+      "creationDate": "22/08/2012",
+      "rentingFee": 2783.87,
+      "tags": [
+        "#cnes",
+        "#seaside",
+        "#hollidays"
+      ],
+      "healthLevel": 0,
+      "geoLocation": {
+        "lon": 12.568337,
+        "lat": 55.676098
+      },
+      "name": "Cygnus (Copenhagen)",
+      "baseTypeId": "HYDRO",
+      "baseTypeId_display": "Hydroponic",
+      "assetsValue": 71619.81,
+      "geosectorId": 1027
+    },
+    {
+      "code": "Roma-Dragon",
+      "geosectorId_display": "Pavonis Mons ",
+      "description": "The Dragon base is managed by Roma. The first settlers, led by Han Solo, planted the flag in a crater, near a frozen lake.\nThe crater is one kilometer deep, which offers a mountain-like landscape.\nThe place is rich in minerals, especially in antimony.",
+      "baseId": 1004,
+      "creationDate": "05/02/2017",
+      "rentingFee": 1413.74,
+      "tags": [
+        "#cnsa",
+        "#crater",
+        "#mine"
+      ],
+      "healthLevel": 26,
+      "geoLocation": {
+        "lon": 12.48327333,
+        "lat": 41.89988
+      },
+      "name": "Dragon (Roma)",
+      "baseTypeId": "DWELLING",
+      "baseTypeId_display": "Dwelling Complex",
+      "assetsValue": 72762.36,
+      "geosectorId": 1002
+    },
+    {
+      "code": "London-Andromeda",
+      "geosectorId_display": "Tharsis Tholus",
+      "description": "The Andromeda base is managed by London. The first settlers, led by Jim Lovell, planted the flag near Utopia Planitia.\nThe area is flat and several kilometers long.\nThe place is ideal for agriculture, with a soil rich in potassium.",
+      "baseId": 1005,
+      "creationDate": "16/03/2011",
+      "rentingFee": 2241.77,
+      "tags": [
+        "#esa",
+        "#powerplant",
+        "#energy"
+      ],
+      "healthLevel": 95,
+      "geoLocation": {
+        "lon": -0.1255,
+        "lat": 51.5084
+      },
+      "name": "Andromeda (London)",
+      "baseTypeId": "HYDRO",
+      "baseTypeId_display": "Hydroponic",
+      "assetsValue": 34277.39,
+      "geosectorId": 1006
+    },
+    {
+      "code": "Barcelona-Proxima",
+      "geosectorId_display": "Tharsis Tholus",
+      "description": "The Proxima base is managed by Barcelona. The first settlers, led by William Adama, planted the flag in Olympus Mons.\nThe base offers a wonderful landscape around the Olympus Mons which offers a natural watchtower.\nThe place is used as a refinery thanks to blast furnaces.",
+      "baseId": 1006,
+      "creationDate": "19/10/2011",
+      "rentingFee": 2788.21,
+      "tags": [
+        "#cnsa",
+        "#mountain",
+        "#gas"
+      ],
+      "healthLevel": 70,
+      "geoLocation": {
+        "lon": 2.166117778,
+        "lat": 41.38961111
+      },
+      "name": "Proxima (Barcelona)",
+      "baseTypeId": "HYDRO",
+      "baseTypeId_display": "Hydroponic",
+      "assetsValue": 40453.84,
+      "geosectorId": 1006
+    },
+    {
+      "code": "Hamburg-Cassiopeiae",
+      "geosectorId_display": "Syrtis Major Planum",
+      "description": "The Cassiopeiae base is managed by Hamburg. The first settlers, led by HAL, planted the flag in Tharsis.\nThe base offers a wonderful maritime landscape and is well-known for its seaside resort and its retirement house\nThe place is used as a rest place.",
+      "baseId": 1007,
+      "creationDate": "03/10/2014",
+      "rentingFee": 1568.91,
+      "tags": [
+        "#roscomos",
+        "#maritime",
+        "#hollidays"
+      ],
+      "healthLevel": 62,
+      "geoLocation": {
+        "lon": 10.002914,
+        "lat": 53.561012
+      },
+      "name": "Cassiopeiae (Hamburg)",
+      "baseTypeId": "DWELLING",
+      "baseTypeId_display": "Dwelling Complex",
+      "assetsValue": 60703.71,
+      "geosectorId": 1020
+    },
+    {
+      "code": "Moscow-Persei",
+      "geosectorId_display": "Hadriacus Mons",
+      "description": "The Persei base is managed by Moscow. The first settlers, led by Arthur Dallas, planted the flag in a crater, near a frozen lake.\nThe crater is one kilometer deep, which offers a mountain-like landscape.\nThe place is rich in minerals, especially in antimony.",
+      "baseId": 1008,
+      "creationDate": "25/05/2011",
+      "rentingFee": 3764.50,
+      "tags": [
+        "#roscosmos",
+        "#crater",
+        "#mine"
+      ],
+      "healthLevel": 10,
+      "geoLocation": {
+        "lon": 37.619183,
+        "lat": 55.757425
+      },
+      "name": "Persei (Moscow)",
+      "baseTypeId": "MINE",
+      "baseTypeId_display": "Mining Complex",
+      "assetsValue": 27451.38,
+      "geosectorId": 1013
+    },
+    {
+      "code": "Munich-Pegasus",
+      "geosectorId_display": "Pindus Mons",
+      "description": "The Pegasus base is managed by Munich. The first settlers, led by Ellen Louise Ripley, planted the flag near Utopia Planitia.\nThe area is flat and several kilometers long.\nThe place is ideal for agriculture, with a soil rich in potassium.",
+      "baseId": 1009,
+      "creationDate": "17/07/2011",
+      "rentingFee": 2692.44,
+      "tags": [
+        "#nasa",
+        "#flat",
+        "#farming"
+      ],
+      "healthLevel": 29,
+      "geoLocation": {
+        "lon": 11.576124,
+        "lat": 48.137154
+      },
+      "name": "Pegasus (Munich)",
+      "baseTypeId": "DWELLING",
+      "baseTypeId_display": "Dwelling Complex",
+      "assetsValue": 54414.37,
+      "geosectorId": 1028
+    }
+  ],
+  "geosectors": [
+    {
+      "geosectorId": 1008,
+      "sectorLabel": "Alba Mons"
+    },
+    {
+      "geosectorId": 1005,
+      "sectorLabel": "Albor Tholus"
+    },
+    {
+      "geosectorId": 1021,
+      "sectorLabel": "Amphitrites Patera"
+    },
+    {
+      "geosectorId": 1012,
+      "sectorLabel": "Anseris Mons"
+    },
+    {
+      "geosectorId": 1018,
+      "sectorLabel": "Apollinaris Mons"
+    },
+    {
+      "geosectorId": 1001,
+      "sectorLabel": "Arsia Mons"
+    },
+    {
+      "geosectorId": 1000,
+      "sectorLabel": "Ascraeus Mons"
+    },
+    {
+      "geosectorId": 1007,
+      "sectorLabel": "Biblis Tholus"
+    },
+    {
+      "geosectorId": 1017,
+      "sectorLabel": "Chronius Mons"
+    },
+    {
+      "geosectorId": 1003,
+      "sectorLabel": "Elysium Mons"
+    },
+    {
+      "geosectorId": 1014,
+      "sectorLabel": "Euripus Mons"
+    },
+    {
+      "geosectorId": 1019,
+      "sectorLabel": "Gonnus Mons"
+    },
+    {
+      "geosectorId": 1013,
+      "sectorLabel": "Hadriacus Mons"
+    },
+    {
+      "geosectorId": 1004,
+      "sectorLabel": "Hecates Tholus"
+    },
+    {
+      "geosectorId": 1027,
+      "sectorLabel": "Issedon Paterae"
+    },
+    {
+      "geosectorId": 1026,
+      "sectorLabel": "Labeatis Mons"
+    },
+    {
+      "geosectorId": 1024,
+      "sectorLabel": "Malea Patera"
+    },
+    {
+      "geosectorId": 1029,
+      "sectorLabel": "Meroe Patera"
+    },
+    {
+      "geosectorId": 1010,
+      "sectorLabel": "Mount Sharp"
+    },
+    {
+      "geosectorId": 1022,
+      "sectorLabel": "Nili Patera"
+    },
+    {
+      "geosectorId": 1002,
+      "sectorLabel": "Pavonis Mons "
+    },
+    {
+      "geosectorId": 1025,
+      "sectorLabel": "Peneus Patera"
+    },
+    {
+      "geosectorId": 1028,
+      "sectorLabel": "Pindus Mons"
+    },
+    {
+      "geosectorId": 1023,
+      "sectorLabel": "Pityusa Patera"
+    },
+    {
+      "geosectorId": 1016,
+      "sectorLabel": "Promethei Mons"
+    },
+    {
+      "geosectorId": 1020,
+      "sectorLabel": "Syrtis Major Planum"
+    },
+    {
+      "geosectorId": 1006,
+      "sectorLabel": "Tharsis Tholus"
+    },
+    {
+      "geosectorId": 1015,
+      "sectorLabel": "Tyrrhenus Mons"
+    },
+    {
+      "geosectorId": 1009,
+      "sectorLabel": "Ulysses Tholus"
+    },
+    {
+      "geosectorId": 1011,
+      "sectorLabel": "Uranius Mons"
+    }
+  ],
+  "CTX": "e96c646c-cc3c-4532-9f0e-50b226cff709",
+  "emptyBase": {},
+  "baseTypes": [
+    {
+      "baseTypeId": "DWELLING",
+      "label": "Dwelling Complex"
+    },
+    {
+      "baseTypeId": "HYDRO",
+      "label": "Hydroponic"
+    },
+    {
+      "baseTypeId": "MINE",
+      "label": "Mining Complex"
+    }
+  ],
+  "connectedUser": {
+    "personId": 1000
+  },
+  "jobExecution": {
+    "beginTime": "21/05/2020 00:26"
+  },
+  "job": {
+    "active": true
+  },
+  "tags": [],
+  "base": {
+    "healthLevel": 42,
+    "code": "Paris-Aldebaran",
+    "geoLocation": {
+      "lon": 2.333333,
+      "lat": 48.866667
+    },
+    "name": "Aldebaran (Paris)",
+    "description": "The Aldebaran base was the first base of the MMC and managed by Paris. The first settlers, led by James T. Kirk, planted the flag in a crater, near a frozen lake.\nThe crater is one kilometer deep, which offers a mountain-like landscape.\nThe place is rich in minerals, especially in antimony.",
+    "baseTypeId": "DWELLING",
+    "baseId": 1000,
+    "creationDate": "22/03/2012",
+    "assetsValue": 95872.14,
+    "geosectorId": 1009,
+    "rentingFee": 2083.58,
+    "tags": [
+      "#cnes",
+      "#crater",
+      "#mine"
+    ]
+  }
+};
+       	var componentStates = {"navDrawer":{"mini":false},"tags_base_tags":{"options":[]},"baseCards":{"pagination":{"sortUrl":"null","componentId":"baseCards","rowsNumber":10,"listKey":"bases","page":1,"rowsPerPage":8},"loading":false,"selected":[]},"baseTable":{"pagination":{"listKey":"bases","page":1,"componentId":"baseTable","rowsPerPage":10},"columns":[{"field":"name","classes":"","name":"name","label":"Name","sortable":true,"align":"left"},{"field":"code","classes":"","name":"code","label":"Code","sortable":true,"align":"left"},{"field":"creationDate","classes":"","name":"creationDate","label":"Creation Date","sortable":true,"align":"left"},{"field":"null","classes":"","name":"geosector","label":"Geosector","sortable":true,"align":"left"}],"loading":false,"selected":[]},"geosectors_base_geosectorId":{"options":[{"value":1009,"label":"Ulysses Tholus"}]}};
+       	var uiMessageStack = {"globalErrors":[],"globalWarnings":[],"globalInfos":[],"globalSuccess":[],"objectFieldErrors":{"emptyBase":{"assetsValue":["Some error message"]}},"objectFieldWarnings":{},"objectFieldInfos":{}};
+	</script>
+
+	<script src="/design-system/iframes/io/vertigo/ui/static/js/vertigo-ui.js"></script>
+	<script src="/design-system/iframes/io/vertigo/ui/static/js/vertigo-ui-lang-en-us.js"></script>
+	<script>
+		Quasar.lang.set(Quasar.lang.enUs)
+		var data = {
+				  vueData : vueData,
+				  componentStates : componentStates,
+				  uiMessageStack: uiMessageStack,
+				  dataX : VUiExtensions.dataX
+			  };
+		
+		var VUiPage = new Vue({
+		  el: '#page',
+		  data: data,
+		  methods: Vue.util.extend(VUi.methods, VUiExtensions.methods ||  {}) 
+		});
+
+		// fixes wrong components states due to firefox bfcache (back-forward cache)
+		//https://developer.mozilla.org/en-US/docs/Archive/Misc_top_level/Working_with_BFCache
+		window.addEventListener('pageshow', function(event) {
+			VUiPage.$forceUpdate();
+		});
+	</script>
+
+			
+</body>
+</html>
