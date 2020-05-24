@@ -4,7 +4,7 @@ Une saisie booléenne représente une valeur binaire vraie ou fausse.
 Pour ces types de données il est très important de choisir une méthode de rendu qui ne soit pas ambigüe pour les utilisateurs.
 
 Ansi nous avons fait le choix de privilégier une unique manière de saisir ce type d'information via une case à cocher (checkbox)
-Ce choix est motivé par deux raisons principales :
+Ce choix est motivé par trois raisons principales :
 
 - c'est le choix historique du web, celui donc qui destabilisera le moins les utilisateurs quelles que soient leurs compétences en informatique
 - c'est celui qui est le moins équivoque et donc le plus accessible

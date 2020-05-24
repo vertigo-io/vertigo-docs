@@ -8,7 +8,7 @@ D'autre part cette structuration plus forte sécurise davantage les applications
 
 # Bonnes pratiques
 
-- Un onglet ou une page doit pas contenir plus de 7 blocs.
+- Un onglet ou une page ne doit pas contenir plus de 7 blocs.
 - Veuillez à indiquer de manière visuelle l'onglet actuellement actif
 - Le titre d'un onglet doit etre le plus concis et précis possible. Il s'agit la plupart du temps d'un nom commun.
 

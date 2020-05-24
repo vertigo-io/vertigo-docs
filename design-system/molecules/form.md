@@ -1,6 +1,6 @@
 # Formulaire
 
-Dans les applications de gestions, les données occupent une place très importante.
+Dans les applications de gestion, les données occupent une place très importante.
 Par extension, les formulaires de saisie sont très nombreux dans ce type d'application. Ils doivent permettre une saisie d'information :
 
 - fiable
@@ -17,10 +17,10 @@ D'autre part l'intégralité des composants que nous avons selectionnés peuvent
 # Bonnes pratiques
 
 - Placez toujours à proximité les champs proches d'un point de vue fonctionnel
-- Privilégiez les controles globaux côté serveur qui sont les seuls à même de garantir l'intégrité de l'application. Utilisez les contrôle de surface côté client en complément.
+- Privilégiez les controles globaux côté serveur qui sont les seuls à même de garantir l'intégrité de l'application. Utilisez les contrôles de surface côté client en complément.
 - Essayez de densifier au maximum l'affichage vous éviterez alors à vos utilisateurs des "scrolls" superflus.
 - Le libellé doit être court et précis, toujours sur une seule ligne
-- Privilégiez des aides à la saisie courte, sur une ligne ou placeez là en dehors du champs de saisie
+- Privilégiez des aides à la saisie courte, sur une ligne ou placez les en dehors du champs de saisie
 - Mentionnez toujours le caractère obligatoire d'un champ (ceci est géré automatiquement dans Vertigo, en cohérence avec le modèle) 
 
 # Design

@@ -3,7 +3,7 @@
 Une carte permet de représenter une entité métier de manière très visuelle au sein d'une collection.
 Une carte possède plusieurs zones d'information : un header, une zone médiane de contenu et un footer.
 
-Ce type de représentation est très utile lorsque vos utilisateurs utiliserons aussi bien un mobile qu'un ordinateur de bureau car les cartes peuvent se ré-arranger automatiquement sur l'écran en fonction de la place disponible.
+Ce type de représentation est très utile lorsque votre application sera aussi bien utilisée sur un mobile qu'un ordinateur de bureau car les cartes peuvent se ré-arranger automatiquement sur l'écran en fonction de la place disponible.
 
 # Bonnes pratiques
 

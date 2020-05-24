@@ -8,9 +8,9 @@ Il existe deux grandes familles de données qui apportent des informations tempo
 - les horodatages (timestamp ou instant en anglais) : qui représente de manière universelle un point sur l'échelle du temps
 
 Il est possible de "projeter" un horodatage en date en lui adjoignant une zone de temps (timezone en anglais)
-Cette projection est toujours un choix métier : le choix de la zone à utiliser peut être la zone de l'utilisateur qui consulte la données ou une information portée par le contexte métier.
+Cette projection est toujours un choix métier : le choix de la zone à utiliser peut être la zone de l'utilisateur qui consulte la donnée ou une information portée par le contexte métier.
 
-Une saisie utilisateur se fait à deux niveaux de précisions :
+Une saisie utilisateur se fait à deux niveaux de précision :
 
 - le jour
 - la minute
@@ -29,7 +29,7 @@ Ces deux composants permettent la saisie selon deux modalités complémentaires 
 
 Lorsqu'il est nécessaire d'un point de vue métier de saisir une information de zone de temps (timezone) nous privilégions de saisir cette information dans un autre champ.
 
-Ces différents choix permettent de gérer les informations temporelles de manière cohérente et fiable sur toute la chaine qui va de la saisie à la visualisation en passant par le transfert et le stockage.
+Ces différents choix permettent de gérer les informations temporelles de manière cohérente et fiable sur toute la chaine, qui va de la saisie à la visualisation en passant par le transfert et le stockage.
 
 # Bonnes pratiques
 

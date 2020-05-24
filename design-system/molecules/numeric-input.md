@@ -17,7 +17,7 @@ Lors de la saisie textuelle d'une valeur numérique Vertigo fera automatiquement
 
 - Lors de la saisie d'une donnée numérique il peut être important de préciser l'unité attendue
 - Les potentiomètres nécessitent toujours la définition d'une valeur minimale et maximale
-- Lors d'une saisie via une potentiomètre virtuel veillez toujours à ce que la précision soit compatible avec la capacité de saisie. Un réglage trop fin et des valeurs ne seront pas saisissables, à contrario un réglage trop grossier destabilisera l'utilisateur. Vertigo règle par défaut ces potentiomètres à partir de bornes min et max afin que 200 valeurs soit selectionnables. Ceci est évidemment surchargeable.
+- Lors d'une saisie via un potentiomètre virtuel veillez toujours à ce que la précision soit compatible avec la capacité de saisie. Un réglage trop fin et des valeurs ne seront pas saisissables, à contrario un réglage trop grossier destabilisera l'utilisateur. Vertigo règle par défaut ces potentiomètres à partir de bornes min et max afin que 200 valeurs soit selectionnables. Ceci est évidemment surchargeable.
 
 
 # Design

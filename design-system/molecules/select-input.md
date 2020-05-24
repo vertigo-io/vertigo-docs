@@ -3,16 +3,17 @@
 Les composants de sélection permettent de saisir une valeur parmi une liste de choix possibles.
 La saisie par de l'utilisateur est alors parfaitement cadrée. 
 
-Ce type de composant de selection intervient lorsque les choix sont mutuellement exclusifs et que l'utilisateur ne doit en choisir qu'une parmi les alternatives proposées. 
+Ce type de composant de selection intervient lorsque les choix sont mutuellement exclusifs et que l'utilisateur ne doit en choisir qu'une valeur parmi les alternatives proposées. 
 
-Nous avons selectioné trois type selection :
+Nous avons selectioné trois type selection 
+
 - les boutons "radio"
 - la liste déroulante
 - l'autocomplete 
 
 
 Ces différents modes de selections sont tous utilisables au clavier uniquement pour améliorer l'accessibilité.
-Bon à savoir le composant liste déroulante permet à l'utilisateur de taper les premières lettre afin de naviguer plus vite dans la liste. 
+Bon à savoir le composant liste déroulante permet à l'utilisateur de taper les premières lettres afin de naviguer plus vite dans la liste. 
 
 # Bonnes pratiques
 
