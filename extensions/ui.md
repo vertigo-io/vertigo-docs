@@ -8,7 +8,7 @@ Nous présentons ici, les éléments plus spécifiques qui aident à la prise en
 
 ## Controller : SpringMVC
 
-La documentation de SpringMVC sur [docs.spring.io](https://docs.spring.io/spring/docs/3.2.x/spring-framework-reference/html/mvc.html)
+La documentation de SpringMVC sur [docs.spring.io](https://docs.spring.io/spring/docs/5.2.x/spring-framework-reference/web.html)
 
 Le fonctionnement principal de SpringMVC est de permettre de mapper simplement des requêtes HTTP vers des méthodes Java.
 Pour cela deux mécanismes cohabitent : 
@@ -110,9 +110,11 @@ VueJS propose une approche WebComponent avec une IHM réactive mappée sur un mo
 
 ## Bibliothèque de composant : Quasar
 
-La documentation de Quasar sur [quasar.dev](https://v0-17.quasar-framework.org/guide/)
+La documentation de Quasar sur [quasar.dev](https://quasar.dev/vue-components/)
 
-!> Vertigo-ui 2.0.0 utilise la version 0.17 de Quasar, la 1.0.0 étant toujours en RC, à l'heure ou nous écrivons ces lignes.
+!> Vertigo-ui 2.1.0 utilise la version 1.4.1 de Quasar.
+
+Les composants les plus utils/courants sont : 
 
 - `q-page`
 - `q-layout`
@@ -279,26 +281,111 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
 ### Composants Vertigo-UI : inputs
 
 Ces composants sont les composants principaux de construction des formulaires des applications.
-Pour simplifier l'écriture des écrans, la plupart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly** 
+Pour simplifier l'écriture des écrans, la plupart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly**.
+Les composants en **Edit** gèrent également nativement les messages d'erreurs issus des controles de validation.
 
 - `vu:label` : Composant label 
-  - `object`
-  - `field`
-  - `label`
-  - `other_attrs`
-- `vu:text-field`
-- `vu:text-area`
-- `vu:autocomplete`
-- `vu:checkbox`
-- `vu:select`
-- `vu:radio`
-- `vu:date`
-- `vu:datetime`
-- `vu:knob`
-- `vu:slider`
-- `vu:chips-autocomplete`
-- `vu:fileupload`
-
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `other_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+- `vu:text-field` : Composant text field
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `suffix` : Surcharge du suffix
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)
+- `vu:text-area` : Composant text area
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)
+- `vu:autocomplete` : Composant d'autocompletion : choix dans une liste à partir du libellé affecte la value au champ
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `list`* : Nom de la list du context
+  - `valueField` : Nom du champ de la list utilisée comme value, a affecter dans l'objet
+  - `labelField` : Nom du champ de la list utilisée comme label
+  - `componentId` : id du composant vueJs
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-select>`) 
+- `vu:checkbox` : Composant checkbox
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-checkbox>`)  
+- `vu:select` : Composant de selection par une combobox
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `list`* : Nom de la list du context
+  - `valueField` : Nom du champ de la list utilisée comme value, a affecter dans l'objet
+  - `labelField` : Nom du champ de la list utilisée comme label
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-select>`) 
+- `vu:radio` : Composant de selection par une liste de radio bouton
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `list`* : Nom de la list du context
+  - `valueField` : Nom du champ de la list utilisée comme value, a affecter dans l'objet
+  - `labelField` : Nom du champ de la list utilisée comme label
+  - `layout` : Mise en forme du radio : `horizontal` ou `vertical`
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-select>`) 
+- `vu:date` : Composant de selection de date
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `format` : Format de la valeur de la date (par défaut `DD/MM/YYYY`)
+  - `date_attrs` : Listes des attributs à ajouter sur la date (tag `<q-date>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)  
+- `vu:datetime` : Composant de selection de date/time
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `format` : Format de la valeur de la date (par défaut `DD/MM/YYYY HH:mm`)
+  - `date_attrs` : Listes des attributs à ajouter sur la date (tag `<q-date>`)
+  - `time_attrs` : Listes des attributs à ajouter sur le time (tag `<q-time>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)  
+- `vu:knob` : Composant graphique de modification de valeur numérique
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `min` : Valeur minimum
+  - `max` : Valeur maximum
+  - `step` : Pas des modifications de la valeur
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-knob>`) 
+- `vu:slider` : Composant graphique de modification de valeur numérique
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `min` : Valeur minimum
+  - `max` : Valeur maximum
+  - `step` : Pas des modifications de la valeur
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-slider>`) 
+- `vu:chips-autocomplete` : Composant d'ajout d'une liste de tags en autocomplete
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `list`* : Nom de la list du context
+  - `valueField` : Nom du champ de la list utilisée comme value, a affecter dans l'objet
+  - `labelField` : Nom du champ de la list utilisée comme label
+  - `componentId` : id du composant vueJs
+  - `staticData` : Indique si les données sont statiques (ou issue d'un WebService `@{/autocomplete/_searchFullText}`)
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-select>`) 
+- `vu:fileupload` : Composant d'ajout de fichier (contrairement aux autres composants input, l'id du fichier n'est pas stocké dans un objet métier)
+  - `url`* : Url du WebService d'ubload
+  - `key`* : Clé du contexte réceptionnant les fichiers
+  - `multiple` : Indique si on autorise plusieurs fichiers
+  - `uploader_attrs` : Listes des attributs à ajouter sur le input (tag `<q-uploader>`) 
 
 > Pour adapter leur rendu ces composants utilisent des mécanismes particuliers.
 > Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi : 
