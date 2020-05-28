@@ -36,8 +36,7 @@
   - [UI](extensions/ui.md)
   - [Orchestra](extensions/orchestra.md)
   - [Quarto](extensions/quarto.md)
-- Design System
-  - [Introduction](design-system/intro.md)
+- [Design System](design-system/intro.md)
   - [Atomes](design-system/atoms.md)
   - Molecules
     - [Boutons](design-system/molecules/buttons.md)
