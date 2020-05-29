@@ -29,6 +29,6 @@ Ces champs supportent le copier/coller.
 - Quand il existe une option navitement supportée par HTML5 pour votre besoin priviligiez là toujours par rapport à du code specifique ou une fonction fournie par la bibliotèque de composants afin d'améliorer la sécurité et la compatibilité de votre application.
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/molecules/text-input.html" height="1000px" scrolling="no" style="border:none;" ></iframe>

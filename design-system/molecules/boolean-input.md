@@ -16,6 +16,6 @@ Ce choix est motivé par trois raisons principales :
 - Lorsqu'une différence doit être faite entre une donnée non saisie et une valeur nulle, privilégiez un autre composant de selection non ambigu, par exemple un "radio" 
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/molecules/boolean-input.html" height="300px" scrolling="no" style="border:none;" ></iframe>

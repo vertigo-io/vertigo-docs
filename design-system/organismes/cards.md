@@ -14,6 +14,6 @@ Ce type de représentation est très utile lorsque votre application sera aussi 
 - Préférez l'affichage d'une page supplémentaire par appui sur un bouton de type "Voir plus"
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/organismes/cards.html" height="1500px" scrolling="no" style="border:none;" ></iframe>

@@ -18,6 +18,6 @@ Différents types de contenu peuvent être placés dans la zone prévue à cet e
 - La couleur du bloc doit constraster avec l'arrière plan de l'application et permettre une bonne lisibilité du contenu placé à l'intérieur. Nous préconisons le blanc.
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/organismes/block.html" height="300px" scrolling="no" style="border:none;" ></iframe>

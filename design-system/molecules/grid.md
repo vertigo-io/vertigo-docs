@@ -13,6 +13,6 @@ Il permet également de mélanger dans une même grille un nombre de colonne var
 - Le mode en deux colonnes est à privilégier, c'est d'ailleurs la valeur par défaut
 - La densification ne doit pas prendre le dessus sur la clareté et la cohérence. Ainsi évitez de faire des grilles trop grandes (> 8 lignes) et utilisez dans ce cas des blocs pour structurer l'information.
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/molecules/grid.html" height="1000px" scrolling="no" style="border:none;" ></iframe>

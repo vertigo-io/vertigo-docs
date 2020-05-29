@@ -1,6 +1,6 @@
 # Saisie numérique
 
-Il existe plusieurs façon de saisir et représenter un format numérique sur le web.
+Il existe plusieurs façons de saisir et représenter un format numérique sur le web.
 Cette section n'a pas vocation a être exhautive ni à traiter la problématique de la visualisation de données (Dataviz, Graphiques, etc...)
 
 Nous proposons différentes méthodes qui permettent à la fois la saisie et la consultation de données numériques unitaires.
@@ -20,6 +20,6 @@ Lors de la saisie textuelle d'une valeur numérique Vertigo fera automatiquement
 - Lors d'une saisie via un potentiomètre virtuel veillez toujours à ce que la précision soit compatible avec la capacité de saisie. Un réglage trop fin et des valeurs ne seront pas saisissables, à contrario un réglage trop grossier destabilisera l'utilisateur. Vertigo règle par défaut ces potentiomètres à partir de bornes min et max afin que 200 valeurs soit selectionnables. Ceci est évidemment surchargeable.
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/molecules/numeric-input.html" height="1000px" scrolling="no" style="border:none;" ></iframe>

@@ -25,6 +25,6 @@ Le critère de choix principal d'un composant plutot qu'un autre est la volumét
 - S'il n'y a pas d'intéret particulier à utiliser une liste "radio" préférez, même dans le cas d'un nombre restreint d'option, la liste déroulante afin de densifier l'information.
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/molecules/select-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>

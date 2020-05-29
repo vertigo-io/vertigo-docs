@@ -9,6 +9,6 @@ C'est un format qui dans certains cas s'adapte bien sur mobile.
 
 - Limiter le nombre d'actions disponibles sur une ligne (<3), pour les actions complexes préférez une navigation vers un écran dédié
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/organismes/items.html" height="1500px" scrolling="no" style="border:none;" ></iframe>

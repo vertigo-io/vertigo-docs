@@ -21,6 +21,6 @@ Lorsque de nombreuses actions sont disponibles il doivent être placés dans un 
 - Dans une même zone de la page ne melangez pas différents types de boutons (rond, rectangulaire) et utilisez toujours la même taille
 - Les boutons actifs par défaut doivent toujours correspondre à des actions sans risque (ex : annuler, retour, fermer...)
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/molecules/buttons.html" height="600px" scrolling="no" style="border:none;" ></iframe>

@@ -20,6 +20,21 @@ Les principes qui nous ont guidés dans la création de ce Design System sont :
 Pour documenter ce Design System nous avons choisi d'utiliser le formalisme de l'Atomic Design qui s'articule en plusieurs niveaux : les atomes, les molécules, les organismes et les templates.
 Ces différents niveaux se composent successivement entre eux pour créer des pages.
 
+![](/images/atomic-design-process.png)
+
+https://atomicdesign.bradfrost.com/
+
 Ce Design System est entièrement implémenté par le module [Vertigo-Ui](/extensions/ui.md), vous pouvez donc dès à présent développer votre application en l'adoptant.
+
+Voici des exemples d'écrans réalisés avec ce design-system : 
+
+![](/images/exemple-1.png)
+
+![](/images/exemple-2.png)
+
+![](/images/exemple-3.png)
+
+
+
 
 

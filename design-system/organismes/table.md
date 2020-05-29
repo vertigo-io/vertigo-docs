@@ -22,6 +22,6 @@ Dans certain cas il peut être utile de pouvoir selectioner certains lignes, dan
 - Ils sont plus adaptés pour des applications utilisées massivement sur ordinateur de bureau
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/organismes/table.html" height="1600px" scrolling="no" style="border:none;" ></iframe>

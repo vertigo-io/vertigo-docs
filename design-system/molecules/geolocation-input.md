@@ -11,6 +11,6 @@ Cependant il n'est pas rare de devoir visualiser et corriger cette information.
 - La saisie d'informations cartographiques est un domaine en soit. Il serait complexe de le standardiser. Nous privilégions ainsi de maintenir ces choix dans le périmètre de chaque projet.
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/molecules/geolocation-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>

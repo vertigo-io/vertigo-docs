@@ -39,6 +39,6 @@ Ces différents choix permettent de gérer les informations temporelles de mani�
 - L'interface utilisateur manipule le concept de zone de temps (timezone) exclusivement dans des champs spécifiques indépendants des composants date et datetime
 
 
-# Design
+# Design & Try me
 
 <iframe src="/design-system/iframes/molecules/date-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>
