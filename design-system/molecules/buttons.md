@@ -23,4 +23,4 @@ Lorsque de nombreuses actions sont disponibles il doivent être placés dans un 
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/molecules/buttons.html" height="600px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="design-system/iframes/molecules/buttons.html" height="600px" scrolling="no" style="border:none;" ></iframe>
