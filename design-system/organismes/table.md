@@ -24,4 +24,4 @@ Dans certain cas il peut être utile de pouvoir selectioner certains lignes, dan
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/organismes/table.html" height="1600px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/organismes/table.html" height="1600px" scrolling="no" style="border:none;" ></iframe>

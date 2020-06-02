@@ -18,4 +18,4 @@ Ce choix est motivé par trois raisons principales :
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/molecules/boolean-input.html" height="300px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/molecules/boolean-input.html" height="300px" scrolling="no" style="border:none;" ></iframe>

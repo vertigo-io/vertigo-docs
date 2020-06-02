@@ -20,4 +20,4 @@ Différents types de contenu peuvent être placés dans la zone prévue à cet e
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/organismes/block.html" height="300px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/organismes/block.html" height="300px" scrolling="no" style="border:none;" ></iframe>

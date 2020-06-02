@@ -22,4 +22,4 @@ Lors de la saisie textuelle d'une valeur numérique Vertigo fera automatiquement
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/molecules/numeric-input.html" height="1000px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/molecules/numeric-input.html" height="1000px" scrolling="no" style="border:none;" ></iframe>

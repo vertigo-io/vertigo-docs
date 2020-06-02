@@ -41,4 +41,4 @@ Ces différents choix permettent de gérer les informations temporelles de mani�
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/molecules/date-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/molecules/date-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>

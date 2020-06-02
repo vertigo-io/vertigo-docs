@@ -31,4 +31,4 @@ Ces champs supportent le copier/coller.
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/molecules/text-input.html" height="1000px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/molecules/text-input.html" height="1000px" scrolling="no" style="border:none;" ></iframe>

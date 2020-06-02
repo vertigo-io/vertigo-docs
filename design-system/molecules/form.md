@@ -25,4 +25,4 @@ D'autre part l'intégralité des composants que nous avons selectionnés peuvent
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/molecules/form.html" height="1000px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/molecules/form.html" height="1000px" scrolling="no" style="border:none;" ></iframe>

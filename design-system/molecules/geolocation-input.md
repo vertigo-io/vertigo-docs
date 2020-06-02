@@ -13,4 +13,4 @@ Cependant il n'est pas rare de devoir visualiser et corriger cette information.
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/molecules/geolocation-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/molecules/geolocation-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>

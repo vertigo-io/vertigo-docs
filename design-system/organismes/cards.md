@@ -16,4 +16,4 @@ Ce type de représentation est très utile lorsque votre application sera aussi 
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/organismes/cards.html" height="1500px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/organismes/cards.html" height="1500px" scrolling="no" style="border:none;" ></iframe>

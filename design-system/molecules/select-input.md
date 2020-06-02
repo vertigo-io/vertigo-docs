@@ -27,4 +27,4 @@ Le critère de choix principal d'un composant plutot qu'un autre est la volumét
 
 # Design & Try me
 
-<iframe src="/design-system/iframes/molecules/select-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/design-system/iframes/molecules/select-input.html" height="700px" scrolling="no" style="border:none;" ></iframe>

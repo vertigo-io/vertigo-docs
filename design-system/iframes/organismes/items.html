@@ -3,14 +3,14 @@
 <head>
     <title>Bases</title>
     
-		<link href="/design-system/iframes/io/vertigo/ui/static/3rdParty/materialIcons/v50/css/materialIcons.css" rel="stylesheet" type="text/css"/>
-		<link href="/design-system/iframes/io/vertigo/ui/static/3rdParty/roboto/v20/css/roboto.css" rel="stylesheet" type="text/css"/>
-		<link href="/design-system/iframes/io/vertigo/ui/static/3rdParty/use.fontawesome.com/releases/v5.7.1/css/all.min.css" rel="stylesheet" type="text/css"/>
+		<link href="/vertigo-docs/design-system/iframes/io/vertigo/ui/static/3rdParty/materialIcons/v50/css/materialIcons.css" rel="stylesheet" type="text/css"/>
+		<link href="/vertigo-docs/design-system/iframes/io/vertigo/ui/static/3rdParty/roboto/v20/css/roboto.css" rel="stylesheet" type="text/css"/>
+		<link href="/vertigo-docs/design-system/iframes/io/vertigo/ui/static/3rdParty/use.fontawesome.com/releases/v5.7.1/css/all.min.css" rel="stylesheet" type="text/css"/>
 		<link href="https://cdn.jsdelivr.net/npm/ionicons@4.6.2/dist/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
 		<link href="https://cdn.jsdelivr.net/npm/@mdi/font@3.4.93/css/materialdesignicons.min.css" rel="stylesheet" type="text/css"/>
 		<link href="https://cdn.jsdelivr.net/npm/animate.css@3.7.0/animate.min.css" rel="stylesheet" type="text/css"/>
 		<link href="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.min.css" rel="stylesheet" type="text/css"/>
-		<link href="/design-system/iframes/io/vertigo/ui/static/css/vertigo-ui.css" rel="stylesheet" type="text/css"/>
+		<link href="/vertigo-docs/design-system/iframes/io/vertigo/ui/static/css/vertigo-ui.css" rel="stylesheet" type="text/css"/>
 		
 		<script src="https://cdn.jsdelivr.net/npm/quasar@1.4.1/dist/quasar.ie.polyfills.umd.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"> </script>
@@ -30,7 +30,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     
   	<!--link rel="stylesheet" href="/mars/static/css/mars.css"/-->
-	<script src="/design-system/iframes/io/vertigo/ui/static/js/v-components/v-facets.js"></script>
+	<script src="/vertigo-docs/design-system/iframes/io/vertigo/ui/static/js/v-components/v-facets.js"></script>
 </head>
 
 <body class="mat desktop no-touch platform-mat">
@@ -43,7 +43,7 @@
 							<q-list>
 								<q-item v-for="item in paginatedData(&#39;bases&#39;, &#39;basesList&#39; )" :key="item.baseId" class="q-mb-sm bg-white" style="box-shadow: 0 1px 5px rgba(0,0,0,0.2), 0 2px 2px rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12);" >
 									<q-item-section avatar >
-										<q-img :src="&#39;/design-system/iframes/images/base/&#39;+item.baseId+&#39.jpg&#39;"></q-img>
+										<q-img :src="&#39;/vertigo-docs/design-system/iframes/images/base/&#39;+item.baseId+&#39.jpg&#39;"></q-img>
 									</q-item-section>
 									<q-item-section><a class="text-primary small-caps text-bigger" >{{item.name}}</a>Created : {{item.creationDate}}
 									</q-item-section>
@@ -492,8 +492,8 @@
        	var uiMessageStack = {"globalErrors":[],"globalWarnings":[],"globalInfos":[],"globalSuccess":[],"objectFieldErrors":{"emptyBase":{"assetsValue":["Some error message"]}},"objectFieldWarnings":{},"objectFieldInfos":{}};
 	</script>
 
-	<script src="/design-system/iframes/io/vertigo/ui/static/js/vertigo-ui.js"></script>
-	<script src="/design-system/iframes/io/vertigo/ui/static/js/vertigo-ui-lang-en-us.js"></script>
+	<script src="/vertigo-docs/design-system/iframes/io/vertigo/ui/static/js/vertigo-ui.js"></script>
+	<script src="/vertigo-docs/design-system/iframes/io/vertigo/ui/static/js/vertigo-ui-lang-en-us.js"></script>
 	<script>
 		Quasar.lang.set(Quasar.lang.enUs)
 		var data = {
