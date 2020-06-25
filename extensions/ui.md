@@ -169,6 +169,7 @@ Nécessite :
 > Les layouts peuvent hériter d'autres layout.
 
 Les layouts permettent de mutualiser tout la partie récurrente des pages : bandeau, menu, footer, ...
+Le principe est qu'un layout est une page *à trou*, les trous sont nommés dans le template et peuvent avoir une valeur par défaut. Lorsque l'on écrit une page, on indique que l'on *décore* un layout particulier, et on ne précise que la valeur des *trous*. Le but étant que les éléments écrits dans la page ne sont que les éléments spécifiques à cette page, tous le contenu commun est dans le layout.
 L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-mars/tree/master/src/main/webapp/WEB-INF/views/templates) qui peuvent être adaptés et réutilisés.
 
 
