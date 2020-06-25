@@ -169,7 +169,7 @@ Nécessite :
 > Les layouts peuvent hériter d'autres layout.
 
 Les layouts permettent de mutualiser tout la partie récurrente des pages : bandeau, menu, footer, ...
-L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-university/tree/master/mars/src/main/webapp/WEB-INF/views/templates) qui peuvent être adaptés et réutilisés.
+L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-mars/tree/master/src/main/webapp/WEB-INF/views/templates) qui peuvent être adaptés et réutilisés.
 
 
 ## Composants nommés Vertigo-ui
@@ -230,7 +230,7 @@ Nécessite :
   - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
   - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
   
-Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-university/blob/master/mars/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
+Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-mars/blob/master/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
 ```HTML
   <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
 
