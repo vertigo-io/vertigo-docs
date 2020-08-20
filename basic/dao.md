@@ -120,9 +120,9 @@ D'autre part, il est également possible d'apporter du dynamisme dans les requê
         	 and mov.YEAR = #year#
         	<%}%>
 			"
-	attribute title	 	{domain : DoLabelLong 		notNull:"true" 	inOut :"in"}
-	attribute year	 	{domain : DoYear 			notNull:"true" 	inOut :"in"}
-	attribute movies	{domain : DoDtMovieDtc	 	notNull:"true" 	inOut :"out"}
+	attribute title	 	{domain : DoLabelLong 		required:"true" 	inOut :"in"}
+	attribute year	 	{domain : DoYear 		required:"true" 	inOut :"in"}
+	attribute movies	{domain : DoDtMovieDtc	 	required:"true" 	inOut :"out"}
 }
 ```
 
@@ -141,8 +141,8 @@ create Task TK_GET_ACTORS_IN_MOVIE {
         	join actor act on act.ACT_ID = rol.ACT_ID
         	where rol.MOV_ID = #movId#
 			"
-	attribute movId		{domain : DoId 			notNull:"true" 	inOut :"in"}
-	attribute actors	{domain : DoDtActorDtc 	notNull:"true" 	inOut :"out"}
+	attribute movId		{domain : DoId 		required:"true" 	inOut :"in"}
+	attribute actors	{domain : DoDtActorDtc 	required:"true" 	inOut :"out"}
 }
 
 ```
