@@ -117,8 +117,8 @@ Voici le contenu du fichier *model.ksp* (référencé par le fichier kpr ci-dess
 package my.project.domain
 
 create DtDefinition DtCountry {
-  id couId 		{domain: DoId 		label: "Id" }
-  field name 	{domain: DoLabel 	label: "Nom du pays" required:"false"}
+  id couId   {domain:DoId     label:"Id"           required:"true"}
+  field name {domain:DoLabel  label:"Nom du pays"  required:"false"}
 }
 
 create Domain DoId {
