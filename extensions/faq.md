@@ -102,7 +102,82 @@ La valeur est alors résolue par le paramManager.
 ## [Studio] J'essaye de faire une double asscociation dans un .ksp vers le même DtObject, mais studio génère deux méthodes avec le même nom.
 Il faut donner un rôle à chaque association (roleA et roleB), ce rôle est utilisé pour nommer la méthode de navigation
 
-2/09
+
+## Je souhaite faire apparaitre une notification à l'utilisateur, comment faire ?
+Il faut utiliser l'api Notify de Quasar (cf : https://quasar.dev/quasar-plugins/notify#Notify-API)
+Attention, si c'est après un appel Ajax, pour récupérer le `$q`de Quasar, il faut :
+- soit binder la fonction sur this pour pouvoir utiliser `$`q : `function(response){ this.$q.notify({message : 'TEST', type : 'positive'}).bind(this)`
+- soit passer par l'instance Globale de `VUiPage.$q.notify`
+
+
+## Quel est l'api pour faire des appels Ajax ?
+La signature de la méthode `httpPostAjax` est la suivante :
+```httpPostAjax(url, params, options)```
+
+Le derniere paramètre permet de fournir un objet qui contient le callback en cas de succès et en cas d'erreur
+```{
+    onSuccess : function (response) {
+        // do something
+    }, 
+    onError(error) {
+        // do something
+    }
+}```
+
+## Comment proposer à un utiliseteur de selectionner plusieurs choix parmi les éléments d'une liste de référence  ?
+Cela dépend du mode de stockage.
+Mais globalement, nous proposons deux fonctionnements : 
+1- Dans l'objet de critère, on ajoute un champ avec le domain de la FK et une cardinalité `*`
+Dans ce cas le champ sera bien ajouté au vueData en tant que tableau d'id et pourra être mappé sur la checkbox comme ceci :
+```
+<q-checkbox v-model="selectedTimeZoneList" v-for="item in vueData.timeZoneList" :val="item" :label="item"></q-checkbox>
+``` 
+Coté `Controller`, il y aura un champ qui est un tableau d'id. Ce champ n'est pas persistable en tant que tel, charge au service de le traduire en donnée persistable.
+
+2- L'autre solution, constiste à utiliser les *SmartTypes*. 
+Dans l'objet critère, on ajoute un champ avec un domain qui est un SmartType (par exemple `DoIds`) avec comme BasicType une String
+On associe au SmartType un adapteur UI qui transforme la chaine de caractère une liste d'Id, celle-ci sera sérialisée en Json lors de l'ajout au vueData, et pourra être utilisé par le composant checkbox comme dans le cas 1.
+Coté `Controller`, le champ sera une chaine de caractère qui pourra être persistée directement si besoin.
+
+
+## Je n'arrive pas à faire fonctionner l'upload de fichier en Ajax
+
+Coté page :
+```Html
+<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" th:url="'@{/commons/upload}'" key="baseTmpPictureUris" multiple />	
+```
+
+Coté Controller
+```Java
+@PostMapping("/_save")
+	public String doSave(
+			final ViewContext viewContext,
+			@Validate(DefaultDtObjectValidator.class) @ViewAttribute("base") final Base base,
+			@QueryParam("baseTmpPictureUris") final List<FileInfoURI> addedPictureFile,
+			final UiMessageStack uiMessageStack) {
+```
+
+Le composant d'upload marche en deux temps : 
+1- l'utilisateur dépose son fichier sur le composant, celui-ci envoi tout de suite le fichier coté serveur et récupère un id temporaire qu'il stock dans le formulaire
+2- Lorsque l'utilisateur poste son formulaire, l'id du fichier part avec le reste des données métiers, coté serveur l'id permet de retrouver le fichier et la méthode du controlleur reçoit les données métiers et le fichier en entrée.
+
+Lorsque l'étape 2 est faite en Ajax, il faut récupérer l'id *à la main*. Le code à ajouter ressemble à :
+```Json
+<q-btn th:@click="|httpPostAjax('', {baseTmpPictureUris:VUiPage.componentStates.uploaderbaseTmpPictureUris.fileUris.toString()})|"  label="Save"></q-btn>
+```
+
+## Comment choisir mon plugin de stockage de fichier ?
+Vertigo propose plusieurs type de stockage.
+Le choix dépendra de la volumétrie et des contraintes de l'hébergeur.
+Si le volume est faible, un stockage en base de données est possible (avec `DbFileStorePlugin`).
+Il faut alors un objet de mapping avec un champ `FILE_DATA` de type Blob (ou `bytea` sur PostgreSQL)
+
+Sinon, préférer un stockage metadonnée en base de données et fichier sur FileSystem (avec `FsFileStorePlugin`).
+Il faut alors un objet de mapping avec un champ `FILE_PATH` de type String dans lequel on stocke le path vers le fichier physique. 
+Ce path doit pointer vers un espace adapté au context du projet (par exemple un NAS)
+
+
+8/09
 
 
 
