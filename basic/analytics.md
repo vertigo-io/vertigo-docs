@@ -19,7 +19,7 @@ Les sondes nativement incluses dans vertigo sont placées à des endroits strat�
 
 La collecte des données n'est pas optionnelle dans une application Vertigo car son impact est extrêmement faible. En revanche, la consommation des données récoltées est paramétrable.
 
-Il existe des *Connector* d'analytics qu'il est possible de brancher à la collecte des données. Ces *Connector* ont pour but de réceptionner les données collectées et de les traiter. Il est possible de positonner autant de *Connecter* que voulu afin de s'adapter aux besoins du projet.
+Il existe des *Plugins* d'analytics qu'il est possible de brancher à la collecte des données. Ces *Plugins* ont pour but de réceptionner les données collectées et de les traiter. Il est possible de positonner autant de *Plugins* que voulu afin de s'adapter aux besoins du projet.
 
 Les connecteurs inclus dans vertigo sont :
 
@@ -29,13 +29,13 @@ Les connecteurs inclus dans vertigo sont :
 Pour activer ces connecteurs, voici un extrait de la configuration Yaml à inclure dans votre application :
 
 ```yaml
-io.vertigo.commons.CommonsFeatures:
-    features:
-    featuresConfig:
-      - analytics.smartLoggerConnector:
-          aggregatedBy: sql
-      - analytics.socketLoggerConnector:
-          hostName: ${analyticsHost}
+boot:
+  plugins:
+    - io.vertigo.core.plugins.analytics.log.SmartLoggerAnalyticsConnectorPlugin:
+        aggregatedBy: sql
+    - io.vertigo.core.plugins.analytics.log.SocketLoggerAnalyticsConnectorPlugin:
+        appName: YourApp
+        hostName: ${boot.analyticsHost}
 ```
 
 ## Affichage des résultats

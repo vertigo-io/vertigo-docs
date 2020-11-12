@@ -12,12 +12,15 @@
   - [Philosophie](overview/philosophie.md)
   - [Références](overview/references.md)
   - [Ecosystème](overview/ecosystem.md)
-  - [Modules](overview/modules.md)
+  - [Core](overview/core.md)
+  - [Extensions](overview/extensions.md)
+  - [Connectors](overview/connectors.md)
+  - [Studio](overview/studio.md)
 - Getting-started
   - [Prérequis](getting-started/requirements.md)  
   - [Comment démarrer le moteur...](getting-started/helloworld.md)
   - [Real world Hello World !](getting-started/realworld_helloworld.md)  
-- Basique
+- Pour bien commencer
   - [Concepts](basic/concepts.md)
   - [Configuration](basic/configuration.md)
   - [Composants](basic/composants.md)
@@ -28,11 +31,10 @@
   - [WebServices](basic/webservices.md)
   - [UI](basic/ui.md)
   - [Analytics](basic/analytics.md)
-- Details des Modules
-  - [Vega](advanced/vega.md)
-  - [Account](advanced/account.md)
-  - [Commons](advanced/commons.md)
-- Extensions
+- Pour aller plus loin
+  - [Commons](extensions/commons.md)
+  - [Account](extensions/account.md)
+  - [Vega](extensions/vega.md)
   - [UI](extensions/ui.md)
   - [Orchestra](extensions/orchestra.md)
   - [Quarto](extensions/quarto.md)
