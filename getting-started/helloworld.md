@@ -28,8 +28,8 @@ A l'issu de cette création votre fichier __pom.xml__ doit ressembler à ça :
 	<dependencies>
 		<dependency>
 			<groupId>io.vertigo</groupId>
-			<artifactId>vertigo-vega</artifactId>
-			<version>2.0.0</version>
+			<artifactId>vertigo-vega-impl</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 	</dependencies>
 	
