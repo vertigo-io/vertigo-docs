@@ -20,3 +20,10 @@ Sur ce cœur se greffent des options innovantes, activables en fonction des obje
 C'est ce principe qui lui permet de maximiser l'efficacité des développements pour la réalisation des applications métier de type "Applications de gestion" : très efficace sur son domaine, mais qui permet d'en sortir. Là où d'autres frameworks généralistes auront une efficacité moyenne mais sur un pan très large (*trop ?*) de cas d'application.
 
 **Vertigo**, en cœur applicatif de la plateforme, embarque nativement l'ensemble des composants indispensables à une application moderne : recherche, sécurité, mobilité, analytics, dataviz...
+
+Vertigo est composé de :
+
+- [**Vertigo-Core**](/overview/core) : Un framework Java ultra puissant et super léger
+- [**Vertigo-Extensions**](/overview/extensions) : Une collections de module d'extensions permettant de gérer toutes les problématiques prinicipale des applications métiers, et donc de la créer en un temps record
+- [**Vertigo-Connectors**](/overview/connectors) : Une collections de connecteurs "bas-niveau" vers des librairies et produits tiers pour faciliter la vie du développeur dans les cas aux limites
+- [**Vertigo-Studio**](/overview/studio) : Un outil de conception dédié aux applications métiers pour gagner en efficacité et en cohérence

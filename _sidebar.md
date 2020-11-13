@@ -7,11 +7,12 @@
 	</h3>
 <hr/>
 
+- Introduction
+  - [Pourquoi Vertigo ?](intro/why.md)
+  - [Philosophie](intro/philosophie.md)
+  - [Références](intro/references.md)
+  - [Ecosystème](intro/ecosystem.md)
 - Overview
-  - [Introduction](overview/introduction.md)
-  - [Philosophie](overview/philosophie.md)
-  - [Références](overview/references.md)
-  - [Ecosystème](overview/ecosystem.md)
   - [Core](overview/core.md)
   - [Extensions](overview/extensions.md)
   - [Connectors](overview/connectors.md)

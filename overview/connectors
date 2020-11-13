@@ -1,6 +1,0 @@
-
-# redis
-  - `host` : Server redis
-  - `port` : port du redis
-  - `database` : nom de la database redis
-  - `password` *Optionel* : mot de passe de connection

@@ -1,4 +1,4 @@
-# Modules de Vertigo
+# Extensions de Vertigo
 Vertigo suit les paradigmes de la programmation modulaire. Il est donc découpé en modules qui ont chacun une vocation claire.
 
 L'idée sous-jacente est la suivante : 1 enjeu récurrent des applications métier = 1 module vertigo
