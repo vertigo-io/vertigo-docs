@@ -21,15 +21,15 @@ A l'issu de cette création votre fichier __pom.xml__ doit ressembler à ça :
 	<packaging>jar</packaging>
 	
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
 	
 	<dependencies>
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-vega-impl</artifactId>
-			<version>2.1.0</version>
+			<version>3.0.0</version>
 		</dependency>
 	</dependencies>
 	
@@ -80,7 +80,7 @@ Voici notre classe Main :
 /***
  * Start the main method.
  *
- * Call "http://localhost:8080/hello" with your web browser.
+ * Call "http://localhost:8080/helloworld" with your web browser.
  * You may receive an "hello world" back.
  *
  */
@@ -90,10 +90,11 @@ public class HelloWorld {
 		
 		// Create the nodeConfig
 		final NodeConfig nodeConfig = NodeConfig.builder()
-				.addModule(new CommonsFeatures().build())
+		        .addModule(new JavalinFeatures().withEmbeddedServer(Param.of("port", "8080")).build()) // we want to use javalin embeded
+				.addModule(new DataModelFeatures().build()) // we want the support of DtObjects
 				.addModule(new VegaFeatures() // we want to use Vega that offers simple REST WebServices management
 						.withWebServices()
-						.withWebServicesEmbeddedServer(Param.of("port", "8080"))
+						.withJavalinWebServerPlugin()
 						.build())
 				//-----Declaration of a module named 'Hello' which contains a webservice component.
 				.addModule(ModuleConfig.builder("Hello")
@@ -109,5 +110,5 @@ public class HelloWorld {
 
 Il ne reste plus qu'à exécuter cette classe par le biais de votre choix, le plus simple étant de le faire via un IDE (dans Eclipse : Clic-droit sur la classe > Run As > Java Application )
 
-Il ne reste plus qu'à vous rendre à l'adresse suivante : http://localhost:8080/hello/ et admirer le résultat. 
+Il ne reste plus qu'à vous rendre à l'adresse suivante : http://localhost:8080/helloworld/ et admirer le résultat. 
 Vous savez maintenant faire une application Vertigo! Pour aller plus loin consultez le chapitre [Application complète (Real world Hello World !)](getting-started/realworld_helloworld.md) qui vous permettra de faire une mini-application de la vraie vie...

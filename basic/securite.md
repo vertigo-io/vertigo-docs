@@ -169,3 +169,6 @@ Voici un fichier type de configuration de la sécurité
 }
 ```
 
+## Pour aller plus loin
+
+Vertigo fournit avec vertigo-keycloak-connector et Vertigo-Vega un mécanisme très simple pour déléguer l'authentification d'un utilisateur à un serveur KeyCloak.

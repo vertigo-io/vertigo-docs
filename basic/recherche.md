@@ -1,6 +1,6 @@
 # Recherche
 
-Dans les projets Vertigo, l'intégration d'un moteur de recherche puissant est simplifiée et pérennisée par l'utilisation du module **dynamo-search**.
+Dans les projets Vertigo, l'intégration d'un moteur de recherche puissant est simplifiée et pérennisée par l'utilisation du module **vertigo-datafactory**.
 
 ## Principe général
 
@@ -42,7 +42,7 @@ Vertigo maintient deux versions du plugin ElasticSearch : la version courante et
 
 ### Activer le module
 
-Pour commencer, il faut activer le module **dynamo-search** <br/>
+Pour commencer, il faut activer le module **vertigo-datafactory** et le connecteur **vertigo-elasticsearch-connector**<br/>
 Le module propose deux modes de fonctionnement : 
 - le mode *standard* utilisant un serveur ElasticSearch distant
 - le mode *embedded* utilisant un serveur ElasticSearch local, démarré en même temps que l'application (utile pour les tests) 
@@ -68,19 +68,22 @@ modules
 Exemple de configuration pour le mode Embedded :
 ```yaml
 modules
-  io.vertigo.commons.CommonsFeatures:
-  io.vertigo.dynamo.DynamoFeatures:
+  io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
     features:
-      - search
+      - restHL:
+          servers.names: ${esHost}
+  io.vertigo.datafactory.DataFactoryFeatures:
+    features:
+      - search:
     featuresConfig:
-      - search.elasticsearchEmbedded:
-          home: search/
-          envIndex: mars
+      - collections.luceneIndex:
+      - search.elasticsearch.restHL:
+          envIndexPrefix: mars
           rowsPerQuery: 50
           config.file: search/elasticsearch.yml
 ```
 
-> Notez que le paramètre `envIndex` permet d'indiquer un préfixe des index pour un environnement applicatif, ainsi un même serveur ElasticSearch peut être utilisé pour différents environnements.
+> Notez que le paramètre `envIndexPrefix` permet d'indiquer un préfixe des index pour un environnement applicatif, ainsi un même serveur ElasticSearch peut être utilisé pour différents environnements.
 > Les nouvelles versions d'ElasticSearch imposent un seul type de documents par index.
 
 ### Configuration ElasticSearch
@@ -136,14 +139,14 @@ Les index sont très puissants et gèrent des données **documentaires**. Il n'y
 Très simplement, il s'agit de créer un DtObject mettant les données à plat.
 ```javascript
 create DtDefinition DtEquipmentIndex {
-   field equipmentId {domain: DoId label:"Id" required:"true"}
-   field name {domain: DoLabel label: "Name" required:"false"}
-   field code {domain: DoCode label: "Code" required:"false"}
-   field purchaseDate {domain: DoLocaldate label: "Date of purchase" required:"false"}
-   field description {domain: DoDescription label: "Description" required:"false"}
-   field tags {domain: DoTags label: "Tags" required:"false"}
-   field equipmentTypeName {domain: DoLabel label:"Type" required:"false"}
-   field equipmentCategoryName {domain: DoLabel label:"Category" required:"false"}
+   field equipmentId              {domain: DoId           label:"Id"      cardinality:"1"}
+   field name                     {domain: DoLabel        label: "Name" }
+   field code                     {domain: DoCode         label: "Code" }
+   field purchaseDate             {domain: DoLocaldate    label: "Date of purchase" }
+   field description              {domain: DoDescription  label: "Description" }
+   field tags                     {domain: DoTags         label: "Tags" }
+   field equipmentTypeName        {domain: DoLabel        label:"Type" }
+   field equipmentCategoryName    {domain: DoLabel        label:"Category" }
 }
 ```
 
@@ -164,25 +167,21 @@ Exemple de domain :
 ```javascript
 create Domain DoCode {
    dataType : String
-   formatter : FmtDefault
    indexType : "code:keyword"
 }
 
 create Domain DoLabel {
    dataType : String
-   formatter : FmtDefault
    indexType : "text_fr:sortable"
 }
 
 create Domain DoDescription {
    dataType : String
-   formatter : FmtDefault
    indexType : "text_fr"
 }
 
 create Domain DoTags {
    dataType : String
-   formatter : FmtTags
    indexType : "multiple_code:facetable"
 }
 ```
@@ -351,7 +350,7 @@ Il est possible de filtrer la liste des KeyConcept à indexer en surchargeant la
 Une tâche SQL de récupération de l'objet à indexer doit être déclarée :
 ```json
 create Task TkLoadEquipmentIndex {
-   className : "io.vertigo.dynamox.task.TaskEngineSelect",
+   className : "io.vertigo.basics.task.TaskEngineSelect",
    request : "   select equ.EQUIPMENT_ID,
                   equ.NAME, 
                   equ.CODE, 
@@ -363,8 +362,8 @@ create Task TkLoadEquipmentIndex {
             join EQUIPMENT_TYPE equipmentType on equipmentType.equipment_type_id = equ.equipment_type_id
             join EQUIPMENT_CATEGORY equipmentCategory on equipmentCategory.equipment_category_id = equipmentType.equipment_category_id
             where EQUIPMENT_ID in (#equipmentIds.rownum#);"
-   attribute equipmentIds {domain : DoLongs, required:"true", inOut :"in",} 
-   attribute dtcIndex {domain : DoDtEquipmentIndexDtc, required:"true", inOut :"out",} 
+   in equipmentIds {domain : DoLong             cardinality:"*"} 
+   out dtcIndex    {domain : DoDtEquipmentIndex cardinality:"*"} 
 }
     
 ```
@@ -558,7 +557,6 @@ Pour l'indexType des types primitifs, nous préconisons de définir l'indexType 
 ```Json
 create Domain DoVisitCount {
     dataType: Integer
-    formatter: FmtDefault
     indexType: "standard:integer"
 }
 ```

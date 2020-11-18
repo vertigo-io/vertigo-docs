@@ -29,13 +29,13 @@ Cliquer sur __Finish__.
 
 Ouvrir le fichier __pom.xml__ à la racine du projet.
 
-Rajouter les propriétés permettant de spécifier la version de Java (ici 1.8) ainsi que l'encodage des fichiers à utiliser.
+Rajouter les propriétés permettant de spécifier la version de Java (ici 11) ainsi que l'encodage des fichiers à utiliser.
 
 Rajouter les dépendances suivantes dans le fichier pom.xml : 
 * Module vertigo-ui (cette dépendance tirera l'ensemble des modules Vertigo requis pour l'application)
 * Module vertigo-studio (celui-ci nous simplifie la tâche en générant des parties de code sans valeur ajoutée)
 * Les dépendances externes vers des outils nécessaires : 
-  * La dépendance `provided` à l'API servlet 3.1 ou supérieure
+  * La dépendance `provided` à l'API servlet 4.0.1 ou supérieure
   * Une base de données H2 (il s'agit d'une base mémoire, facile à utiliser à des fins de tests)
   * Le gestionnaire de pool de connexions C3P0 pour la connexion à la base de données
 
@@ -52,8 +52,8 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 	<packaging>war</packaging>
 	
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
@@ -61,13 +61,13 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
+			<version>4.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-ui</artifactId>
-			<version>2.0.0</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.vertigo</groupId>
@@ -77,12 +77,12 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.199</version>
+			<version>1.4.200</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mchange</groupId>
 			<artifactId>c3p0</artifactId>
-			<version>0.9.5.3</version>
+			<version>0.9.5.5</version>
 		</dependency>
 	</dependencies>
 	
@@ -147,24 +147,22 @@ create Formatter FmtDefault {
 /* Domaines représentant les types de données utilisables dans les entités */
 create Domain DoId {
 	dataType: Long
-	formatter: FmtDefault
 	storeType: "NUMERIC"
 }
 
 create Domain DoLabel {
 	dataType:String
-	formatter: FmtDefault
 	storeType: "TEXT"
 }
 
 /* Description d'une entité métier représentant un film et son titre */
 create DtDefinition DtMovie {
 	id movId {domain: DoId label: "ID"}
-	field title {domain: DoLabel label: "Titre" required: "true"  }
+	field title {domain: DoLabel label: "Titre" cardinality: "1"  }
 }
 ```
 
-### 2. Créer un fichier __run.kpr__ dans le répertoire __src/main/resources/your/group/id/gs/modulemetier1/__
+### 2. Créer un fichier __application.kpr__ dans le répertoire __src/main/resources/your/group/id/gs/modulemetier1/__
 
 Ce fichier contient la ligne suivante, indiquant que le fichier à utiliser pour la génération des classes est le fichier ksp créé ci-dessus
 
@@ -172,7 +170,27 @@ Ce fichier contient la ligne suivante, indiquant que le fichier à utiliser pour
 mda/modele.ksp
 ```
 
-### 3. Créer une classe nommée __Studio__ dans le package __your/group/id/gs/mda/__
+### 3. Créer un fichier de configuration  __studio-config.yaml__ à la racine du projet
+
+```yaml
+resources: 
+  - { type: kpr, path: src/main/resources/your/group/id/gs/modulemetier1/application.kpr}
+mdaConfig:
+  projectPackageName: your.group.id.gs
+  targetGenDir : src/main/
+  properties: 
+    vertigo.domain.java: true
+    vertigo.domain.java.generateDtResources: false
+    vertigo.domain.sql: true
+    vertigo.domain.sql.targetSubDir: javagen/sqlgen
+    vertigo.domain.sql.baseCible: H2
+    vertigo.domain.sql.generateDrop: true
+    vertigo.domain.sql.generateMasterData: true
+    vertigo.task: true
+```
+
+
+### 4. Créer une classe nommée __Studio__ dans le package __your/group/id/gs/mda/__
 
 Cette classe comprend l'ensemble des instructions permettant de générer les classes Java et les DAO correspondant aux entités métier à partir des fichiers KSP pointés par le fichier KPR.
 
@@ -181,65 +199,23 @@ Copier le code suivant dans la classe Studio :
 ```java
 package your.group.id.gs.mda;
 
-import io.vertigo.app.AutoCloseableApp;
-import io.vertigo.app.config.DefinitionProviderConfig;
-import io.vertigo.app.config.ModuleConfig;
-import io.vertigo.app.config.NodeConfig;
-import io.vertigo.commons.CommonsFeatures;
-import io.vertigo.core.param.Param;
-import io.vertigo.core.plugins.resource.classpath.ClassPathResourceResolverPlugin;
-import io.vertigo.dynamo.DynamoFeatures;
-import io.vertigo.dynamo.plugins.environment.DynamoDefinitionProvider;
-import io.vertigo.studio.StudioFeatures;
-import io.vertigo.studio.mda.MdaManager;
+import java.net.MalformedURLException;
+import java.nio.file.Paths;
+
+import io.vertigo.core.lang.WrappedException;
+import io.vertigo.studio.tools.VertigoStudioMda;
 
 public class Studio {
 
-	// Méthode d'initialisation de la configuration de Studio
-	private static NodeConfig buildNodeConfig() {
-		return NodeConfig.builder() 									// Création d'un conteneur pour la configuration
-				.beginBoot() 											// Debut de configuration du boot de l'application qui permet de spécifier les plugins des composants natifs (ParamManager et ResourcesManager)
-				.addPlugin(ClassPathResourceResolverPlugin.class)		// Initialisation du resolveur de ressources via le classpath
-				.endBoot()												// Le démarrage de vertigo-studio est terminé
-				.addModule(new CommonsFeatures().build())				// Configuration des fonctions communes de Vertigo
-				.addModule(new DynamoFeatures().build())				// Configuration des fonctions d'accès aux données
-				//----Definitions
-				.addModule(ModuleConfig.builder("ressources")			// Ajout des ressources pour la génération des classes Java
-						.addDefinitionProvider(DefinitionProviderConfig.builder(DynamoDefinitionProvider.class)
-								.addDefinitionResource("kpr", "your/group/id/gs/modulemetier1/run.kpr")
-								.build())
-						.build())
-				// ---StudioFeature
-				.addModule(new StudioFeatures()							// Configuration du moteur vertigo-Studio
-						.withMasterData()
-						.withMda(Param.of("projectPackageName", "your.group.id.gs"))
-						.withJavaDomainGenerator(Param.of("generateDtResources", "false"))
-						.withTaskGenerator()
-						.withSqlDomainGenerator(
-								Param.of("targetSubDir", "javagen/sqlgen"),
-								Param.of("baseCible", "H2"), 
-								Param.of("generateDrop", "true"),
-								Param.of("generateMasterData", "true"))
-						.build())
-				.build();
-
-	}
-
-	
-	// Méthode main à lancer pour générer les éléments du projet à partir du modèle 
-	public static void main(String[] args) {
-		// Création de l'application vertigo-studio avec la configuration ci-dessus
-		try (final AutoCloseableApp app = new AutoCloseableApp(buildNodeConfig())) {	
-			final MdaManager mdaManager = app.getComponentSpace().resolve(MdaManager.class);
-			//-----
-			// Nettoyage des générations précédentes
-			mdaManager.clean();
-			// Lancement de la génération
-			mdaManager.generate().displayResultMessage(System.out);
+	public static void main(final String[] args) {
+		try {
+			VertigoStudioMda.main(new String[] { "generate", Paths.get("studio-config.yaml").toUri().toURL().toExternalForm() });
+		} catch (final MalformedURLException e) {
+			throw WrappedException.wrap(e);
 		}
 	}
-
 }
+
 ```
 
 > Attention le cas échéant à adapter le code pour correspondre à votre nom de package 
@@ -254,12 +230,12 @@ Ces éléments sont maintenant utilisables pour créer des services puis des éc
 
 ![](./images/getting-started-6.png)
 
-### 4. Créer la base de données exemple
+### 5. Créer la base de données exemple
 
 Nous allons ici créer la structure de la base de données correspondant au modèle créé précédemment.
 
 Pour ce faire :
-* Télécharger l'exécutable H2 : [ici](http://central.maven.org/maven2/com/h2database/h2/1.4.199/h2-1.4.199.jar)
+* Télécharger l'exécutable H2 : [ici](http://central.maven.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar)
 * Double-cliquer sur le jar téléchargé
 * Renseigner "URL JDBC", comme ceci : 
     * `jdbc:h2:~/vertigo/getting-started`
@@ -276,12 +252,39 @@ Pour ce faire :
 * Cliquer sur le bouton __Déconnecter__
 
 
-### 5. Configuration de l'application
+### 6. Configuration de l'application
 
-Configurer notre application va se faire en deux étapes :
+Configurer notre application va se faire en trois étapes :
 
+- Créer notre classe Java decrivant nos SmartTypes
 - Déclarer notre module métier en créant sa classe de manifeste
 - Créer le fichier de configuration de notre application qui utilisera des modules de vertigo ainsi que notre module métier
+
+Pour créer nos SmartTypes, il suffit de créer une enum __GsSmartTypes__ dans le package __your.group.id.gs__ avec le contenu suivant:
+
+```java
+package your.group.id.gs;
+
+import io.vertigo.datamodel.smarttype.annotations.Formatter;
+import io.vertigo.datamodel.smarttype.annotations.SmartTypeDefinition;
+import io.vertigo.datamodel.smarttype.annotations.SmartTypeProperty;
+
+public enum GsSmartTypes {
+
+    @SmartTypeDefinition(Long.class)
+	@Formatter(clazz = FormatterDefault.class)
+	@SmartTypeProperty(property = "storeType", value = "NUMERIC")
+	Id,
+
+	@SmartTypeDefinition(String.class)
+	@Formatter(clazz = FormatterDefault.class)
+	@SmartTypeProperty(property = "storeType", value = "TEXT")
+	Label;
+
+}
+
+```
+
 
 Pour déclarer notre module métier, il suffit de créer la classe __ModuleMetier1Features__ avec le contenu suivant à la racine du package de notre module métier : __your.group.id.gs.modulemetier1__
 Pour simplifier la configuration nous allons utiliser la découverte automatique des composants à partir d'un package racine en utilisant la classe `ModuleDiscoveryFeatures`
@@ -292,7 +295,7 @@ package your.group.id.gs.modulemetier1;
 
 import io.vertigo.app.config.DefinitionProviderConfig;
 import io.vertigo.app.config.discovery.ModuleDiscoveryFeatures;
-import io.vertigo.dynamo.plugins.environment.DynamoDefinitionProvider;
+import io.vertigo.datamodel.impl.smarttype.ModelDefinitionProvider;
 
 public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1Features> { // nous étendons ModuleDiscoveryFeatures pour activer la découverte automatique
 
@@ -304,8 +307,10 @@ public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1
 	protected void buildFeatures() {
 		super.buildFeatures(); // découverte automatique de tous les composants
 		getModuleConfigBuilder()
-				.addDefinitionProvider(DefinitionProviderConfig.builder(DynamoDefinitionProvider.class)
-						.addDefinitionResource("kpr", "your/group/id/gs/modulemetier1/run.kpr") // chargement de notre modèle de donnée
+				.addDefinitionProvider(DefinitionProviderConfig.builder(ModelDefinitionProvider.class)
+						.addDefinitionResource("smarttypes", "your.group.id.gs.GsSmartTypes")
+						.addDefinitionResource("dtobjects", "your.group.id.gs.domain.DtDefinitions") // chargement de notre modèle de donnée
+
 						.build());
 
 	}
@@ -346,12 +351,15 @@ modules:
           dataBaseClass: io.vertigo.database.impl.sql.vendor.h2.H2DataBase
           jdbcDriver: org.h2.Driver
           jdbcUrl: jdbc:h2:~/vertigo/getting-started
-  io.vertigo.dynamo.DynamoFeatures: # utilisation du module vertigo-dynamo
+  io.vertigo.datamodel.DataModelFeatures: 
+  io.vertigo.datastore.DataStoreFeatures: # utilisation du module vertigo-dynamo
     features:
-      - store: # activation du support du stockage des entités de notre modèle
+	  - entitystore: # activation du support du stockage des entités de notre modèle
+	  - cache: # activation du cache
       - kvStore: # activation du support du stockage clé/valeur (utilisé pour la conservation des état de écrans)
     featuresConfig:
-      - store.data.sql: # nous utilisons un store de type SQL (avec notre base H2)
+	  - entitystore.sql: # nous utilisons un store de type SQL (avec notre base H2)
+	  - cache.memory: # nous utilisons une implémentation mémoire du cache
       - kvStore.berkeley:  # nous utilisons un stockage clé valeur avec la base de donnée BerkeleyDB
           collections: VViewContext;TTL=43200
           dbFilePath: ${java.io.tmpdir}/vertigo-ui/VViewContext
@@ -779,14 +787,14 @@ Copier/Coller le contenu suivant :
 
 ## Lancement de l'application
 
-Installer un serveur Tomcat (version 8.5+) dans Eclipse et y ajouter notre projet :
+Installer un serveur Tomcat (version 9.0+) dans Eclipse et y ajouter notre projet :
 
 Pour ce faire :
 
-- Télécharger l'archive du serveur tomcat depuis le site officiel : http://apache.mediamirrors.org/tomcat/tomcat-8/v8.5.40/bin/apache-tomcat-8.5.40.zip
+- Télécharger l'archive du serveur tomcat depuis le site officiel : http://apache.mediamirrors.org/tomcat/tomcat-9/v9.0.40/bin/apache-tomcat-9.0.40.zip
 - Extraire l'archive à l'endroit de votre convenance. Par exemple __%userprofile%/tomcat__
 - Dans la vue __Servers__ d'Eclipse cliquer sur _No Servers are available. Click this link to create a new server..._
-- Sélectionner Apache->Tomcat v8.5 Server
+- Sélectionner Apache->Tomcat v9.0 Server
 - Cliquer sur __Next__
 - Cliquer sur __Browse__ et se placer dans le répertoire ou l'archive de Tomcat a été extraite ici __%userprofile%/tomcat__
 - Cliquer sur __Next__

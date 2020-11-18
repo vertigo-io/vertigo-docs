@@ -31,17 +31,8 @@ modules:
   io.vertigo.commons.CommonsFeatures:
     features:
       - script:
-      - cache:
-      - redis:
-          host: ${redisHost}
-          port: 6379
-          database: 0
     featuresConfig:
       - script.janino:
-      - cache.memory:
-      - analytics.socketLoggerConnector:
-          appName: mars-analytics
-          hostName: ${analyticsHost}
 ```
 
 

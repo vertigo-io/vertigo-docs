@@ -20,28 +20,33 @@ Vega propose deux méthodes de fonctionnements :
 
 ### Cas du filtre de servlet
 
-Voici une configuration Yaml typique d'une application utilisant le module Vega
+Voici une configuration Yaml typique d'une application utilisant le module Vega et le connecteur vers Javalin
 
 ```yaml
 modules
-  io.vertigo.commons.CommonsFeatures:
+  io.vertigo.connectors.javalin.JavalinFeatures:
+    features:
+      - standalone:
+  io.vertigo.datamodel.DataModelFeatures:
   io.vertigo.vega.VegaFeatures:
     features:
-      - webservices
+        - webservices:
     featuresConfig:
-      - webservices.apiPrefix
-          apiPrefix : /api
+        - webservices.javalin:
+            apiPrefix: /api
+        - webservices.security:
+        - webservices.swagger:
 ```
 
 D'autre part voici le filtre à ajouter dans la servlet dans ce cas de figure :
 
 ```xml
 <filter>
-	<filter-name>VegaSparkFilter</filter-name>
-	<filter-class>io.vertigo.vega.plugins.webservice.webserver.sparkjava.VegaSparkFilter</filter-class>
-</filter>
+		<filter-name>VegaJavalinFilter</filter-name>
+		<filter-class>io.vertigo.vega.plugins.webservice.webserver.javalin.VegaJavalinFilter</filter-class>
+	</filter>
 <filter-mapping>
-	<filter-name>VegaSparkFilter</filter-name>
+	<filter-name>VegaJavalinFilter</filter-name>
 	<url-pattern>/api/*</url-pattern>
 </filter-mapping>
 ```
@@ -54,15 +59,19 @@ Voici une configuration Yaml typique d'une application utilisant le module Vega 
 
 ```yaml
 modules
-  io.vertigo.commons.CommonsFeatures:
+  io.vertigo.connectors.javalin.JavalinFeatures:
+    features:
+      - embeddedServer:
+          - port : 8080
+  io.vertigo.datamodel.DataModelFeatures:
   io.vertigo.vega.VegaFeatures:
     features:
-      - webservices
+        - webservices:
     featuresConfig:
-      - webservices.apiPrefix
-          apiPrefix : /api
-      - webservices.embeddedServer
-          port: 8080
+        - webservices.javalin:
+            apiPrefix: /api
+        - webservices.security:
+        - webservices.swagger:
 ```
 
 

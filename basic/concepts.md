@@ -34,11 +34,22 @@ Ils représentent les options d'implémentation d'un besoin particulier, nécess
 Ils permettent de systématiser le découplage entre le coeur applicatif et les dépendances tierces nécessaires. 
 Ce principe assure le côté pérenne et stable des applications : l'évolution ou le remplacement d'une bibliothèque tierce est absorbé par le plugin concerné.
 
+### Connector *(interface)*
+
+Les `Connectors` sont des `Components` également, ils ont vocaction à être liés et utilisés  soit par des `Plugins` soit par d'autre composants. 
+Ils permettent de configurer et d'accèder sans API intermédiaire aux clients de librairies / produits tiers.
+Les `Plugins` natifs dans Vertigo utilisent des `Connectors` quand ils s'appuient sur une librairie ou un produit tiers. Ces connecteurs peuvent alors être reutilisés directement par le développeur de l'application en cas de besoin impératif.
+
 ### Definition *(interface)*
 
 Les `Definitions` répresentent les porteurs d'informations. Là où les `Managers` portent les traitements, les `Definitions` portent la description des données.
 De manière générale, tout élément qui sert à établir le modèle (*tout ce qui tourne autour des données*) est porté par une `Definition`.
 Les `Definitions` servent **à modéliser** le métier. Elles sont uniques, chargées au démarrage du serveur et immuables. 
+
+### BasicType *(concept)*
+
+L'intégralité des modules Vertigo gère un nombre fini de type de données. Il s'agit de types primaires (basiques).
+Il s'agit donc du dénominateur commun, ce qui permet d'assurer une **compatibilité totale** des types de données complets entre tous les modules Vertigo.
 
 ### VUserException, VSystemException, WrappedException *(class)*
 
@@ -51,7 +62,18 @@ Trois types sont utilisés :
 - `VSystemException` : Pour les exceptions correspondant à une erreur système (Assertions, erreurs I/O, etc...) 
 - `WrappedException` : Pour l'encapsulation d'exceptions techniques, permet d'encapsuler une erreur technique tierce afin de la laisser remonter jusqu'à l'interception Vertigo.  
 
-## Dynamo
+## Data-Model
+
+### SmartType *(concept)*
+
+Les `SmartType` sont le permier niveau de déclaration du modèle et à ce titre sont des `Definitions`. 
+Ils représentent un *super-type*, c'est un typage fort de la donnée, enrichi par des métadonnées pour décupler ses possibilités.
+Globalement, un `SmartType` possède : un type Java, porte une validation (avec une liste de contraintes), un formatteur et des adapteurs, et des métadonnées complémentaires : le type de stockage SQL, la taille du champ d'affichage, l'unité pour les quantités, etc...
+
+Les `SmartType` définissent des `Adapter` afin de transformer de manière bi-directionnelle la donnée vers un `BasicType` (exemple : un POJO avec différentes propriétés peut etre transformé vers le `BasicType` **String** via une serialisation JSON)
+
+Dans `Vertigo` le `SmartType` remplace la notion de type Java dans les déclarations, ainsi la déclaration des entrées/sorties dans les `Tasks` (voir ci-dessous) utilise la notion de `SmartType`.
+Toutefois, dans le code Java, c'est bien le type Java qui est utilisé (Par exemple une `String` pour un `Domain` *SIRET*).
 
 ### DtObject *(interface)*
 
@@ -72,25 +94,18 @@ Les APIs **Vertigo** utilisent cette notion pour guider les développeurs.
 
 Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de compenser l'absence de liste fortement typée en Java. 
 
-### Domain *(concept)*
 
-Les `Domain` sont le permier niveau de déclaration du modèle et à ce titre sont des `Definitions`. 
-Ils représentent un *super-type*, c'est un typage fort de la donnée, enrichi par des métadonnées pour décupler ses possibilités.
-Globalement, un `Domain` a un type Java simple, porte une validation (avec une liste de contraintes), un formatteur et des métadonnées complémentaires : le type de stockage SQL, la taille du champ d'affichage, l'unité pour les quantités, etc...
-
-Dans `Vertigo` le `Domain` remplace la notion de type Java dans les déclarations, ainsi la déclaration des entrées/sorties dans les `Tasks` (voir ci-dessous) utilise la notion de `Domain`.
-Toutefois, dans le code Java, c'est bien le type Java qui est utilisé (Par exemple une `String` pour un `Domain` *SIRET*).
 
 ### Constraint *(interface)*
 
-Les `Constraints` représentent les contrôles associés à un `Domain`. `Vertigo` propose de base de nombreuses `Constraints` standard et il est très simple d'en ajouter. Les `Contraints` standards peuvent posséder des paramètres pour adapter leur comportement ou changer le message d'erreur.
+Les `Constraints` représentent les contrôles associés à un `SmartType`. `Vertigo` propose de base de nombreuses `Constraints` standard et il est très simple d'en ajouter. Les `Contraints` standards peuvent posséder des paramètres pour adapter leur comportement ou changer le message d'erreur.
 Les `Constraints` sont appliquées et validées automatiquement lorsque des données saisies par les utilisateurs sont intégrées dans le système (ie : sur les données saisies). Il est possible de forcer une validation des contraintes.
 En général, une violation de contrainte génère une exception utilisateur.
 
 
 ### Formatter *(interface)*
 
-Les `Formatters` sont des convertisseurs associés à un `Domain`. Ils permettent de transformer une donnée depuis son format typé de manipulation dans les services Java en chaîne de caractères manipulée par l'utilisateur. Les `Formatters` sont biderectionnels et sont souvent plus permissifs lors de la traduction de la saisie utilisateur vers le type technique (une date peut être saisie 10/01/2019 ou 10/01/19 ou 10/1/19 ou 10 01 19).
+Les `Formatters` sont des convertisseurs associés à un `SmartType`. Ils permettent de transformer une donnée depuis son format typé de manipulation dans les services Java en chaîne de caractères manipulée par l'utilisateur. Les `Formatters` sont biderectionnels et sont souvent plus permissifs lors de la traduction de la saisie utilisateur vers le type technique (une date peut être saisie 10/01/2019 ou 10/01/19 ou 10/1/19 ou 10 01 19).
 Dans l'ensemble, ils sont utilisés (*automatiquement*) lors des communications avec l'IHM ou dans les exports de données.
 
 
@@ -116,18 +131,21 @@ La notion de `MDA' (pour *Model Driven Architecture*) décrit le fait de partir 
 **Vertigo** guide les développements vers une approche de ce type, la structure déclarative du **Model** (ce qui touche aux données) soutient le reste de l'application : la séparation en modules (découpage fonctionnel) et en couches (découpage technique).
 **Vertigo** propose un module de génération de code qui permet de mettre en pratique ce principe de manière rapide, homogène et reproductible : le code généré n'est pas modifié par le développeur, il est toujours maintenu cohérent avec la déclaration du modèle. 
 
+### Domain *(concept)*
+
+Les domains permettent dans Studio de déclarer les types de données utilisables dans une application.
+Il existe deux types de `Domain` ceux s'appuyant sur un `BasicType` et ceux utilisant toute autre classe Java (préférablement une classe de type *ValueObject*)
+Les `Domain` possèdent également d'autre propriétés utiles pour compléter sa définition.
 
 ### KSP *(fichier)*
 
-Les fichiers KSP sont des fichiers texte permettant aux développeurs de déclarer la définition du **Model**. Ces fichiers viennent en complément des fichiers déclarant le structure objet de la base de données (OOM ou XMI celon l'outil).
+Les fichiers KSP sont des fichiers texte permettant aux développeurs de concevoir son application et d'y déclarer la définition du **Model**. Ces fichiers sont auto-suffisants mais le modèle de donnée peut également être complété par des fichiers issus d'outils de modélisation tiers (OOM ou XMI).
 Les fichiers KSP reprennent une syntaxe proche du Json afin de rester lisible et flexible, y compris par quelqu'un d'externe au projet ou non développeur comme le chef de projet, ou un DBA.
 Globalement ils permettent de déclarer toutes les définitions de Vertigo.
 
 Les éléments du **Modèle** le plus souvant déclarés en fichier *KSP* sont :
 
 - Domain
-- Formatter
-- Constraint
 - DtObject : les objets non persistés comme les objets d'IHM, les autres sont plutôt dans le modèle de données (OOM ou XMI)
 - Task : Les requêtes SQL restent ainsi hors du code, indentées correctement et lisibles.
 

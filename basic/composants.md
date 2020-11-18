@@ -81,12 +81,12 @@ private Calculator1 calculator1;
 Dans le cas où l'objet n'est pas lui-même un composant et donc n'est pas créé par le moteur d'injection, il est possible d'activer manuellement l'injection de dépedances :
 - soit lors de la création de l'instance :
 ```java
-DIInjector.newInstance(Samples.class, Home.getApp().getComponentSpace())
+DIInjector.newInstance(Samples.class, Node.getNode().getComponentSpace())
 ```
 - soit après coup :
 ```java
 final Samples sample = new Samples();
-DIInjector.injectMembers(sample, Home.getApp().getComponentSpace());
+DIInjector.injectMembers(sample, Node.getNode().getComponentSpace());
 ```
 
 ## Accès direct au registre de composants
@@ -94,7 +94,7 @@ DIInjector.injectMembers(sample, Home.getApp().getComponentSpace());
 Il est également possible de récupérer le composant directement dans l'espace des composants.
 
 ```java
-final Calculator2 calculator2 = Home.getApp().getComponentSpace().resolve(Calculator2.class)
+final Calculator2 calculator2 = Node.getNode().getComponentSpace().resolve(Calculator2.class)
 ```
 !> Attention : cette pratique n'est à utiliser que dans les cas très particuliers (et extrèmement rares) où l'injection n'est pas disponible.
 

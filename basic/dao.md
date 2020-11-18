@@ -77,19 +77,19 @@ Une tâche est créée en la déclarant dans un fichier KSP.
 
 Vertigo embarque un certain nombre de moteurs d'exécution. De par la nature des applications construites avec Vertigo, ces moteurs sont concus pour l'ex&cution de requêtes SQL. En voici les principaux :
 
-- `io.vertigo.dynamox.task.TaskEngineSelect`: permet de faire une selection de données dans une base de données relationelle en SQL (requête de type *select*)
-- `io.vertigo.dynamox.task.TaskEngineProc`: permet de faire une manipulation de données dans une base de données relationelle en SQL (requêtes de type *update* et *delete*)
-- `io.vertigo.dynamox.task.TaskEngineProcBatch`: permet de faire une requête de type batch avec un paramètre d'entrée de type `DtList`
+- `io.vertigo.basics.task.TaskEngineSelect`: permet de faire une selection de données dans une base de données relationelle en SQL (requête de type *select*)
+- `io.vertigo.basics.task.TaskEngineProc`: permet de faire une manipulation de données dans une base de données relationelle en SQL (requêtes de type *update* et *delete*)
+- `io.vertigo.basics.task.TaskEngineProcBatch`: permet de faire une requête de type batch avec un paramètre d'entrée de type `DtList`
 
 
 ### Paramètres
 
 Les paramètres d'une tâche sont définis par :
 
-- un nom : utilisable dans la requête sous forme de paramètre bindé
-- un domain : permet de préciser son type (au sens Vertigo). Pour les objets ou les listes, il existe les *domains* suivants ( Do*NomObjet*Dto pour un objet simple et Do*NomObjet*Dtc pour une liste)
-- le caractère obligatoire
 - s'il s'agit d'un paramètre d'entrée ou de sortie
+- un nom : utilisable dans la requête sous forme de paramètre bindé
+- un domain : permet de préciser son type (au sens Vertigo). Pour les objets il existe le *domain* suivant Do*NomObjet*
+- la cardinalité associée au paramètre (`1`, `?` ou `*`)
 
 ### Requête
 
@@ -106,8 +106,8 @@ Ce champ permet l'utilisation des paramètres d'entrées sous forme de paramètr
 D'autre part, il est également possible d'apporter du dynamisme dans les requêtes avec l'utilisation de la syntaxe `<%><%>` qui permet d'intercaler du code Java qui sera interprété à l'exécution. Ceci est notamment utilisé afin d'activer ou désactiver des parties de requêtes.
 
 ```json
- create Task TK_GET_MOVIES_BY_CRITERIA {
-    className : "io.vertigo.dynamox.task.TaskEngineSelect"
+ create Task TkGetMoviesByCriteria {
+    className : "io.vertigo.basics.task.TaskEngineSelect"
         request : "
         	select mov.*
         	from movie mov
@@ -120,9 +120,9 @@ D'autre part, il est également possible d'apporter du dynamisme dans les requê
         	 and mov.YEAR = #year#
         	<%}%>
 			"
-	attribute title	 	{domain : DoLabelLong 		required:"true" 	inOut :"in"}
-	attribute year	 	{domain : DoYear 		required:"true" 	inOut :"in"}
-	attribute movies	{domain : DoDtMovieDtc	 	required:"true" 	inOut :"out"}
+	in title	 	{domain : DoLabelLong 		cardinality:"1" 	}
+	in year	 		{domain : DoYear 			cardinality:"1" 	}
+	out movies		{domain : DoDtMovie	 		cardinality:"*" 	}
 }
 ```
 
@@ -133,16 +133,16 @@ Pour plus de détails sur l'utilisation de ces syntaxes, un [atelier](/guide/sam
 Voici un exemple de déclaration de tâche permettant de récupérer une liste d'acteurs ayant participé à un film. 
 
 ```json
-create Task TK_GET_ACTORS_IN_MOVIE {
-    className : "io.vertigo.dynamox.task.TaskEngineSelect"
+create Task TkGetActorsInMovie {
+    className : "io.vertigo.basics.task.TaskEngineSelect"
         request : "
         	select act.*
         	from role rol
         	join actor act on act.ACT_ID = rol.ACT_ID
         	where rol.MOV_ID = #movId#
 			"
-	attribute movId		{domain : DoId 		required:"true" 	inOut :"in"}
-	attribute actors	{domain : DoDtActorDtc 	required:"true" 	inOut :"out"}
+	in 	movId		{domain : DoId 				cardinality:"1" 	}
+	out actors		{domain : DoDtActor 		cardinality:"*"		}
 }
 
 ```
@@ -150,7 +150,7 @@ Une fois cette tâche déclarée et le générateur executé, une nouvelle méth
 
 ```java
 public io.vertigo.dynamo.domain.model.DtList<io.vertigo.samples.dao.domain.Actor> getActorsInMovie(final Long movId) {
-		final Task task = createTaskBuilder("TKGetActorsInMovie")
+		final Task task = createTaskBuilder("TkGetActorsInMovie")
 				.addValue("movId", movId)
 				.build();
 		return getTaskManager()
