@@ -176,8 +176,71 @@ Sinon, préférer un stockage metadonnée en base de données et fichier sur Fil
 Il faut alors un objet de mapping avec un champ `FILE_PATH` de type String dans lequel on stocke le path vers le fichier physique. 
 Ce path doit pointer vers un espace adapté au context du projet (par exemple un NAS)
 
+## Comment ajouter un paramètre en plus au tag `input` de mon composant `<vu:text-field>` ?
+Les composants thymeleaf accepte des paramètres particuliers suffixés par `_attrs`, ces paramètres agrègent les paramètres supplémentaires posés par le développeur.
+Le système est basé sur une règle de nommage.
+Exemple : 
+Le composant `<vu:date>` a les paramètres suivant : `object, field, label, format, date_attrs, input_attrs`
+Lors du rendu : 
+- La valeur du paramètre `date_attrs` est posé sur le tag `q-date` sous jacent
+- La valeur du paramètre `input_attrs` est posé sur le tag `q-input` sous jacent (tag principal)
 
-8/09
+A l'usage : 
+Lorsque le développeur ajoute un paramètre autre que ceux nommés explicitement `(object, field, label, format)`, il rentre dans un des paramètres `_attrs`
+S'il est préfixé par `date_` il est agrégé dans `date_attrs`. 
+S'il est préfixé par `input_` il est agrégé dans `input_attrs`. 
+S'il n'est pas reconnu il est agrégé dans le dernier paramètre `_attrs`, soit : `input_attrs`.
+En ajoutant `date_landscape`, l'attribut `landscape` sera posé sur le `q-date`
+En ajoutant `input_placeholder="Placeholder"`, l'attribut `placeholder="Placeholder"` sera posé sur le `q-input`
+En ajoutant `placeholder="Placeholder"`, l'attribut `placeholder="Placeholder"` sera posé sur le `q-input`
+
+
+## Est ce que lorsque utilise une liste de référence, on peut utiliser un filtrer pour ne récuperer que certains éléments ?
+Les liste des références sont des listes "nommées" : quand on les enregistre (via un `MasterDataDefinitionProvider`) on spécifie : 
+- un nom
+- un type d'objet
+- un filtre optionnel (soit via un champ, soit deux, soit un Predicat)
+Ensuite on utilise ces listes nommées en les publiant dans le context avec la methode publishMdl
+Il existe un cas particulier des listes qui n'ont pas de nom (`null`) qui est la valeur par défaut pour n'associer aucun filtre
+
+Exemple:
+Pour ne récupérer que les élements 'actifs' (donc avec un champ boolééen qui a une certaine valeur)
+Dans le `MasterDataDefinitionProvider` du module (`extends AbstractMasterDataDefinitionProvider`)
+```Java
+registerDtMasterDatas(EquipmentType.class, Map.of("active", EquipmentType::getActive), true);
+```
+
+Et pour le poser dans le context, dans le controller :
+```Java
+viewContext.publishMdl(ViewContextKey.of("equipmentTypes"), EquipmentType.class, "active");
+```
+
+## A quoi correspond le paramètre `isReloadedByList` de `AbstractMasterDataDefinitionProvider.registerDtMasterDatas` ?
+
+Ce paramètre défini le mode de rechargement de la liste lors de l'expiration du cache, soit il recharge la liste entière et redispach en id, value, soit il fait ligne par ligne. 
+Le mode liste est préconisé pour la plus part des cas.
+Le mode unitaire, est utilisé pour les grosses listes, comme la liste des communes par exemple
+
+## Le composant vu:autocomplete n'affiche pas le libellé de la donnée mais son identifiant
+Le composant autocomplete ne s'attend pas à recevoir un ViewContext en type de retour, mais un autre format plus spécifique.
+Pour inspiration voir comment est faire le controller généric qui gère les autocomplete
+`io.vertigo.ui.controllers.ListAutocompleteController`
+
+Le problème peut apparaitre si le composant sous jacent (QSelect) n'a pas la map pour associé l'identifiant en libellé. 
+Normalement cette opération est effectué coté serveur dans le template thymeleaf, en Ajax il faut alors un traitement particulier.
+
+## J'ai une 404 pour ma page, pourtant l'url semble bonne
+Avec une 404 c'est sans doute que le controller n'est pas enregistrer dans Spring
+A vérifier :
+- les annotations du controlleur (il doit y avoir unicité des `@RequestMapping(...)` )
+- la configuration de spring (*Projet*`SpringWebConfig`) (notamment les packages à scanner)
+
+12/10
+
+
+
+
+
 
 
 
