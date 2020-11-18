@@ -64,4 +64,5 @@
     - [Edition/Consultation](design-system/templates/read-edit.md)
     - [Recherche](design-system/templates/search.md)
 - [Changelog](changes.md)
-- [Changelog-extensions](changes-extensions.md)
+- [Changelog-extensions](changes-extensions.md) 
+- [FAQ](faq.md)
