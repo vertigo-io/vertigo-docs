@@ -144,17 +144,17 @@ Coté `Controller`, le champ sera une chaine de caractère qui pourra être pers
 
 Coté page :
 ```Html
-<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" th:url="'@{/commons/upload}'" key="baseTmpPictureUris" multiple />	
+<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" th:url="'@{/commons/upload}'" key="baseTmpPictureUris" multiple />   
 ```
 
 Coté Controller
 ```Java
 @PostMapping("/_save")
-	public String doSave(
-			final ViewContext viewContext,
-			@Validate(DefaultDtObjectValidator.class) @ViewAttribute("base") final Base base,
-			@QueryParam("baseTmpPictureUris") final List<FileInfoURI> addedPictureFile,
-			final UiMessageStack uiMessageStack) {
+   public String doSave(
+         final ViewContext viewContext,
+         @Validate(DefaultDtObjectValidator.class) @ViewAttribute("base") final Base base,
+         @QueryParam("baseTmpPictureUris") final List<FileInfoURI> addedPictureFile,
+         final UiMessageStack uiMessageStack) {
 ```
 
 Le composant d'upload marche en deux temps : 
@@ -235,7 +235,78 @@ A vérifier :
 - les annotations du controlleur (il doit y avoir unicité des `@RequestMapping(...)` )
 - la configuration de spring (*Projet*`SpringWebConfig`) (notamment les packages à scanner)
 
-12/10
+## J'ai besoin de faire de l'ajax sur ma page car j'ai une carte et je ne dois pas la perdre
+Il est possible de créer le postAjax "à la main" pour des besoins particuliers. Mais dans ce cas, vous perdez les accélérateurs, assurez vous que votre cas est justifé.
+`httpPostAjax` poste en ajax sur une route (le premier argument), avec des paramètres (le second argument) et gère le retour et les erreurs
+
+```Java
+httpPostAjax('_saveMyData', {​​​​
+  'vContext[myDataForm][field1]' : vueData.myDataForm.field1,
+  'vContext[myDataForm][field2]' : vueData.myDataForm.field2,
+  'vContext[myDataForm][field3]' : vueData.myDataForm.field3
+}​​​​)
+```
+
+## J'ai besoin de proposer une liste éditable dans mon écran, mais je ne recois pas les données coté serveur
+L'object DtList est un objet qui ne permet pas de modification par le client pour des raisons de sécurité.
+Pour avoir une liste éditable dans le context, il faut utiliser le `context.publishDtListModifiable`
+Le composant de tableau `<vu:table>` nécessite un identifiant de ligne, il faut soit que l'objet soit une entité (stockable en base), soit définir le `rowKey` sur le `<vu:table>`
+
+
+## Comment activer la consultation des WebServices avec Swagger ?
+La documentation est ici : https://vertigo-io.github.io/vertigo-docs/#/basic/webservices?id=swaggerapi
+A partir de la version 2.1.0, le catalogue swagger est activé par défaut.
+Il suffit d'aller sur la page `/swaggerUi`
+Si vous avez mis un prefix d'api dans la configuration de vega vous devez l'utiliser.
+Par exemple `_apiPrefix_/swaggerUi`
+
+
+## Je voudrais ajouter un controle automatique sur un objet en entrée de mon webservice
+Les DtObjects portent des champs qui ont tous un type métier : `SmartTypes`. 
+Ces `SmartTypes` portent une liste de contrainte, il en existe plusieurs fournit par Vertigo, mais il est possible d'en ajouter dans le projet.
+Lorsqu'un DtObject (ou une DtList) arrive par un WebService Vega ou un controlleur SpringMVC, l'objet passe par un `DtObjectValidator`.
+Si rien n'est précisé il passe par le `DefaultDtObjectValidator` qui vérifie les contraintes des `SmartTypes` pour tout les champs passés par l'api.
+Pour ajouter votre propre validateur il suffit d'annoter le paramètre d'entrée avec l'annotation `@Validate`
+```Java
+@Validate(YourValidator.class)
+```
+Ou même avec plusieurs 
+```Java
+@Validate({​​​​​​ YourValidator.class, YourOtherValidator.class }​​​​​​)
+```
+Utiliser votre propre validateur, permet de faire des controles multi-champs.
+
+
+## Y a-t-il un moyen de load() tous les accessors d'un objet donné en une fois
+Non, car le load est une opération qu'il ne faut pas prendre à la légère (1 accès base). Il faut charger les données en fonction du process que le service est entrain de dérouler.
+De cette règle découle le fait que la granularité du service doit être adapté, il faut éviter les services qui font tous les cas métier de l'appli 
+=> pour 2 process relativement disctint il faut 2 services métiers différents.
+Il reste le cas de l'affichage d'une entité complète, dans ce cas il est assez rare de devoir tout afficher d'un coup : 
+- soit on a un DTO dédié à l'affichage avec un select SQL qui à permis de le remplir en une fois, 
+- soit on a un découpage en onglet qui présente des informations différentes (et c'est plutot le controller qui charge les données)
+
+## Comment faire pour transferer des fichiers (pdf, word, ...) via des webservices ?
+Tout est pris en charge par vertigo, pour le download il suffit de retourner un `VFile`.
+Pour l'upload en utilisant le composant `<vu:fileupload>`, il suffit d'avoir un service qui prend un VFile en paramètre, le protocole utilisé est le standard multipart HTML.
+*Il existe un système pour protéger l'identifiant et ne pas l'envoyé en clair coté client (cf. `ProtectedValueUtil`)*
+**Attention** a bien respecter les verbes : `GET` pour un download et `POST` pour l'upload.
+
+Exemple : 
+```Java
+@GetMapping("/myFiles/{protectedUrl}")
+public VFile loadFile(@PathVariable("protectedUrl") final String protectedUrl) throws URISyntaxException, IOException {
+   final URI fullPath = getClass().getResource(ProtectedValueUtil.readProtectedValue(protectedUrl, String.class)).toURI();
+   return fileService.loadMyFile(fullPath);
+}
+
+@PostMapping("/upload")
+public FileInfoURI uploadFile(@QueryParam("file") final VFile vFile) {
+   final String fullPath = fileService.loadMyFile(fullPath);
+   final String protectedPath = ProtectedValueUtil.generateProtectedValue(fullPath);
+   return new FileInfoURI(new FileInfoDefinition("FiDummy", "none"), protectedPath);
+}
+```
+2/11
 
 
 
