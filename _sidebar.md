@@ -65,4 +65,4 @@
     - [Recherche](design-system/templates/search.md)
 - [Changelog](changes.md)
 - [Changelog-extensions](changes-extensions.md) 
-- [FAQ](faq.md)
+- [FAQ](extensions/faq.md)
