@@ -306,7 +306,43 @@ public FileInfoURI uploadFile(@QueryParam("file") final VFile vFile) {
    return new FileInfoURI(new FileInfoDefinition("FiDummy", "none"), protectedPath);
 }
 ```
-2/11
+
+## Comment faire pour passer un paramètre d'une page à une autre coté serveur ? (par FlashAttribute ?)
+**Le plus simple est de passer les données par l'url.**
+Il est possible de "protéger" les données avec un utilitaire Vertigo `ProtectedValueUtil`.
+La sécurité des données doit être réalisé sur les pages lors du chargement des données : faire apparaitre un identifiant dans l'url n'est pas un problème si la sécurité est correctement appliqué.
+
+**Pour un passage coté serveur**
+Le plus simple est de passer le paramètre par la session.
+sinon, il est possible de faire un *forward* coté serveur en passant un `ModelAndView`
+
+## Pourquoi actuellement `securityManager.getCurrentUserSession();` retourne un Option vide ?
+Ce n'est pas normale, normalement y a toujours une UserSession.
+C'est automatique. Ce qui compte c'est le io.vertigo.vega.impl.servlet.filter.SecurityFilter qui doit etre présent dans le web.xml
+
+```XML
+<filter>   
+     <filter-name>Security Filter</filter-name>
+     <filter-class>io.vertigo.vega.impl.servlet.filter.SecurityFilter</filter-class>
+     <init-param>
+         <param-name>url-exclude-pattern</param-name>
+         <param-value>/static/*</param-value>
+     </init-param>
+	 <init-param>
+         <param-name>url-no-authentification</param-name>
+         <param-value>/login;/login/*</param-value>
+     </init-param>
+</filter>
+<filter-mapping>
+     <filter-name>Security Filter</filter-name>
+     <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+!Attention le paramètre **url-exclude-pattern** désactive le filter, il ne faut le faire que sur les pages qui n'ont pas de Session (par exemple sur les WebServices vers d'autres SI)
+
+
+26/11
 
 
 
