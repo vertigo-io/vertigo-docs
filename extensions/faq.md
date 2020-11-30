@@ -16,7 +16,7 @@ Regarde l'exemple de la config de Mars : https://github.com/vertigo-io/vertigo-m
 Normalement l'archetype Maven le pose déjà comme il faut.
 
 ## La page refuse de s'afficher
-Si la page contient layout:decorate="~{templates/MonLayout}", alors il faut que la page respecte la structure de MonLayout
+Si la page contient `layout:decorate="~{templates/MonLayout}"`, alors il faut que la page respecte la structure de MonLayout
 Un layout c'est la page complete avec des trous
 Pour faire une page on indique quel layout prendre et ce que l'on met dans les trous.
 Il est possible de faire plusieurs niveau de layout mais ca n'aide pas la lisibilité alors il n'en faut pas trop
@@ -26,7 +26,7 @@ En principe, un layout général, un layout pour les pages de recherche, d'accue
 Vertigo studio est nativement compatible avec PowerDesigner et Entreprise Architect.
 PowerDesigner est préconisé car plus complete, Entreprise Architect passe par le XMI
 
-## Ou sont les classes css du genre : col-md-3 col-xs-12 q-jumbotron bg-white
+## Où sont les classes css du genre : `col-md-3 col-xs-12 q-jumbotron bg-white`
 Ce sont des classes fournient par la librairie de composant Quasar (https://quasar.dev/layout/grid/introduction-to-flexbox#Responsive-Design)
 
 ## Comment debuger les écrans vue.js/quasar ?
@@ -55,10 +55,10 @@ Ce tag permet d'inclure la donnée du context serveur dans le vueData client.
 Normalement le composant d'affichage s'occupe du include-data et il n'y a rien à faire.
 Dans certains cas, il n'y a pas de composant d'affichage (ni vu:textfield, ni vu:column, ...) mais on en a besoin coté client (pour construire un lien par exemple), il faut alors l'inclure manuellement.
 
-## J'ai un <vu:select> dans mon formulaire, il permet d'afficher le libellé et non l'id, comment reproduire le comportement dans une liste avec le <vu:column> ?
+## J'ai un `<vu:select>` dans mon formulaire, il permet d'afficher le libellé et non l'id, comment reproduire le comportement dans une liste avec le `<vu:column>` ?
 Dans de nombreux cas, l'objet sous-jacent à une liste est un objet sépcifique d'IHM, il est alors possible d'ajouter un champ dans la liste, et adapter le select SQL pour récupérer le libellé directement.
 Dans le cas d'une liste de référence (sinon attention aux performances), cela peut-être fait automcatiquement en définissant le contenu de la colonne :
-```
+```HTML
 <vu:column name="equipmentType" label="Equipment Type" >
     <vu:field-read field="equipmentTypeId" list="equipmentTypes" listKey="equipmentTypeId" listDisplay="label" />
 </vu:column>
@@ -76,7 +76,7 @@ Pour emettre la selection coté serveur, il faut ajouter du code spécifique.
 ## Comment rendre un champ obligatoire en fonction d'un autre ?
 Il faut utiliser un DtObjectValidator
 Voici le code à mettre dans la methode de controleur pour lancer le controle du validateur sur l'objet
-```
+```Java
 viewContext.getUiObject(contextKey).mergeAndCheckInput(Collections.singletonList(new YourCustomDtObjectValidator()), uiMessageStack);
 if (uiMessageStack.hasErrors()) {
             throw new ValidationUserException();
@@ -88,9 +88,9 @@ Pour récuper l'uiMessageStack il suffit de l'inclure dans la signature de la m�
 Le MailManager aide pour l'envoi de mail. (https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-social/src/test/java/io/vertigo/social/mail/MailManagerTest.java)
 
 
-## Peux-t-on avoir 2 balises <vu:messages> dans une page ?
+## Peux-t-on avoir 2 balises `<vu:messages>` dans une page ?
 Non il faut une seule
-Le plus simple est que le <vu:message> soit dans le template parent
+Le plus simple est que le `<vu:message>` soit dans le template parent
 
 ## L'implémentation d'un Manager vertigo est introuvable (Components or params not found)
 Il faut pensser à activer la fonctionnalité dans le fichier de configuration yaml de l'appli (https://vertigo-io.github.io/vertigo-docs/#/basic/configuration)
@@ -112,17 +112,19 @@ Attention, si c'est après un appel Ajax, pour récupérer le `$q`de Quasar, il 
 
 ## Quel est l'api pour faire des appels Ajax ?
 La signature de la méthode `httpPostAjax` est la suivante :
-```httpPostAjax(url, params, options)```
+`httpPostAjax(url, params, options)`
 
-Le derniere paramètre permet de fournir un objet qui contient le callback en cas de succès et en cas d'erreur
-```{
-    onSuccess : function (response) {
-        // do something
-    }, 
-    onError(error) {
-        // do something
-    }
-}```
+Le dernier paramètre permet de fournir un objet qui contient le callback en cas de succès et en cas d'erreur
+```Java
+{
+   onSuccess : function (response) {
+      // do something
+   }, 
+   onError(error) {
+      // do something
+   }
+}
+```
 
 ## Comment proposer à un utiliseteur de selectionner plusieurs choix parmi les éléments d'une liste de référence  ?
 Cela dépend du mode de stockage.
@@ -162,8 +164,10 @@ Le composant d'upload marche en deux temps :
 2- Lorsque l'utilisateur poste son formulaire, l'id du fichier part avec le reste des données métiers, coté serveur l'id permet de retrouver le fichier et la méthode du controlleur reçoit les données métiers et le fichier en entrée.
 
 Lorsque l'étape 2 est faite en Ajax, il faut récupérer l'id *à la main*. Le code à ajouter ressemble à :
-```Json
-<q-btn th:@click="|httpPostAjax('', {baseTmpPictureUris:VUiPage.componentStates.uploaderbaseTmpPictureUris.fileUris.toString()})|"  label="Save"></q-btn>
+```Html
+<q-btn 
+   th:@click="|httpPostAjax('', {baseTmpPictureUris:VUiPage.componentStates.uploaderbaseTmpPictureUris.fileUris.toString()})|"  
+   label="Save"></q-btn>
 ```
 
 ## Comment choisir mon plugin de stockage de fichier ?
@@ -221,7 +225,7 @@ Ce paramètre défini le mode de rechargement de la liste lors de l'expiration d
 Le mode liste est préconisé pour la plus part des cas.
 Le mode unitaire, est utilisé pour les grosses listes, comme la liste des communes par exemple
 
-## Le composant vu:autocomplete n'affiche pas le libellé de la donnée mais son identifiant
+## Le composant `vu:autocomplete` n'affiche pas le libellé de la donnée mais son identifiant
 Le composant autocomplete ne s'attend pas à recevoir un ViewContext en type de retour, mais un autre format plus spécifique.
 Pour inspiration voir comment est faire le controller généric qui gère les autocomplete
 `io.vertigo.ui.controllers.ListAutocompleteController`
