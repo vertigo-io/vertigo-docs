@@ -75,6 +75,18 @@
             }
             $select.val(extractFromLocation);
             });
+			
+		  const $search = Docsify.dom.find('div.search');
+		  const $input = Docsify.dom.find($search, 'input');
+		  let gaTimeId;
+		  
+		  $.dom.on($input, 'input', e => {
+			clearTimeout(gaTimeId);
+			gaTimeId = setTimeout(_ => {
+				window.ga('set', 'page', '?s='+e.target.value.trim()+location.hash);
+				window.ga('send', 'pageview');
+			}, 500);
+		  });
         });
     }
     ]
@@ -82,8 +94,8 @@
   </script>
   <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>
   <script src="https://unpkg.com/docsify/lib/docsify.min.js"></script>
-  <script src="https://unpkg.com/docsify/lib/plugins/ga.min.js"></script>
   <script src="https://unpkg.com/docsify/lib/plugins/search.min.js"></script>
+  <script src="https://unpkg.com/docsify/lib/plugins/ga.min.js"></script>
   <script src="https://unpkg.com/prismjs/components/prism-markdown.min.js"></script>
   <script src="https://unpkg.com/prismjs/components/prism-java.min.js"></script>
   <script src="https://unpkg.com/prismjs/components/prism-yaml.min.js"></script>
