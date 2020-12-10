@@ -16,7 +16,7 @@ Regarde l'exemple de la config de Mars : https://github.com/vertigo-io/vertigo-m
 Normalement l'archetype Maven le pose déjà comme il faut.
 
 ## La page refuse de s'afficher
-Si la page contient layout:decorate="~{templates/MonLayout}", alors il faut que la page respecte la structure de MonLayout
+Si la page contient `layout:decorate="~{templates/MonLayout}"`, alors il faut que la page respecte la structure de MonLayout
 Un layout c'est la page complete avec des trous
 Pour faire une page on indique quel layout prendre et ce que l'on met dans les trous.
 Il est possible de faire plusieurs niveau de layout mais ca n'aide pas la lisibilité alors il n'en faut pas trop
@@ -26,7 +26,7 @@ En principe, un layout général, un layout pour les pages de recherche, d'accue
 Vertigo studio est nativement compatible avec PowerDesigner et Entreprise Architect.
 PowerDesigner est préconisé car plus complete, Entreprise Architect passe par le XMI
 
-## Ou sont les classes css du genre : col-md-3 col-xs-12 q-jumbotron bg-white
+## Où sont les classes css du genre : `col-md-3 col-xs-12 q-jumbotron bg-white`
 Ce sont des classes fournient par la librairie de composant Quasar (https://quasar.dev/layout/grid/introduction-to-flexbox#Responsive-Design)
 
 ## Comment debuger les écrans vue.js/quasar ?
@@ -58,7 +58,7 @@ Dans certains cas, il n'y a pas de composant d'affichage (ni vu:textfield, ni vu
 ## J'ai un `<vu:select>` dans mon formulaire, il permet d'afficher le libellé et non l'id, comment reproduire le comportement dans une liste avec le `<vu:column>` ?
 Dans de nombreux cas, l'objet sous-jacent à une liste est un objet sépcifique d'IHM, il est alors possible d'ajouter un champ dans la liste, et adapter le select SQL pour récupérer le libellé directement.
 Dans le cas d'une liste de référence (sinon attention aux performances), cela peut-être fait automcatiquement en définissant le contenu de la colonne :
-```
+```HTML
 <vu:column name="equipmentType" label="Equipment Type" >
     <vu:field-read field="equipmentTypeId" list="equipmentTypes" listKey="equipmentTypeId" listDisplay="label" />
 </vu:column>
@@ -76,7 +76,7 @@ Pour emettre la selection coté serveur, il faut ajouter du code spécifique.
 ## Comment rendre un champ obligatoire en fonction d'un autre ?
 Il faut utiliser un DtObjectValidator
 Voici le code à mettre dans la methode de controleur pour lancer le controle du validateur sur l'objet
-```
+```Java
 viewContext.getUiObject(contextKey).mergeAndCheckInput(Collections.singletonList(new YourCustomDtObjectValidator()), uiMessageStack);
 if (uiMessageStack.hasErrors()) {
             throw new ValidationUserException();
@@ -112,17 +112,19 @@ Attention, si c'est après un appel Ajax, pour récupérer le `$q`de Quasar, il 
 
 ## Quel est l'api pour faire des appels Ajax ?
 La signature de la méthode `httpPostAjax` est la suivante :
-```httpPostAjax(url, params, options)```
+`httpPostAjax(url, params, options)`
 
-Le derniere paramètre permet de fournir un objet qui contient le callback en cas de succès et en cas d'erreur
-```{
-    onSuccess : function (response) {
-        // do something
-    }, 
-    onError(error) {
-        // do something
-    }
-}```
+Le dernier paramètre permet de fournir un objet qui contient le callback en cas de succès et en cas d'erreur
+```Java
+{
+   onSuccess : function (response) {
+      // do something
+   }, 
+   onError(error) {
+      // do something
+   }
+}
+```
 
 ## Comment proposer à un utiliseteur de selectionner plusieurs choix parmi les éléments d'une liste de référence  ?
 Cela dépend du mode de stockage.
@@ -162,8 +164,10 @@ Le composant d'upload marche en deux temps :
 2- Lorsque l'utilisateur poste son formulaire, l'id du fichier part avec le reste des données métiers, coté serveur l'id permet de retrouver le fichier et la méthode du controlleur reçoit les données métiers et le fichier en entrée.
 
 Lorsque l'étape 2 est faite en Ajax, il faut récupérer l'id *à la main*. Le code à ajouter ressemble à :
-```Json
-<q-btn th:@click="|httpPostAjax('', {baseTmpPictureUris:VUiPage.componentStates.uploaderbaseTmpPictureUris.fileUris.toString()})|"  label="Save"></q-btn>
+```Html
+<q-btn 
+   th:@click="|httpPostAjax('', {baseTmpPictureUris:VUiPage.componentStates.uploaderbaseTmpPictureUris.fileUris.toString()})|"  
+   label="Save"></q-btn>
 ```
 
 ## Comment choisir mon plugin de stockage de fichier ?
@@ -221,7 +225,7 @@ Ce paramètre défini le mode de rechargement de la liste lors de l'expiration d
 Le mode liste est préconisé pour la plus part des cas.
 Le mode unitaire, est utilisé pour les grosses listes, comme la liste des communes par exemple
 
-## Le composant vu:autocomplete n'affiche pas le libellé de la donnée mais son identifiant
+## Le composant `vu:autocomplete` n'affiche pas le libellé de la donnée mais son identifiant
 Le composant autocomplete ne s'attend pas à recevoir un ViewContext en type de retour, mais un autre format plus spécifique.
 Pour inspiration voir comment est faire le controller généric qui gère les autocomplete
 `io.vertigo.ui.controllers.ListAutocompleteController`
@@ -306,7 +310,43 @@ public FileInfoURI uploadFile(@QueryParam("file") final VFile vFile) {
    return new FileInfoURI(new FileInfoDefinition("FiDummy", "none"), protectedPath);
 }
 ```
-2/11
+
+## Comment faire pour passer un paramètre d'une page à une autre coté serveur ? (par FlashAttribute ?)
+**Le plus simple est de passer les données par l'url.**
+Il est possible de "protéger" les données avec un utilitaire Vertigo `ProtectedValueUtil`.
+La sécurité des données doit être réalisé sur les pages lors du chargement des données : faire apparaitre un identifiant dans l'url n'est pas un problème si la sécurité est correctement appliqué.
+
+**Pour un passage coté serveur**
+Le plus simple est de passer le paramètre par la session.
+sinon, il est possible de faire un *forward* coté serveur en passant un `ModelAndView`
+
+## Pourquoi actuellement `securityManager.getCurrentUserSession();` retourne un Option vide ?
+Ce n'est pas normale, normalement y a toujours une UserSession.
+C'est automatique. Ce qui compte c'est le io.vertigo.vega.impl.servlet.filter.SecurityFilter qui doit etre présent dans le web.xml
+
+```XML
+<filter>   
+     <filter-name>Security Filter</filter-name>
+     <filter-class>io.vertigo.vega.impl.servlet.filter.SecurityFilter</filter-class>
+     <init-param>
+         <param-name>url-exclude-pattern</param-name>
+         <param-value>/static/*</param-value>
+     </init-param>
+	 <init-param>
+         <param-name>url-no-authentification</param-name>
+         <param-value>/login;/login/*</param-value>
+     </init-param>
+</filter>
+<filter-mapping>
+     <filter-name>Security Filter</filter-name>
+     <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+!Attention le paramètre **url-exclude-pattern** désactive le filter, il ne faut le faire que sur les pages qui n'ont pas de Session (par exemple sur les WebServices vers d'autres SI)
+
+
+26/11
 
 
 
