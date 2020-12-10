@@ -55,7 +55,7 @@ Ce tag permet d'inclure la donnée du context serveur dans le vueData client.
 Normalement le composant d'affichage s'occupe du include-data et il n'y a rien à faire.
 Dans certains cas, il n'y a pas de composant d'affichage (ni vu:textfield, ni vu:column, ...) mais on en a besoin coté client (pour construire un lien par exemple), il faut alors l'inclure manuellement.
 
-## J'ai un <vu:select> dans mon formulaire, il permet d'afficher le libellé et non l'id, comment reproduire le comportement dans une liste avec le <vu:column> ?
+## J'ai un `<vu:select>` dans mon formulaire, il permet d'afficher le libellé et non l'id, comment reproduire le comportement dans une liste avec le `<vu:column>` ?
 Dans de nombreux cas, l'objet sous-jacent à une liste est un objet sépcifique d'IHM, il est alors possible d'ajouter un champ dans la liste, et adapter le select SQL pour récupérer le libellé directement.
 Dans le cas d'une liste de référence (sinon attention aux performances), cela peut-être fait automcatiquement en définissant le contenu de la colonne :
 ```
@@ -88,9 +88,9 @@ Pour récuper l'uiMessageStack il suffit de l'inclure dans la signature de la m�
 Le MailManager aide pour l'envoi de mail. (https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-social/src/test/java/io/vertigo/social/mail/MailManagerTest.java)
 
 
-## Peux-t-on avoir 2 balises <vu:messages> dans une page ?
+## Peux-t-on avoir 2 balises `<vu:messages>` dans une page ?
 Non il faut une seule
-Le plus simple est que le <vu:message> soit dans le template parent
+Le plus simple est que le `<vu:message>` soit dans le template parent
 
 ## L'implémentation d'un Manager vertigo est introuvable (Components or params not found)
 Il faut pensser à activer la fonctionnalité dans le fichier de configuration yaml de l'appli (https://vertigo-io.github.io/vertigo-docs/#/basic/configuration)
