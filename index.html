@@ -83,7 +83,7 @@
 		  $.dom.on($input, 'input', e => {
 			clearTimeout(gaTimeId);
 			gaTimeId = setTimeout(_ => {
-				window.ga('set', 'page', '?s='+e.target.value.trim()+location.hash);
+				window.ga('set', 'page', '/?s='+e.target.value.trim()+location.hash);
 				window.ga('send', 'pageview');
 			}, 500);
 		  });
