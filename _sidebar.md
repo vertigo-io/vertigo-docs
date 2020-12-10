@@ -63,6 +63,7 @@
     - [Onglets](design-system/templates/tab.md)
     - [Edition/Consultation](design-system/templates/read-edit.md)
     - [Recherche](design-system/templates/search.md)
+- <a href="apidocs/index.html" target="_blank">API documentation</a>
 - [Changelog](changes.md)
 - [Changelog-extensions](changes-extensions.md) 
-- [FAQ](faq.md)
+- [FAQ](extensions/faq.md)
