@@ -80,7 +80,7 @@
 		  const $input = Docsify.dom.find($search, 'input');
 		  let gaTimeId;
 		  
-		  $.dom.on($input, 'input', e => {
+		  vm.dom.on($input, 'input', e => {
 			clearTimeout(gaTimeId);
 			gaTimeId = setTimeout(_ => {
 				window.ga('set', 'page', '/?s='+e.target.value.trim()+location.hash);
