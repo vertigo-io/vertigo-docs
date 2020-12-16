@@ -345,6 +345,22 @@ C'est automatique. Ce qui compte c'est le io.vertigo.vega.impl.servlet.filter.Se
 
 !Attention le paramètre **url-exclude-pattern** désactive le filter, il ne faut le faire que sur les pages qui n'ont pas de Session (par exemple sur les WebServices vers d'autres SI)
 
+## Comment changer le comportement landscape de mon composant `&lt;vu:date&gt;` ou `&lt;vu:datetime&gt;` ?
+Il faut passer l'attribut `landscape` sur le composant `q-date`. 
+Si on vérifie dans le composant (vertigo-ui/.../ date.html), on voit que les attributs par défaut vont sur le `q-input` (car `input_attrs` est le dernier paramètre attrs)
+
+```XML
+<th:block th:fragment="date-edit(object, field, label, format, date_attrs, input_attrs)" ... >
+```
+
+Pour poser l'attribut sur le `q-date` il faut donc le préfixer par `date_`
+Comme on veut que l'attribut soit *évalué* par VueJs, il faut un `:`
+Ce qui donnera par exemple : 
+```
+date_:landscape="'$q.screen.gt.md'"
+```
+
+
 
 26/11
 
