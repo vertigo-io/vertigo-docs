@@ -360,7 +360,34 @@ Ce qui donnera par exemple :
 date_:landscape="'$q.screen.gt.md'"
 ```
 
+## Comment rendre mon application multi-lingue ?
+**Note**: Cette réponse s'applique pour les applications multi-lingues. Le seul besoin d'externalisé les messages doit être réflechit
+Pour rendre une application multi-lingue, il faut traiter plusieurs contenu :
+- Les textes propre aux pages (titre, menu, etc..)
+- Les libellé des champs (associé au champs des entités)
+- Les règles de formatage (format de date et nombre dépendent de la langue)
+- Les messages de règle de gestion
+- Les messages d'erreur utilisateur
+- Les données de référence multi-lingue
+- Les données métier 
 
+Ces contenus ne s'appliquent pas au meme endroit et ont souvant des manières de faire différentes.
+
+**Les textes propre aux pages** utilisent la syntaxe Thymeleaf : `#{my.code}`, les fichiers `.properties` doivent être posés à coté du fichier `.html` qui les utilise.
+
+**Les libellés des champs** sont définis dans la définition du model. Ils utilisent le mécanisme multi-lingue de Vertigo via le LocalManager.
+
+**Les règles de formatage** sont définies dans les composants Quasar
+
+**Les messages des règles de gestion**, par la UiMessageStack il est plus simple d'utiliser le mécanisme multi-lingue de Vertigo via le LocalManager, mais il est possible d'utiliser les MessageSource Spring.
+
+**Les erreurs utilisateurs** sont produitent via des UserException, ces exceptions utilisent le mécanisme multi-lingue de Vertigo via le LocalManager.
+
+**Les données de référence multi-lingue**, à implémenté dans l'appli, il y a plusieurs solutions : 
+- soit via un champ multivalué (pour chaque lanque), il est possible de le faire avec un SmartTypeAdapter
+- soit via un champ par langue (par exemple labelFr, labelEs, labelEn, ...), il faut alors ajouter ce dynamisme sur l'attribut du composant dans la page
+
+**Les données métier**, à implémenté dans l'appli. La données peut-être multi-lingue (plusieurs langues pour une même entité) ou associé à une langue particulière (une seule langue par entité)
 
 26/11
 
