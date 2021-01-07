@@ -22,7 +22,7 @@ Elle inclut plusieurs modules :
 Publisher n’est pas prévu pour :
 
 - Créer un export brut des données : on utilisera le module [Export]
-- Créer des rapports normalisés (Cerfa ….)  : on utilisera iText
+- Créer des rapports normalisés (Cerfa ….)  : on utilisera une librairie dédiée (comme iText ou PDFBox)
 - Créer des rapports BI : on utilisera Jasper, Birt, SSRS, ...
 
 Ce module n’est composé que d’un seul service homonyme.
