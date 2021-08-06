@@ -4,12 +4,17 @@ Le module **Vega** permet de mettre en place simplement des WebServices dans l'a
 Ce module est orienté pour le développement d'applications *Single-Page-Application*, mais peut évidemment être utilisé pour des WebServices d'applications Web standards ou de SI à SI.
 Il intègre un ensemble de solutions *production-ready* pour accélérer et sécuriser l'application.
 
+Vega propose également un client de WebService pour appeller simplement des WebServices d'un autre noeud Vertigo, ou d'une autre application.
+
 ## Composant interne
 En interne, le module utilise [java-spark](https://github.com/perwendel/spark).<br/>
 Il propose une publication de l'API par le standard [Swagger](https://swagger.io/).<br/>
 Pour publier les WebServices, il suffit d'un ensemble d'annotations sur une façade de vos services métier. Les annotations sont volontairement une sous-partie du standard [JAX-RS](https://javaee.github.io/javaee-spec/javadocs/javax/ws/rs/package-summary.html)
 
-## Quick start
+Pour la partie cliente, le module utilise le HttpClient du JDK.<br/>
+Pour appeler des WebServices, il suffit d'une interface avec les annotations standard de Vega.
+
+## Quick start server
 
 1. La classe du webservice doit implémenter l'interface [WebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-api/src/main/java/io/vertigo/vega/webservice/WebServices.java)
 2. La classe doit être déclaré comme un *Composant* Vertigo, concrètement, cela est fait par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application) 
@@ -53,6 +58,76 @@ Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.c
 
 
 ?> Vega peux être lancé en mode serveur intégré avec le paramètre *webservices.embeddedServer*, dans ce cas, il est inutile de spécifier un filtre dans le *web.xml* 
+
+
+## Quick start client
+
+Pour appeler un WebService distant
+1. Il faut reproduire l'api du WebService avec une interface Java. Cette interface doit hériter de `io.vertigo.core.node.component.Amplifier` et avoir l'annotation `@WebServiceProxyAnnotation`
+Elle sera détecté par Vertigo comme les autres composants par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application) 
+
+2. Ajouter la *featureConfig* dans la configuration de Vega
+```yaml
+  io.vertigo.vega.VegaFeatures:
+    features:
+      - webservices:
+    featuresConfig:
+      - webservices.proxyclient:
+```
+
+3. Ajouter le connecteur HttpClient dans la configuration
+```yaml
+  io.vertigo.connectors.httpclient.HttpClientConnector:
+    features:
+      - httpclient:
+          urlPrefix:  http://mySpUrl:8080
+```
+
+4. Ajouter les annotations sur les méthodes de l'interface, exemple:
+```Java
+@WebServiceProxyAnnotation
+@PathPrefix("/test")
+public interface SimplerClientTestWebServices extends Amplifier {
+
+  @AnonymousAccessAllowed
+  @GET("/login")
+  void login();
+
+  @SessionInvalidate
+  @GET("/logout")
+  void logout();
+
+  @GET("/{conId}")
+  Contact testRead(@PathParam("conId") final long conId);
+
+  }
+```
+
+5. Pour "utiliser" votre WebService, il suffit d'injecter l'interface dans votre service métier.
+L'autocloseable `HttpClientCookie` permet de conserver les cookies pour effectuer des appels succéssifs :
+
+```Java
+  @Inject
+  private SimplerClientTestWebServices otherWService;
+	
+  @Test
+  public void myBusinessService() {
+    try (HttpClientCookie httpClientCookie = new HttpClientCookie()) {
+      otherWService.login();
+      final Contact result = otherWService.testRead(2);
+	  //do something
+    }
+  }
+```
+!> Le HttpClientCookie, conserve le cookie distant sur dans un threadlocal.
+Il est donc adapté pour des WebServices appellé dans un batch ou dans le traitement d'un écran de l'application. 
+Mais pas pour être conserver tout le temps d'une navigation utilisateur.
+
+?> Le connecteur `HttpClient` propose d'autres paramètres optionnels :
+- `name` pour gérer plusieurs endpoint, il faut alors préciser le nom de la connexion dans l'annotation `@WebServiceProxyAnnotation`
+- `connectTimeoutSecond` pour définir le timeout
+- `proxy` et `proxyPort` pour gérer les proxy
+
 
 ## API
 
