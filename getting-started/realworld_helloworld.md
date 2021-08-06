@@ -139,11 +139,6 @@ Dans ce fichier, insérer les éléments suivants:
 ```json
 package your.group.id.gs.modulemetier1.domain 
 
-/* Formatteur de données par défaut */
-create Formatter FmtDefault {
-	className: "io.vertigo.dynamox.domain.formatter.FormatterDefault"
-}
-
 /* Domaines représentant les types de données utilisables dans les entités */
 create Domain DoId {
 	dataType: Long
@@ -235,7 +230,7 @@ Ces éléments sont maintenant utilisables pour créer des services puis des éc
 Nous allons ici créer la structure de la base de données correspondant au modèle créé précédemment.
 
 Pour ce faire :
-* Télécharger l'exécutable H2 : [ici](http://central.maven.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar)
+* Télécharger l'exécutable H2 : [ici](https://repo1.maven.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar)
 * Double-cliquer sur le jar téléchargé
 * Renseigner "URL JDBC", comme ceci : 
     * `jdbc:h2:~/vertigo/getting-started`
@@ -268,18 +263,19 @@ package your.group.id.gs;
 import io.vertigo.datamodel.smarttype.annotations.Formatter;
 import io.vertigo.datamodel.smarttype.annotations.SmartTypeDefinition;
 import io.vertigo.datamodel.smarttype.annotations.SmartTypeProperty;
+import io.vertigo.basics.formatter.FormatterDefault;
 
 public enum GsSmartTypes {
 
     @SmartTypeDefinition(Long.class)
-	@Formatter(clazz = FormatterDefault.class)
-	@SmartTypeProperty(property = "storeType", value = "NUMERIC")
-	Id,
+    @Formatter(clazz = FormatterDefault.class)
+    @SmartTypeProperty(property = "storeType", value = "NUMERIC")
+    Id,
 
-	@SmartTypeDefinition(String.class)
-	@Formatter(clazz = FormatterDefault.class)
-	@SmartTypeProperty(property = "storeType", value = "TEXT")
-	Label;
+    @SmartTypeDefinition(String.class)
+    @Formatter(clazz = FormatterDefault.class)
+    @SmartTypeProperty(property = "storeType", value = "TEXT")
+    Label;
 
 }
 
@@ -293,32 +289,32 @@ Pour simplifier la configuration nous allons utiliser la découverte automatique
 ```java
 package your.group.id.gs.modulemetier1;
 
-import io.vertigo.app.config.DefinitionProviderConfig;
-import io.vertigo.app.config.discovery.ModuleDiscoveryFeatures;
 import io.vertigo.datamodel.impl.smarttype.ModelDefinitionProvider;
+import io.vertigo.core.node.config.DefinitionProviderConfig;
+import io.vertigo.core.node.config.discovery.ModuleDiscoveryFeatures;
 
 public class ModuleMetier1Features extends ModuleDiscoveryFeatures<ModuleMetier1Features> { // nous étendons ModuleDiscoveryFeatures pour activer la découverte automatique
 
-	public ModuleMetier1Features() {
-		super("ModuleMetier1"); // Nous donnons un nom signigiant à notre module métier
-	}
+    public ModuleMetier1Features() {
+        super("ModuleMetier1"); // Nous donnons un nom signigiant à notre module métier
+    }
 
-	@Override
-	protected void buildFeatures() {
-		super.buildFeatures(); // découverte automatique de tous les composants
-		getModuleConfigBuilder()
-				.addDefinitionProvider(DefinitionProviderConfig.builder(ModelDefinitionProvider.class)
-						.addDefinitionResource("smarttypes", "your.group.id.gs.GsSmartTypes")
-						.addDefinitionResource("dtobjects", "your.group.id.gs.domain.DtDefinitions") // chargement de notre modèle de donnée
+    @Override
+    protected void buildFeatures() {
+        super.buildFeatures(); // découverte automatique de tous les composants
+        getModuleConfigBuilder()
+                .addDefinitionProvider(DefinitionProviderConfig.builder(ModelDefinitionProvider.class)
+                        .addDefinitionResource("smarttypes", "your.group.id.gs.GsSmartTypes")
+                        .addDefinitionResource("dtobjects", "your.group.id.gs.domain.DtDefinitions") // chargement de notre modèle de donnée
 
-						.build());
+                        .build());
 
-	}
+    }
 
-	@Override
-	protected String getPackageRoot() {
-		return this.getClass().getPackage().getName(); // nous utilisons la localisation de la classe de manisfeste comme racine du module
-	}
+    @Override
+    protected String getPackageRoot() {
+        return this.getClass().getPackage().getName(); // nous utilisons la localisation de la classe de manisfeste comme racine du module
+    }
 
 }
 
@@ -349,7 +345,9 @@ modules:
           dataBaseClass: io.vertigo.database.impl.sql.vendor.h2.H2DataBase
           jdbcDriver: org.h2.Driver
           jdbcUrl: jdbc:h2:~/vertigo/getting-started
-  io.vertigo.datamodel.DataModelFeatures: 
+  io.vertigo.datamodel.DataModelFeatures:
+  io.vertigo.vega.VegaFeatures: # utilisation du module web services
+  io.vertigo.datafactory.DataFactoryFeatures: # utilisation du module collections
   io.vertigo.datastore.DataStoreFeatures: # utilisation du module vertigo-dynamo
     features:
 	  - entitystore: # activation du support du stockage des entités de notre modèle
@@ -393,35 +391,35 @@ package your.group.id.gs.modulemetier1.services;
 import javax.inject.Inject;
 
 import io.vertigo.commons.transaction.Transactional;
-import io.vertigo.core.component.Component;
-import io.vertigo.dynamo.criteria.Criterions;
-import io.vertigo.dynamo.domain.model.DtList;
-import io.vertigo.dynamo.domain.model.DtListState;
-import io.vertigo.lang.Assertion;
+import io.vertigo.core.node.component.Component;
+import io.vertigo.datamodel.criteria.Criterions;
+import io.vertigo.datamodel.structure.model.DtList;
+import io.vertigo.datamodel.structure.model.DtListState;
+import io.vertigo.core.lang.Assertion;
 import your.group.id.gs.modulemetier1.dao.MovieDAO;
 import your.group.id.gs.modulemetier1.domain.Movie;
 
 @Transactional
 public class MovieServices implements Component {
 
-	@Inject
-	private MovieDAO movieDAO;
+    @Inject
+    private MovieDAO movieDAO;
 
-	public Movie getMovieById(final Long movId) {
-		Assertion.checkNotNull(movId);
-		//--- 
-		return movieDAO.get(movId);
-	}
+    public Movie getMovieById(final Long movId) {
+        Assertion.check().isNotNull(movId);
+        //--- 
+        return movieDAO.get(movId);
+    }
 
-	public DtList<Movie> getAllMovies() {
-		return movieDAO.findAll(Criterions.alwaysTrue(), DtListState.of(100));
-	}
+    public DtList<Movie> getAllMovies() {
+        return movieDAO.findAll(Criterions.alwaysTrue(), DtListState.of(100));
+    }
 
-	public Movie save(final Movie movie) {
-		Assertion.checkNotNull(movie);
-		//---
-		return movieDAO.save(movie);
-	}
+    public Movie save(final Movie movie) {
+        Assertion.check().isNotNull(movie);
+        //---
+        return movieDAO.save(movie);
+    }
 }
 ```
 
@@ -789,12 +787,13 @@ Installer un serveur Tomcat (version 9.0+) dans Eclipse et y ajouter notre proje
 
 Pour ce faire :
 
-- Télécharger l'archive du serveur tomcat depuis le site officiel : http://apache.mediamirrors.org/tomcat/tomcat-9/v9.0.40/bin/apache-tomcat-9.0.40.zip
+- Vérifier l'encodage du workspace Eclipse (Window -> Preferences -> General -> Workspace et mettre Text file encoding sur UTF-8)
+- Télécharger l'archive du serveur tomcat depuis le site officiel :https://apache.mediamirrors.org/tomcat/tomcat-9/v9.0.43/bin/apache-tomcat-9.0.43.zip
 - Extraire l'archive à l'endroit de votre convenance. Par exemple __%userprofile%/tomcat__
 - Dans la vue __Servers__ d'Eclipse cliquer sur _No Servers are available. Click this link to create a new server..._
 - Sélectionner Apache->Tomcat v9.0 Server
 - Cliquer sur __Next__
-- Cliquer sur __Browse__ et se placer dans le répertoire ou l'archive de Tomcat a été extraite ici __%userprofile%/tomcat__
+- Cliquer sur __Browse__ et se placer dans le répertoire où l'archive de Tomcat a été extraite ici __%userprofile%/tomcat__
 - Cliquer sur __Next__
 - Sélectionner le projet _vertigo-getting-started_ dans la colonne de gauche puis cliquer sur __Add__ (Le projet apparait alors dans la colonne de droite)
 - Cliquer sur __Finish__
