@@ -84,7 +84,7 @@ Elle sera détectée par Vertigo comme les autres composants par [l'autodiscover
 ```
 
 4. Ajouter les annotations sur les méthodes de l'interface, exemple:
-```Java
+```java
 @WebServiceProxyAnnotation
 @PathPrefix("/test")
 public interface SimplerClientTestWebServices extends Amplifier {
@@ -99,14 +99,13 @@ public interface SimplerClientTestWebServices extends Amplifier {
 
   @GET("/{conId}")
   Contact testRead(@PathParam("conId") final long conId);
-
-  }
+}
 ```
 
 5. Pour "utiliser" votre WebService, il suffit d'injecter l'interface dans votre service métier.
 L'autocloseable `HttpClientCookie` permet de conserver les cookies pour effectuer des appels succéssifs :
 
-```Java
+```java
   @Inject
   private SimplerClientTestWebServices otherWService;
 	
