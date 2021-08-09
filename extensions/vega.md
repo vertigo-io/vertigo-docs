@@ -19,7 +19,7 @@ Pour appeler des WebServices, il suffit d'une interface avec les annotations sta
 1. La classe du webservice doit implémenter l'interface [WebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-api/src/main/java/io/vertigo/vega/webservice/WebServices.java)
 2. La classe doit être déclaré comme un *Composant* Vertigo, concrètement, cela est fait par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application) 
 3. Ajouter les annotations sur les méthodes, exemple:
-```Java 
+```java 
 @AnonymousAccessAllowed 
 @GET("/anonymousTest")
 ```
@@ -84,7 +84,7 @@ Elle sera détecté par Vertigo comme les autres composants par [l'autodiscovery
 ```
 
 4. Ajouter les annotations sur les méthodes de l'interface, exemple:
-```Java
+```java
 @WebServiceProxyAnnotation
 @PathPrefix("/test")
 public interface SimplerClientTestWebServices extends Amplifier {
@@ -106,7 +106,7 @@ public interface SimplerClientTestWebServices extends Amplifier {
 5. Pour "utiliser" votre WebService, il suffit d'injecter l'interface dans votre service métier.
 L'autocloseable `HttpClientCookie` permet de conserver les cookies pour effectuer des appels succéssifs :
 
-```Java
+```java
   @Inject
   private SimplerClientTestWebServices otherWService;
 	
@@ -137,7 +137,7 @@ De nombreux exemples complets sont présents dans les tests de Vertigo sur GitHu
 ### Syntaxe des routes
 Lors de la définition des routes, vous pouvez utiliser `{myParamName}` pour déclarer une variable de l'URL qui est utilisée comme paramètre du service.  
 Exemple:
-```Java
+```java
 @GET("/contact/{id}")
 public Contact getContact(@PathParam("conId") final int contactId) {
 ...
@@ -170,7 +170,7 @@ La serialisation JSON est optimisée pour les Objects spécifiques de Vertigo :
 - UiObject : objet composite générique, utilisé pour charger un contexte complet de page
 - FacetedQueryResult : l'objet résultat du moteur de recherche (avec facettes, groupements et highlights)
 
-```Java
+```java
 @GET("/uiContext/{contactIdFrom}/{contactIdTo}")
 public UiContext testMultiPartBody(@PathParam("contactIdFrom") final long contactIdFrom, @PathParam("contactIdTo") final long contactIdTo) {
  	final UiContext uiContext = new UiContext();
@@ -183,7 +183,7 @@ public UiContext testMultiPartBody(@PathParam("contactIdFrom") final long contac
 }
 ```
 Result :
-```Json
+```json
 {
 	"testDate":"2014-07-29T00:00:00.000Z",
 	"contactFrom":{
@@ -203,14 +203,14 @@ Result :
 
 ### Handler des Exceptions
 En cas d'Exceptions levées dans le service, un code HTTP est automatiquement positionné et un message d'erreur JSON est envoyé. Le retour d'erreur est volontairement simplifié pour des raisons de sécurité de l'application (pas de stacktrace par exemple).
-```Json
+```json
 {
   "globalErrors": "Error message or simple class name"
 }
 ```
 
 Si le service lance une **Exception utilisateur** (saisie utilisateur ou une erreur métier), le message est plus complet et précise les informations pour le positionnement des erreurs dans l'écran :
-```Json
+```json
 {
   "globalErrors": [ "list of error messages", ...],
   "globalWarnings": [ "list of warning messages", ...],
@@ -243,7 +243,7 @@ Si le service lance une **Exception utilisateur** (saisie utilisateur ou une err
 Pour les erreurs sur un object, le nom repris dans le JSON d'erreur est le même que celui envoyé lors de la request. Pour un object dans une liste, le nom utilisé est :
 `nom de la liste dans la request`+ `idx` + index dans la liste (commence à 0)
 Exemple : 
-```Json
+```json
 Request : 
 { 
   "persons" : [
@@ -287,7 +287,7 @@ Pour ce faire, vous avez à votre disposition trois annotations :
 * `ServerSideConsume` : Comme `ServerSideRead`, mais l'état conservé est consommé lors de l'appel.
 
 Exemple : 
-```Java
+```java
 @GET("/contact/{conId}")
 @ExcludedFields({ "birthday", "email", "passport" }) // All secret fields are excluded
 @ServerSideSave  // Full contact data are kept serverSide, exclusion are done on json convert only
@@ -310,7 +310,7 @@ public Contact updateFirstNameContact(
 Request: `GET http://localhost:8080/*maWebApp*/api/contact/1`
 
 Response:
-```Json
+```json
 {
 	"conId":"1",
 	"honorificCode":"MR_",
@@ -322,14 +322,14 @@ Response:
 
 
 Request: `PUT http://localhost:8080/*maWebApp*/api/contact/1`
-```Json
+```json
 {
 	"firstName":"Jean-denis",
 	"serverToken":"cb44ab11-4eac-41e9-a3d1-c0fc20ea55e1"
 }
 ```
 Response:
-```Json
+```json
 {
 	"conId":"1",
 	"honorificCode":"MR_",
@@ -368,7 +368,7 @@ Si la limite du serveur est dépassée, le serveur retourne une erreur `HTTP 429
 `DtListDelta` est un objet spécifique utilisé par Vertigo Vega.
 Il est utilisé pour agréger les modifications apportées à une liste : création, mise à jour ou suppression réalisées côté client et retournées au serveur en 1 appel.
 La requête JSON doit respecter ce format : 
-```Json
+```json
 {
 	"collCreates": { 
 		"clientId1" : { ... object1 ... },
@@ -387,7 +387,7 @@ La requête JSON doit respecter ce format :
 ```
 
 Exemple : 
-```Java
+```java
 @POST("/contacts/delta")
 @ExcludedFields({ "birthday", "email", "passport" }) // All secret fields are excluded
 public String updateContacts( final DtListDelta<Contacts> contactsDelta) {
@@ -404,7 +404,7 @@ L'annotation `AutoSortAndPagination` est le moyen le plus simple pour publier un
 En partant d'un service métier qui retourne une DtList complète, il suffit d'ajouter un WebService avec cette annotation qui retourne directement le résultat du service.
 
 Exemple :
-```Java
+```java
 @AutoSortAndPagination
 @GET("/contacts")
 public DtList<Contacts> searchContacts( final ContactCriteria contactCriteria) {
@@ -433,7 +433,7 @@ Pour avoir la même API, vous avez à ajouter un paramètre  ``` @QueryParam("."
 DtListState est une représentation de l'état d'une sous-liste, avec les champs `top`, `skip`, `sortFieldName`, `sortDesc` et `listServerToken`   
 
 Exemple :
-```Java
+```java
 @GET("/contacts")
 public DtList<Contacts> searchContacts( final ContactCriteria contactCriteria, @QueryParam("") UiListState uiListState) {
     //think to add a total-count metadata to the returned list.

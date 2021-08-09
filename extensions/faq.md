@@ -77,7 +77,7 @@ Pour émettre la selection coté serveur, il faut ajouter du code spécifique.
 ## Comment rendre un champ obligatoire en fonction d'un autre ?
 Il faut utiliser un DtObjectValidator
 Voici le code à mettre dans la méthode de controleur pour lancer le contrôle du validateur sur l'objet
-```Java
+```java
 viewContext.getUiObject(contextKey).mergeAndCheckInput(Collections.singletonList(new YourCustomDtObjectValidator()), uiMessageStack);
 if (uiMessageStack.hasErrors()) {
             throw new ValidationUserException();
@@ -116,7 +116,7 @@ La signature de la méthode `httpPostAjax` est la suivante :
 `httpPostAjax(url, params, options)`
 
 Le dernier paramètre permet de fournir un objet qui contient le callback en cas de succès et en cas d'erreur
-```Java
+```java
 {
    onSuccess : function (response) {
       // do something
@@ -151,7 +151,7 @@ Coté page :
 ```
 
 Coté Controller
-```Java
+```java
 @PostMapping("/_save")
    public String doSave(
          final ViewContext viewContext,
@@ -211,12 +211,12 @@ Il existe un cas particulier des listes qui n'ont pas de nom (`null`) qui est la
 Exemple:
 Pour ne récupérer que les éléments 'actifs' (donc avec un champ booléen qui a une certaine valeur)
 Dans le `MasterDataDefinitionProvider` du module (`extends AbstractMasterDataDefinitionProvider`)
-```Java
+```java
 registerDtMasterDatas(EquipmentType.class, Map.of("active", EquipmentType::getActive), true);
 ```
 
 Et pour le poser dans le `context`, dans le controller :
-```Java
+```java
 viewContext.publishMdl(ViewContextKey.of("equipmentTypes"), EquipmentType.class, "active");
 ```
 
@@ -244,7 +244,7 @@ A vérifier :
 Il est possible de créer le postAjax "à la main" pour des besoins particuliers. Mais dans ce cas, vous perdez les accélérateurs, assurez-vous que votre cas est pertinent.
 `httpPostAjax` poste en ajax sur une route (le premier argument), avec des paramètres (le second argument) et gère le retour et les erreurs
 
-```Java
+```java
 httpPostAjax('_saveMyData', {
   'vContext[myDataForm][field1]' : vueData.myDataForm.field1,
   'vContext[myDataForm][field2]' : vueData.myDataForm.field2,
@@ -272,11 +272,11 @@ Ces `SmartTypes` portent une liste de contrainte, il en existe plusieurs fournit
 Lorsqu'un DtObject (ou une DtList) arrive par un WebService Vega ou un controlleur SpringMVC, l'objet passe par un `DtObjectValidator`.
 Si rien n'est précisé il passe par le `DefaultDtObjectValidator` qui vérifie les contraintes des `SmartTypes` pour tous les champs passés par l'api.
 Pour ajouter votre propre validateur il suffit d'annoter le paramètre d'entrée avec l'annotation `@Validate`
-```Java
+```java
 @Validate(YourValidator.class)
 ```
 Ou même avec plusieurs 
-```Java
+```java
 @Validate({ YourValidator.class, YourOtherValidator.class })
 ```
 Utiliser votre propre validateur, permet de faire des contrôles multi-champs.
@@ -297,7 +297,7 @@ Pour l'upload en utilisant le composant `<vu:fileupload>`, il suffit d'avoir un 
 **Attention** à bien respecter les verbes : `GET` pour un download et `POST` pour l'upload.
 
 Exemple : 
-```Java
+```java
 @GetMapping("/myFiles/{protectedUrl}")
 public VFile loadFile(@PathVariable("protectedUrl") final String protectedUrl) throws URISyntaxException, IOException {
    final URI fullPath = getClass().getResource(ProtectedValueUtil.readProtectedValue(protectedUrl, String.class)).toURI();
