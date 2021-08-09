@@ -533,7 +533,7 @@ Cette copie est effectuée côté ElasticSearch et est plus efficace qu'une copi
 
 Exemple de KSP : 
 
-```Json
+```json
 create IndexDefinition IdxCar {
     keyConcept : DtCar
     dtIndex : DtCar
@@ -547,14 +547,14 @@ Cette fonction permet de créer des champs de recherche multichamps, mais peut a
 
 Pour utiliser les champs ``copy_to``, il faut que le champ existe dans le Dt de l'index et que les champs copiés dedans aient tous un indexType.<br/>
 Pour cela, nous préconisons d'ajouter des champs computed :
-```Json
+```json
 computed modelPhonetic { domain:DoPhonetic label:"model sort" expression:"throw new io.vertigo.lang.VSystemException(\"Can't use index copyTo field\");"}
 computed allText { domain:DoFullText label:"index all" expression:"throw new io.vertigo.lang.VSystemException(\"Can't use index copyTo field\");"}
 ```
 
 Pour l'indexType des types primitifs, nous préconisons de définir l'indexType standard : 
 
-```Json
+```json
 create Domain DoVisitCount {
     dataType: Integer
     indexType: "standard:integer"
@@ -596,7 +596,7 @@ avec les mots clés ==92350 Le plessis robinson== devient :
 Une solution à envisager est le mix des deux solutions présentées ci-dessus :<br/>
 On vérifie d'abord la présence des mots clés saisis par l'utilisateur dans `_all` puis on affecte le poids à certains champs en OU.
 
-```Java
+```java
 +_all:#+query*# //_all en obligatoire contient tous les mots saisis par l'utilisateur
 +titre:#query*#^5 //le titre est boosté avec les mots en Optionnel; il n'est pas obligé de contenir tous les termes
 ```
@@ -608,7 +608,7 @@ Le filtre de sécurité a vocation à être conservé en session et être ajout�
 Le module de sécurité de Vertigo permet de générer le filtre dans différents langages (et notamment Lucene) à partir d'une déclaration unifiée des règles de sécurité.
 
 Il se positionne avec le code suivant :
-```Java
+```java
 searchQueryBuilder.withSecurityFilter(session.getSearchSecurityFilter())
 ```
 

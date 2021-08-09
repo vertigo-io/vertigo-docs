@@ -39,7 +39,7 @@ modules
 La configuration de la sécurité est ensuite ajoutée au manifest du module applicatif. <br/>
 Exemple : 
 
-```Java
+```java
 public class MaintenanceFeatures extends ModuleDiscoveryFeatures {
 
   public MaintenanceFeatures() {
@@ -133,7 +133,7 @@ Deux types d'autorisations sont proposés :
 
 Voici un fichier type de configuration de la sécurité 
 
-```Json
+```json
 {
   "globalAuthorizations": [{
     "name": "SecuredUser",

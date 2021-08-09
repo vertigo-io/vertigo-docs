@@ -129,7 +129,7 @@ L'usage de ce module est assez simple :
  
 Globalement le login est réalisé ainsi dans le service métier : 
 
-```Java
+```java
 public void login(final String login, final String password) {
   final Optional<Account> loggedAccount = authenticationManager.login(new UsernamePasswordAuthenticationToken(login, password));
   if (!loggedAccount.isPresent()) {
@@ -265,7 +265,7 @@ Le Criteria Vertigo est un élément transverse représentant un filtre, qui peu
 Les autorisations sont chargées via un DefinitionProvider dans la Feature du module applicatif.<br/>
 
 *Exemple :*
-```Java 
+```java 
   .addDefinitionProvider(DefinitionProviderConfig.builder(JsonSecurityDefinitionProvider.class)
     .addDefinitionResource("security", "mars-auth-config.json")
     .build())
