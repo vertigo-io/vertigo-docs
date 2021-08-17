@@ -93,7 +93,7 @@ Les notifications dans une application métier sont utilisées pour :
 - proposer un racourci vers un écran métier
 
 !> Il est important de ne pas négliger la conception des notifications : quels types existent, quels url en cible, quels process les crées, quels process les supprimes, à qui sont-elles envoyées, ...
-   Il faut notament réfléchir au targetUrl qui sert d'id fonctionnel (on peut compléter l'url avec des # si besoins)
+   Il faut notament réfléchir au targetUrl qui sert d'id fonctionnel (on peut compléter l'url avec des # si besoin)
 
 ?> Il est possible d'envoyer des Notifications d'un SI à un autre (c'est l'interet du stockage partagé Redis)
 
