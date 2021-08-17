@@ -21,7 +21,6 @@ Le module **Account** est nécessaire pour utiliser ce module.
 Voici une configuration typique d'une application utilisant le module Social
 
 ```yaml
-
 modules
   io.vertigo.connectors.mail.MailFeatures:
     features:
@@ -94,12 +93,12 @@ Les notifications dans une application métier sont utilisées pour :
 - proposer un racourci vers un écran métier
 
 !> Il est important de ne pas négliger la conception des notifications : quels types existent, quels url en cible, quels process les crées, quels process les supprimes, à qui sont-elles envoyées, ...
-!> Il faut notament réfléchir au targetUrl qui sert d'id fonctionnel (on peut compléter l'url avec des # si besoins)
+   Il faut notament réfléchir au targetUrl qui sert d'id fonctionnel (on peut compléter l'url avec des # si besoins)
 
 ?> Il est possible d'envoyer des Notifications d'un SI à un autre (c'est l'interet du stockage partagé Redis)
 
 ?> Les Notifications sont globales aux utilisateurs, mais il est possible de conserver des méta-données par utilisateurs (comme un état *lue/non lue* ou pour l'*épingler*)
-?> Des projets ont déjà implémentés un mecanisme de résumer quotidien pour envoyer un récapitulatif par mail des notifications non lues
+   Des projets ont déjà implémentés un mecanisme de résumer quotidien pour envoyer un récapitulatif par mail des notifications non lues
 
 
 ### Utilisation
@@ -114,14 +113,14 @@ L'utilisation des Notifications est assez simple :
 
 #### API
 
-NotificationManager
+`NotificationManager`
 - **send(Notification, Set<UID<Account>>)** : Envoi une notification à un ensemble d'utilisateur
 - **getCurrentNotifications(UID<Account>)** : Récupère les notifications d'un utilisateur
 - **remove(UID<Account>,notificationUUID)** : Supprime une notification pour un utilisateur (n'affecte pas les autres utilisateurs)
 - **removeAll(type, targetUrl)** : Supprime toutes les notifications par type et targetUrl
 - **updateUserContent(UID<Account>,notificationUUID,userContent)** : Permet de modifier (annule et remplace) l'information par utilisateur sur une notification (notion de tags ou de flags)
 
-Notification
+`Notification`
 - **UUID uuid** : Identifiant unique
 - **String sender** : Libellé de l'émetteur 
 - **String type** : Type de la notification (affecte le rendu)
@@ -134,7 +133,7 @@ Notification
 
 Exemple de création et envoi d'une notification :
 
-```Java
+```java
 final Notification notification = Notification.builder()
   .withSender("System") //we could keep the user who did this update
   .withTitle("Base updated")
