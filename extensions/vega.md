@@ -460,6 +460,7 @@ Vertigo Vega retourne automatiquement les codes HTTP suivants :
 
 ### Annotations de classe
 * `PathPrefix` : Utilisé pour ajouter un préfixe commun à toutes les routes de la classe
+* `RequireApiKey` : Utilisé pour protéger l'ensemble des routes de la classe. L'accès sera conditionné à la présence d'un header (par défaut `X-Api-Key`) contenant la valeur configurée dans la feature `webservices.auth.apiKey` (paramètre `apiKey`).
 
 ### Annotations de méthode
 * `Doc` : Ajoute une documentation à la route. Apparaît dans la spécification de l'API (Swagger)
@@ -476,6 +477,7 @@ Vertigo Vega retourne automatiquement les codes HTTP suivants :
 * `AccessTokenMandatory` : Définit le service comme étant *protégé par AccessToken*. Le service impose la présence d'un AccessToken valide dans le header `x-access-token` de la requête. A utiliser dans un objectif de sécurité.
 * `AccessTokenConsume` : Définit le service comme étant *protégé par AccessToken*. Le service impose la présence d'un AccessToken valide dans le header `x-access-token` de la requête. Quand ce service est appelé et termine sans erreur, le token est consommé et ne peut plus être utilisé. A utiliser dans un objectif de sécurité.
 * `ServerSideSave` : Indique au serveur de conserver une copie de l'objet complet côté serveur. L'objet retourné est complété avec un champ `serverToken` avec un identifiant unique. Ce `serverToken` devra être envoyé par le client lorsqu'il interagit avec le serveur sur cet objet.
+* `RequireApiKey` : Identique à l'annonation de classe mais pour protéger une seule route.
 
 ### Annotations de paramètre
 * `PathParam` : Récupère un paramètre depuis une partie de la route (indiqué dans la route avec {myParamName}).
