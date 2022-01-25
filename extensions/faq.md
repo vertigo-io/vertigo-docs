@@ -390,7 +390,18 @@ Ces contenus ne s'appliquent pas au même endroit et ont souvent des manières d
 
 **Les données métier**, à implémenter dans l'appli. La donnée peut être multilingue (plusieurs langues pour une même entité) ou associée à une langue particulière (une seule langue par entité)
 
+## Comment préselectionner des facettes lorsque l'utilisateur arrive sur l'écran de recherche ?
+L'api du composant de recherche prend un paramètre pour les facettes sélectionnées, il suffit d'initialiser cet objet `SelectedFacetValues`, il y a pour cela un Builder.
+
+Exemple:
+```Java
+final SelectedFacetValues initialSelectedFacetValues = SelectedFacetValues.empty()
+     .add("FctEquipmentEquipmentTypeName", "building")
+     .build();
+```
+
 26/11
+
 
 
 
