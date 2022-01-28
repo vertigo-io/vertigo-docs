@@ -253,6 +253,8 @@ Le Criteria Vertigo est un élément transverse représentant un filtre, qui peu
 - **@Secured({`liste de nom d'authorization`})** : Permet de sécuriser une *méthode* seule ou toute une *class* en vérifiant que l'utilisateur a l'une des autorisations
 - **@SecuredOperation(`nom d'authorization`)** : Permet de sécuriser une `SecuredEntity` passée en paramètre en vérifiant que l'utilisateur est autorisé à réaliser cette opération sur l'entité
 
+> Dans ces annotations, il n'est pas nécessaire d'utiliser le préfix `Atz` pour le nom des authorisations
+ 
 > `@SecuredOperation` nécessite que la méthode soit annotée par `@Secured`
 
 !> Attention : les annotations sont vérifiées par AOP, ce mode de contrôle est donc **non-réentrant**
