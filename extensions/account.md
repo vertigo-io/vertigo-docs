@@ -250,12 +250,12 @@ Pour l'appliquer sur des requetes générales du DAO
 ```
 
  Pour l'appliquer sur des tasks spécifique du DAO.
- Il faut 
+ Il faut passer un AuthorizationCriteria par les paramètres IN de la Task. Il est alors possible de le traduire en SQL directement dans la requete SQL.
 ```Java
 return equipmentDAO.getLastPurchasedEquipmentsByBaseId(baseId,
 				AuthorizationUtil.authorizationCriteria(Equipment.class, SecuredEntities.EquipmentOperations.read));
 ```
- ```JSON
+ ```
 create Task TkGetLastPurchasedEquipmentsByBaseId {  
     className : "io.vertigo.basics.task.TaskEngineSelect"
     request : "
@@ -271,9 +271,9 @@ create Task TkGetLastPurchasedEquipmentsByBaseId {
     out equipments       {domain : DoDtEquipment	cardinality: "*"}
 }
 ```
-
+> Note : Il est efficace de passer le filtre de sécurité sous la forme d'un from. Cela permet de limiter rapidement le périmêtre de donnée avant de faire des jointures plus complexes.
  
-Pour l'appliquer à une recherche
+Pour l'appliquer à une recherche par un moteur de recherche :
 ```Java
  final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read));
 	final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
