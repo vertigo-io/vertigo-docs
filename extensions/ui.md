@@ -35,7 +35,6 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
 
 - `@ViewAttribute("nomDuParam")` : Map une variable de type objet, avec les données de formulaire lors d'un POST. Le nom doit correspondre à une clé du context (voir [ViewContextKey](#ViewContextKey)). L'objet est récupéré du context, mis à jour par les données du POST, validées puis passées à la méthode.
 - `@QueryParam("paramName")` : Utiliser dans quelques cas pour indiquer le nom du paramètre de la request. Typiquement pour opérations sur les fichiers ([VFile](VFile) et [FileInfoURI](FileInfoURI))
-- `@Secured("authname")` : Utiliser sur les controllers ou les méthodes de controller pour vérifier que l'utilisateur à bien ces authorisations. (Utilise la configuration de vertigo-account authorization)
 
 ### ArgumentResolver Vertigo-ui
 
@@ -56,8 +55,6 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
 ### Autres spécificités Vertigo-ui
 
 - `ViewContextKey<AutreType>` : Déclare une entrée typée dans le context de la page.
-- `UiUtil` : Utilitaire passé au moteur de templating `uiUtil`, il propose des fonctions qui sont utiles pour les composants Vertigo-ui et le rendu des pages. En générale, les pages n'ont pas besoin de l'utiliser, mais plus les composants.
-- `UiAuthorizationUtil` : Utilitaire passé au moteur de templating `authz`, il propose des fonctions pour simplifier les controles de sécurité lors de l'affichage.
 
 API du **ViewContext**
 - `publishRef` : Ajoute au context un simple objet sérialisable
