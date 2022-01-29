@@ -226,11 +226,11 @@ La force du modèle de sécurité de Vertigo, est de permettre une unique défin
 
 #### API
 
-L'API proposée permet de gérer la plupart des cas d'usages rencontrés.
+L'API proposée par le AuthorizationManager permet de gérer la plupart des cas d'usages rencontrés.
 
 - **hasAuthorization(AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre
-- **isAuthorized(KeyConcept, OperationName)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
-- **getCriteriaSecurity(Class<KeyConcept>, OperationName)** : Génère un [Criteria] valable pour l'utilisateur connecté, un type d'entité et une opération. Le Criteria permet de nombreux usages, voir détails plus bas.
+- **isAuthorized(Entity, OperationName)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
+- **getCriteriaSecurity(Class<Entity>, OperationName)** : Génère un [Criteria] valable pour l'utilisateur connecté, un type d'entité et une opération. Le Criteria permet de nombreux usages, voir détails plus bas.
 - **getSearchSecurity(Class<KeyConcept>, OperationName)** : Génère le filtre de sécurité dans la syntaxe ElasticSearch applicable pour l'utilisateur connecté, un type d'entité et une opération.
 - **getAuthorizedOperations(KeyConcept)** : Liste des opérations possibles par l'utilisateur connecté sur l'entité passée en paramètre (utilisé par la couche IHM pour adapter les actions possibles)
 
@@ -243,16 +243,94 @@ Le Criteria Vertigo est un élément transverse représentant un filtre, qui peu
 - **toPredicate** : Conversion en Predicat Java (pour les stream, ou un test localisé)
 - **toSQL** : Conversion en clause WHERE pour une requète SQL (préférer l'usage par le DAO)
 
+Pour l'appliquer sur des requetes générales du DAO
+```Java
+ final Criteria<Equipment> securityFilter = authorizationManager.getCriteriaSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read);
+	return equipmentDAO.findAll(securityFilter, dtListState);
+```
+
+ Pour l'appliquer sur des tasks spécifique du DAO.
+ Il faut 
+```Java
+return equipmentDAO.getLastPurchasedEquipmentsByBaseId(baseId,
+				AuthorizationUtil.authorizationCriteria(Equipment.class, SecuredEntities.EquipmentOperations.read));
+```
+ ```JSON
+create Task TkGetLastPurchasedEquipmentsByBaseId {  
+    className : "io.vertigo.basics.task.TaskEngineSelect"
+    request : "
+            select 
+            	equ.*
+			from (<%=securedEquipment.asSqlFrom(\"equipment\", ctx)%>) equ
+			where equ.base_id = #baseId#
+			order by equ.purchase_date desc
+			limit 50
+             "
+    in 	baseId           {domain : DoId         	cardinality: "1"}
+    in  securedEquipment {domain : DoAuthorizationCriteria    cardinality: "1"}
+    out equipments       {domain : DoDtEquipment	cardinality: "*"}
+}
+```
+
+ 
+Pour l'appliquer à une recherche
+```Java
+ final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read));
+	final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
+				.withSecurityFilter(securityListFilter)
+				.build();
+ ```
+ 
+#### AuthorizationUtil
+
+Cet utilitaire propose des méthodes static facilement utilisable pour vérifer les authorisations de l'utilisateur dans les services métiers.
+Il est préférable de faire les controles le plus tôt possible dans le traitement pour des questions de performances. 
+Mais si l'utilisateur n'a pas les authorisations suffisantes, une exception est lancée ce qui rollbackera la transaction et affichera une erreur à l'utilisateur.
+
+- **assertAuthorizations(message*(optionel)*, AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre et lance une exception sinon
+- **assertOperations(Entity, OperationName, message*(optionel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
+- **assertOperationsOnOriginalEntity(Entity, OperationName, message*(optionel)*)** : Comme **assertOperations** mais reload d'abord l'objet original pour faire le controle de sécurité AVANT d'appliquer les modifications de l'utilisateur
+ - **assertOr(BooleanSupplier...)** : Permet d'assembler plusieurs controle en OR
+ - **hasAuthorization(BooleanSupplier...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre
+ - **authorizationCriteria(<Class<Entity>, OperationName)** : Construit un criteria représentant le filtre de sécurité pour un type d'opération sur une entity
+ - **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optionel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** porté par cette accessor (FK), l'accessor sera loadé si besoin 
+ 
+ Exemple:
+```Java
+  //check d'opération sur une entity
+ AuthorizationUtil.assertOperations(baseDAO.get(baseId), SecuredEntities.BaseOperations.read);
+ 
+ //util pour les FK
+ AuthorizationUtil.assertOperationsWithLoadIfNeeded(ticket.equipment(), SecuredEntities.EquipmentOperations.readTickets);
+```
+	
+#### UiAuthorizationUtil
+
+Pour le rendu des pages, un utilitaire permet de valider que l'utilisateur possède des authorizations globales, ou les authoriations pour une opération sur une entité.
+Cela permet de désactiver l'affichage de bouton ou lien dans l'UI.
+Habituellement les controles sont fait en thymeleaf avec un `th:if`
+Exemple:
+```HTML
+ th:if="${authz.hasAuthorization('AdmUser','ViewAcademy')}"
+ ```
+
+Api:
+- **hasAuthorization(AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre
+- **hasOperation(UiObject, OperationName)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
+ 
+!> La désactivation d'un bouton n'est pas suffisante pour assurer un niveau de sécurité minimum. Le controle des authorizations doit surtout être réalisé coté serveur
 
 #### Aspect
 
-!> Bien que pratique, le controle de sécurité par aspect n'est pas préconisé, à cause du caractère non-systématique de cette technique. A réserver aux développeurs avertis.
+!> Bien que pratique, le controle de sécurité par aspect n'est pas préconisé, à cause du caractère non-systématique de cette technique (non-réentrance). A réserver aux développeurs avertis.
 
 **Vertigo Authorization** propose deux annotations permettant l'implémentation des controles de sécurité par AOP.
 
 - **@Secured({`liste de nom d'authorization`})** : Permet de sécuriser une *méthode* seule ou toute une *class* en vérifiant que l'utilisateur a l'une des autorisations
 - **@SecuredOperation(`nom d'authorization`)** : Permet de sécuriser une `SecuredEntity` passée en paramètre en vérifiant que l'utilisateur est autorisé à réaliser cette opération sur l'entité
 
+> Dans ces annotations, il n'est pas nécessaire d'utiliser le préfix `Atz` pour le nom des authorisations
+ 
 > `@SecuredOperation` nécessite que la méthode soit annotée par `@Secured`
 
 !> Attention : les annotations sont vérifiées par AOP, ce mode de contrôle est donc **non-réentrant**
@@ -260,6 +338,7 @@ Le Criteria Vertigo est un élément transverse représentant un filtre, qui peu
 !> Re-attention : Le `@SecuredOperation` nécessite l'entité, ce qui signifie qu'elle doit déjà être chargée (du coup avant le check de sécurité)
 
 
+ 
 ### Chargement
 
 Les autorisations sont chargées via un DefinitionProvider dans la Feature du module applicatif.<br/>

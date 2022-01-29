@@ -21,7 +21,6 @@ Le module **Account** est nécessaire pour utiliser ce module.
 Voici une configuration typique d'une application utilisant le module Social
 
 ```yaml
-
 modules
   io.vertigo.connectors.mail.MailFeatures:
     features:
@@ -41,8 +40,7 @@ modules
           developmentMailTo: team@vertigo.io
           charset: "UTF8"
       - notifications.redis:
-      - comments.redis:
-	  
+      - comments.redis:	  
 ```
 
 ### Features disponibles :

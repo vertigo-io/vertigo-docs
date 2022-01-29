@@ -64,7 +64,7 @@ Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.c
 
 Pour appeler un WebService distant
 1. Il faut reproduire l'api du WebService avec une interface Java. Cette interface doit hériter de `io.vertigo.core.node.component.Amplifier` et avoir l'annotation `@WebServiceProxyAnnotation`
-Elle sera détecté par Vertigo comme les autres composants par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application) 
+Elle sera détectée par Vertigo comme les autres composants par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application) 
 
 2. Ajouter la *featureConfig* dans la configuration de Vega
 ```yaml
@@ -99,8 +99,7 @@ public interface SimplerClientTestWebServices extends Amplifier {
 
   @GET("/{conId}")
   Contact testRead(@PathParam("conId") final long conId);
-
-  }
+}
 ```
 
 5. Pour "utiliser" votre WebService, il suffit d'injecter l'interface dans votre service métier.
@@ -119,12 +118,12 @@ L'autocloseable `HttpClientCookie` permet de conserver les cookies pour effectue
     }
   }
 ```
-!> Le HttpClientCookie, conserve le cookie distant sur dans un threadlocal.
-Il est donc adapté pour des WebServices appellé dans un batch ou dans le traitement d'un écran de l'application. 
-Mais pas pour être conserver tout le temps d'une navigation utilisateur.
+!> Le `HttpClientCookie` conserve le cookie distant sur dans un threadlocal.
+Il est donc adapté pour des WebServices appellés dans un batch ou dans le traitement d'un écran de l'application. 
+Mais pas pour être conservé tout le temps d'une navigation utilisateur.
 
 ?> Le connecteur `HttpClient` propose d'autres paramètres optionnels :
-- `name` pour gérer plusieurs endpoint, il faut alors préciser le nom de la connexion dans l'annotation `@WebServiceProxyAnnotation`
+- `name` pour gérer plusieurs *endpoint*, il faut alors préciser le nom de la connexion dans l'annotation `@WebServiceProxyAnnotation`
 - `connectTimeoutSecond` pour définir le timeout
 - `proxy` et `proxyPort` pour gérer les proxy
 
