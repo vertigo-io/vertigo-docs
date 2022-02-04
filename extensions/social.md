@@ -40,7 +40,7 @@ modules
           developmentMailTo: team@vertigo.io
           charset: "UTF8"
       - notifications.redis:
-      - comments.redis:
+      - comments.redis:	  
 ```
 
 ### Features disponibles :
@@ -93,7 +93,7 @@ Les notifications dans une application métier sont utilisées pour :
 - proposer un racourci vers un écran métier
 
 !> Il est important de ne pas négliger la conception des notifications : quels types existent, quels url en cible, quels process les crées, quels process les supprimes, à qui sont-elles envoyées, ...
-   Il faut notament réfléchir au targetUrl qui sert d'id fonctionnel (on peut compléter l'url avec des # si besoins)
+   Il faut notament réfléchir au targetUrl qui sert d'id fonctionnel (on peut compléter l'url avec des # si besoin)
 
 ?> Il est possible d'envoyer des Notifications d'un SI à un autre (c'est l'interet du stockage partagé Redis)
 
@@ -113,14 +113,14 @@ L'utilisation des Notifications est assez simple :
 
 #### API
 
-`NotificationManager`
+##### NotificationManager
 - **send(Notification, Set<UID<Account>>)** : Envoi une notification à un ensemble d'utilisateur
 - **getCurrentNotifications(UID<Account>)** : Récupère les notifications d'un utilisateur
 - **remove(UID<Account>,notificationUUID)** : Supprime une notification pour un utilisateur (n'affecte pas les autres utilisateurs)
 - **removeAll(type, targetUrl)** : Supprime toutes les notifications par type et targetUrl
 - **updateUserContent(UID<Account>,notificationUUID,userContent)** : Permet de modifier (annule et remplace) l'information par utilisateur sur une notification (notion de tags ou de flags)
 
-`Notification`
+##### Notification
 - **UUID uuid** : Identifiant unique
 - **String sender** : Libellé de l'émetteur 
 - **String type** : Type de la notification (affecte le rendu)
