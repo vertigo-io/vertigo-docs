@@ -7,7 +7,7 @@ Il intègre un ensemble de solutions *production-ready* pour accélérer et séc
 Vega propose également un client de WebService pour appeller simplement des WebServices d'un autre noeud Vertigo, ou d'une autre application.
 
 ## Composant interne
-En interne, le module utilise [java-spark](https://github.com/perwendel/spark).<br/>
+En interne, le module utilise [Javalin](https://github.com/tipsy/javalin).<br/>
 Il propose une publication de l'API par le standard [Swagger](https://swagger.io/).<br/>
 Pour publier les WebServices, il suffit d'un ensemble d'annotations sur une façade de vos services métier. Les annotations sont volontairement une sous-partie du standard [JAX-RS](https://javaee.github.io/javaee-spec/javadocs/javax/ws/rs/package-summary.html)
 
@@ -16,7 +16,7 @@ Pour appeler des WebServices, il suffit d'une interface avec les annotations sta
 
 ## Quick start server
 
-1. La classe du webservice doit implémenter l'interface [WebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-api/src/main/java/io/vertigo/vega/webservice/WebServices.java)
+1. La classe du webservice doit implémenter l'interface [WebServices](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/webservice/WebServices.java)
 2. La classe doit être déclaré comme un *Composant* Vertigo, concrètement, cela est fait par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application) 
 3. Ajouter les annotations sur les méthodes, exemple:
 ```java 
@@ -39,20 +39,20 @@ modules:
 5. Déclarer le filtre dans le fichier *web.xml*
 
 ```xml
-	<filter>
-		<filter-name>VegaSparkFilter</filter-name>
-		<filter-class>io.vertigo.vega.plugins.webservice.webserver.sparkjava.VegaSparkFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>VegaSparkFilter</filter-name>
-		<url-pattern>/api/*</url-pattern>
-	</filter-mapping>
+   <filter>
+	   <filter-name>VegaJavalinFilter</filter-name>
+	   <filter-class>io.vertigo.vega.plugins.webservice.webserver.javalin.VegaJavalinFilter</filter-class>
+  </filter>
+  <filter-mapping>
+	  <filter-name>VegaJavalinFilter</filter-name>
+	  <url-pattern>/api/*</url-pattern>
+  </filter-mapping>
 ```
  
 6. Démarrer l'application
 7. **C'est bon**. Vous pouvez appeler votre webservice :  [http://localhost:8080/*maWebApp*/api/anonymousTest](http://localhost:8080/*maWebApp*/api/anonymousTest)
 
-Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/impl/webservice/catalog/SwaggerWebServices.java) qui vous donnent la vue de l'API des WebServices disponibles.<br/>
+Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/impl/webservice/catalog/SwaggerWebServices.java) qui vous donnent la vue de l'API des WebServices disponibles.<br/>
 * IHM Swagger :  [http://localhost:8080/*maWebApp*/api/swaggerUi](http://localhost:8080/*maWebApp*/api/swaggerUi)
 * API Swagger seule : [http://localhost:8080/*maWebApp*/api/swaggerApi](http://localhost:8080/*maWebApp*/api/swaggerApi)
 
@@ -338,7 +338,7 @@ Response:
 }
 ```
 
-?> Cette fonction est traitée par [`ServerSideStateWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/plugins/webservice/handler/ServerSideStateWebServiceHandlerPlugin.java)
+?> Cette fonction est traitée par [`ServerSideStateWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/plugins/webservice/handler/ServerSideStateWebServiceHandlerPlugin.java)
 
 
 ### Sécurité **AccessToken**
@@ -358,7 +358,7 @@ Le serveur envoie des informations dans des *headers* de la *Response*
 
 Si la limite du serveur est dépassée, le serveur retourne une erreur `HTTP 429 TOO_MANY_REQUEST`.
 
-> Cette fonction est traitée par [`RateLimitingWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo/blob/master/vertigo-vega-impl/src/main/java/io/vertigo/vega/plugins/webservice/handler/RateLimitingWebServiceHandlerPlugin.java)
+> Cette fonction est traitée par [`RateLimitingWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/plugins/webservice/handler/RateLimitingWebServiceHandlerPlugin.java)
 > Le handler propose des paramètres optionnels : 
 > - *windowSeconds* : Taille de la fenêtre en seconde
 > - *limitValue* : Nombre d'appels maximum (dans la durée de la fenêtre)
