@@ -102,6 +102,7 @@ Vertigo propose quatre types de source d'authentification :
 
 - **authentication.text** : Permet l'authentification basée sur un fichier texte
   - filePath : Chemin du fichier. (Format du fichier : accountKey    login    password    //comments )
+
 ?> Le hash des mots de passe utilise l'algorithme [PBKDF2WithHmacSHA256](https://en.wikipedia.org/wiki/PBKDF2)
 
 - **authentication.store** : Permet l'authentification basée sur le *StoreManager*
@@ -109,6 +110,7 @@ Vertigo propose quatre types de source d'authentification :
   - userLoginField : Nom du champ 
   - userPasswordField : Nom du champ password
   - userTokenIdField : Nom du champ *authToken* (champ utilisé pour le lien vers *Account*)
+
 ?> Le hash des mots de passe utilise l'algorithme [PBKDF2WithHmacSHA256](https://en.wikipedia.org/wiki/PBKDF2)
 
 - **authentication.ldap** : Permet l'authentification déportée sur un LDAP
