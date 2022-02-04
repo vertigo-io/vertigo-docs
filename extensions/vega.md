@@ -131,7 +131,7 @@ Mais pas pour être conservé tout le temps d'une navigation utilisateur.
 ## API
 
 ### Code exemples :
-De nombreux exemples complets sont présents dans les tests de Vertigo sur GitHub : [Tests Exemples](https://github.com/vertigo-io/vertigo/tree/master/vertigo-vega-impl/src/test/java/io/vertigo/vega/webservice/data/ws)
+De nombreux exemples complets sont présents dans les tests de Vertigo sur GitHub : [Tests Exemples](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/test/java/io/vertigo/vega/webservice/data/ws)
 
 ### Syntaxe des routes
 Lors de la définition des routes, vous pouvez utiliser `{myParamName}` pour déclarer une variable de l'URL qui est utilisée comme paramètre du service.  

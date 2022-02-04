@@ -268,8 +268,11 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
 - `vu:include-data` : Inclus le champ d'un objet 
   - `object` : Nom de l'objet du context
   - `field` : Nom du champ
+  - `modifiable` : Indique que le champ est modifiable coté client et peut-être renvoyé au serveur
+  - `modifiableAllLines` : Indique que toutes les lignes sont modifiables
 - `vu:include-data-primitive` : Inclus une donnée primitive du context
   - `key` : Clé de la donnée
+  - `modifiable` : Indique que le champ est modifiable coté client et peut-être renvoyé au serveur
 - `vu:include-data-map` : Inclus le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
   - `object` : Nom de l'objet du context
   - `field` : Nom du champ
