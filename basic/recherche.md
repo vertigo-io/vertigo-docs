@@ -264,8 +264,12 @@ create FacetDefinition FctEquipmentPurchaseDate {
 ```
 
 * les facettes **custom** elles permettent de passer directement le code Json à envoyer à ElasticSearch (ou Transport mais attention) 
+Nous pouvons les utiliser pour faire du geoHash, des sommes ou autres fonctions d'agrégation. 
+Pour les agregations retournant des valeurs numériques, l'attribut `_decimalPrecision` permet d'indiquer le nombre de chiffre après la virgule.
 
-Facette réalisant un geoHash.
+!> Seuls les fonctions retournant des groupes (geoHash) de document ou des valeurs numériques (sommes, moyennes, ...) sont supportées
+
+Ex : facette réalisant un geoHash :
 En version client REST
 ```javascript
 create FacetDefinition FctEquipmentGeoHash {
@@ -281,6 +285,17 @@ create FacetDefinition FctEquipmentGeoHash {
 	params _innerWriteTo { value : "writeVInt(#geoPrecision#);writeVInt(1000);writeVInt(-1)" }
 }
 ```
+
+Ex : facette réalisant une somme :
+En version client REST
+```javascript
+create FacetDefinition FctSumMontantEnCours {
+    dtDefinition:DtFacturationIndex, fieldName:"montantEnCours", label:"Sum montantEnCours"
+    params sum { value : "{\"field\" : \"montantEnCours\"}" }
+    params _decimalPrecision { value : "2" }
+}
+```
+
 
 #### **FacetedQueryDefinition**
 
