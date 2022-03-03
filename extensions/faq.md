@@ -422,8 +422,7 @@ Son identifiant est calculé automatiquement, si il y a plusieurs plugins dans l
 
 > Si lors du démarrage, une erreur indique que deux composants on le même id, c'est peut-être que le même plugin a été chargé dans deux modules différents.
 
-!> **Attention** notament aux features du projet qui sont souvant en autodiscovery, car dans ce cas tous les composants présent dans un package sont chargés (y compris les plugins custom d'autres Managers). Si c'est le cas, il est possible de déplacer le plugin dans un package non scanné **ou** d'annoter le plugin avec `@NotDiscoverable`
-
+!> **Attention** notamment aux features du projet qui sont souvent en autodiscovery, car dans ce cas tous les composants présent dans un package sont chargés (y compris les plugins custom d'autres Managers). Si c'est le cas, il est possible de déplacer le plugin dans un package non scanné **ou** d'annoter le plugin avec `@NotDiscoverable`
 
 26/11
 
