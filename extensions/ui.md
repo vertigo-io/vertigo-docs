@@ -202,23 +202,29 @@ Nécessite :
 ### Composants Vertigo-UI : layout
 - `vu:page` : Composant obligatoire encadrant la zone sur laquelle VueJS est actif.
   - `content` : Le body du tag est conservé
+  - `vuiDevMode` : active le mode developpeur pour les composants VertigoUi (il faut un serveur nodeJs qui pousse le js buildé `npm serve`..)
+  - `vuiSsr` : Active le mode Server Side Rendering (il faut un serveur nodeJs qui effectue le rendering de la page)
 - `vu:head` : Pose le tag head et les méta du head html
   - `title`* : Titre de la page
   - `content` : Le body du tag est conservé
 - `vu:head-meta` : Composant obligatoire posant les éléments **méta** du head (script js, css, ...)
+  - `vuejsDevMode` : passe VueJs en mode dev *(nous avons noté des bugs sur VueJs dans quelques cas qui n'apparaissent qu'en devMode)* 
 - `vu:form` : Pose un formulaire et référence le context de page associé
   - `content` : Le body du tag est conservé
+  - `other_attrs` : Listes des attributs à ajouter sur le form (tag `<form>`)
 - `vu:block` : Composant de block (visible graphiquement), représenté sous forme de card
   - `title` : Titre du block
   - `subtitle` : Sous titre du block
   - `icon` : Icon du block
   - `withFab` **boolean** : Ajoute la class `withFab` si nécessaire
+  - `actions_slot` : Slot pour positionner des actions sur le block *(remplace l'icon)*
   - `header_attrs` : Listes des attributs à ajouter sur le header du block (tag `<div>`)
   - `content_attrs` : Listes des attributs à ajouter sur le corps du block (tag `<div class="q-card-main">`)
   - `card_attrs` : Listes des attributs à ajouter sur le parent du block (tag `<div class="q-card">`)
   - `content` : Le body du tag est conservé
 - `vu:grid` : Déclare une mise en page de grille
   - `cols` : Nombre de colonne. Par défaut : 2
+  - `dense` : Applique un mode *dense* réduisant la taille des gutters
   - `contentTags` : Le contenu du tag est conservé. Chaque éléments est posé dans un `<div>` avec la largeur attendue. (on force une seule colonne sous le breakpoint **xs**)
 - `vu:grid-cell` : Déclare une cellule spécifique d'une **grid**
   - `col` : Nombre de colonne de la cellule
@@ -326,6 +332,15 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
   - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-checkbox>`)  
 - `vu:select` : Composant de selection par une combobox
+  - `object`* : Nom de l'objet du context
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `list`* : Nom de la list du context
+  - `valueField` : Nom du champ de la list utilisée comme value, a affecter dans l'objet
+  - `labelField` : Nom du champ de la list utilisée comme label
+  - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-select>`) 
+- `vu:select-multiple` : Composant de selection multiple par une combobox
   - `object`* : Nom de l'objet du context
   - `field`* : Nom du champ
   - `label` : Surcharge du label
@@ -454,12 +469,40 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - icon : icon du bouton
   - url : url du lien
   - ariaLabel : libellé aria pour l'accessibilité
-  - other_attrs : tous autres attribut. Posés sur le `<q-btn`
+  - disabled : **boolean** si le bouton est désactivé
+  - other_attrs : tous autres attribut. Posés sur le `<q-btn`  
+- `vu:button-link-confirm` : Pose un bouton de type lien avec une popin de confirmation (tag `<q-btn type="a"`)
+  - actions_slot : slot des boutons d'annulation et de confirmation
+  - label : libellé du bouton
+  - icon : icon du bouton
+  - url : url du lien
+  - ariaLabel : libellé aria pour l'accessibilité
+  - disabled : **boolean** si le bouton est désactivé
+  - confirmMessage : Message de confirmation
+  - labelOk : libellé du bouton OK (par défaut Oui)
+  - labelCancel : libellé du bouton annuler (par défaut Non)
+  - other_attrs : tous autres attribut. Posés sur le `<q-btn` (pas sur le bouton interne de confirmation)
 - `vu:button-submit` : Pose un bouton de type submit (tag `<q-btn type="submit"`)
   - label : libellé du bouton
   - icon : icon du bouton
+  - action : nom de l'action associé
   - ariaLabel : libellé aria pour l'accessibilité
   - other_attrs : tous autres attribut. Posés sur le `<q-btn`
+
+<th:block th:fragment="button-submit-confirm(actions_slot, label, icon, action, ariaLabel, formId, confirmMessage, labelOk, labelCancel, other_attrs)"
+
+- `vu:button-submit-confirm` : Pose un bouton de type submit (tag `<q-btn type="submit"`)
+  - actions_slot : slot des boutons d'annulation et de confirmation
+  - label : libellé du bouton
+  - icon : icon du bouton
+  - action* : nom de l'action associé
+  - ariaLabel : libellé aria pour l'accessibilité
+  - formId* : identifiant du form (nécessaire car la popin est hors du form)
+  - confirmMessage : Message de confirmation
+  - labelOk : libellé du bouton OK (par défaut Oui)
+  - labelCancel : libellé du bouton annuler (par défaut Non)
+  - other_attrs : tous autres attribut. Posés sur le `<q-btn` (pas sur le bouton interne de confirmation)
+
 
 ## Composants VueJS Vertigo-ui
 
