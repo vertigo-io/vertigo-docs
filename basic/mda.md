@@ -103,7 +103,110 @@ public class StudioGenerate {
 }
 
 ```
+## Format de la configuration Yaml
 
+### Généralité
+
+Pour la configuration Vertigo, les éléments important sont :
+> - Le format Yaml utilise les indentations pour donner du sens, il faut y faire attention.
+> - L'indentation avec `-` n'est utilisée que pour déclarer les listes. ie. pour le nom des plugins actives (1er niveau sous `features:` et `featuresConfig:`), pour les plugins custom (1er niveau sous `plugins:`) et les initialisers (1er niveau sous `initializers:`)
+> - L'indentation seule, sans `-` est utilisée pour les attributs et les maps. Notament les Features sous `modules:` et les paramètres en général (de plugin, feature, ...)
+> - Des valeurs peuvent venir de paramètres extérieur avec `${ }`. _Ceux du `boot` viennent de sources limitée et doivent être préfixé par `boot.`_
+!> - Vertigo support l'attribut particulier `__flags__:` placé sous n'importe quels éléments il permet de conditionner l'inclusion de l'élément dans la configuration en fonction des activeFlags (paramètre de démarrage de l'application : ligne de commande, web.xml, etc...). _le flag peut être inclus : `__flags__: ["redis"]` ou exclus : `__flags__: ["!redis"]`
+
+_Note : En interne, le fichier Yaml est mappé sur l'objet `io.vertigo.core.node.config.yaml.YamlAppConfig`_
+
+Extrait de [Wikipedia](https://fr.wikipedia.org/wiki/YAML) : 
+- Les commentaires sont signalés par le signe dièse `#` et se prolongent sur toute la ligne. Si par contre le dièse apparait dans une chaine, il signifie alors un nombre littéral.
+- Une valeur nulle s'écrit avec le caractère tilde `~`
+- Il est possible d'inclure une syntaxe JSON dans une syntaxe YAML.
+- Les éléments de listes sont dénotés par le tiret `-`, suivi d'une espace, à raison d'un élément par ligne.
+- Les tableaux sont de la forme `clé: valeur`, à raison d'un couple par ligne.
+- Les scalaires peuvent être entourés de guillemets doubles `"`, ou simples `'`, sachant qu'un guillemet s'échappe avec un antislash `\`, alors qu'une apostrophe s'échappe avec une autre apostrophe5. Ils peuvent de plus être représentés par un bloc indenté avec des modificateurs facultatifs pour conserver `|` ou éliminer `>` les retours à la ligne.
+- Plusieurs documents rassemblés dans un seul fichier sont séparés par trois traits d'union `---` ; trois points `...` optionnels marquent la fin d'un document dans un fichier.
+- Les nœuds répétés sont initialement signalés par une esperluette `&` puis sont référencés avec un astérisque `*` ; JSON, un langage concurrent de YAML, est compatible avec la syntaxe de JavaScript mais ne supporte pas cette notion de référence.
+- L'indentation, par des espaces, manifeste une arborescence.
+
+
+### boot
+Le fichier est composée d'une première partie déclarant le comportement de la phase de démarrage du système :
+
+- `boot` la balise déclare le début de cette configuration. Cela inclus les Managers par défaut : LocaleManager, ResourceManager, ParamManager, DaemonManager, AnalyticsManager
+- > `params` déclare les paramètres des Managers par défaut
+- > `plugins` déclare les plugins des Managers par défaut
+
+
+Exemple :
+```yaml
+boot:
+  params:
+    locales: fr_FR
+  plugins:
+    - io.vertigo.core.plugins.resource.classpath.ClassPathResourceResolverPlugin: {}
+    - io.vertigo.core.plugins.resource.url.URLResourceResolverPlugin: {}
+    - io.vertigo.core.plugins.param.properties.PropertiesParamPlugin:
+       url : file:./src/test/java/fr/gouv/interieur/rdvpref/support/env-test.properties
+    - io.vertigo.core.plugins.param.env.EnvParamPlugin: {}
+```
+
+### modules
+Le fichier est composée d'une seconde partie déclarant les modules de l'application :
+
+- `modules` la balise déclare le début de cette configuration. Il faut ensuite déclarer les Features à appliquer.
+- > `xx.xxx.XxxFeatures` le chemin complet de la class déclarant la feature
+- > `features` déclare les features optionnelles (et leurs paramètres) effectivement activées _les features possibles sont déclarées avec `@Feature` sur la classe de Features_
+- > `featuresConfig` déclare les plugins (et leurs paramètres) des features _les features doivent avoir été activées_
+- > `plugins` _(optionel)_ il est possible de déclarer des plugins complémentaires non prévus dans la Feature
+
+!> L'ordre de déclaration des modules est important, les modules ne peuvent dépendre que des modules _'au dessus'_ d'eux
+
+Typiquement, on déclare les Modules Vertigo utilisés, puis ceux de l'application.
+```
+   <Connectors> JavalinFeatures
+   CommonsFeatures
+   DatabaseFeatures
+   DataModelFeatures
+   DataStoreFeatures
+   DataFactoryFeatures
+   AccountFeatures
+   VegaFeatures
+   <modules de l'application> io.mars.support.SupportFeatures
+   <modules de l'application> io.mars.basemanagement.BasemanagementFeatures
+```
+
+Exemple :
+```yaml
+modules:
+  io.vertigo.database.DatabaseFeatures:
+    features:
+      - sql:
+      - migration:
+          mode: update
+    featuresConfig:
+      - sql.datasource:
+          __flags__: ["klee"]
+          classname: io.vertigo.database.impl.sql.vendor.postgresql.PostgreSqlDataBase
+          source: java:/comp/env/jdbc/DataSource
+      - sql.datasource:
+          __flags__: ["home"]
+          classname: io.vertigo.database.impl.sql.vendor.h2.H2DataBase
+          source: java:/comp/env/jdbc/DataSourceHome
+      - migration.liquibase:
+          masterFile: /liquibase/master.xml
+```
+
+### Initializers
+
+La configuration se termine par la déclaration des Initializers.
+Ceux ci enrichissent les composants après leur démarrage.
+
+Habituellement on déclare des Initialiers tel que : 
+```yaml
+  - io.mars.support.boot.InitialDataInitializer:
+  - io.mars.support.boot.I18nResourcesInitializer:
+  - io.mars.support.boot.SearchInitializer:
+  - io.mars.support.boot.OrchestraInitializer:
+```
 
 ## Annexes
 
