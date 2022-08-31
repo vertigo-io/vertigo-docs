@@ -63,7 +63,7 @@ modules
   - accountFilePattern : RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508) : id, displayName, email, authToken, photoUrl)
   - groupFilePath : Chemin du fichier des *AccountGroup* 
   - groupFilePattern :  RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508) : id, displayName, accountIds)
-- **account.store.loader** : Stockage des *Account* délégué à un loader spécifique *(implements [AccountLoader](https://github.com/vertigo-io/vertigo/blob/master/vertigo-account-impl/src/main/java/io/vertigo/account/plugins/account/store/loader/AccountLoader.java))*
+- **account.store.loader** : Stockage des *Account* délégué à un loader spécifique *(implements [AccountLoader](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-account/src/main/java/io/vertigo/account/plugins/account/store/loader/AccountLoader.java))*
 - **account.cache.memory** : Active le cache mémoire (**Attention** : pas de purge automatique)
 - **account.cache.redis** : Active le cache Redis via le *RedisConnector* (**Attention** : pas de purge automatique)
 
@@ -102,6 +102,7 @@ Vertigo propose quatre types de source d'authentification :
 
 - **authentication.text** : Permet l'authentification basée sur un fichier texte
   - filePath : Chemin du fichier. (Format du fichier : accountKey    login    password    //comments )
+
 ?> Le hash des mots de passe utilise l'algorithme [PBKDF2WithHmacSHA256](https://en.wikipedia.org/wiki/PBKDF2)
 
 - **authentication.store** : Permet l'authentification basée sur le *StoreManager*
@@ -109,6 +110,7 @@ Vertigo propose quatre types de source d'authentification :
   - userLoginField : Nom du champ 
   - userPasswordField : Nom du champ password
   - userTokenIdField : Nom du champ *authToken* (champ utilisé pour le lien vers *Account*)
+
 ?> Le hash des mots de passe utilise l'algorithme [PBKDF2WithHmacSHA256](https://en.wikipedia.org/wiki/PBKDF2)
 
 - **authentication.ldap** : Permet l'authentification déportée sur un LDAP

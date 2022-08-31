@@ -400,6 +400,30 @@ final SelectedFacetValues initialSelectedFacetValues = SelectedFacetValues.empty
      .build();
 ```
 
+## [Config] Comment utiliser un plugin custom pour un manager existant (par exemple Quarto) ?
+Les modules sont démarrés les uns après les autres. La configuration via leur feature doit être intègre et complète.
+Dans la configuration yaml, il est possible de préciser des class de plugins spécifiques à utiliser :
+
+Exemple:
+```Yaml
+modules:
+  io.vertigo.core.node.config.yaml.YamlBioFeatures:
+      features:
+        - bio:
+        - math: 
+            start: 100
+      plugins:
+        - io.vertigo.core.node.component.data.SimpleMathPlugin: 
+            factor: 20
+```
+
+Il est important de vérifier l'interface implémentée par le plugin, c'est elle qui déterminera quel *type* de plugin et comment il sera injecté dans le Manager.
+Son identifiant est calculé automatiquement, si il y a plusieurs plugins dans le module les id seront suffixés par $1,$2, etc...
+
+> Si lors du démarrage, une erreur indique que deux composants on le même id, c'est peut-être que le même plugin a été chargé dans deux modules différents.
+
+!> **Attention** notamment aux features du projet qui sont souvent en autodiscovery, car dans ce cas tous les composants présent dans un package sont chargés (y compris les plugins custom d'autres Managers). Si c'est le cas, il est possible de déplacer le plugin dans un package non scanné **ou** d'annoter le plugin avec `@NotDiscoverable`
+
 26/11
 
 

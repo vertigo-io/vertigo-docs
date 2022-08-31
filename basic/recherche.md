@@ -104,14 +104,14 @@ index :
         analyzer :
             multiple_code :
                 tokenizer : piped_keywords
-                filter : [standard]
+                filter : []
             text_fr :
                 tokenizer : standard
-                filter : [standard, lowercase, asciifolding, snowball, elision]
+                filter : [lowercase, asciifolding, snowball, elision]
         tokenizer :
             piped_keywords :
                 type : pattern
-                pattern : '([|,] *)'
+                pattern : '([|,;] *)'
         filter :
             snowball:
                 type : snowball
@@ -139,51 +139,63 @@ Les index sont très puissants et gèrent des données **documentaires**. Il n'y
 Très simplement, il s'agit de créer un DtObject mettant les données à plat.
 ```javascript
 create DtDefinition DtEquipmentIndex {
-   field equipmentId              {domain: DoId           label:"Id"      cardinality:"1"}
-   field name                     {domain: DoLabel        label: "Name" }
-   field code                     {domain: DoCode         label: "Code" }
-   field purchaseDate             {domain: DoLocaldate    label: "Date of purchase" }
-   field description              {domain: DoDescription  label: "Description" }
-   field tags                     {domain: DoTags         label: "Tags" }
-   field equipmentTypeName        {domain: DoLabel        label:"Type" }
-   field equipmentCategoryName    {domain: DoLabel        label:"Category" }
+  field equipmentId {domain: DoId label:"Id" cardinality: "1"}
+  field name {domain: DoLabel label: "Name" }
+  field code {domain: DoCode label: "Code" }
+  field purchaseDate {domain: DoLocaldate label: "Date of purchase" }
+  field description {domain: DoDescription label: "Description" }
+  field tags {domain: DoTags label: "Tags" }
+  field equipmentTypeName {domain: DoLabel label:"Type" }
+  field equipmentCategoryName {domain: DoLabel label:"Category" }
+  field equipmentValue {domain: DoCurrency label:"Current equipment value" }
+  field baseId {domain: DoId label: "Base Id" }
+  field baseName {domain: DoLabel label: "Base Name" }
+  field geoLocation {domain: DoGeoPoint label:"Geographic Location" }
+  
+  /* Must contains security fields */
 }
 ```
 
 Il est possible de préciser comment la donnée est indexée par la propriété **indexType** du domaine.<br/>
 Cette propriété permet la conversion du simple **Domain Vertigo**, vers le type ElasticSearch plus complexe.<br/>
 Sa syntaxe est la suivante :<br/>
-``indexType : "myAnalyzer{:myDataType}{:stored|notStored}{:sortable|notSortable}{:facetable|notFacetable}"``
+``indexType : "myAnalyzer{:myDataType}{:stored|notStored}{:sortable{(mySortNormalizer)}|notSortable}{:facetable|notFacetable}"``
+
+- `myAnalyzer` : définit l'analyzer ou normalizer utilisé (dans le fichier `elasticsearch.yml`
+- `myDataType` *(optionel)*: permet de préciser le data type au sens ElasticSearch. Il est nécessaire pour les **keyword** (Ex : `code:keyword`)
+- `stored` *(optionel, true par defaut)* : indique que la valeur est stocké dans le document. Permet d'économiser de la place pour des gros champs indexés mais pas stockés
+- `sortable` *(optionel, false par defaut)* : indique que le champ doit être triable, cela ajoute automatiquement une version `keyword` du champ
+- `mySortNormalizer` *(optionel)* : utilisé avec le champ est `sortable`, précise le normalizer à utiliser sur le `keyword`
+- `facetable` *(optionel, false par defaut)* : indique que le champ est un `fieldData` au sens ElasticSearch. Cela est nécessaire pour créer des facettes sur ce champ
+
 
 > Les champs ayant l'attribut `sortable`, sont automatiquement doublés avec une version `keyword` du champ.
-> Ce pseudo permet de trier correctement le champ. Vertigo l'utilise de manière transparente pour les tris et les facettes.
-> Il peut être utilisé dans les requêtes : <br/>
+> Le pseudo champ `keyword` permet de trier correctement le champ. Vertigo l'utilise de manière transparente pour les tris et les facettes.
+> Sans cela, le tri ou les facettes sont effectués **après** le découpage par le tokenizer.
+> Si le champ est déjà `sortable`, le `facetable` n'est pas nécessaire puisque c'est le `keyword` qui sera utilisé
+> Le sous champ `keyword` peut être utilisé dans les requêtes : <br/>
 > **Exemple :**<br/>
 > ``field1.keyword:#query#``
 
 
 Exemple de domain :
 
-```javascript
-create Domain DoCode {
-   dataType : String
-   indexType : "code:keyword"
-}
+```java
+  @SmartTypeDefinition(String.class)
+  @SmartTypeProperty(property = "indexType", value = "code:keyword")
+  Code,
 
-create Domain DoLabel {
-   dataType : String
-   indexType : "text_fr:sortable"
-}
+  @SmartTypeDefinition(String.class)
+  @SmartTypeProperty(property = "indexType", value = "text_fr:sortable")
+  Label,
 
-create Domain DoDescription {
-   dataType : String
-   indexType : "text_fr"
-}
+  @SmartTypeDefinition(String.class)
+  @SmartTypeProperty(property = "indexType", value = "text_fr:notStored")
+  Description
 
-create Domain DoTags {
-   dataType : String
-   indexType : "multiple_code:facetable"
-}
+  @SmartTypeDefinition(String.class)
+  @SmartTypeProperty(property = "indexType", value = "multiple_code:facetable")
+  Tags
 ```
 
 
@@ -208,16 +220,16 @@ L'**IndexDefinition** représente un Index. Il n'en faut qu'une seule par KeyCon
 create IndexDefinition IdxEquipment {  
   keyConcept : DtEquipment
   dtIndex : DtEquipmentIndex 
+  indexCopyTo allText { from: "name,code,description,tags,equipmentTypeName,equipmentCategoryName,baseName" }
   loaderId : "EquipmentSearchLoader"
-  indexCopyTo allText { from: "name,code,description,tags,equipmentTypeName,equipmentCategoryName" }
-}
+} 
 ```
 > L'attribut `loaderId` pointe sur un composant Vertigo qui implémente l'interface `SearchLoader<? extends DtObject>` adapté pour l'objet d'index
 
 
 #### **FacetDefinition**
 
-La **FacetDefinition** représente une définition de facette. Il en existe deux types : 
+La **FacetDefinition** représente une définition de facette. Il en existe trois types : 
 
 **Propriétés**
 - `dtDefinition`* : Nom du Dt d'index
@@ -228,6 +240,7 @@ La **FacetDefinition** représente une définition de facette. Il en existe deux
 - `range` : Ajoute une valeur de facette (pour les facettes **range**), le nom est utilisé comme code
   - `filter`* : filtre de recherche pour cette valeur. Reprend la syntaxe du moteur de recherche utilisé (ici ElasticSearch).
   - `label`* : label de cette valeur
+- `_innerWriteTo` : Utilisé pour les facettes **custom** avec le client Transport, permet de définir le code sérialisé à envoyer *(nous préconisons l'usage du client REST plus simple et plus pérenne)*
 
 !> Attention : les facettes multiSelectable impactent les performances 
   
@@ -250,6 +263,40 @@ create FacetDefinition FctEquipmentPurchaseDate {
 }
 ```
 
+* les facettes **custom** elles permettent de passer directement le code Json à envoyer à ElasticSearch (ou Transport mais attention) 
+Nous pouvons les utiliser pour faire du geoHash, des sommes ou autres fonctions d'agrégation. 
+Pour les agregations retournant des valeurs numériques, l'attribut `_decimalPrecision` permet d'indiquer le nombre de chiffre après la virgule.
+
+!> Seuls les fonctions retournant des groupes (geoHash) de document ou des valeurs numériques (sommes, moyennes, ...) sont supportées
+
+Ex : facette réalisant un geoHash :
+En version client REST
+```javascript
+create FacetDefinition FctEquipmentGeoHash {
+  dtDefinition:DtEquipmentIndex, fieldName:"geoLocation", label:"Location"
+  params geohash_grid { value : "{\"field\" : \"geoLocation\", \"precision\" : #geoPrecision#}" }
+}
+```
+
+En version client Transport
+```javascript
+create FacetDefinition FctEquipmentGeoHash {
+	dtDefinition:DtEquipmentIndex, fieldName:"geoLocation", label:"Location"
+	params _innerWriteTo { value : "writeVInt(#geoPrecision#);writeVInt(1000);writeVInt(-1)" }
+}
+```
+
+Ex : facette réalisant une somme :
+En version client REST
+```javascript
+create FacetDefinition FctSumMontantEnCours {
+    dtDefinition:DtFacturationIndex, fieldName:"montantEnCours", label:"Sum montantEnCours"
+    params sum { value : "{\"field\" : \"montantEnCours\"}" }
+    params _decimalPrecision { value : "2" }
+}
+```
+
+
 #### **FacetedQueryDefinition**
 
 La **FacetedQueryDefinition** représente une définition de requête de recherche. Associée à un KeyConcept, elle précise également :
@@ -260,11 +307,12 @@ La **FacetedQueryDefinition** représente une définition de requête de recherc
 * Le pattern de la requête du moteur de recherche
 
 **Propriétés**
-- `keyConcept`* : Nom du Dt du KeyConcept
+- `dtIndex`* : Nom du Dt d'index
 - `domainCriteria`* : Nom du domain du critère d'entrée.
 - `facets`* : Liste des facettes activées dans cette recherche
 - `listFilterBuilderClass`* : Nom du moteur permettant la traduction de la requête(*io.vertigo.dynamox.search.DslListFilterBuilder* préconisé)
 - `listFilterBuilderQuery`* : Requête de la recherche (voir syntaxe [VertigoSearchDSL](#syntaxe-vertigosearchdsl))
+- `geoSearchQuery` : Permet de compléter (si besoin) la requete avec un filtre géographique (pour les bornes d'une carte par exemple)
   
 
 ```javascript
@@ -274,12 +322,13 @@ create FacetedQueryDefinition QryEquipment {
    domainCriteria : DoLabel
    listFilterBuilderClass : "io.vertigo.dynamox.search.DslListFilterBuilder"  
    listFilterBuilderQuery : "allText:#+query*#"
+   geoSearchQuery : "geoLocation: [#geoUpperLeft# to #geoLowerRight#]"
 }
 ```
 
 #### **Code généré**
 
-Le module [MDA](/basic/mda) de Vertigo (*vertigo-studio*) utilise ces informations pour générer une méthode pour chaque FacetedQueryDefinition dans le DAO du KeyConcept associé.
+Le module [MDA](/basic/mda) de Vertigo (*vertigo-studio*) utilise ces informations pour générer une méthode pour chaque FacetedQueryDefinition dans le DAO associé au Dt de l'index *(il peut y avoir plusieurs index par KeyConcept)*.
 
 ### Service de chargement des données
 
@@ -384,14 +433,15 @@ Exemple :
 
 ### Lancer une recherche
 
-Pour lancer une recherche, Vertigo a généré du code dans le DAO du KeyConcept associé à l'index. Il faut d'abord créer une SearchQuery et la faire exécuter par le DAO.
+Pour lancer une recherche, Vertigo a généré du code dans le SearchClient de l'index. Il faut d'abord créer une SearchQuery et la faire exécuter par le SearchClient.
 
 Exemple :
 ```java
-     public FacetedQueryResult<EquipmentIndex, SearchQuery> searchEquipments(final String criteria, final SelectedFacetValues selectedFacetValues, final DtListState dtListState) {
-      final SearchQuery searchQuery = equipmentSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues).build();
-      return equipmentSearchClient.loadList(searchQuery, dtListState);
-   }
+    public FacetedQueryResult<EquipmentIndex, SearchQuery> searchEquipments(final String criteria, final SelectedFacetValues selectedFacetValues, final DtListState dtListState) {
+      final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
+	     .build();
+	  return equipmentIndexSearchClient.loadList(searchQuery, dtListState);
+	}
 ```
 
 L'objet de résultat `FacetedQueryResult` fournit de nombreuses informations utiles pour l'affichage :
@@ -403,7 +453,7 @@ L'objet de résultat `FacetedQueryResult` fournit de nombreuses informations uti
 
 ### Ajouter la sélection d'une facette
 
-La méthode générée dans le DAO du KeyConcept prend en paramètre un `SelectedFacetValues`.
+La méthode générée dans le SearchClient prend en paramètre un `SelectedFacetValues`.
 Vertigo propose un pont entre cet objet et les IHMs utilisées (WebServices, SpringMVC ou Struts2)
 
 
@@ -615,4 +665,13 @@ searchQueryBuilder.withSecurityFilter(session.getSearchSecurityFilter())
 Il correspond à une expression de recherche qui sera directement ajoutée à la recherche en mode obligatoire. (avec `+()`)
 La saisie utilisateur ne peut pas désactiver ce filtre : non seulement il y a des échappements, mais de plus elle est cloisonnée dans une autre sous-requête.
 
+Il aussi est possible d'ajouter un filtre pour une action particuliere :
+
+```java
+final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read));
+final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
+    .withSecurityFilter(securityListFilter)
+	.build();
+```
+		
 
