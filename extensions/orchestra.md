@@ -131,3 +131,12 @@ orchestraServices.getScheduler().scheduleAt(myFirstProcessDefinition, DateUtil.n
 orchestraServices.getReport().getSummaryByDate(myFirstProcessDefinition, 
 		DateUtil.parse("01/01/2017", "dd/MM/yyyy"), DateUtil.parse("31/12/2017", "dd/MM/yyyy"));
 ```
+
+## Cas des évolutions des processus
+
+Le principe général, c'est qu'une définition de processus Orchestra est lié à du code : une activité, un service, etc... Ces définitions sont donc par nature stable dans le temps et ne change pas à chaque démarrage.
+Par défaut, la définition est conservée en base de données. Lorsqu'il est nécessaire de mettre à jour une nouvelle version du processus, on doit inclure dans la précedure d edéploiement une mise à jour de la définition dans la base de données
+avec needUpdate=true (en général, cela est réalisé par un script liquibase). Avec ce paramètre, au démarrage le système mettra à jour la définition dans la base à partir de la définition dans le code.
+
+Pour une modification du paramétrage du déclenchement, ce n'est pas directement dans la définition mais dans la "ProcessTriggeringStrategy". 
+Ces infos sont modifiables avec l'api (updateProcessProperties), et certaines IHM proposent de modifier le cron directement par l'ihm (il n'y a pas d'IHM officielles pour le moment, elles sont construites dans les projets)
