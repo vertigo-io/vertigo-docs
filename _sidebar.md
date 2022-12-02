@@ -34,6 +34,7 @@
   - [Analytics](basic/analytics.md)
 - Pour aller plus loin
   - [Commons](extensions/commons.md)
+  - [DataModel](extensions/datamodel.md)
   - [Account](extensions/account.md)
   - [Vega](extensions/vega.md)
   - [UI](extensions/ui.md)
