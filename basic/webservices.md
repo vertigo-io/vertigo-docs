@@ -231,4 +231,4 @@ Il est possible d'enrichir le comportement d'un Webservice à l'aide de Vega en 
 - **server-side** : conservation d'un état côté serveur pour gérer efficacement certains traitements
 - **etc...**
 
-L'ensemble de ces fonctionnalités et leurs API sont disponibles dans [ce](/advanced/vega) chapitre
+L'ensemble de ces fonctionnalités et leurs API sont disponibles dans [ce](/extensions/vega) chapitre
