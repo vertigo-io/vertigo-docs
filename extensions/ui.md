@@ -57,7 +57,19 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
 
 - `ViewContextKey<AutreType>` : Déclare une entrée typée dans le context de la page.
 - `UiUtil` : Utilitaire passé au moteur de templating `uiUtil`, il propose des fonctions qui sont utiles pour les composants Vertigo-ui et le rendu des pages. En générale, les pages n'ont pas besoin de l'utiliser, mais plus les composants.
-- `UiAuthorizationUtil` : Utilitaire passé au moteur de templating `authz`, il propose des fonctions pour simplifier les controles de sécurité lors de l'affichage.
+- `UiAuthorizationUtil` : Utilitaire passé au moteur de templating `authz`, il propose des fonctions pour simplifier les controles de sécurité lors de l'affichage. 3 modes d'utilisation :
+     - 1- Avec une chaine simpe :
+        `vu:authz="myGlobalAuthz"` or `vu:authz="mySecuredEntityAuthz$read"`
+        => équivalent à `authz.hasAuthorization('myGlobalAuthz')`
+        Supporte les listes multiples avec `,` pour OR et `!` pour NOT
+     - 2- Avec un chemin vers un `UiObject<Entity>` du context :
+        `vu:authz="model.myEntity$read"` or `vu:authz="model.list[0]$read"`
+        => équivalent à `authz.hasOperation(model.myEntity, 'read')`
+        (la première partie est évaluée comme `${model.myEntity}`)
+     - 3- Avec une expression évaluée (commence par `${` )
+        `vu:authz="${authz.hasAuthorization('myGlobalAuthz') && authz.hasAuthorization('mySecuredEntityAuthz$read')}"`
+        => exactement équivalent à `th:if`. Mais gardez `th:if` pour la logique métier et `th:authz` pour la logique sécurité
+ 
 
 API du **ViewContext**
 - `publishRef` : Ajoute au context un simple objet sérialisable
