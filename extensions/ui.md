@@ -69,7 +69,6 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
      - 3- Avec une expression évaluée (commence par `${` )
         `vu:authz="${authz.hasAuthorization('myGlobalAuthz') && authz.hasAuthorization('mySecuredEntityAuthz$read')}"`
         => exactement équivalent à `th:if`. Mais gardez `th:if` pour la logique métier et `th:authz` pour la logique sécurité
- 
 
 API du **ViewContext**
 - `publishRef` : Ajoute au context un simple objet sérialisable
