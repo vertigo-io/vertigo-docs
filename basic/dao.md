@@ -97,11 +97,12 @@ La requête est un champ texte qui contient le traitement à effectuer.
 
 Ce champ permet l'utilisation des paramètres d'entrées sous forme de paramètres bindés à l'aide de la syntaxe suivante : 
 
-- *#nomParametre#* : pour un paramètre primitif
+- *#nomParametrePrimitif#* : pour un paramètre primitif
+- *#nomParametrePrimitif.rownum#* : pour un paramètre de type liste de primitif et utilisation d'un champ dans le cadre des requêtes de type batch 
 
 - *#nomParametre.champ#* : pour un paramètre de type objet et utilisation d'un champ
-- *#nomParametre.index.champ#* : pour un paramètre de type liste d'objet et utilisation d'un champ (à utiliser pour les clauses de type IN
-- *#nomParametre.champ#* : pour un paramètre de type liste et utilisation d'un champ dans le cadre des requêtes de type batch 
+- *#nomParametreList.index.champ#* : pour un paramètre de type liste d'objet et utilisation d'un champ (*à utiliser pour les clauses de type Where IN(...)*)
+- *#nomParametreList.champ#* : pour un paramètre de type liste et utilisation d'un champ dans le cadre des requêtes de type batch 
 
 D'autre part, il est également possible d'apporter du dynamisme dans les requêtes avec l'utilisation de la syntaxe `<%><%>` qui permet d'intercaler du code Java qui sera interprété à l'exécution. Ceci est notamment utilisé afin d'activer ou désactiver des parties de requêtes.
 
@@ -167,5 +168,22 @@ public DtList<Actor> getActorsByMovie2(final Long movId) {
 }
 ```
 
+### Exemple de TaskEngineProcBatch
 
+Avec un taskEngine de type TaskEngineProcBatch, il est possible d'appliquer les champs des éléments de la liste ligne par ligne pour faire des mises à jour ensembliste.
 
+Comme ceci :
+```json
+create Task TkUpdateActorsNameBatch {
+    className : "io.vertigo.basics.task.TaskEngineProcBatch"
+        request : "
+        	UPDATE actor
+        	SET name = #actors.name#
+            WHERE act_id = #actors.actId#;
+			"
+	int actors		{domain : DoDtActor 		cardinality:"*"		}
+    out intSqlRowcount  {domain : DoNumber      cardinality: "1" }
+}
+```
+
+Cet exemple est fictif, dans beaucoup de cas il est plus simple de passer par le DAO de l'entité et sa méthode `updateList(final DtList<E> entities)`.
