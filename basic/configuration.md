@@ -318,7 +318,12 @@ Les flags actifs peuvent être fournis à l'aide du paramètre *boot.activeFlags
 </context-param>
 ```
 
+Pour les environnements qui le nécessitent, il est possible de passer les flags actifs par une variable d'environnement : `VERTIGO_BOOT_ACTIVE_FLAGS`.
 
+Exemple : 
+```xml
+VERTIGO_BOOT_ACTIVE_FLAGS=devPages;redis;kvSpeedb;searchES;analytics;cspReportWs
+```
 
 ## Exemple
 
