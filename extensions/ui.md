@@ -149,10 +149,12 @@ La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/
 
 - **inline** `__${...}__` : Préprocesseur. Indique à Thymeleaf que cette portion doit-être préprocessée. C'est utilisé pour des expressions à l'interieur d'autre expression plus globale.
 - **inline** `|...|` : Literal substitution. Permet d'écrire une chaîne contenant des parties à évaluer, c'est un moyen de simplifier l'écriture et évite des concaténations de chaîne.
+- **inline html** `[[...]]` : Literal substitution. Permet d'écrire une chaîne contenant du texte dynamique dans le html directement (`[(...)]` pour l'équivalent du `th:utext`). Il faut un `th:inline` dans un des tags parents du contenu.
 - **prefix** `th:` : Ce préfix indique que Thymeleaf doit interpréter l'attribut qui suit. Cela permet de faire du Thymeleaf sur des attributs HTML standards. Sur les tags, cela correspond au namespace des tags spécifiques Thymeleaf.
 - `abc?:bcd` : Souvent utilisé pour simplifier l'écriture, équivalent de `abc != null ? abc : bcd`
 - `${...}` : Evalue une expression de variable. Ex : `${name}` ou `${user.name}`
 - `@{...}` : Reconstruit l'url d'un lien.
+- `#{...}` : Référence une ressource i18n.
 - `~{abc::bcd}` : Sélectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le selector est soit le nom d'un fragment, soit un selector javascript standard (`#id`, `.class`, ...)
 - `th:if` : Donne la condition d'affichage sur un tag (et son body). Le filtre est effectué coté serveur et convient pour la sécurité.
 - `th:with="var1=${...}, var2=${...}"` : Déclare des variables locales. Le scope est le contenu du tag, même hors du fichier : lorsqu'on include d'autres fragments la variable reste accessible. 
