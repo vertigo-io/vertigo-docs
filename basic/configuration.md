@@ -580,4 +580,112 @@ initializers:
   - io.mars.support.boot.OrchestraInitializer:
 
 ```
+---
+
+## Focus sur le format YAML
+Un fichier YAML (Yet Another Markup Language) est un format lisible par l’homme, largement utilisé pour la configuration et les échanges de données. 
+Travailler avec YAML nécessite une attention particulière à la lisibilité, l’indentation, et la cohérence. La validation régulière et des pratiques de structuration claire vous permettront d’éviter des erreurs frustrantes et difficiles à diagnostiquer.
+Voici quelques principes, bonnes pratiques, pièges courants, et conseils pour travailler efficacement avec YAML :
+
+### **Principes de base**
+1. **Format lisible** : YAML est conçu pour être facile à lire. Utilisez des noms explicites pour les clés et évitez d’encombrer vos fichiers avec des configurations complexes si elles peuvent être simplifiées.
+2. **Indentation stricte** : YAML repose sur l’indentation pour structurer les données. Utilisez **des espaces (2 ou 4)** pour indenter et **évitez les tabulations**, qui ne sont pas reconnues.
+3. **Pas d’ambiguïté dans les types** : YAML détecte automatiquement les types (chaînes, entiers, booléens, etc.), mais cela peut causer des surprises. Utilisez des guillemets pour les chaînes ambiguës (comme `"true"`, `"123"`).
+
+### **Syntaxes importantes**
+#### **Clés et valeurs**
+```yaml
+clé_simple: valeur
+nom: "Jean Dupont"
+âge: 30
+actif: true
+```
+
+#### **Structures imbriquées**
+- **Objets (map)** :
+```yaml
+utilisateur:
+  nom: "Alice"
+  rôle: "Admin"
+```
+
+- **Listes** :
+```yaml
+animaux:
+  - chat
+  - chien
+  - oiseau
+```
+
+- **Liste d’objets** :
+```yaml
+personnes:
+  - nom: "Alice"
+    âge: 25
+  - nom: "Bob"
+    âge: 30
+```
+
+### **Conseils pratiques**
+1. **Vérifiez vos fichiers YAML** : Utilisez des validateurs en ligne ou des outils comme `yamllint` pour détecter des erreurs d’indentation ou de syntaxe.
+2. **Utilisez des commentaires** : Ajoutez des commentaires pour expliquer des sections complexes.
+   ```yaml
+   # Ce fichier configure le système de production
+   environnement: production
+   ```
+3. **Respectez la casse** : YAML est sensible à la casse (`nom` et `Nom` sont différents).
+4. **Évitez les clés dupliquées** : Chaque clé dans un niveau doit être unique. Sinon, seul le dernier sera pris en compte.
+   ```yaml
+   # Erreur fréquente
+   clé: valeur1
+   clé: valeur2  # valeur1 sera ignorée
+   ```
+
+
+### **Pièges courants**
+1. **Mauvaises indentations** :
+   - Mauvais :
+     ```yaml
+     utilisateur:
+       nom: "Alice"
+       âge: 25
+         rôle: "Admin"  # Trop d'espaces
+       ^^
+     ```
+   - Correct :
+     ```yaml
+     utilisateur:
+       nom: "Alice"
+       âge: 25
+       rôle: "Admin"
+     ```
+
+3. **Utilisation incorrecte des listes** :
+   - Mauvais :
+     ```yaml
+     animaux:
+       - "chat"
+       - chien
+         - oiseau  # Mauvais niveau d'indentation
+       ^^
+     ```
+
+   - Correct :
+     ```yaml
+     animaux:
+       - "chat"
+       - "chien"
+       - "oiseau"
+     ```
+
+4. **Caractères spéciaux : utiliser les guillemets** :
+   - Exemple :
+     ```yaml
+     mot_de_passe: "1234$abcd"
+     ```
+
+5. **Attention aux types avancés (à éviter)** :
+   - Plusieurs types comme les timestamps (`2024-11-28`) peuvent être interprétés comme des dates. Encadrez-les de guillemets si c'est du texte.
+
+
 
