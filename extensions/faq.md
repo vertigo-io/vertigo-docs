@@ -424,6 +424,68 @@ Son identifiant est calculé automatiquement, si il y a plusieurs plugins dans l
 
 !> **Attention** notamment aux features du projet qui sont souvent en autodiscovery, car dans ce cas tous les composants présent dans un package sont chargés (y compris les plugins custom d'autres Managers). Si c'est le cas, il est possible de déplacer le plugin dans un package non scanné **ou** d'annoter le plugin avec `@NotDiscoverable`
 
+## [Ui] Comment ajouter un composant VueJs dans mon projet
+Pour ajouter un composant VueJs dans le projet, il faut utiliser la fonction adaptée sur l'instance VueJs.
+
+Pour que cela soit fait au bon moment, Vertigo propose un event pour le faire : 
+
+```Javascript
+window.addEventListener('vui-before-plugins', function(event) {
+    let vuiApp = event.detail.vuiAppInstance;
+    vuiApp.component('v-my-component', MyComponent);
+});
+```
+> Il est aussi possible d'enregistrer des directives (`vuiApp.directive(...)`)
+
+Pour construire le composant, il est possible de le faire dans un fichier `.vue` puis de faire le build en format compatible `umd` avec un vite, webpack ou autre.
+
+Il est aussi possible de le créer dans un fichier javascript, via l'utilisation de `Vue.defineComponent`.
+
+Cela resemble alors à cela : 
+```Javascript
+const MyComponent = Vue.defineComponent({
+  name: 'MyComponent', // Nom du composant
+  props: {
+    message: {
+      type: String,
+      required: true, // La prop est obligatoire
+    },
+    initialCounter: {
+      type: Number,
+      default: 0, // Valeur par défaut
+    },
+  },
+  data() {
+    return {
+      counter: this.initialCounter, // Initialise le compteur avec une prop
+    };
+  },
+  methods: {
+    increment() {
+      this.counter++;
+    },
+    decrement() {
+      if (this.counter > 0) {
+        this.counter--;
+      }
+    },
+  },
+  created() {
+    console.log(`Composant ${this.name} créé avec le message : "${this.message}"`);
+  },
+  mounted() {
+    console.log('Composant monté dans le DOM.');
+  },
+  template: `
+    <div>
+      <h1>{{ message }}</h1>
+      <p>Valeur actuelle du compteur : {{ counter }}</p>
+      <button @click="increment">Incrémenter</button>
+      <button @click="decrement">Décrémenter</button>
+    </div>
+  `,
+});
+```
 26/11
 
 
