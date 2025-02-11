@@ -70,9 +70,50 @@ Il y a deux manières de définir une colonne :
 Une fois que tu es dans le cas deux tu peux utiliser comme contenu un champ spécial `<vu:field-read>` qui s'occupe d'afficher un champ en read-only qui pointe vers une liste
 
 ## [Ui] Comment rendre les éléments d'une liste sélectionnable ?
-Il suffit de poser l'attribut selectable="true" sur la table.
-Cela active un binding de la selection dans un : componentStates.${componentId}.selected 
+Il suffit de poser l'attribut `selectable` sur la `vu:table`.
+On peut utiliser une autorisation pour le proposer si l'utilisateur à les droits : `selectable="${authz.hasAuthorization('Equipment$delete')}"`
+
+Cela active un binding de la selection dans `componentStates.${componentId}.selected`.
 Pour émettre la selection coté serveur, il faut ajouter du code spécifique.
+Il faut que le développeur l'utilise pour l'envoyer au serveur sous la forme qu'il souhaite.
+
+Coté UI, on peut afficher certain bouton lorsqu'il y a des éléments sélectionnés avec un `v-if="componentStates.reservationsTable.selected.length > 0"`
+
+Voici un exemple, où nous envoyons la liste des ids dans un appel Ajax (pour supprimer ces éléments)
+```Javascript
+VUiExtensions.methods.deleteSelectedEquipment = function(deleteEquipmentUrl)  { 
+ var formParams = this.vueDataParams(['deleteEquipmentMessage']);
+ formParams.append('vContext[deletedEquipmentIds]', JSON.stringify(VertigoUi.componentStates.equipmentsTable.selected.map(row => row.equId)));
+  
+ this.httpPostAjax(deleteEquipmentUrl, formParams, {
+    onSuccess: function(response) {
+       this.$data.componentStates.equipmentsTable.selected = [];
+    }.bind(this)
+  });
+};
+```
+
+Coté Controller, on a besoin d'un élément dans le contexte pour le réceptionner (à noter que dans cet exemple, le Controller n'a pas de présélection, ce qui nécessiterai de préparer le componentStates):
+
+```Java
+private static final ViewContextKey<Long[]> deletedEquipmentIdsKey = ViewContextKey.of("deletedEquipmentIds");
+
+public void initContext(final ViewContext viewContext) {
+  //...
+  viewContext.publishTypedRef(deletedEquipmentIdsKey, new Long[0], Long[].class);
+  //...
+ }
+
+@PostMapping("/_deleteEquipments")
+public ViewContext deleteEquipments(final ViewContext viewContext,
+   @ViewAttribute("deleteEquipmentMessage") final DeleteEquipmentMessage deleteEquipmentMessage,
+   @ViewAttribute("deletedEquipmentIds") final Long[] equipmentIds,
+   final UiMessageStack uiMessageStack) {
+   final var equUids = Stream.of(reservationIds).map(equId -> UID.of(Equipment.class, equId)).toList();
+   equipmentServices.deleteEquipments(equUids, deleteEquipmentMessage, uiMessageStack);
+   return viewContext;
+}
+```
 
 ## [Ui] Comment rendre un champ obligatoire en fonction d'un autre ?
 Il faut utiliser un DtObjectValidator
