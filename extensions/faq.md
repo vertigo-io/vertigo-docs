@@ -529,6 +529,26 @@ const MyComponent = Vue.defineComponent({
 });
 ```
 
+## [Ui] Comment changer la page active du composant table lors du changement des critères ?
+Si votre page propose un rafraichissement d'une liste en Ajax, et que l'utilisateur a changer de page active, lorsque la liste est mise à jour, il est possible que la page courante soit supérieur au nombre de page maximum et plus rien ne s'affiche.
+Lorsque que vous avez un tableau paginé, et que vous rafraichissez la liste par Ajax, nous préconisons de retourner à la première page dès que l'on agit sur un critérè.
+Pour cela il faut modifier l'objet `pagination`du component state sur le `onSuccess`.
+
+Exemple: 
+```Javascript
+httpPostAjax('_reload', ['myCriteria'], {
+	 onSuccess: function() {
+		 this.$data.componentStates.maTableRef.pagination.page = 0;
+		}
+	}.bind(this)
+})
+```
+
+Rappel: pour réagir au modification de critère, il est préférable de mettre un `watch`sur l'objet critère : 
+```Javascript
+VUiPage.$watch('vueData.critereDossier', () => reload('dossier'), { deep: true });
+```
+
 26/11
 
 
