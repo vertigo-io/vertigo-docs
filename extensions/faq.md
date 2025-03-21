@@ -15,7 +15,7 @@ Pour activer les composants, il faut le faire dans le config de SpringMvc : le f
 Regarde l'exemple de la config de Mars : https://github.com/vertigo-io/vertigo-mars/blob/master/src/main/java/io/mars/support/boot/MarsVSpringWebConfig.java
 Normalement l'archetype Maven le pose déjà comme il faut.
 
-## [Ui] La page refuse de s'afficher
+## [Ui] La page refuse de s'afficher et reste blanche
 Si la page contient `layout:decorate="~{templates/MonLayout}"`, alors il faut que la page respecte la structure de MonLayout
 Un layout c'est la page complète avec des trous
 Pour faire une page on indique quel layout prendre et ce que l'on met dans les trous.
@@ -486,6 +486,81 @@ const MyComponent = Vue.defineComponent({
   `,
 });
 ```
+
+## [List] Comment ne pas avoir de pagination coté client pour une liste ?
+
+Le composant sous jacent utilise celui de Quasar. 
+En se réferant à la documention de l'API (https://quasar.dev/vue-components/table#qtable-api), on voit qui faut simplement lui mettre une nombre de ligne par page à 0.
+Donc :
+```HTML
+<vu:table ... myRowsPerPage="0" ...
+```
+
+
+## [List] J'ai une Internal Serveur Error (erreur 500) quand une liste dans mon écran à trop d'éléments, que dois-je faire ?
+
+Lors d'un rendu standard de liste dans une page, l'emsemble de la liste fournit dans le viewContext est affichée.
+Pour protéger le système, cette liste doit être limitée en taille, pour cela il faut déjà le traiter coté serveur dès le service de requete.
+
+Le fait de passer la limite coté serveur, entraine des modifications du fonctionement de la liste coté client, car les opérations de navigations dans la liste doivent aussi reportés coté serveur : (tri, filtrage, ...)
+*Note : La pagination peut rester coté client, car elle permet de consulter les X premiers éléments pour un tri donné. *
+*Et il n'est pas possible de proposer l'ensemble des résultats à travers la pagination, car les bases de données ne peuvent pas non plus récuperer efficacement les données de pages trop lointaines*
+
+Vous aurez certainement besoin d'un objet pour porter le filtrage adapté à votre cas : une liste déroulante, un préfix de recherche, des dates, etc...
+Pour porter les critères de tri et de pagination, Vertigo propose l'object `DtListState`.
+
+Voici les étapes à mettre en place : 
+
+Coté service, complétez votre requête avec le dtListState : 
+```Java
+public DtList<Document> getAuthorizedDocuments(final DocumentFiltre documentFiltre, final DtListState dtListState) {
+	//---Authz--
+	final Criteria<Document> securityCriteria = authorizationManager.getCriteriaSecurity(Document.class, DocumentOperations.readDocument);
+	//---
+	final Criteria<Document> documentCriteria = Criterions.isEqualTo(DocumentFields.documentTypeId, DocumentTypeEnum.document.getEntityUID().getId())
+				.and(Criterions.startsWith(DocumentFields.name, documentFiltre.getNamePrefix()));
+	return documentDAO.findAll(securityCriteria.and(documentCriteria), dtListState);
+}
+```
+
+Coté controller, il faut modifier le initContext pour ajouter le filtre et le chargement de la liste avec une limite.
+Il faut surtout ajouter un WebService de rechargement qui applique le filtre et le tri (le initContext réutilise d'ailleurs cette méthode)
+```Java
+@GetMapping("/")
+public void initContext(final ViewContext viewContext, final UiMessageStack uiMessageStack) {
+	final DocumentFiltre documentFiltre = new DocumentFiltre();
+	viewContext.publishDto(documentFiltreKey, documentFiltre);
+	reload(documentFiltre, DtListState.of(MAX_ELEMENTS, 0, DocumentFields.name.name(), false), viewContext, uiMessageStack);
+}
+
+@PostMapping("/_reload")
+public ViewContext reload(@ViewAttribute("documentFiltre") final DocumentFiltre documentFiltre, final DtListState dtListState, final ViewContext viewContext, final UiMessageStack uiMessageStack) {
+	final DtList<Document> documents = documentsServices.getAuthorizedDocuments(documentFiltre, dtListState.withDefault(MAX_ELEMENTS, TemplateFields.name, false));
+	if (documents.size() >= MAX_ELEMENTS) {
+		uiMessageStack.info("La liste ne présente que les "+MAX_ELEMENTS+" premiers éléments, veuillez affiner votre filtre.");
+	}
+	viewContext.publishDtList(documentsKey, documents);
+	return viewContext;
+}
+```
+
+Coté page, il faut ajouter le filtre et activer le tri coté serveur sur le tableau
+
+Pour le tri coté serveur, on ajoute l'attribut `sortUrl` sur le `vu:table`.
+
+Exemple : `sortUrl="@{_reload}"`
+
+Pour recharger la liste lorsque le filtre est modifié, on peut utiliser le `$watch` de vueJs :
+```Javascript
+VUiPage.$watch('vueData.documentFiltre', Quasar.debounce(
+        (newValue, oldValue) => { VUiPage.httpPostAjax('_reload', VUiPage.vueDataParams(['documentFiltre']))}, 500
+        ), { deep: true });	
+```
+
+
+*Note: Un exemple de ce type de liste est proposée dans la formation UI : (https://github.com/vertigo-io/vertigo-university/blob/master/sample-vertigo-ui-full/Level2.4.md#Ecran de détail - Tri coté serveur)*
+*Note2 : Il est possible de récupèrer le nombre total de ligne pour l'afficher en entête de tableau. Dans ce cas le nombre total est conservé dans la liste en tant que metadata. Exemple: `list.setMetaData(DtList.TOTAL_COUNT_META, service.countByCriteria(filtre));`
+
 26/11
 
 
