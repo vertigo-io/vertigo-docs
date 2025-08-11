@@ -327,7 +327,7 @@ VERTIGO_BOOT_ACTIVE_FLAGS=devPages;redis;kvSpeedb;searchES;analytics;cspReportWs
 
 ## Exemple
 
-Voici un exemple de configuration de l'application blanche de Vertigo : [configuration.yaml](https://github.com/KleeGroup/vertigo-university/blob/develop/mars/src/main/resources/boot/mars.yaml) qui met en œuvre un grand nombre de modules et extensions.
+Voici un exemple de configuration de l'application blanche de Vertigo : [configuration.yaml](https://github.com/vertigo-io/vertigo-mars/blob/master/src/main/resources/mars.yaml) qui met en œuvre un grand nombre de modules et extensions.
 
 ```yaml
 ---

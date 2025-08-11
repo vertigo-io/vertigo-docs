@@ -106,7 +106,7 @@ Ce champ permet l'utilisation des paramètres d'entrées sous forme de paramètr
 
 D'autre part, il est également possible d'apporter du dynamisme dans les requêtes avec l'utilisation de la syntaxe `<%><%>` qui permet d'intercaler du code Java qui sera interprété à l'exécution. Ceci est notamment utilisé afin d'activer ou désactiver des parties de requêtes.
 
-```json
+```
  create Task TkGetMoviesByCriteria {
     className : "io.vertigo.basics.task.TaskEngineSelect"
         request : "
@@ -127,13 +127,22 @@ D'autre part, il est également possible d'apporter du dynamisme dans les requê
 }
 ```
 
+
 Pour plus de détails sur l'utilisation de ces syntaxes, un [atelier](/guide/samples_dao) complet est disponible.
 
-### Exemple
+### Exemple d'échappement
 
+Pour échapper un caractère comme le `"`, vous pouvez utiliser `\`
+
+Exemple souvant utilisé pour passer la clause de sécurité : 
+
+`where ass.usr_Id = #usrId# and <%=securedAssignement.asSqlWhere(\"ass\", ctx)%>`
+
+
+### Exemple de TaskEngineSelect
 Voici un exemple de déclaration de tâche permettant de récupérer une liste d'acteurs ayant participé à un film. 
 
-```json
+```
 create Task TkGetActorsInMovie {
     className : "io.vertigo.basics.task.TaskEngineSelect"
         request : "
@@ -173,7 +182,7 @@ public DtList<Actor> getActorsByMovie2(final Long movId) {
 Avec un taskEngine de type TaskEngineProcBatch, il est possible d'appliquer les champs des éléments de la liste ligne par ligne pour faire des mises à jour ensembliste.
 
 Comme ceci :
-```json
+```
 create Task TkUpdateActorsNameBatch {
     className : "io.vertigo.basics.task.TaskEngineProcBatch"
         request : "

@@ -70,9 +70,50 @@ Il y a deux manières de définir une colonne :
 Une fois que tu es dans le cas deux tu peux utiliser comme contenu un champ spécial `<vu:field-read>` qui s'occupe d'afficher un champ en read-only qui pointe vers une liste
 
 ## [Ui] Comment rendre les éléments d'une liste sélectionnable ?
-Il suffit de poser l'attribut selectable="true" sur la table.
-Cela active un binding de la selection dans un : componentStates.${componentId}.selected 
+Il suffit de poser l'attribut `selectable` sur la `vu:table`.
+On peut utiliser une autorisation pour le proposer si l'utilisateur à les droits : `selectable="${authz.hasAuthorization('Equipment$delete')}"`
+
+Cela active un binding de la selection dans `componentStates.${componentId}.selected`.
 Pour émettre la selection coté serveur, il faut ajouter du code spécifique.
+Il faut que le développeur l'utilise pour l'envoyer au serveur sous la forme qu'il souhaite.
+
+Coté UI, on peut afficher certain bouton lorsqu'il y a des éléments sélectionnés avec un `v-if="componentStates.reservationsTable.selected.length > 0"`
+
+Voici un exemple, où nous envoyons la liste des ids dans un appel Ajax (pour supprimer ces éléments)
+```Javascript
+VUiExtensions.methods.deleteSelectedEquipment = function(deleteEquipmentUrl)  { 
+ var formParams = this.vueDataParams(['deleteEquipmentMessage']);
+ formParams.append('vContext[deletedEquipmentIds]', JSON.stringify(VertigoUi.componentStates.equipmentsTable.selected.map(row => row.equId)));
+  
+ this.httpPostAjax(deleteEquipmentUrl, formParams, {
+    onSuccess: function(response) {
+       this.$data.componentStates.equipmentsTable.selected = [];
+    }.bind(this)
+  });
+};
+```
+
+Coté Controller, on a besoin d'un élément dans le contexte pour le réceptionner (à noter que dans cet exemple, le Controller n'a pas de présélection, ce qui nécessiterai de préparer le componentStates):
+
+```Java
+private static final ViewContextKey<Long[]> deletedEquipmentIdsKey = ViewContextKey.of("deletedEquipmentIds");
+
+public void initContext(final ViewContext viewContext) {
+  //...
+  viewContext.publishTypedRef(deletedEquipmentIdsKey, new Long[0], Long[].class);
+  //...
+ }
+
+@PostMapping("/_deleteEquipments")
+public ViewContext deleteEquipments(final ViewContext viewContext,
+   @ViewAttribute("deleteEquipmentMessage") final DeleteEquipmentMessage deleteEquipmentMessage,
+   @ViewAttribute("deletedEquipmentIds") final Long[] equipmentIds,
+   final UiMessageStack uiMessageStack) {
+   final var equUids = Stream.of(reservationIds).map(equId -> UID.of(Equipment.class, equId)).toList();
+   equipmentServices.deleteEquipments(equUids, deleteEquipmentMessage, uiMessageStack);
+   return viewContext;
+}
+```
 
 ## [Ui] Comment rendre un champ obligatoire en fonction d'un autre ?
 Il faut utiliser un DtObjectValidator
@@ -424,6 +465,7 @@ Son identifiant est calculé automatiquement, si il y a plusieurs plugins dans l
 
 !> **Attention** notamment aux features du projet qui sont souvent en autodiscovery, car dans ce cas tous les composants présent dans un package sont chargés (y compris les plugins custom d'autres Managers). Si c'est le cas, il est possible de déplacer le plugin dans un package non scanné **ou** d'annoter le plugin avec `@NotDiscoverable`
 
+
 ## [Ui] Comment ajouter un composant VueJs dans mon projet
 Pour ajouter un composant VueJs dans le projet, il faut utiliser la fonction adaptée sur l'instance VueJs.
 
@@ -486,6 +528,7 @@ const MyComponent = Vue.defineComponent({
   `,
 });
 ```
+
 
 ## [List] Comment ne pas avoir de pagination coté client pour une liste ?
 
@@ -561,7 +604,28 @@ VUiPage.$watch('vueData.documentFiltre', Quasar.debounce(
 *Note: Un exemple de ce type de liste est proposée dans la formation UI : (https://github.com/vertigo-io/vertigo-university/blob/master/sample-vertigo-ui-full/Level2.4.md#Ecran de détail - Tri coté serveur)*
 *Note2 : Il est possible de récupèrer le nombre total de ligne pour l'afficher en entête de tableau. Dans ce cas le nombre total est conservé dans la liste en tant que metadata. Exemple: `list.setMetaData(DtList.TOTAL_COUNT_META, service.countByCriteria(filtre));`
 
-26/11
+
+## [Ui] Comment changer la page active du composant table lors du changement des critères ?
+Si votre page propose un rafraichissement d'une liste en Ajax, et que l'utilisateur a changer de page active, lorsque la liste est mise à jour, il est possible que la page courante soit supérieur au nombre de page maximum et plus rien ne s'affiche.
+Lorsque que vous avez un tableau paginé, et que vous rafraichissez la liste par Ajax, nous préconisons de retourner à la première page dès que l'on agit sur un critérè.
+Pour cela il faut modifier l'objet `pagination`du component state sur le `onSuccess`.
+
+Exemple: 
+```Javascript
+httpPostAjax('_reload', ['myCriteria'], {
+	 onSuccess: function() {
+		 this.$data.componentStates.maTableRef.pagination.page = 0;
+		}
+	}.bind(this)
+})
+```
+
+Rappel: pour réagir au modification de critère, il est préférable de mettre un `watch`sur l'objet critère : 
+```Javascript
+VUiPage.$watch('vueData.critereDossier', () => reload('dossier'), { deep: true });
+```
+
+// 26/11
 
 
 

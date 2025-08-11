@@ -4,7 +4,7 @@ L'extension vertigo-ui permet la création d'écrans riches, de manière simple 
 
 Pour ce faire, elle s'appuie sur deux frameworks du marché (SpringMVC et Vue.js) auxquels elle adjoint la philosophie de Vertigo : simplicité et robustesse.
 
-*Ecran de détail d'une base dans l'application démo [Mars](https://github.com/vertigo-io/vertigo-university/tree/master/mars)*
+*Ecran de détail d'une base dans l'application démo [Mars](https://github.com/vertigo-io/vertigo-mars/tree/master)*
 ![](./images/ui-mars.png)
 
 ## Principe général
@@ -234,5 +234,5 @@ Il est possible d'appeler des méthodes d'un controller via des requêtes XHR en
 
 Vertigo UI permet de réaliser des applications responsives (qui s'adaptent à la taille de l'écran). 
 
-*Ecran de détail de la base dans l'application démo [Mars](https://github.com/vertigo-io/vertigo-university/tree/master/mars) en mode mobile*
+*Ecran de détail de la base dans l'application démo [Mars](https://github.com/vertigo-io/vertigo-mars/tree/master) en mode mobile*
 ![](./images/ui-mars-mobile.png)
