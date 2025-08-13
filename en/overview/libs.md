@@ -1,14 +1,21 @@
-# Vertigo Extensions
-Vertigo follows the paradigms of modular programming. Therefore, it is divided into modules, each with a clear vocation.
+# Vertigo Extensions: Libs and Modules
 
-The underlying idea is as follows: 1 recurring issue of business applications = 1 vertigo module
+Vertigo follows the paradigms of modular programming. It is therefore split into modules, each with a clear purpose.
 
-Of course, when issues are very close, they are encapsulated in the same module.
+The underlying idea is as follows: **1 recurring business application challenge = 1 Vertigo module**.
 
-The modules listed here are those that are part of the central core of Vertigo. They are intended to be used together to provide a coherent whole to create a Java application. 
-These modules are called *extensions* because they enrich a Vertigo application and provide solutions to one or more issues related to a business application.
+Of course, when issues are closely related, they are encapsulated within the same module.
 
-Here is the list of modules along with a brief description of their content
+The modules listed here are those that are part of the Vertigo core. They are intended to be used together to provide a coherent whole for building a Java application.
+These modules are considered extensions because they enhance a Vertigo application and provide solutions to one or more business application challenges.
+
+We classify these extensions into two groups: *libs* and *modules*.
+
+* **Libs** are more like components designed to solve a specific technical problem.
+* **Modules** are closer to functional modules and aim to address a complete business problem. Modules generally offer a service API, a data model, and sometimes a UI. [Module Overview](/en/overview/modules)
+
+Below is the list of *Libs* along with a brief description of their contents.
+
 
 ## vertigo-commons
 > A collection of technical utilities.
@@ -101,3 +108,4 @@ Here is the list of modules along with a brief description of their content
 - __redis__: The tasks to be performed are centralized in a REDIS database
 
 [Access the documentation](/extensions/stella)
+

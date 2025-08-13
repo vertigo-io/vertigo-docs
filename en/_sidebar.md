@@ -14,7 +14,8 @@
   - [Ecosystem](/en/intro/ecosystem.md)
 - Overview
   - [Core](/en/overview/core.md)
-  - [Extensions](/en/overview/extensions.md)
+  - [Libs](/en/overview/libs.md)
+  - [Modules](/en/overview/modules.md)
   - [Connectors](/en/overview/connectors.md)
   - [Studio](/en/overview/studio.md)
 - Getting-started
@@ -38,8 +39,10 @@
   - [Account](/en/extensions/account.md)
   - [Vega](/en/extensions/vega.md)
   - [UI](/en/extensions/ui.md)
-  - [Orchestra](/en/extensions/orchestra.md)
-  - [Quarto](/en/extensions/quarto.md)
+  - [Orchestra](/en/modules/orchestra.md)
+  - [Quarto](/en/modules/quarto.md)
+  - [EasyForm](/en/modules/easyform.md)
+  - [Planning](/en/modules/planning.md)
 - [Design System](/en/design-system/intro.md)
   - [Atomes](/en/design-system/atoms.md)
   - Molecules

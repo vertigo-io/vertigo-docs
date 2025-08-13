@@ -9,13 +9,12 @@ Les modules listés ici sont ceux qui font partie du noyau central de Vertigo. I
 Ces modules sont des extensions car ils permettent d'enrichir une application Vertigo et fournissent des solutions à un ou plusieurs enjeux liés à une application métier.
 Nous classons ces extensions en deux groups *libs* et *modules*.
 Les *libs* sont plutôt des composants qui visent à résoudre une problèmatique techniques, et les *modules* s'apparentent aux modules fonctionnels et visent à résoudre une problématique métier dans son ensemble.
-Les *modules* proposent en général une API de services, un modèle de données et parfois une IHM.
+Les *modules* proposent en général une API de services, un modèle de données et parfois une IHM [Présentation des modules](/overview/modules).
 
-Voici la liste des *Extensions* ainsi qu'une description succincte de leur contenu
+Voici la liste des *Libs* ainsi qu'une description succincte de leur contenu
 
-## Libs
 
-### vertigo-commons
+## vertigo-commons
 > Une collection d'utilitaires techniques.
 
 * __codec__ : transformer les objets avec des codecs (codecs intégrés : HTML, MD5, SHA1, SHA256, Base64, Compress, Serialize...) 
@@ -27,7 +26,7 @@ Voici la liste des *Extensions* ainsi qu'une description succincte de leur conte
 
 [Accéder à la documentation](/extensions/commons)
 
-### vertigo-database
+## vertigo-database
 
 >  Accéder à des bases de données avec une API unifiée par concept.
 
@@ -36,7 +35,7 @@ Voici la liste des *Extensions* ainsi qu'une description succincte de leur conte
 
 [Accéder à la documentation](/extensions/database)
 
-### vertigo-datamodel
+## vertigo-datamodel
 
 > Modéliser efficacement une application métier.
 
@@ -47,7 +46,7 @@ Voici la liste des *Extensions* ainsi qu'une description succincte de leur conte
 
 [Accéder à la documentation](/extensions/datamodel)
 
-### vertigo-datastore
+## vertigo-datastore
 
 > Gestion du stockage simplifié via une API standardisée
 
@@ -57,7 +56,7 @@ Voici la liste des *Extensions* ainsi qu'une description succincte de leur conte
 
 [Accéder à la documentation](/extensions/datastore)
 
-### vertigo-datafactory
+## vertigo-datafactory
 
 > Des services à forte valeur ajoutée pour traiter les données efficacement.
 
@@ -66,7 +65,7 @@ Voici la liste des *Extensions* ainsi qu'une description succincte de leur conte
 
 [Accéder à la documentation](/extensions/datafactory)
 
-### vertigo-basics
+## vertigo-basics
 
 > Des collections de Formatters, Contraintes, TaskEngine prêt à l'emploi pour créer tous vos SmartType et Task en un éclair.
 
@@ -77,20 +76,20 @@ Voici la liste des *Extensions* ainsi qu'une description succincte de leur conte
 [Accéder à la documentation](/extensions/basics)
 
 
-### vertigo-vega
+## vertigo-vega
 > Publier son application à destination du reste du monde.
 
 * __rest__ : Ajoute une couche webservice REST à votre application. Ces services sont à la fois adaptés aux échanges Machine2Machine et à la construction de Single Page Applications via des fonctionnalités dédiées (gestion de la sécurité, rate limiting, gestion de tokens...)
 
 [Accéder à la documentation](/extensions/vega)
 
-### vertigo-ui
+## vertigo-ui
 
 > Créer de superbes interfaces Web en tout sécurité et très efficacement avec l'extension Vertigo-UI qui tire le meilleur parti de VueJS et de Quasar avec un Design System ultra efficace et ergonomique
 
 [Accéder à la documentation](/extensions/ui)
 
-### vertigo-account
+## vertigo-account
 > Gestion des utilisateurs de votre application, et pas uniquement d'un point de vue technique.
 
 * __authentication__ : fournit une variété de connecteurs pour gérer l'authentification de vos utilisateurs à l'application
@@ -99,7 +98,7 @@ Voici la liste des *Extensions* ainsi qu'une description succincte de leur conte
 
 [Accéder à la documentation](/extensions/account)
 
-### vertigo-stella
+## vertigo-stella
 
 > Distribue les traitements sur des noeud dédiés
 
@@ -107,82 +106,3 @@ Voici la liste des *Extensions* ainsi qu'une description succincte de leur conte
 - __redis__ : Les taches à effectuer sont centralise dans une base de données REDIS
 
 [Accéder à la documentation](/extensions/stella)
-
-
-
-## Modules
-
-### vertigo-social
-
-> Ajoute des fonctions collaboratives à votre application pour améliorer la communication avec et entre vos utilisateurs.
-
-* __notification__ : Envoyer des notifications à vos utilisateurs sans recourir à des services tiers
-* __comment__ : Des espaces de partage d'informations non structurés pour améliorer l'efficacité opérationnelle de l'application 
-* __mail__ : Envoyer des emails très simplement
-* __sms__ : Envoyer des SMS
-* __handle__ : (Fonction en beta) : Associer aux entités de votre application des 'handle' signifiants permettant un référencement simplifié à l'exterieur de l'application ainsi qu'une meilleure navigation au sein de l'application.
-
-[Accéder à la documentation](/extensions/social)
-
-### vertigo-orchestra
-
-> Une tour de controle et d'execution de processus longs et programmés (regulièrement appelés batchs), permettant la supervision de l'application par un administrateur technico-fonctionnel.
-> Ce module propose une IHM de base en VueJs.
-
-* __definition__ : définit les processus gérés
-* __schedule__ : planifie les executions récurrentes ou délègue ce traitement à une solutions tierces
-* __execute__ : execute les processus selon différentes stratégie tout en minimisant l'impact sur l'application hôte
-
-[Accéder à la documentation](/extensions/orchestra)
-
-### vertigo-quarto
-
-> Permet la gestion des publications et des éditions de documents avec fusion de données.
-
-- __publisher__ : Outil d'éditique simple et léger. Permet de produire des documents à partir de modèle de document utilisateur et des données de l'application. Les modèles sont très simples à modifier car ils sont des documents ODT ou DOCX avec des marqueurs.
-- __converter__ : Permet de convertir un format de document dans un autre (les plugins existants supportent : ODT, DOC, DOCX, RTF, TXT vers PDF)
-- __export__ : Permet d'exporter des collections ou des objets métiers vers des formats utilitaires (les plugins existants supportent : CSV, PDF, RTF, XLS)
-
-[Accéder à la documentation](/extensions/quarto)
-
-### vertigo-audit
-
-> Permet d'enregister les actions critiques dans une application pour créer des pistes d'audit
-
-- __ledger__ : Utilise les méchanismes de BlockChain pour tracer de manière sécurisé des informations importantes (Support de la blockchain Ethereum, publique et/ou privée, et/ou sidechain)
-- __trace__ : Trace selon diverses stratégies les actions (log, db, etc...)
-
-[Accéder à la documentation](/extensions/audit)
-
-### vertigo-dashboard
-
-> Fournir un tableau de bord clé en main pour suivre les performances et la santé d'une application sans dépendre d'un produit tiers.
-
-Ce module est susceptible d'être fortement remanié / déplacé dans un avenir proche.
-
-[Accéder à la documentation](/extensions/dashboard)
-
-### vertigo-geo
-
-> Ajoute une dimension géographique à vos entités métiers et à votre application 
-
-* __geocoder__ : Transformer des positions en adresses et inversement, via différents services (GoogleMaps et BAN inclus)
-* __geosearch__ : Utiliser les fonctions cartographiques pour rechercher des entités métiers dans une zone geographique (ElasticSearch inclus)
-
-[Accéder à la documentation](/extensions/geo)
-
-
-### vertigo-easyforms
-
-> Ajoute un outil de formulaire dynamique dans votre application. Ce module est conçu pour permettre aux administrateurs fonctionnels d'adapater les formulaires qui ont besoin de flexibilité.
-> Ce module propose une IHM en VertigoUi.
-
-[Accéder à la documentation](/extensions/easyforms)
-
-
-### vertigo-planning
-
-> Ajoute un outil de gestion de planning dans votre application. Ce module propose à la fois la plannification de créneau (cot BackOffice) et la sélection de créneau (coté FrontOffice).
-> Ce module propose une IHM en VertigoUi.
-
-[Accéder à la documentation](/extensions/planning)
