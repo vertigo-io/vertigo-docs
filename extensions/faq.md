@@ -625,6 +625,76 @@ Rappel: pour réagir au modification de critère, il est préférable de mettre 
 VUiPage.$watch('vueData.critereDossier', () => reload('dossier'), { deep: true });
 ```
 
+## [Database] Comment accéder facilement à la base de données de mon environnement ?
+Tout d'abord, attention aux aspects de sécurité, dans un principe de défence en profondeur, il est normal et souhaitable que votre base de données soit pas accéssible en direct.
+Cependant lors des phases de mise aux point, et en fonction du contexte de votre projet cela peut être utile.
+Je partage ici, une solution parmi d'autres et qui a déjà été réalisées.
+
+Dans votre configuration.yaml, vous pouvez ajouter un manager pour lancer une console H2 (base de données de test, mais qui inclus un client Jdbc)
+Exemple : 
+```yaml
+  #on ajoute une feature dans le module de support du projet. On conditionne sur le mode de dev, pour le retirer des envs avec des données senssibles
+  io.vertigo.mars.support.SupportFeatures: 
+    features:
+      - h2Console:
+          __flags__: ["devMode"]
+
+```
+
+Dans SupportFeatures :
+```java
+	/**
+	 * Activates h2 console.
+	 * @return these features
+	 */
+	@Feature("h2Console")
+	public SupportFeatures withH2Console(final Param... params) {
+		getModuleConfigBuilder()
+				.addComponent(H2ConsoleManager.class, params);
+		return this;
+	}
+```
+
+Le H2ConsoleManager :
+```java
+import org.h2.tools.Console;
+
+public final class H2ConsoleManager implements Component, Activeable {
+
+	private final Console console = new Console();
+	private final String[] args;
+
+	@Inject
+	public H2ConsoleManager(@ParamValue("args") final Optional<String> argsOpt) {
+		Assertion.check().isNotNull(argsOpt);
+		//---
+		args = argsOpt.map(cmdArgs -> cmdArgs.split("\\|")).orElseGet(() -> new String[] { "-web" });
+
+	}
+
+	@Override
+	public void start() {
+		try {
+			console.runTool(args);
+		} catch (final SQLException e) {
+			throw WrappedException.wrap(e);
+		}
+
+	}
+
+	@Override
+	public void stop() {
+		console.shutdown();
+
+	}
+}
+```
+
+La console est lancée au démarrage, et accéssible via l'url indiquée dans le log : 
+`Web Console server running at http://127.0.0.1:8082?key=0103....bf8a (only local connections)`
+
+Il faudra configurer la connexion en reprenant les infos de l'url Jdbc, mais vous aurez ainsi facilement accès à la base de données.
+
 // 26/11
 
 
