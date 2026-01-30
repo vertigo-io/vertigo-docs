@@ -625,8 +625,80 @@ Rappel: pour réagir au modification de critère, il est préférable de mettre 
 VUiPage.$watch('vueData.critereDossier', () => reload('dossier'), { deep: true });
 ```
 
-// 26/11
+## [Search] Comment créer une facette à partir d'une liste de tags dans mon objet ?
 
+*Note: Un exemple est présent sur la démo mars pour la facette des équipements par tags ([mars](https://github.com/vertigo-io/vertigo-mars/))*
+
+Nous partons d'une colonne de notre objet d'index qui contient la liste des tags avec un séparateur.
+Nous allons utiliser une facette term : les valeurs de celle-ci sera basée sur les valeurs présentent dans l'index.
+Comme c'est une facette term, il est important que la facette soit construite sur une valeur non modifiée de la valeur saisie, pour cela on utilise le mode keyword. 
+Pour gérer le caractère multiple, on va utiliser un séparateur, dans cet exemple nous prenons le | qui à l'avantage d'être un caractère qui peut être facilement dédié à cet usage (ce n'est pas une ponctuation 'légitime').
+
+On commence par un analyser spéciale dans la configuration elasticsearch :
+
+`elasticsearch.yaml`
+```yaml
+
+index :
+    analysis :
+        normalizer :
+            code :
+                type : custom
+        analyzer :
+            multiple_code :
+                tokenizer : piped_keywords
+                filter : []
+        tokenizer :
+            piped_keywords :
+                type : pattern
+                pattern : '([|,;] *)'
+```
+
+On utilise un smartype adapté qui utilise cet analyzer:
+`MarsSmartTypes.java`
+```Java
+	@SmartTypeDefinition(String.class)
+	@Formatter(clazz = FormatterDefault.class)
+	@SmartTypeProperty(property = "storeType", value = "TEXT")
+	@SmartTypeProperty(property = "indexType", value = "multiple_code:facetable")
+	Tags,
+```
+
+Dans le ksp de search, on ajoute le champs
+`searchEquipment.ksp` 
+```Javascript
+create DtDefinition DtEquipmentIndex {
+	...
+	field tags {domain: DoTags, label: "Tags" }
+	...
+}
+```
+
+Il faut ensuite compléter la requete de recherche pour concaténer :
+`searchTasks.ksp`
+```SQL
+SELECT 
+    equ.EQUIPMENT_ID,
+    ...
+    -- On récupère la colonne calculée depuis la jointure LATERAL
+    COALESCE(t.TAG_LIST, '') as TAGS, 
+    ...
+FROM EQUIPMENT equ
+JOIN BASE bas on bas.base_id = equ.base_id
+LEFT JOIN LATERAL (
+    SELECT STRING_AGG(tg.LABEL, '|') as TAG_LIST
+    FROM TAGS tg
+    WHERE tg.EQUIPMENT_ID = equ.EQUIPMENT_ID
+) t ON true
+WHERE equ.EQUIPMENT_ID in (#equipmentIds.rownum#);
+```
+*Note : Dans cette exemple, on utilise le LATERAL qui est plus performant pour PostgreSQL*
+
+La facette est ensuite automatique. 
+ElasticSearch va 'découper' la valeur de la colonne tags suivant les |. Les majuscules et les espaces seront conservés.
+Il va automatiquement peupler la facette avec les valeurs.
+
+// 26/11
 
 
 
