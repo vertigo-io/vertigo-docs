@@ -24,7 +24,7 @@ Il existe des *Plugins* d'analytics qu'il est possible de brancher à la collect
 Les connecteurs inclus dans vertigo sont :
 
 - `SmartLoggerAnalyticsConnectorPlugin` : qui permet de logger de manière intelligente les informations, notamment à destination du developpeur. Ce connecteur permet très simplement de connaitre le nombre d'appels à la base de données pour chaque appel de webservice ou d'écran.
-- `SocketLoggerAnalyticsConnectorPlugin` : qui permet la transmission des données au serveur analytics de Vertigo. Ce serveur d'analytics disponible [ici](la documentation officielle) est capable d'agréger les données collectées sur plusieurs serveurs d'une même application ou bien même de plusieurs applications en vue de leur exploitation. L'utilisation standard est le stockage de données dans une base InfluxDB pour des visualisations via vertigo-dashboard ou Grafana.
+- `SocketLoggerAnalyticsConnectorPlugin` : qui permet la transmission des données au serveur analytics de Vertigo. Ce serveur d'analytics ([vertigo-analytics-server](https://github.com/vertigo-io/vertigo-analytics-server)) est capable d'agréger les données collectées sur plusieurs serveurs d'une même application ou bien même de plusieurs applications en vue de leur exploitation. L'utilisation standard est le stockage de données dans une base InfluxDB pour des visualisations via vertigo-dashboard ou Grafana.
 
 Pour activer ces connecteurs, voici un extrait de la configuration Yaml à inclure dans votre application :
 

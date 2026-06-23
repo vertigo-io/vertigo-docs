@@ -34,7 +34,7 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
 ### Annotations Vertigo-ui
 
 - `@ViewAttribute("nomDuParam")` : Map une variable de type objet, avec les données de formulaire lors d'un POST. Le nom doit correspondre à une clé du context (voir [ViewContextKey](#ViewContextKey)). L'objet est récupéré du context, mis à jour par les données du POST, validées puis passées à la méthode.
-- `@QueryParam("paramName")` : Utiliser dans quelques cas pour indiquer le nom du paramètre de la request. Typiquement pour opérations sur les fichiers ([VFile](VFile) et [FileInfoURI](FileInfoURI))
+- `@QueryParam("paramName")` : Utiliser dans quelques cas pour indiquer le nom du paramètre de la request. Typiquement pour opérations sur les fichiers (`VFile` et `FileInfoURI`)
 - `@Secured("authname")` : Utiliser sur les controllers ou les méthodes de controller pour vérifier que l'utilisateur à bien ces authorisations. (Utilise la configuration de vertigo-account authorization)
 
 ### ArgumentResolver Vertigo-ui
@@ -42,7 +42,7 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
 - `ViewContext` : Objet représentant le context de la page. Vierge sur un GET, il a vocation a être peuplé, récupérer et mis à jour sur un POST il est utlisé pour réaliser l'action.
 - `DtListState` : Objet représentant l'état d'affichage d'une page : tri et pagination.
 - `UiMessageStack` : Objet contenant la pile des messages de l'action : erreurs de format et de surface (validation des contraintes et du caractère non null), il peut être passé au service et complété avec des messages d'erreur, de warning, d'info ou de succès globaux, par objet ou par champs 
-- `FileInfoURI` : Permet de recevoir une uri de fichier. Nécessite de nommer le paramètre avec `@QueryParam`. A noter que les URI de fichiers sont protégées dans la page (transformées), lorsqu'elle reviens sur le serveur on fait la traduction inverse.
+- `FileInfoURI` : Permet de recevoir une uri de fichier. Nécessite de nommer le paramètre avec `@QueryParam`. Les URI de fichiers sont protégées dans la page (transformées), lors du retour sur le serveur on fait la traduction inverse.
 - `VFile` : Permet de recevoir un fichier. Nécessite de nommer le paramètre avec `@QueryParam`. Le fichier est temporaire et doit être persisté si besoin dans un service.
 - `Optional<AutreType> ` : Permet de supporter les paramètres optionnels.
 
@@ -186,7 +186,7 @@ Nécessite :
 
 Les layouts permettent de mutualiser tout la partie récurrente des pages : bandeau, menu, footer, ...
 Le principe est qu'un layout est une page *à trou*, les trous sont nommés dans le template et peuvent avoir une valeur par défaut. Lorsque l'on écrit une page, on indique que l'on *décore* un layout particulier, et on ne précise que la valeur des *trous*. Le but étant que les éléments écrits dans la page ne sont que les éléments spécifiques à cette page, tous le contenu commun est dans le layout.
-L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-mars/tree/master/src/main/webapp/WEB-INF/views/templates) qui peuvent être adaptés et réutilisés.
+L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-mars/tree/develop/src/main/webapp/WEB-INF/views/templates) qui peuvent être adaptés et réutilisés.
 
 
 ## Composants nommés Vertigo-ui
@@ -253,7 +253,7 @@ Nécessite :
   - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
   - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
   
-Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-mars/blob/master/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
+Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-mars/blob/develop/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
 ```HTML
   <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
 
@@ -268,7 +268,7 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
 ```
 
 - `vu:content` : Tag utilisé dans les composants pour marquer l'insertion du `content` (ie : le body du tag lors de l'utilisation de ce composant). Le body peut-être utilisé pour définir le rendu par défaut.
-- `vu:content-item` : Tag utilisé dans les composants pour marquer l'insertion du `contentItem`. Utilisé dans les cas particulier ou les composants placé dans le corps d'un autre composant doivent être interprétés séparément. Le cas d'exemple est le composant `grid`. Pour être utilisé correctement, il faut que le composant parent ait un attribut contentTags, pose une boucle dessus avec pour nom d'item `contentItem`. (cf. [grid](https://raw.githubusercontent.com/vertigo-io/vertigo-extensions/master/vertigo-ui/src/main/resources/io/vertigo/ui/components/layout/grid.html) )
+- `vu:content-item` : Tag utilisé dans les composants pour marquer l'insertion du `contentItem`. Utilisé dans les cas particulier ou les composants placé dans le corps d'un autre composant doivent être interprétés séparément. Le cas d'exemple est le composant `grid`. Pour être utilisé correctement, il faut que le composant parent ait un attribut contentTags, pose une boucle dessus avec pour nom d'item `contentItem`. (cf. [grid](https://raw.githubusercontent.com/vertigo-io/vertigo-libs/master/vertigo-ui/src/main/resources/io/vertigo/ui/components/quasar/layout/grid.html) )
 - `vu:slot` *tag* : Composant permettant de passer le contenu d'un slot au composant parent. Les slots du composant parent sont référencés par le suffix `_slot`.
   - `name` : Nom du slot
   - `content` : Le body du tag est passé au composant parent et sera inséré soit avec l'attribut `vu:slot` soit le tag `<vu:content-slot />`  

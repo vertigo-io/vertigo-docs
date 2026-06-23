@@ -327,4 +327,4 @@ StellaFeatures.withMaster();
 
 ## Références
 
-- [vertigo-stella](https://github.com/vertigo-io/vertigo-extensions/tree/master/vertigo-stella) sur GitHub
+- [vertigo-stella](https://github.com/vertigo-io/vertigo-libs/tree/master/vertigo-stella) sur GitHub

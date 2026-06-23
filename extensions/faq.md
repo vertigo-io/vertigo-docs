@@ -127,7 +127,7 @@ if (uiMessageStack.hasErrors()) {
 Pour récupérer l'uiMessageStack il suffit de l'inclure dans la signature de la méthode du controlleur (comme le ViewContext)
 
 ## [Mail] Comment envoyer un mail ?
-Le MailManager aide pour l'envoi de mail. (https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-social/src/test/java/io/vertigo/social/mail/MailManagerTest.java)
+Le MailManager aide pour l'envoi de mail. (https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-social/src/test/java/io/vertigo/social/mail/MailManagerTest.java)
 
 
 ## [Ui] Peux-t-on avoir 2 balises `<vu:messages>` dans une page ?

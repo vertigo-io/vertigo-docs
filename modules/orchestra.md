@@ -49,7 +49,7 @@ La configuration YAML pour orchestra en mode base de données est la suivante :
 
 
 
-Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires) à l'aide de [ce](le guide d'installation du module Orchestra dans le dépôt vertigo-io) fichier SQL.
+Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires) en vous reportant au guide d'installation du module Orchestra sur le dépôt vertigo-io.
 
 ## A quoi cela ressemble-t-il dans le code?
 

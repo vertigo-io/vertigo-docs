@@ -41,7 +41,7 @@
   - [UI](extensions/ui.md)
   - [Orchestra](modules/orchestra.md)
   - [Quarto](modules/quarto.md)
-  - [EasyForm](modules/easyform.md)
+  - [EasyForms](modules/easyforms.md)
   - [Planning](modules/planning.md)
 - [Design System](design-system/intro.md)
   - [Atomes](design-system/atoms.md)
@@ -68,6 +68,7 @@
     - [Edition/Consultation](design-system/templates/read-edit.md)
     - [Recherche](design-system/templates/search.md)
 - <a href="apidocs/index.html" target="_blank">API documentation</a>
-- [Changelog](changes.md)
-- [Changelog-extensions](changes-extensions.md) 
+- [Changelog Core](changes)
+- [Changelog Libs](changes-extensions)
+- [Changelog Modules](changes-modules)
 - [FAQ](extensions/faq.md)

@@ -16,7 +16,7 @@ Pour appeler des WebServices, il suffit d'une interface avec les annotations sta
 
 ## Quick start server
 
-1. La classe du webservice doit implémenter l'interface [WebServices](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/webservice/WebServices.java)
+1. La classe du webservice doit implémenter l'interface [WebServices](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/webservice/WebServices.java)
 2. La classe doit être déclaré comme un *Composant* Vertigo, concrètement, cela est fait par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application) 
 3. Ajouter les annotations sur les méthodes, exemple:
 ```java 
@@ -52,7 +52,7 @@ modules:
 6. Démarrer l'application
 7. **C'est bon**. Vous pouvez appeler votre webservice :  [http://localhost:8080/*maWebApp*/api/anonymousTest](http://localhost:8080/*maWebApp*/api/anonymousTest)
 
-Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/impl/webservice/catalog/SwaggerWebServices.java) qui vous donnent la vue de l'API des WebServices disponibles.<br/>
+Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/impl/webservice/catalog/SwaggerWebServices.java) qui vous donnent la vue de l'API des WebServices disponibles.<br/>
 * IHM Swagger :  [http://localhost:8080/*maWebApp*/api/swaggerUi](http://localhost:8080/*maWebApp*/api/swaggerUi)
 * API Swagger seule : [http://localhost:8080/*maWebApp*/api/swaggerApi](http://localhost:8080/*maWebApp*/api/swaggerApi)
 
@@ -131,7 +131,7 @@ Mais pas pour être conservé tout le temps d'une navigation utilisateur.
 ## API
 
 ### Code exemples :
-De nombreux exemples complets sont présents dans les tests de Vertigo sur GitHub : [Tests Exemples](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/test/java/io/vertigo/vega/webservice/data/ws)
+De nombreux exemples complets sont présents dans les tests de Vertigo sur GitHub : [Tests Exemples](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-vega/src/test/java/io/vertigo/vega/webservice/data/ws)
 
 ### Syntaxe des routes
 Lors de la définition des routes, vous pouvez utiliser `{myParamName}` pour déclarer une variable de l'URL qui est utilisée comme paramètre du service.  
@@ -338,7 +338,7 @@ Response:
 }
 ```
 
-?> Cette fonction est traitée par [`ServerSideStateWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/plugins/webservice/handler/ServerSideStateWebServiceHandlerPlugin.java)
+?> Cette fonction est traitée par [`ServerSideStateWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/plugins/webservice/handler/ServerSideStateWebServiceHandlerPlugin.java)
 
 
 ### Sécurité **AccessToken**
@@ -358,7 +358,7 @@ Le serveur envoie des informations dans des *headers* de la *Response*
 
 Si la limite du serveur est dépassée, le serveur retourne une erreur `HTTP 429 TOO_MANY_REQUEST`.
 
-> Cette fonction est traitée par [`RateLimitingWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/plugins/webservice/handler/RateLimitingWebServiceHandlerPlugin.java)
+> Cette fonction est traitée par [`RateLimitingWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/plugins/webservice/handler/RateLimitingWebServiceHandlerPlugin.java)
 > Le handler propose des paramètres optionnels : 
 > - *windowSeconds* : Taille de la fenêtre en seconde
 > - *limitValue* : Nombre d'appels maximum (dans la durée de la fenêtre)

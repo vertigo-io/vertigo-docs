@@ -288,7 +288,7 @@ Dans l'exemple ci-dessus :
 
 Il est alors possible de changer la configuration par l'intermédiaire d'un fichier de paramètrage.
 
-> La configuration par fichier xml est également décrite par un fichier XSD disponible [ici](https://github.com/vertigo-io/vertigo-hq)
+> La configuration par fichier xml est également décrite par un fichier XSD disponible [ici](https://github.com/vertigo-io/vertigo/blob/master/vertigo-core/src/main/java/io/vertigo/app/config/xml/vertigo_1_0.xsd)
 
 # Utilisation
 
