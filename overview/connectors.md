@@ -73,5 +73,29 @@ Les __connectors__ inclus dans vertigo sont les suivants
 
 ## vertigo-iftt-connector
 
-> Accède à certaines fonctions de l'API IFFT via du code natif
+> Accède à certaines fonctions de l'API IFTTT via du code natif
+
+## vertigo-azure-connector
+
+> Accès au client [MSAL4j](https://github.com/AzureAD/microsoft-authentication-library-for-java) pour l'authentification Azure Active Directory
+
+## vertigo-httpclient-connector
+
+> Accès au client HTTP Java standard [java.net.http.HttpClient](https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html) avec support proxy, truststore et cookies
+
+## vertigo-jsch-connector
+
+> Accès au client SSH [JSch](https://github.com/mwiede/jsch) avec authentification par clé privée issue d'un keystore PKCS12
+
+## vertigo-oidc-connector
+
+> Accès au client [Nimbus OIDC](https://github.com/connect2id/nimbus-oauth-openid-connect-sdk) pour l'authentification OpenID Connect
+
+## vertigo-s3-connector
+
+> Accès au client [MinIO](https://github.com/minio/minio-java) pour les stockages compatibles S3
+
+## vertigo-saml2-connector
+
+> Accès au framework [OpenSAML](https://github.com/Jasig/OpenSAML) pour l'authentification SAML2 avec configuration des clés SP et IP
 

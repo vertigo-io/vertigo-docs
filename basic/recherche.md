@@ -52,15 +52,16 @@ Le module propose deux modes de fonctionnement :
 Exemple de configuration pour le mode Standard :
 ```yaml
 modules
-  io.vertigo.commons.CommonsFeatures:
-  io.vertigo.dynamo.DynamoFeatures:
+  io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
     features:
-      - search
-    featuresConfig:
-      - search.elasticsearchTransport:
+      - restHL:
           servers.names: ${esHost}
-          envIndex: mars
-          cluster.name: mars
+  io.vertigo.datafactory.DataFactoryFeatures:
+    features:
+      - search:
+    featuresConfig:
+      - search.elasticsearch.restHL:
+          envIndexPrefix: mars
           rowsPerQuery: 50
           config.file: search/elasticsearch.yml
 ```
@@ -320,7 +321,7 @@ create FacetedQueryDefinition QryEquipment {
    keyConcept : DtEquipment
    facets : [FctEquipmentEquipmentTypeName, FctEquipmentPurchaseDate ]
    domainCriteria : DoLabel
-   listFilterBuilderClass : "io.vertigo.dynamox.search.DslListFilterBuilder"  
+    listFilterBuilderClass : "io.vertigo.datafactory.impl.search.dsl.DslListFilterBuilder"
    listFilterBuilderQuery : "allText:#+query*#"
    geoSearchQuery : "geoLocation: [#geoUpperLeft# to #geoLowerRight#]"
 }

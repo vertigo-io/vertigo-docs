@@ -64,7 +64,7 @@ Dans l'exemple, il est possible d'activer la fonctionalité **EmbeddedServer** (
 Une fois cet objet AppConfig créé, il est possible de démarrer l'application : 
 
 ```java
-try (AutoCloseableApp app = new AutoCloseableApp(nodeConfig)) {
+try (AutoCloseableNode app = new AutoCloseableNode(nodeConfig)) {
 	//do whatever you want
 }
 ```
@@ -168,7 +168,7 @@ boot:
     - io.vertigo.core.plugins.resource.classpath.ClassPathResourceResolverPlugin: {}
     - io.vertigo.core.plugins.resource.url.URLResourceResolverPlugin: {}
     - io.vertigo.core.plugins.param.properties.PropertiesParamPlugin:
-       url : file:./src/test/java/fr/gouv/interieur/rdvpref/support/env-test.properties
+        url : file:./src/test/java/com/example/gestionprojet/support/env-test.properties
     - io.vertigo.core.plugins.param.env.EnvParamPlugin: {}
 ```
 
@@ -288,7 +288,7 @@ Dans l'exemple ci-dessus :
 
 Il est alors possible de changer la configuration par l'intermédiaire d'un fichier de paramètrage.
 
-> La configuration par fichier xml est également décrite par un fichier XSD disponible [ici](https://github.com/KleeGroup/vertigo/blob/master/vertigo-core/src/main/java/io/vertigo/app/config/xml/vertigo_1_0.xsd)
+> La configuration par fichier xml est également décrite par un fichier XSD disponible [ici](https://github.com/vertigo-io/vertigo-hq)
 
 # Utilisation
 

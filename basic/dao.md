@@ -29,7 +29,7 @@ public Movie getMovieById(final Long movId) {
 
 ?> Les méthodes qui sont offertes sont limitées à la manipulation d'une seule entité métier car c'est l'assurance de bonnes performances. La maîtrise des performances étant primordiale pour un système opérationnel, nous conseillons l'utilisation du store dans les cas simples et d'utiliser une [tâche](#tâches) dédiée dans les cas plus complexes, notamment lorsque plusieurs entités sont concernées.
 
-!> Il est important de toujours privilégier les manipulations de données ensemblistes (selection et modification) et d'éviter les appels unitaires multiples qui ont un coût en performances important et non-maitrisé. L'atelier DAO détaillé [ici](/guide/samples_dao) permet, au travers d'exercices, de maitriser l'accès aux données dans une application Vertigo.
+!> Il est important de toujours privilégier les manipulations de données ensemblistes (selection et modification) et d'éviter les appels unitaires multiples qui ont un coût en performances important et non-maitrisé.
 
 
 ## Criteria
@@ -128,7 +128,7 @@ D'autre part, il est également possible d'apporter du dynamisme dans les requê
 ```
 
 
-Pour plus de détails sur l'utilisation de ces syntaxes, un [atelier](/guide/samples_dao) complet est disponible.
+Pour plus de détails sur l'utilisation de ces syntaxes, consulter la documentation sur les tâches KSP.
 
 ### Exemple d'échappement
 

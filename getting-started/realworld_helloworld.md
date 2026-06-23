@@ -2,7 +2,7 @@
 
 ## Création du projet dans l'IDE
 
-Nous utiliserons ici Eclipse. A l'heure de la rédaction de ce guide, la version utilisée est la 2018-09.
+Nous utiliserons ici Eclipse. A l'heure de la rédaction de ce guide, la version utilisée est la 2024-06 (ou supérieure).
 
 
 
@@ -35,7 +35,7 @@ Rajouter les dépendances suivantes dans le fichier pom.xml :
 * Module vertigo-ui (cette dépendance tirera l'ensemble des modules Vertigo requis pour l'application)
 * Module vertigo-studio (celui-ci nous simplifie la tâche en générant des parties de code sans valeur ajoutée)
 * Les dépendances externes vers des outils nécessaires : 
-  * La dépendance `provided` à l'API servlet 4.0.1 ou supérieure
+   * La dépendance `provided` à l'API servlet 6.0.0 ou supérieure
   * Une base de données H2 (il s'agit d'une base mémoire, facile à utiliser à des fins de tests)
   * Le gestionnaire de pool de connexions C3P0 pour la connexion à la base de données
 
@@ -59,20 +59,20 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 	
 	<dependencies>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>4.0.1</version>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-ui</artifactId>
-			<version>3.0.0</version>
+			<version>4.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-studio</artifactId>
-			<version>3.0.0</version>
+			<version>4.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>

@@ -1,7 +1,7 @@
 # Composants
 
 Les composants sont des objets offrant des services.
-Ils doivent à minima implémenter l'interface `io.vertigo.core.component.Component` qui n'est rien d'autre qu'un simple marqueur ou bien implémenter une interface métier qui contractualise les services offerts.
+Ils doivent à minima implémenter l'interface `io.vertigo.core.node.component.Component` qui n'est rien d'autre qu'un simple marqueur ou bien implémenter une interface métier qui contractualise les services offerts.
 
 !> Les composants sont des singletons, ils doivent donc avoir un comportant **threadsafe**. Un moyen simple de s'en assurer est d'en faire des objets totalement **stateless**.
 
@@ -24,7 +24,7 @@ Pour être créé, un composant doit donc avoir au choix :
 
 Il est possible d'injecter dans un composant, soit sous la forme de variables d'instance, soit sous la forme de paramètres du constructeur, les éléments suivants :
 
-- un paramètre de type primitif portant l'annotation `@Named` afin de spécifier son nom
+- un paramètre de type primitif portant l'annotation `@ParamValue` afin de spécifier son nom
 - un composant
 - un plugin
 - une liste de plugins du même type 
@@ -32,7 +32,7 @@ Il est possible d'injecter dans un composant, soit sous la forme de variables d'
 
 ```java
 @Inject
-public Calculator3(@Named("offset") final Optional<Integer> offset) {
+public Calculator3(@ParamValue("offset") final Optional<Integer> offset) {
 	this.offset = offset.orElse(0);
 }
 ```
@@ -57,7 +57,7 @@ private OperationPlugin operationPlugin;
 
 ```java
 @Inject
-@Named("log")
+@ParamValue("log")
 private boolean log;
 ```
 
