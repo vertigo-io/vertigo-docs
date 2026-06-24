@@ -71,7 +71,7 @@ Les __connectors__ inclus dans vertigo sont les suivants
 
 > Accès au client java [Twitter4j](https://github.com/Twitter4J/Twitter4J)
 
-## vertigo-iftt-connector
+## vertigo-ifttt-connector
 
 > Accède à certaines fonctions de l'API IFTTT via du code natif
 

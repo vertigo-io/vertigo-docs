@@ -128,7 +128,7 @@ D'autre part, il est également possible d'apporter du dynamisme dans les requê
 ```
 
 
-Pour plus de détails sur l'utilisation de ces syntaxes, consulter la documentation sur les tâches KSP.
+Pour plus de détails sur l'utilisation de ces syntaxes, consulter la documentation sur les [Tâches](/basic/dao#tâches).
 
 ### Exemple d'échappement
 

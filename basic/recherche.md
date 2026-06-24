@@ -51,11 +51,7 @@ Le module propose deux modes de fonctionnement :
 
 Exemple de configuration pour le mode Standard :
 ```yaml
-modules
-  io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
-    features:
-      - restHL:
-          servers.names: ${esHost}
+modules:
   io.vertigo.datafactory.DataFactoryFeatures:
     features:
       - search:
@@ -68,11 +64,7 @@ modules
 
 Exemple de configuration pour le mode Embedded :
 ```yaml
-modules
-  io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
-    features:
-      - restHL:
-          servers.names: ${esHost}
+modules:
   io.vertigo.datafactory.DataFactoryFeatures:
     features:
       - search:

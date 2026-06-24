@@ -260,7 +260,7 @@ Dépendances optionnelles :
 |---|---|---|
 | `GoogleGeoCoderPlugin` | Géocodage via API Google (XML DOM/XPath) | `geocoding.google` |
 | `BanGeoCoderPlugin` | Géocodage via API BAN api-adresse.data.gouv.fr (Gson) | `geocoding.ban` |
-| `ESGeoSearchPlugin` | Recherche géospatiale via Elasticsearch REST HL (GeoBoundingBoxQueryBuilder) | `geosearch.es` |
+| `ESGeoSearchPlugin` | Recherche géospatiale via Elasticsearch REST HL | `geosearch.es` |
 
 ### Configuration YAML
 ```yaml

@@ -319,11 +319,15 @@ Les seuils utilisés lors des controles de validité sont paramétrable via `Age
 ### Configuration YAML
 
 ```yaml
-io.vertigo.planning.PlanningFeatures:
-io.vertigo.planning.agenda.AgendaFeatures:
-    featuresConfig:
-        - services.config:
-        - foConsultation.redis2Unified:
-            __flags__: ["redis && redisCluster"]
-            distributedSynchro: true
+modules:
+    io.vertigo.planning.PlanningFeatures:
+        # Toujours actif : TraceAspect, ModelDefinitionProvider
+    io.vertigo.planning.agenda.AgendaFeatures:
+        featuresConfig:
+            - services.config:
+                  createMinDureePlageMinute: 60
+                  createMaxDureePlageHeure: 10
+            - foConsultation.redis2Unified:
+                  __flags__: ["redis && redisCluster"]
+                  distributedSynchro: true
 ```

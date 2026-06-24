@@ -84,7 +84,6 @@ Dépendances transitives utilisées par le code :
 - `vertigo-core`
 - `vertigo-commons`
 - `vertigo-datastore`
-- `vertigo-datastore`
 
 ### Configuration
 

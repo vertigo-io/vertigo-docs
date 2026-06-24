@@ -324,12 +324,12 @@ modules:
             - trace.store:
             - trace.log:
             - ledger.ethereum:
-                  ethereumRPCUrl: "http://eth-node:8545"
-                  contractName: "gestion-projet"
-                  contractAddress: "0xAbC123..."
-                  ledgerName: "archive"
-                  walletAddress: "0xDeF456..."
-                  walletPassword: "secret"
+                  urlRpcEthNode: "http://eth-node:8545"
+                  myAccountName: "gestion-projet"
+                  myPublicAddr: "0xAbC123..."
+                  defaultDestAccountName: "archive"
+                  defaultDestPublicAddr: "0xDeF456..."
+                  walletPassword: "..."
                   walletPath: "/wallet/gestion-projet.p12"
 ```
 
