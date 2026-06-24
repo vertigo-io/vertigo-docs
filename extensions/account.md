@@ -19,7 +19,7 @@ Voici une configuration typique d'une application utilisant le module Account
 
 ```yaml
 
-modules
+modules:
   io.vertigo.account.AccountFeatures:
     features:
       - security:
@@ -406,10 +406,113 @@ Vertigo propose de base trois types de sources d'identité :
   - userIdentityEntity : Nom de l'entité portant l'identité (ie: du User au sens application)
   - ldapUserAttributeMapping : Mapping des champs du LDAP vers l'entité d'identité
 - **identityProvider.text** : Provision des *Identités* depuis un fichier texte
-  - identityFilePath : Chemin du fichier des *Identités* 
+  - identityFilePath : Chemin du fichier des *Identités*
   - identityFilePattern : RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508))
   - userAuthField : Nom du champ relié à l'authentification *(authToken)*
   - userIdentityEntity : Nom de l'entité portant l'identité (ie: du User au sens application)
+
+## Pour les experts
+
+### Managers
+
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `VSecurityManager` | Gestion des sessions utilisateur et authentification session | `security` |
+| `AuthenticationManager` | Authentification des utilisateurs (login/mot de passe, token) | `authentication` |
+| `AuthorizationManager` | Contrôle des autorisations (globales et entités sécurisées) | `authorization` |
+| `AccountManager` | Gestion des comptes et groupes | `account` |
+| `IdentityProviderManager` | Synchronisation avec les fournisseurs d'identité externes | `identityProvider` |
+
+### Features (@Feature)
+
+| Flag | Composants |
+|---|---|
+| `security` | `VSecurityManagerImpl` — session, utilisateur connecté |
+| `authentication` | `AuthenticationManagerImpl` — moteur d'authentification |
+| `authentication.text` | `TextAuthenticationPlugin` — auth depuis fichier texte (PBKDF2) |
+| `authentication.store` | `StoreAuthenticationPlugin` — auth depuis base de données |
+| `authentication.ldap` | `LdapAuthenticationPlugin` — auth depuis annuaire LDAP |
+| `authentication.mock` | `MockAuthenticationPlugin` — auth fictive pour tests |
+| `account` | `AccountManagerImpl`, `AccountDefinitionProvider` |
+| `account.store.store` | `StoreAccountStorePlugin` — comptes persistés en base |
+| `account.store.text` | `TextAccountStorePlugin` — comptes depuis fichier texte |
+| `account.store.loader` | `LoaderAccountStorePlugin` — comptes chargés par `AccountLoader`/`GroupLoader` |
+| `account.cache.memory` | `MemoryAccountCachePlugin` — cache mémoire des comptes |
+| `account.cache.redis` | `RedisAccountCachePlugin` — cache Redis (`Base64File`, `PhotoCodec`) |
+| `authorization` | `AuthorizationManagerImpl`, `AuthorizationAspect` |
+| `identityProvider` | `IdentityProviderManagerImpl` |
+| `identityProvider.store` | `StoreIdentityProviderPlugin` — identités depuis base |
+| `identityProvider.ldap` | `LdapIdentityProviderPlugin` — identités depuis LDAP |
+| `identityProvider.text` | `TextIdentityProviderPlugin` — identités depuis fichier texte |
+
+### Plugins d'authentification
+
+| Plugin | Description |
+|---|---|
+| `TextAuthenticationPlugin` | Authentification par login/mot de passe depuis un fichier texte |
+| `StoreAuthenticationPlugin` | Authentification par login/mot de passe depuis la base (via EntityStore) |
+| `LdapAuthenticationPlugin` | Authentification par binding LDAP, retourne le login |
+| `MockAuthenticationPlugin` | Toujours valide, pour les tests unitaires |
+
+### DSL de règles de sécurité
+
+Les règles sont traduites dans trois cibles via des `SecurityRuleTranslator` :
+
+| Traducteur | Usage |
+|---|---|
+| `SqlSecurityRuleTranslator` | Traduction en clause `WHERE` SQL pour les requêtes DAO |
+| `SearchSecurityRuleTranslator` | Traduction en syntaxe Elasticsearch pour `SearchManager` |
+| `CriteriaSecurityRuleTranslator` | Traduction en `Criteria` Vertigo (filtre transversal) |
+
+Les éléments du DSL sont : `DslSyntaxRules`, `DslParserUtil`, `DslExpressionRule`, `DslFixedQueryRule`, `DslOperatorRule`, `DslMultiExpressionRule`, `DslUserPropertyValueRule`.
+
+### Chargers d'autorisations
+
+| Classe | Rôle |
+|---|---|
+| `JsonSecurityDefinitionProvider` | Chargement des règles depuis fichier JSON |
+| `AuthorizationDeserializer` | Désérialisation des définitions d'autorisation |
+| `SecuredEntityDeserializer` | Désérialisation des entités sécurisées |
+| `AdvancedSecurityConfiguration` | Configuration avancée de la sécurité |
+
+### Annotations
+
+| Annotation | Cible | Description |
+|---|---|---|
+| `@Secured` | Classe/Méthode | Vérifie les autorisations globales |
+| `@SecuredOperation` | Paramètre | Vérifie l'opération sur une SecuredEntity |
+
+### Exceptions
+
+| Exception | Rôle |
+|---|---|
+| `VSecurityException` | Lancée quand le contrôle d'autorisation échoue |
+
+### Configuration YAML
+
+```yaml
+io.vertigo.account.AccountFeatures:
+    features:
+        - security:
+            userSessionClassName: io.myapp.MyUserSession
+        - account:
+        - authentication:
+        - authorization:
+    featuresConfig:
+        - account.store.store:
+            userIdentityEntity: DtPerson
+            groupIdentityEntity: DtGroup
+            userAuthField: email
+            userToAccountMapping: 'id:personId, displayName:lastName, email:email'
+        - authentication.store:
+            userCredentialEntity: DtPerson
+            userLoginField: login
+            userPasswordField: password
+            userTokenIdField: email
+        - identityProvider.store:
+            userIdentityEntity: DtPerson
+            userAuthField: email
+```
 
 
 

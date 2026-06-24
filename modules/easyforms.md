@@ -218,7 +218,98 @@ Pour ajouter des validateurs spécifiques :
 * Créer une classe héritant de `DefinitionProvider<EasyFormsFieldValidatorTypeDefinition>`.
 * Voir les validateurs intégrés ici : [FieldValidatorTypeDefinitionProvider.java](https://github.com/vertigo-io/vertigo-modules/blob/develop/vertigo-easyforms/src/main/java/io/vertigo/easyforms/runner/pack/provider/FieldValidatorTypeDefinitionProvider.java)
 
----
+## Pour les experts
 
-Si tu veux, je peux aussi te formater cette doc **exactement** comme celles présentes dans [`vertigo-docs/extensions`](https://github.com/vertigo-io/vertigo-docs/tree/gh-pages/extensions) pour qu’elle s’intègre directement dans le site officiel Vertigo.
-Veux-tu que je fasse cette mise en forme ?
+### Managers & Services
+
+| Manager | Rôle | Composants associés |
+|---|---|---|
+| `EasyFormsRunnerManager` | Moteur d'exécution des formulaires | `EasyFormsRunnerServices`, `EasyFormsRunnerController`, `EasyFormsFileUploadController` |
+| `EasyFormsDesignerManager` | Moteur de design des formulaires | `EasyFormsDesignerServices`, `EasyFormsDesignerController` |
+
+### Definition Providers (toujours actifs via `buildFeatures()`)
+
+| Provider | Description |
+|---|---|
+| `FieldTypeDefinitionProvider` | Types de champ intégrés : LABEL, EMAIL, DATE, PHONE, TEXT, FILE, CUSTOM_LIST\_*, YES_NO, … |
+| `UiComponentDefinitionProvider` | Composants UI : TEXT_FIELD, TEXT_AREA, SELECT, RADIO, CHECKBOX, FILE, NUMBER, DATE, READ_ONLY, … |
+| `FieldValidatorTypeDefinitionProvider` | Validateurs : EMAIL_NOT_IN_BLACKLIST, GTE_18_ANS, IN_FUTURE, PHONE_FR, … |
+| `ModelDefinitionProvider` | Définitions des DtObjects et SmartTypes |
+
+### Interfaces d'extension (Suppliers)
+
+| Interface | Usage |
+|---|---|
+| `IEasyFormsFieldTypeDefinitionSupplier` | Ajout de types de champ personnalisés |
+| `IEasyFormsUiComponentDefinitionSupplier` | Ajout de composants UI personnalisés |
+
+### Contraintes (`EasyFormsConstraint`)
+
+| Contrainte | Usage |
+|---|---|
+| `ConstraintPhone` | Validation de numéro de téléphone |
+| `ConstraintAgeMinimum` | Vérification âge minimum |
+| `ConstraintAgeMaximum` | Vérification âge maximum |
+| `ConstraintLocalDateMinimum` | Vérification date minimum |
+| `ConstraintLocalDateMaximum` | Vérification date maximum |
+| `ConstraintEmailBlackList` | Vérification email hors liste noire |
+
+### Moteur de règles
+
+| Classe | Rôle |
+|---|---|
+| `EasyFormsRuleParser` | Parsing des règles conditionnelles |
+| `EasyFormsRule` | Représentation d'une règle |
+| `ValueRule` | Règle basée sur la valeur d'un champ |
+| `FormContextDescription` | Description du contexte pour les règles |
+
+### Adapters
+
+| Adapter | Rôle |
+|---|---|
+| `EasyFormsJsonAdapter` | Adaptation JSON |
+| `EasyFormsMapInputAdapter` | Adaptation Map → modèle |
+
+### Modèle Domain (DtObjects)
+
+| DtObject | Description |
+|---|---|
+| `EasyForm` | Formulaire |
+| `EasyFormsSectionUi` | Section du formulaire |
+| `EasyFormsLabelUi` | Etiquette |
+| `EasyFormsItemUi` | Item / champ |
+| `EasyFormsFieldTypeUi` | Type de champ |
+| `EasyFormsFieldValidatorTypeUi` | Type de validateur |
+
+### Modèle Template
+
+| Classe | Description |
+|---|---|
+| `EasyFormsTemplate` | Template de formulaire |
+| `EasyFormsTemplateSection` | Section du template |
+| `EasyFormsTemplateItemField` | Champ du template |
+| `EasyFormsTemplateItemBlock` | Bloc du template |
+| `EasyFormsData` | Données du formulaire |
+
+### DAO
+
+| DAO | Rôle |
+|---|---|
+| `EasyFormDAO` | Persistance des formulaires |
+
+### Features
+
+| Flag | Paramètres | Composants |
+|---|---|---|
+| `easyforms` | `filestore.persist`, `filestore.tmp`, `languages` | `EasyFormsRunnerManager` + controllers |
+
+### Configuration YAML
+
+```yaml
+io.vertigo.easyforms.EasyFormsFeatures:
+    features:
+        - easyforms:
+            languages: en, fr
+            filestore.persist: main
+            filestore.tmp: temp
+```

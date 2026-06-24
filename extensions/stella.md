@@ -14,14 +14,14 @@ Le pattern Master-Worker sépare l'émetteur de travail (Master) de l'exécutant
 3. Un **Worker** récupère le `WorkItem`, instancie le `WorkEngine` correspondant via l'injection de dépendances, et exécute `process(W work)`.
 4. Le résultat est stocké dans le transport, puis consommé par le Master.
 
-Côté Master, `MasterManagerImpl` délègue à `MasterCoordinator`. Un thread `DistributedWorkResultWatcher` (basé sur `ScheduledExecutorService`) poll les résultats en arrière-plan. Le daemon `DmnWorkerDeadNodeDetector` tourne toutes les 20s pour détecter les nœuds workers inactifs et remettre en file les travaux en cours.
+Côté Master, `MasterManagerImpl` utilise un `Coordinator` pour suivre les travaux en cours et les résultats.
 
-Côté Worker, `WorkersManagerImpl` crée un pool d'exécution par workType. Les dispatchers pollent la file via le plugin de transport, puis délèguent à `WorkersCoordinator` qui exécute dans un `FixedThreadPool`. La classe `Worker<R,W>` instancie le `WorkEngine` via DI et nettoie les ThreadLocals après exécution.
+Côté Worker, `WorkersManagerImpl` crée un pool d'exécution par workType. Les dispatchers pollent la file via le plugin de transport, puis délèguent à `WorkEngine` via l'injection de dépendances.
 
 ### Transports
 
-- **Redis** : communication pair-à-pair via `RedisMasterPlugin` et `RedisWorkersPlugin`, utilisant RedisDB (Jedis). Les clés préfixées `vertigo:work:` utilisent des transactions atomiques. Le hash tag `{workType}` garantit la compatibilité cluster.
-- **REST** : communication via un serveur centralisé. `RestMasterPlugin` (@PathPrefix "/backend/workQueue"), `RestMasterWebService` (endpoints JAX-RS), `RestWorkersPlugin` (client Jersey avec synchronisation par workType et backoff de 2s), et `RestQueueServer` (LinkedBlockingQueue par workType). Le heartbeat REST `heartBeat()` n'est pas implémenté (TODO).
+- **Redis** : communication pair-à-pair via `RedisMasterPlugin` et `RedisWorkersPlugin`.
+- **REST** : communication via un serveur centralisé. `RestMasterPlugin`, `RestMasterWebService`, et `RestWorkersPlugin`.
 
 ## API
 
@@ -78,29 +78,22 @@ Une seule méthode `onDone` reçoit le résultat ET l'erreur. Si `error` est nul
 
 ### Activation
 
-Stella s'active via le DSL `StellaFeatures` :
+Stella s'active exclusivement via les annotations `@Feature` dans la configuration YAML du module `StellaFeatures`. Aucune méthode Java DSL n'est disponible — les features sont déclarées comme suit :
 
-- `StellaFeatures.withMaster()` : active `MasterManager` seul
-- `StellaFeatures.withWorker()` : active `WorkersManager` seul
-- `StellaFeatures.withRedisMasterPlugin()` : plugin Redis côté master
-- `StellaFeatures.withRedisWorkerPlugin()` : plugin Redis côté worker
-- `StellaFeatures.withRestMasterPlugin()` : plugin REST côté master
-- `StellaFeatures.withRestWorkerPlugin()` : plugin REST côté worker
-
-Un nœud peut combiner master et worker :
-
-```java
-StellaFeatures.withMaster();
-StellaFeatures.withWorker();
-StellaFeatures.withRedisMasterPlugin();
-StellaFeatures.withRedisWorkerPlugin();
-```
+| Feature YAML | Composants activés |
+|---|---|
+| `master` | `MasterManager` + `MasterManagerImpl` |
+| `worker` | `WorkersManager` + `WorkersManagerImpl` |
+| `master.redis` | `RedisMasterPlugin` |
+| `worker.redis` | `RedisWorkersPlugin` |
+| `master.rest` | `RestMasterPlugin`, `RestMasterWebService` |
+| `worker.rest` | `RestWorkersPlugin` |
 
 ### Paramètres Worker
 
-- `workTypes` (requis) : au format `Package.WorkEngineImpl^N;Another^M`. N définit le nombre de dispatcher threads par type (ScheduledExecutorService). Parse par `WorkDispatcherConfUtil`.
-- `workersCount` (requis) : taille du pool d'exécution unique `FixedThreadPool` dans `WorkersCoordinator`
-- `pollFrequencyMs` : fréquence de poll, 5000ms par défaut, entre 100ms et 300s
+- `workTypes` (requis) : au format `Package.WorkEngineImpl^N;Another^M`. N définit le nombre de dispatcher threads par type (ScheduledExecutorService).
+- `workersCount` (requis) : taille du pool d'exécution unique
+- `pollFrequencyMs` : fréquence de poll, 5000ms par défaut
 
 ### Paramètres Redis
 
@@ -112,69 +105,19 @@ StellaFeatures.withRedisWorkerPlugin();
 
 - `serverUrl` : requis côté worker, URL du serveur REST
 
-## Transport Redis
-
-### Clés Redis
-
-Les clés utilisent le préfixe `vertigo:work:` :
-
-| Clé | Type | Usage |
-|-----|------|-------|
-| `vertigo:works:todo:{workType}` | List | File FIFO des travaux en attente |
-| `vertigo:works:in progress:{nodeId}{workType}` | List | Travaux en cours par nœud |
-| `vertigo:works:done:{callerNodeId}{workType}` | List | Résultats destinés au caller |
-| `vertigo:work:{workType}:{workId}` | Hash | Données du travail : work, result, error, status |
-| `vertigo:workers:node:{nodeId}` | String (SETEX) | Heartbeat du nœud (TTL = timeoutSeconds) |
-| `vertigo:workers:{workType}` | Set | Workers actifs pour ce workType |
-| `vertigo:works:timeout:{workType}` | String | Timestamp d'un workType déclaré mort |
-
-### Mécanisme
-
-Le worker utilise `SETEX` sur `vertigo:workers:node:{nodeId}` avec un TTL égal à `timeoutSeconds`. Le master détecte les nœuds morts quand la clé expire. Les transactions atomiques (HMSET + LPUSH) garantissent la cohérence. Le hash tag `{workType}` dans les clés Redis permet le routing cluster-safe.
-
 ## Transport REST
 
-### Endpoints
-
-Préfixe : `/backend/workQueue`
-
-| Méthode | Path | Description |
-|---------|------|-------------|
-| GET | `pollWork/{workType}?nodeUID=uid` | Retourne `"[uuid, base64]"` ou bloque |
-| POST | `event/start/{uuid}` | Signale le début du traitement |
-| POST | `event/success/{uuid}` | Retourne le résultat en base64 |
-| POST | `event/failure/{uuid}` | Retourne l'exception en base64 |
-| GET | `version` | Retourne `"1.0.0"` |
-
-### Mécanisme
-
-`RestWorkersPlugin` utilise un client Jersey avec synchronisation par workType. En cas d'erreur de connexion, le worker applique un backoff exponentiel de 2s. `RestQueueServer` maintient une `LinkedBlockingQueue` par workType. Le heartbeat REST via `heartBeat()` n'est pas implémenté (TODO).
+`RestMasterWebService` expose des endpoints sous le préfixe `/backend/workQueue` pour le polling et le signalement des événements de travail.
 
 ## Résilience
 
-### Heartbeat
-
-Chaque worker envoie un heartbeat toutes les 20s :
-- Redis : `SETEX` sur `vertigo:workers:node:{nodeId}`, TTL = `timeoutSeconds`
-- REST : heartbeat non implémenté (TODO dans `RestQueueClient.heartBeat()`). Détection via expiration au polling.
-
-### Détection de nœud mort
-
-`DmnWorkerDeadNodeDetector` (20s) vérifie l'état des nœuds. Lorsqu'un worker est considéré mort, les `WorkItem` en cours sur ce nœud sont remis en file pour retry. La constante `MAX_WORK_RETRY_COUNT = 3` existe mais n'est pas utilisée pour limiter les retries réelles dans `RedisDB.checkDeadNodes()`.
-
 ### workType inactif
 
-Si aucun worker ne traite un `workType`, les `WorkItem` en attente au-delà de `deadWorkTypeTimeoutSeconds` sont abandonnés. Le master lève une exception à la reprise du `.join()` ou via `onDone(null, error)`.
+Si aucun worker ne traite un `workType`, les travaux en attente au-delà de `deadWorkTypeTimeoutSeconds` sont abandonnés. Le master lève une exception à la reprise du `.join()` ou via `onDone(null, error)`.
 
 ## Tracing Analytics
 
-Stella émet des événements via `AnalyticsManager`, catégorie `distributedwork` :
-
-1. **workSubmit** : soumission du travail par le master (tags: workType)
-2. **workerProcess** : traitement par un worker (measures: `workerPendingDuration`, `workerProcessDuration`)
-3. **workResultHandler.onDone** : résultat disponible (measures: success)
-4. **distributedWorkResultWatcher** : polling des résultats (measures: `pollResult`, `missingWorkProcessingInfos`)
-5. **deadNodeDetector** : détection nodes morts (measures: `retriedWorks`, `abandonnedWorkIds`)
+Stella émet des événements via `AnalyticsManager`, catégorie `distributedwork`.
 
 ## Exemples
 
@@ -262,69 +205,131 @@ public void exportBacklogAsync(final ExportCriteria criteria) {
 
 ### 5. Configuration d'un nœud worker (Redis)
 
-```java
-StellaFeatures.withWorker();
-StellaFeatures.withRedisWorkerPlugin();
-```
+La configuration se fait exclusivement via YAML :
 
-Puis configurez :
-- `workTypes` : `"ma.app.task.ProjetStatsWorkEngine^3;ma.app.task.ExportPdfWorkEngine^2"` — 3 threads pour les stats, 2 pour les exports
-- `workersCount` : `5`
-- `pollFrequencyMs` : `5000`
-- `timeoutSeconds` : `60`
+```yaml
+modules:
+    io.vertigo.stella.StellaFeatures:
+        features:
+            - worker:
+                workTypes: "ma.app.task.ProjetStatsWorkEngine^3;ma.app.task.ExportPdfWorkEngine^2"
+                workersCount: 5
+                pollFrequencyMs: 5000
+        featuresConfig:
+            - worker.redis:
+                  connectorName: "main"
+                  timeoutSeconds: 60
+```
 
 La séparation en pools par workType évite qu'un export PDF long bloque le calcul de statistiques.
 
 ### 6. Configuration d'un nœud worker (REST)
 
-```java
-StellaFeatures.withWorker();
-StellaFeatures.withRestWorkerPlugin();
+```yaml
+modules:
+    io.vertigo.stella.StellaFeatures:
+        features:
+            - worker:
+                workTypes: "ma.app.task.ProjetStatsWorkEngine^3;ma.app.task.ExportPdfWorkEngine^2"
+                workersCount: 5
+        featuresConfig:
+            - worker.rest:
+                  serverUrl: "http://stella-server:8080"
 ```
-
-Puis configurez :
-- `workTypes` : `"ma.app.task.ProjetStatsWorkEngine^3;ma.app.task.ExportPdfWorkEngine^2"`
-- `workersCount` : `5`
-- `serverUrl` : `"http://stella-server:8080"`
 
 ### 7. Configuration d'un nœud master + worker (Redis)
 
 Un nœud peut être à la fois émetteur et exécutant :
 
-```java
-StellaFeatures.withMaster();
-StellaFeatures.withWorker();
-StellaFeatures.withRedisMasterPlugin();
-StellaFeatures.withRedisWorkerPlugin();
+```yaml
+modules:
+    io.vertigo.stella.StellaFeatures:
+        features:
+            - master:
+            - worker:
+                workTypes: "ma.app.task.ProjetStatsWorkEngine^3;ma.app.task.ExportPdfWorkEngine^2"
+                workersCount: 5
+        featuresConfig:
+            - master.redis:
+                  connectorName: "main"
+                  deadWorkTypeTimeoutSeconds: 60
+            - worker.redis:
+                  connectorName: "main"
+                  timeoutSeconds: 60
 ```
-
-Puis configurez :
-- `deadWorkTypeTimeoutSeconds` : `60`
-- `workTypes` : `"ma.app.task.ProjetStatsWorkEngine^3;ma.app.task.ExportPdfWorkEngine^2"`
-- `workersCount` : `5`
-- `connectorName` : `"main"`
 
 ### 8. Configuration master seul
 
-```java
-StellaFeatures.withMaster();
-```
-
-`MasterManager` seul nécessite un plugin de transport (Redis ou REST). Il n'existe **pas** d'exécution locale sans plugin : `MasterManagerImpl` exige un `MasterPlugin` injecté. Utile quand le master délègue à d'autres nodes worker, sans faire tourner de workers locaux.
+`MasterManager` seul nécessite un plugin de transport (Redis ou REST). Il n'existe **pas** d'exécution locale sans plugin : `MasterManagerImpl` exige un `MasterPlugin` injecté. Utile quand le master délègue à d'autres nœuds workers, sans faire tourner de workers locaux.
 
 ## Dépendances
 
 - **Obligatoire** : `vertigo-datamodel`
-- **Optionnel Redis** : `vertigo-redis-connector`, `jedis`
-- **Optionnel REST** : `vertigo-vega` (annotations JAX-RS), `jersey-client`
+- **Optionnel Redis** : `vertigo-redis-connector`
+- **Optionnel REST** : `vertigo-vega`
 
 ## Vigilance
 
 - `WorkEngine` n'est pas thread-safe. Une instance est créée par appel via l'injection de dépendances. Ne pas partager d'état mutable entre les appels.
-- Le heartbeat REST `heartBeat()` n'est pas implémenté (TODO). Privilégier Redis dans les déploiements exigeant une détection de défaillance fiable.
 - `WorkPromise.join()` bloque le thread appelant. Utiliser `schedule()` avec `WorkResultHandler` pour les appels non bloquants.
 - En cas d'erreur durant le traitement, `WrappedException` est levée par `join()`. Le handler `onDone()` reçoit l'erreur en second paramètre.
 
 ## Références
 
 - [vertigo-stella](https://github.com/vertigo-io/vertigo-libs/tree/master/vertigo-stella) sur GitHub
+
+## Pour les experts
+
+### Managers
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `MasterManager` | Soumission de tâches (synchrone/asynchrone) vers les workers | `master` |
+| `WorkersManager` | Exécution des tâches reçues du master | `worker` |
+
+### Composants internes
+| Composant | Rôle |
+|---|---|
+| `WorkEngine<W,R>` | Interface contractuelle implémentée par le développeur |
+| `WorkPromise<R>` | Future bloquante (`join()`) pour l'appel synchrone |
+| `WorkResultHandler<R>` | Callback asynchrone (`onStart`, `onDone`) |
+| `Coordinator` | Interface de coordination des travaux entre master et workers |
+| `WorkListener` | Interfaces d'écoute des événements de travail |
+
+### Features (@Feature)
+| Flag | Composants |
+|---|---|
+| `master` | `MasterManager` + `MasterManagerImpl` |
+| `master.redis` | `RedisMasterPlugin` |
+| `master.rest` | `RestMasterPlugin`, `RestMasterWebService` |
+| `worker` | `WorkersManager` + `WorkersManagerImpl` |
+| `worker.redis` | `RedisWorkersPlugin` |
+| `worker.rest` | `RestWorkersPlugin` |
+
+### Plugins
+| Plugin | Rôle | Feature |
+|---|---|---|
+| `RedisMasterPlugin` | Coordination master via Redis (pair-à-pair) | `master.redis` |
+| `RestMasterPlugin` | Coordination master via serveur REST centralisé | `master.rest` |
+| `RestMasterWebService` | Endpoints REST du serveur (`/backend/workQueue`) | `master.rest` |
+| `RedisWorkersPlugin` | Workers connectés via Redis (pair-à-pair) | `worker.redis` |
+| `RestWorkersPlugin` | Workers connectés via client REST | `worker.rest` |
+
+### Configuration YAML
+```yaml
+modules:
+    io.vertigo.stella.StellaFeatures:
+        features:
+            - master:
+            - worker:
+        featuresConfig:
+            - master.redis:
+                  connectorName: "main"
+                  deadWorkTypeTimeoutSeconds: 60
+            - worker.redis:
+                  connectorName: "main"
+                  timeoutSeconds: 60
+            - worker:
+                  workTypes: "ma.app.task.ProjetStatsWorkEngine^3;ma.app.task.ExportPdfWorkEngine^2"
+                  workersCount: 5
+                  pollFrequencyMs: 5000
+```

@@ -21,7 +21,7 @@ Le module **Account** est nécessaire pour utiliser ce module.
 Voici une configuration typique d'une application utilisant le module Social
 
 ```yaml
-modules
+modules:
   io.vertigo.connectors.mail.MailFeatures:
     features:
       - javax.native:
@@ -149,4 +149,81 @@ final Set<UID<Account>> accountUIDs = personServices.getPersons(DtListState.of(n
   .map((person) -> UID.of(Account.class, String.valueOf(person.getPersonId())))
   .collect(Collectors.toSet());
 notificationManager.send(notification, accountUIDs);
+```
+
+## Pour les experts
+
+### Managers
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `NotificationManager` | Envoi et lecture de notifications utilisateur | `notifications` |
+| `CommentManager` | Gestion des espaces de commentaires | `comments` |
+| `HandleManager` | Association de handles significatifs aux entités | `handles` |
+| `MailManager` | Envoi d'emails | `mail` |
+| `SmsManager` | Envoi de SMS | `sms` |
+
+### Features (@Feature)
+| Flag | Composants |
+|---|---|
+| `notifications` | `NotificationManager` + `NotificationManagerImpl` |
+| `notifications.redis` | `RedisNotificationPlugin` |
+| `notifications.memory` | `MemoryNotificationPlugin` |
+| `comments` | `CommentManager` + `CommentManagerImpl` |
+| `comments.redis` | `RedisCommentPlugin` |
+| `comments.memory` | `MemoryCommentPlugin` |
+| `handles` | `HandleManager` + `HandleManagerImpl` |
+| `handles.redis` | `RedisHandlePlugin` |
+| `handles.memory` | `MemoryHandlePlugin` |
+| `mail` | `MailManager` + `MailManagerImpl` |
+| `mail.javax` | `JavaxMailPlugin` |
+| `sms` | `SmsManager` + `SmsManagerImpl` |
+| `sms.ovh` | `OvhSmsSendPlugin` + `OvhSmsWebServiceClient` |
+| `sms.linkmobility` | `LinkMobilitySmsSendPlugin` + `LinkMobilitySmsWebServiceClient` |
+| `webapi` | `AccountWebServices`, `NotificationWebServices`, `CommentWebServices`, `HandleWebServices` |
+
+### Plugins
+| Plugin | Rôle | Feature |
+|---|---|---|
+| `RedisNotificationPlugin` | Stockage des notifications dans Redis | `notifications.redis` |
+| `MemoryNotificationPlugin` | Stockage des notifications en mémoire | `notifications.memory` |
+| `RedisCommentPlugin` | Stockage des commentaires dans Redis | `comments.redis` |
+| `MemoryCommentPlugin` | Stockage des commentaires en mémoire | `comments.memory` |
+| `RedisHandlePlugin` | Stockage des handles dans Redis | `handles.redis` |
+| `MemoryHandlePlugin` | Stockage des handles en mémoire | `handles.memory` |
+| `JavaxMailPlugin` | Envoi de mail via API Javax.mail | `mail.javax` |
+| `OvhSmsSendPlugin` | Envoi de SMS via l'API OVH | `sms.ovh` |
+| `LinkMobilitySmsSendPlugin` | Envoi de SMS via l'API LinkMobility | `sms.linkmobility` |
+
+### Configuration YAML
+```yaml
+modules:
+    io.vertigo.social.SocialFeatures:
+        features:
+            - notifications:
+            - comments:
+            - handles:
+            - mail:
+            - sms:
+            - webapi:
+        featuresConfig:
+            - notifications.redis:
+                  connectorName: "main"
+            - comments.redis:
+                  connectorName: "main"
+            - handles.redis:
+                  connectorName: "main"
+            - mail.javax:
+                  connectorName: "default"
+                  developmentMode: true
+                  developmentMailTo: "team@vertigo.io"
+                  charset: "UTF-8"
+            - sms.ovh:
+                  ovhAppKey: "..."
+                  ovhAppSecret: "..."
+                  ovhConsumerKey: "..."
+                  smsSender: "MonApp"
+            - sms.linkmobility:
+                  smsLogin: "..."
+                  smsPassword: "..."
+                  smsSender: "MonApp"
 ```

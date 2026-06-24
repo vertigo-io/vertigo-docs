@@ -138,5 +138,89 @@ Le principe général, c'est qu'une définition de processus Orchestra est lié 
 Par défaut, la définition est conservée en base de données. Lorsqu'il est nécessaire de mettre à jour une nouvelle version du processus, on doit inclure dans la précedure d edéploiement une mise à jour de la définition dans la base de données
 avec needUpdate=true (en général, cela est réalisé par un script liquibase). Avec ce paramètre, au démarrage le système mettra à jour la définition dans la base à partir de la définition dans le code.
 
-Pour une modification du paramétrage du déclenchement, ce n'est pas directement dans la définition mais dans la "ProcessTriggeringStrategy". 
+Pour une modification du paramétrage du déclenchement, ce n'est pas directement dans la définition mais dans la "ProcessTriggeringStrategy".
 Ces infos sont modifiables avec l'api (updateProcessProperties), et certaines IHM proposent de modifier le cron directement par l'ihm (il n'y a pas d'IHM officielles pour le moment, elles sont construites dans les projets)
+
+## Pour les experts
+
+### Managers
+
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `ONodeManager` | Gestion des nœuds Orchestra (détection nœuds morts, charge) | `orchestra.database` |
+| `OrchestraDefinitionManager` | Gestion des définitions de processus | Toujours actif (`buildFeatures`) |
+| `OrchestraServices` | Services principaux : exécution, planification, reporting, logging | Toujours actif (`buildFeatures`) |
+
+### Services
+
+| Service | Interface | Description |
+|---|---|---|
+| `ProcessExecutor` (`ProcessExecutorImpl`) | `ProcessExecutor` | Exécution des processus (séquentielle, workspace partagé) |
+| `ProcessScheduler` (`ProcessSchedulerImpl`) | `ProcessScheduler` | Planification Cron et exécutions ponctuelles |
+| `ProcessReport` | `ProcessReport` | Rapports d'exécution (historique, statistiques) |
+| `ProcessLogger` | `ProcessLogger` | Journalisation des exécutions et activités |
+
+### Plugins
+
+| Plugin Interface | Implémentations | Activé par |
+|---|---|---|
+| `ProcessDefinitionStorePlugin` | `DbProcessDefinitionStorePlugin`, `MemoryProcessDefinitionStorePlugin` | `orchestra.database` / `orchestra.memory` |
+| `ProcessExecutorPlugin` | `DbProcessExecutorPlugin`, `MemoryProcessExecutorPlugin` | `orchestra.database` / `orchestra.memory` |
+| `ProcessSchedulerPlugin` | `DbProcessSchedulerPlugin`, `MemoryProcessSchedulerPlugin` | `orchestra.database` / `orchestra.memory` |
+| `ProcessReportPlugin` | `DbProcessReportPlugin` | `orchestra.database` |
+| `ProcessLoggerPlugin` | `DbProcessLoggerPlugin` | `orchestra.database` |
+
+### Scheduler Internals
+
+| Classe | Rôle |
+|---|---|
+| `CronExpression` | Parsing et évaluation d'expressions Cron |
+| `BasicTimerTask` | Tâche timer basique pour planification |
+| `ReschedulerTimerTask` | Tâche timer avec re-planification automatique |
+
+### WebServices API (REST)
+
+| WebService | Description |
+|---|---|
+| `WsDefinition` | CRUD des définitions de processus |
+| `WsExecution` | Lancement et suivi des exécutions |
+| `WsExecutionControl` | Contrôle des exécutions (stop, restart) |
+| `WsInfos` | Informations de supervision / monitoring |
+
+### Modèle Domain (DtObjects)
+
+| DtObject | Description |
+|---|---|
+| `OProcess` | Définition du processus |
+| `OActivity` | Définition d'une activité |
+| `OProcessExecution` | Instance d'exécution de processus |
+| `OActivityExecution` | Instance d'exécution d'activité |
+| `OActivityLog` | Log d'activité |
+| `OActivityWorkspace` | Espace de travail partagé entre activités |
+| `ONode` | Nœud Orchestra |
+| `OProcessPlanification` | Planification de processus |
+| `OExecutionState` | État d'exécution |
+| `OSchedulerState` | État du scheduler |
+| `OProcessType` | Type de processus (SUPERVISED, UNSUPERVISED) |
+| `OUser` | Utilisateur Orchestra |
+
+### Features (@Feature)
+
+| Flag | Paramètres | Composants ajoutés |
+|---|---|---|
+| `orchestra.database` | `nodeName`, `daemonPeriodSeconds`, `workersCount`, `forecastDurationSeconds` | ONodeManager, 8 DAOs, 6 PAOs, 5 plugins DB, ModelDefinitionProvider |
+| `orchestra.memory` | `workersCount` | 3 plugins mémoire (store, scheduler, executor) |
+| `orchestra.webapi` | — | WsDefinition, WsExecution, WsExecutionControl, WsInfos |
+
+### Configuration YAML
+
+```yaml
+io.vertigo.orchestra.OrchestraFeatures:
+    featuresConfig:
+        - orchestra.database:
+            nodeName: NODE_ID
+            daemonPeriodSeconds: 30
+            workersCount: 10
+            forecastDurationSeconds: 60
+        - orchestra.webapi:
+```

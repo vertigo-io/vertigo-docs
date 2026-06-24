@@ -525,3 +525,153 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
 - `v-scroll-spy`
 - `v-json-editor`
 - `v-chatbot`
+
+## Pour les experts
+
+### Managers & Configuration
+
+Le module vertigo-ui ne dispose pas de `XxxFeatures.java` dédié. Les composants UI sont injectés automatiquement via `DefaultUiModuleFeatures.addUi()` qui ajoute `VSpringMvcConfigDefinitionProvider` avec les paramètres `name`, `packages` et `componentDirs`.
+
+### ViewContext
+
+`ViewContext` est l'objet central de la couche UI, représentant le contexte d'une page. Il permet de publier et lire des objets, listes et primitives entre le contrôleur et la vue.
+
+| Méthode | Description |
+|---|---|
+| `publishDto` | Publie un objet formulaire (DtObject) dans le contexte |
+| `readDto` | Lit et valide l'objet formulaire (lance `ExpiredViewContextException` en cas d'erreur) |
+| `publishDtList` | Publie une liste (DtList) dans le contexte |
+| `publishDtListModifiable` | Publie une liste modifiable |
+| `publishMdl` | Publie une liste de référence (Master Data List) |
+| `publishFacetedQueryResult` | Publie le résultat d'une recherche à facettes |
+| `getUiObject` / `getUiList` | Récupère les données telles que reçues depuis l'IHM |
+| `ViewContextMap` | Map typée pour accéder aux éléments du contexte via `ViewContextKey` |
+| `ViewContextUpdateSecurity` | Contrôle la sécurité des mises à jour du contexte |
+
+### Spring MVC
+
+| Composant | Description |
+|---|---|
+| `VSpringWebConfig` | Configuration Spring MVC de base |
+| `VSpringMvcConfigDefinition` | Définition de la configuration MVC |
+| `AbstractVSpringMvcController` | Controller parent à étendre |
+| `VSpringMvcControllerAdvice` | Gestion globale des exceptions et données partagées |
+| `VSpringMvcExceptionHandler` | Gestionnaire d'exceptions centralisé |
+| `VSpringMvcUiMessageStack` | Pile de messages UI pour le rendrement des erreurs |
+| `VRequestToViewNameTranslator` | Traduction des requests vers les noms de vues |
+| `VertigoLocaleResolver` | Résolution de la locale par utilisateur |
+
+#### Argument Resolvers
+
+| Resolver | Type Supporté |
+|---|---|
+| `ViewContextReturnValueAndArgumentResolver` | `ViewContext` (lecture et retour) |
+| `ViewAttributeMethodArgumentResolver` | Objets annotés `@ViewAttribute` |
+| `UiMessageStackMethodArgumentResolver` | `UiMessageStack` |
+| `UserSessionMethodArgumentResolver` | Session utilisateur |
+| `DtListStateMethodArgumentResolver` | `DtListState` (tri, pagination) |
+| `VFileMethodArgumentResolver` | `VFile` (avec `@QueryParam`) |
+| `FileInfoURIConverter` | `FileInfoURI` (conversion URI protégée) |
+| `VegaJsonHttpMessageConverter` | Conversion JSON Vega |
+
+#### Return Value Handlers
+
+| Handler | Type Retour |
+|---|---|
+| `VFileReturnValueHandler` | `VFile` |
+| `UiFileInfoReturnValueHandler` | `UiFileInfo` |
+| `FileInfoURIConverterValueHandler` | `FileInfoURI` |
+
+#### Interceptors
+
+| Interceptor | Priorité | Description |
+|---|---|---|
+| `VSpringMvcAuthorizationInterceptor` | — | Vérification `@Secured` sur les contrôleurs |
+| `VSpringMvcViewContextInterceptor` | — | Initialisation du ViewContext |
+| `VSpringMvcErrorInterceptor` | — | Interception et rendu des erreurs |
+| `RateLimitingHandlerInterceptor` | — | Rate limiting sur les requêtes MVC |
+| `VAnnotationHandlerInterceptorImpl` | — | Interception basée sur `@VControllerInterceptor` |
+| `VControllerInterceptorEngine` | — | Moteur d'exécution des intercepteurs |
+
+### Thymeleaf
+
+| Composant | Description |
+|---|---|
+| `VUiStandardDialect` | Dialecte Thymeleaf personnalisé (`vu:`) |
+| `VuiResourceTemplateResolver` | Résolution de templates depuis classpath/webapp |
+| `VSpringTemplateEngine` | Moteur de template Spring-thymeleaf configuré |
+
+#### Composants `vu:` (dialecte Thymeleaf)
+
+| Composant | Classe |
+|---|---|
+| `vu:named` | `NamedComponentDefinition`, `NamedComponentParser`, `NamedComponentElementProcessor` |
+| `vu:content` | `ContentComponentProcessor` |
+| `vu:content-item` | `ContentItemComponentProcessor` |
+| `vu:content-slot` | `ContentSlotComponentProcessor` |
+| `vu:slot` | `SlotComponentProcessor`, `SlotAttributeTagProcessor` |
+| `vu:authz` | `AuthzAttributeTagProcessor` |
+| `vu:once` | `OnceAttributeTagProcessor` |
+| `vu:text` | `VuiTextTagProcessor` |
+| Utilitaires | `FragmentUtil`, `ResourcePathFinder` |
+
+### UI Data Wrappers
+
+| Classe | Description |
+|---|---|
+| `UiListUnmodifiable` | Liste en lecture seule |
+| `BasicUiListModifiable` | Liste modifiable coté client |
+| `UiMdList` | Liste de Master Data (référence) |
+| `MapUiObject` | Objet UI sous forme de Map |
+| `UiFileInfo` / `UiFileInfoList` | Informations fichier sécurisées |
+| `ClusterUiList` | Liste pour l'affichage cluster |
+| `UiSelectedFacetValues` | Facettes sélectionnées dans une recherche |
+| `ComponentRef` / `ComponentStates` | Référence et état des composants Vue |
+| `FormMode` | Mode de formulaire (edit/read) |
+| `AjaxResponseBuilder` | Construction de réponses AJAX |
+| `ProtectedValueUtil` / `FileInfoURIAdapter` | Encodage de valeurs protégées |
+
+### Quasar Tree
+
+| Classe | Description |
+|---|---|
+| `Tree` | Représentation d'un arbre |
+| `TreeNode` / `TreeNodeData` | Nœud de l'arbre |
+| `TreeBuilder` | Construction fluide d'arbres |
+| `LevelContext` / `ListContext` | Contexte de rendu par niveau |
+
+### Jetty Boot
+
+| Classe | Description |
+|---|---|
+| `JettyBoot` | Démarrage du serveur Jetty embarqué |
+| `JettyBootParams` | Paramètres de configuration de Jetty |
+| `JettyBootParamsBuilder` | Construction des paramètres |
+| `KVSessionDataStoreFactory` | Fabricant de store de sessions Jetty |
+| `KVSessionDataStore` | Stockage des sessions Jetty via KVStore |
+
+### Vue.js SSR
+
+| Classe | Description |
+|---|---|
+| `VuejsSsrFilter` | Filter Servlet pour le Server-Side Rendering Vue.js |
+| `VuejsSsrServletResponseWrapper` | Wrapper de la réponse HTTP SSR |
+| `VuejsSsrResponseStream` | Stream de sortie du rendu SSR |
+| `UnAutoCloseTagsFilter` | Filter pour corriger les tags ouverts en double |
+
+### Exceptions
+
+| Exception | Description |
+|---|---|
+| `ExpiredViewContextException` | Lancée quand le ViewContext est expiré |
+
+### Configuration YAML
+
+```yaml
+io.vertigo.ui.DefaultUiModuleFeatures:
+    buildFeatures:
+        - addUi:
+            name: "my-ui"
+            packages: "io.myapp.controllers"
+            componentDirs: "/io/vertigo/ui/components"
+```

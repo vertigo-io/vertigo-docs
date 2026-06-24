@@ -21,10 +21,10 @@ Supporte une charge de consultation très importante, et une contention sur les 
 Utilisé sur un site avec une très forte affluence. Certains agendas disposent de peu de créneaux disponibles, lesquels sont réservés en quelques minutes.
 
 
-# Installation module planning
+## Installation module planning
 
-## Ajout du module dans le pom
-```yaml
+### Ajout du module dans le pom
+```xml
 <dependency>
    <groupId>io.vertigo</groupId>
    <artifactId>vertigo-planning</artifactId>
@@ -187,7 +187,6 @@ Vous pouvez compléter le context pour les autres éléments de votre page, et a
 ## Contenu 
  
 ### Modèle de données
-**TODO** lien vertigo-docs : https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/javagen/mermaid/mermaid-io-vertigo-planning.html
 
 ### Sql
  - planning_create_init_4.3.0.sql : pour la création de la base de données initiale
@@ -224,14 +223,107 @@ une autre peut-être utilisé par vos services métiers.
 https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/java/io/vertigo/planning/agenda/services/PlanningServices.java
 
 Les seuils utilisés lors des controles de validité sont paramétrable via `AgendaFeature -services.config` :
-- `createMinDureePlageMinute` : la durée minimale d'une plage horaire en minutes (60 minutes par défaut)
-- `createMaxDureePlageHeure` : la durée maximale d'une plage horaire en heures (10 heures par défaut)
-- `createPlageHeureMin` : l'heure de début minimale d'une plage horaire en minutes depuis le début de la journée (7:30 par défaut)
-- `createPlageHeureMax` : l'heure de fin maximale d'une plage horaire en minutes depuis le début de la journée (21:00 par défaut)
-- `createMaxNbGuichet` : le nombre maximal de guichets pour une plage horaire (9 par défaut)
-- `createMaxDaysFromNow` : le nombre maximal de jours à l'avance pour créer une plage horaire (365 jours par défaut)
-- `publishMaxDaysFromNow` : le nombre maximal de jours à l'avance pour publier une plage horaire (365 jours par défaut)
-- `publishMaxDaysPeriode` : le nombre maximal de jours publiés à la fois (2 mois par défaut)
-- `publishNowDelaySecond` : le délai avant la publication effective (60 secondes par défaut)
-- `duplicateMaxDaysPeriode` : le nombre maximal de jours à dupliquer (3 mois par défaut)
-- `duplicateMaxDaysFromNow` : le nombre maximal de jours à l'avance pour dupliquer (365 jours par défaut)
+- `createMinDureePlageMinute` : la durée minimale d'une plage horaire en minutes (60 min)
+- `createMaxDureePlageHeure` : la durée maximale d'une plage horaire en heures (10 h)
+- `createPlageHeureMin` : heure de début minimale en minutes depuis minuit (450 = 7:30)
+- `createPlageHeureMax` : heure de fin maximale en minutes depuis minuit (1260 = 21:00)
+- `createMaxNbGuichet` : nombre maximal de guichets pour une plage horaire (9)
+- `createMaxDaysFromNow` : jours maximum à l'avance pour créer (365)
+- `publishMaxDaysFromNow` : jours maximum à l'avance pour publier (365)
+- `publishMaxDaysPeriode` : jours maximum publiés à la fois (60)
+- `publishNowDelaySecond` : délai avant publication effective (60 s)
+- `duplicateMaxDaysPeriode` : jours maximum à dupliquer (90)
+- `duplicateMaxDaysFromNow` : jours maximum à l'avance pour dupliquer (365)
+
+## Pour les experts
+
+### Services
+
+| Service | Rôle |
+|---|---|
+| `PlanningServices` | Services BackOffice : CRUD agenda, plages, tranches, réservations |
+| `FoPlanningServices` | Services FrontOffice : consultation des créneaux disponibles |
+| `PlanningServicesConfig` | Configuration des seuils (11 paramètres)` |
+
+### Plugins FO (consultation créneaux)
+
+| Plugin | Activé par | Description |
+|---|---|---|
+| `DbFoConsultationPlanningPlugin` | `foConsultation.db` | Consultation directe depuis la base |
+| `RedisFoConsultationPlanningPlugin` | `foConsultation.redis` | Consultation depuis Redis (v1) |
+| `Redis2FoConsultationPlanningPlugin` | `foConsultation.redis2` | Consultation depuis Redis (v2) |
+| `RedisUnifiedFoConsultationPlanningPlugin` | `foConsultation.redis2Unified` | Consultation Redis unifiée (cluster + synchro distribuée) |
+
+### Helpers de synchronisation DB↔Redis
+
+| Classe | Rôle |
+|---|---|
+| `SynchroDbRedisCreneauHelper` | Synchronisation des créneaux entre DB et Redis |
+| `WorkEngineSynchroDbRedisCreneau` | WorkEngine Stella pour la synchro distribuée |
+
+### Contrôleurs
+
+| Classe | Rôle |
+|---|---|
+| `AbstractAgendaController` | Controller parent avec initialisation du contexte et actions standards |
+| `AgendaControllerHelper` | Utilitaires pour les contrôleurs d'agenda |
+
+### DAOs
+
+| DAO | Objet persisté |
+|---|---|
+| `AgendaDAO` | `Agenda` |
+| `PlageHoraireDAO` | `PlageHoraire` |
+| `TrancheHoraireDAO` | `TrancheHoraire` |
+| `CreneauDAO` | `Creneau` |
+| `ReservationCreneauDAO` | `ReservationCreneau` |
+
+### Modèle Domain (DtObjects)
+
+| DtObject | Description |
+|---|---|
+| `Agenda` | Calendrier nommé (ex: "Consultations") |
+| `PlageHoraire` | Fenêtre temporelle sur une date (ex: 9h-12h le 01/07) |
+| `TrancheHoraire` | Creneau horaire dans une plage (ex: 9h00-9h30) |
+| `Creneau` | Resource reservable dans une tranche (guichet N°) |
+| `ReservationCreneau` | Reservation effectuee par un utilisateur |
+
+### Events
+
+| Event | Types |
+|---|---|
+| `TrancheHoraireEvent` | SUPPRIME, CONSOMME, LIBERE |
+
+### Formatters
+
+| Formatter | Usage |
+|---|---|
+| `FormatterMinutes` | Formatage des minutes-depuis-minuit en temps lisible (HH:mm) |
+
+### Jobs Orchestra
+
+| Job | Description |
+|---|---|
+| `PurgeAgendaActivity` | Purge des agendas expires (extends `AbstractActivityEngine`) |
+
+### Features (@Feature)
+
+| Flag | Paramètres | Composants |
+|---|---|---|
+| `foConsultation.db` | params… | `DbFoConsultationPlanningPlugin` |
+| `foConsultation.redis` | params… | `RedisFoConsultationPlanningPlugin` |
+| `foConsultation.redis2` | params… | `Redis2FoConsultationPlanningPlugin` |
+| `foConsultation.redis2Unified` | params… | `RedisUnifiedFoConsultationPlanningPlugin` |
+| `services.config` | 11 params (seuils de validation) | `PlanningServicesConfig` |
+
+### Configuration YAML
+
+```yaml
+io.vertigo.planning.PlanningFeatures:
+io.vertigo.planning.agenda.AgendaFeatures:
+    featuresConfig:
+        - services.config:
+        - foConsultation.redis2Unified:
+            __flags__: ["redis && redisCluster"]
+            distributedSynchro: true
+```

@@ -440,3 +440,39 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 - **LoadData du SearchLoader** : `loadData(SearchChunk<K>)` retourne `List<SearchIndex<K, I>>`, pas `void`. Ne pas utiliser `SearchChunk<String>`.
 - **ListFilterBuilder** : pas de méthode statique `.build()`. Utiliser le pattern de builder instance : `withListFilterQuery()` → `withCriteria()` → `build()`.
 - **ESDocumentCodec** : les documents ElasticSearch sont sérialisés en base64 compressé. Cela impacte la lisibilité directe des documents dans l'interface ES mais optimise le transfert réseau.
+
+## Pour les experts
+
+### Managers
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `CollectionsManager` | Facettage pur-Java + filtrage Lucene in-RAM | Toujours actif (buildFeatures) |
+| `SearchManager` | Reindexation (3 stratégies), requêtes ElasticSearch, opérations sur les metadata | `search` |
+
+### Features (@Feature)
+| Flag | Composants |
+|---|---|
+| `search` | `SearchManager` + `SearchManagerImpl` |
+| `search.elasticsearch.client` | `ClientESSearchServicesPlugin` (Transport legacy) |
+| `search.elasticsearch.restHL` | `RestHLClientESSearchServicesPlugin` (RestHighLevelClient 7.17.x) |
+| `collections.luceneIndex` | `LuceneIndexPlugin` |
+
+### Plugins
+| Plugin | Rôle | Feature |
+|---|---|---|
+| `LuceneIndexPlugin` | Index Lucene en RAM pour le facettage in-mémoire | `collections.luceneIndex` |
+| `ClientESSearchServicesPlugin` | Client Transport legacy ElasticSearch | `search.elasticsearch.client` |
+| `RestHLClientESSearchServicesPlugin` | Client REST High Level ElasticSearch 7.17.x | `search.elasticsearch.restHL` |
+
+### Configuration YAML
+```yaml
+modules:
+    io.vertigo.datafactory.DataFactoryFeatures:
+        features:
+            - search:
+            - collections.luceneIndex:
+        featuresConfig:
+            - search.elasticsearch.restHL:
+                  envIndexPrefix: "prod_"
+                  connectorName: "main"
+```

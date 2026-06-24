@@ -237,3 +237,47 @@ Dépendances optionnelles :
     <artifactId>vertigo-geo</artifactId>
 </dependency>
 ```
+
+## Pour les experts
+
+### Managers
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `GeoCoderManager` | Conversion adresse textuelle → coordonnées GPS, calcul de distance (Haversine) | `geocoding` |
+| `GeoSearchManager` | Recherche d'objets métier dans un bounding box géographique via Elasticsearch | `geosearch` |
+
+### Features (@Feature)
+| Flag | Composants |
+|---|---|
+| `geocoding` | `GeoCoderManager` + `GeoCoderManagerImpl` |
+| `geocoding.google` | `GoogleGeoCoderPlugin` |
+| `geocoding.ban` | `BanGeoCoderPlugin` (Base Adresse Nationale) |
+| `geosearch` | `GeoSearchManager` + `GeoSearchManagerImpl` |
+| `geosearch.es` | `ESGeoSearchPlugin` (+`Activeable`) |
+
+### Plugins
+| Plugin | Rôle | Feature |
+|---|---|---|
+| `GoogleGeoCoderPlugin` | Géocodage via API Google (XML DOM/XPath) | `geocoding.google` |
+| `BanGeoCoderPlugin` | Géocodage via API BAN api-adresse.data.gouv.fr (Gson) | `geocoding.ban` |
+| `ESGeoSearchPlugin` | Recherche géospatiale via Elasticsearch REST HL (GeoBoundingBoxQueryBuilder) | `geosearch.es` |
+
+### Configuration YAML
+```yaml
+modules:
+    io.vertigo.geo.GeoFeatures:
+        features:
+            - geocoding:
+            - geosearch:
+        featuresConfig:
+            - geocoding.ban:
+                  proxyHost: "proxy.example.com"
+                  proxyPort: 8080
+            - geocoding.google:
+                  proxyHost: "proxy.example.com"
+                  proxyPort: 8080
+            - geosearch.es:
+                  envIndexPrefix: "prod_"
+                  connectorName: "main"
+```
+```

@@ -28,30 +28,32 @@ Le module s'intègre dans une application de Gestion de Projet, où la traçabil
 | vertigo-datastore | Optionnelle | Requise par StoreTraceStorePlugin |
 | web3j | Optionnelle (4.13.0) | Requise par EthereumLedgerPlugin |
 
-## Activation — AuditFeatures
+## Activation
 
-Le module utilise `AuditFeatures.builder()` pour activer les fonctionnalités. L'API DSL exacte :
+Le module s'active exclusivement via les annotations `@Feature` dans la configuration YAML de `AuditFeatures`. Aucune méthode Java DSL n'est disponible.
 
-| Méthode | Effet |
+| Feature YAML | Composants activés |
 |---|---|
-| `.withTrace()` | Active TraceManager, SmartTypes et DtDefinitions associés |
-| `.withMemoryTrace()` | Ajoute MemoryTraceStorePlugin |
-| `.withStoreTrace()` | Ajoute StoreTraceStorePlugin |
-| `.withLogTrace()` | Ajoute LogTraceStorePlugin |
-| `.withLedger()` | Active LedgerManager (vides, sans plugin) |
-| `.withEthereumBlockChain(...)` | Ajoute EthereumLedgerPlugin avec ses paramètres |
-| `.withFakeBlockChain()` | Ajoute FakeLedgerPlugin |
+| `trace` | `TraceManager`, `TraceManagerImpl`, définitions DT/SmartTypes |
+| `trace.memory` | `MemoryTraceStorePlugin` |
+| `trace.store` | `StoreTraceStorePlugin` |
+| `trace.log` | `LogTraceStorePlugin` |
+| `ledger` | `LedgerManager` + `LedgerManagerImpl` |
+| `ledger.ethereum` | `EthereumLedgerPlugin` (+`Activeable`) |
+| `ledger.fake` | `FakeLedgerPlugin` |
 
-Exemple d'activation combinée :
+Exemple YAML :
 
-```java
-AuditFeatures.builder()
-    .withTrace()
-    .withStoreTrace()
-    .withLogTrace()
-    .withLedger()
-    .withFakeBlockChain()
-    .build();
+```yaml
+modules:
+    io.vertigo.audit.AuditFeatures:
+        features:
+            - trace:
+            - ledger:
+        featuresConfig:
+            - trace.store:
+            - trace.log:
+            - ledger.fake:
 ```
 
 ---
@@ -312,33 +314,85 @@ public void onLedgerTransaction(final LedgerTransactionEvent event) {
 
 Scénario production : traces persistantes en base + archivage log + ledger Ethereum.
 
-```java
-AuditFeatures.builder()
-    .withTrace()
-    .withStoreTrace()
-    .withLogTrace()
-    .withLedger()
-    .withEthereumBlockChain(
-        "http://eth-node:8545",
-        "gestion-projet",
-        "0xAbC123...",
-        "archive",
-        "0xDeF456...",
-        walletPassword,
-        walletPath
-    )
-    .build();
+```yaml
+modules:
+    io.vertigo.audit.AuditFeatures:
+        features:
+            - trace:
+            - ledger:
+        featuresConfig:
+            - trace.store:
+            - trace.log:
+            - ledger.ethereum:
+                  ethereumRPCUrl: "http://eth-node:8545"
+                  contractName: "gestion-projet"
+                  contractAddress: "0xAbC123..."
+                  ledgerName: "archive"
+                  walletAddress: "0xDeF456..."
+                  walletPassword: "secret"
+                  walletPath: "/wallet/gestion-projet.p12"
 ```
 
-Ce scénario trace chaque action sur les projets dans la base de données, archive un journal log parallèle, et ancre les événements critiques (création, modification de statut, clôture) sur la blockchain Ethereum.
+Ce scénario trace chaque action dans la base de données, archive un journal log parallèle, et ancre les événements critiques sur la blockchain Ethereum.
 
 Scénario développement : traces mémoire + ledger simulé.
 
-```java
-AuditFeatures.builder()
-    .withTrace()
-    .withMemoryTrace()
-    .withLedger()
-    .withFakeBlockChain()
-    .build();
+```yaml
+modules:
+    io.vertigo.audit.AuditFeatures:
+        features:
+            - trace:
+            - ledger:
+        featuresConfig:
+            - trace.memory:
+            - ledger.fake:
+```
+
+## Pour les experts
+
+### Managers
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `TraceManager` | Écriture et lecture de traces d'audit (audit trail) | `trace` |
+| `LedgerManager` | Ancrage de données sur blockchain Ethereum (ou simulation) | `ledger` |
+
+### Features (@Feature)
+| Flag | Composants |
+|---|---|
+| `trace` | `TraceManager`, `TraceManagerImpl`, définitions DT/SmartTypes |
+| `trace.memory` | `MemoryTraceStorePlugin` |
+| `trace.store` | `StoreTraceStorePlugin` |
+| `trace.log` | `LogTraceStorePlugin` |
+| `ledger` | `LedgerManager` + `LedgerManagerImpl` |
+| `ledger.ethereum` | `EthereumLedgerPlugin` (+`Activeable`) |
+| `ledger.fake` | `FakeLedgerPlugin` |
+
+### Plugins
+| Plugin | Rôle | Feature |
+|---|---|---|
+| `MemoryTraceStorePlugin` | Stockage des traces en mémoire (dev/tests) | `trace.memory` |
+| `StoreTraceStorePlugin` | Persistance transactionnelle via EntityStoreManager | `trace.store` |
+| `LogTraceStorePlugin` | Archivage complémentaire via logger "audit" (écriture seule) | `trace.log` |
+| `EthereumLedgerPlugin` | Ancrage réel via RPC HTTP web3j (Activeable) | `ledger.ethereum` |
+| `FakeLedgerPlugin` | Simulation ledger, balance à zéro (dev/tests) | `ledger.fake` |
+
+### Configuration YAML
+```yaml
+modules:
+    io.vertigo.audit.AuditFeatures:
+        features:
+            - trace:
+            - ledger:
+        featuresConfig:
+            - trace.store:
+            - trace.log:
+            - ledger.ethereum:
+                  urlRpcEthNode: "http://eth-node:8545"
+                  myAccountName: "gestion-projet"
+                  myPublicAddr: "0xAbC123..."
+                  defaultDestAccountName: "archive"
+                  defaultDestPublicAddr: "0xDeF456..."
+                  walletPassword: "..."
+                  walletPath: "/path/to/wallet"
+            - ledger.fake:
 ```

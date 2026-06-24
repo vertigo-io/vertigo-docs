@@ -2,136 +2,227 @@
 
 **DataModel** est un module central des extensions Vertigo permettant de partager des concepts communs de Data Transfert Object et de ce qui tourne autour.
 
-Ce module est fortement basés sur des définitions qui ont vocation à être transverse.
+Ce module est fortement basé sur des définitions qui ont vocation à être transverse.
 
 Il inclut :
 
-- de nombreuses définitions liés à la couche domain :
-	- DtDefinition
-	- Contraint
-	- Formatter
-	- Association
-	- Task
-
+- de nombreuses définitions liées à la couche domaine :
+	- `DtDefinition`, `DataDefinition`, `DataField`
+	- Contraintes, Formatters
+	- Associations N-N, 1-N
+	- `TaskDefinition`, `TaskAttributes
 - des concepts/API transverses :
-	- UID
-	- DtObject, DtList
-	- MasterData, StaticMasterData
-	- KeyConcept, Fragment
-	- SmartType, Adapter
-	- Criteria
-
+	- `UID`, `Entity`, `DataObject`, `VAccessor`
+	- `DtList`, `DtListState`, `DtListURI`
+	- `MasterData`, `StaticMasterData`, `KeyConcept`, `Fragment`
+	- `SmartType`, `Adapter`, `Formatter`, `Constraint`
+	- `Criteria`, `Criterion`, `CriteriaExpression`
+- les managers `SmartTypeManager` et `TaskManager`, toujours actifs
 
 ## Utilisation via Studio
 
-Une majorité des concepts de ce module peuvent être généré via l'outil Studio.
-Les générateurts suivant sont liés à ce module :
+Une majorité des concepts de ce module peuvent être générés via l'outil Studio.
+Les générateurs suivants sont liés à ce module :
 
-- `vertigo.domain.java`: génère les class Java des DtObject
-- `vertigo.domain.java.targetSubDir`: présise le répertoire de génération (par défaut *~/javagen*)
-- `vertigo.domain.java.generateDtResources`: génère les fichiers .properties pour utiliser le i18n avec les libellés des champs des DtObjects
-- `vertigo.domain.sql`: génère le fichier crebase.sql qui permet de regénérer la structure de la base
-- `vertigo.domain.sql.targetSubDir`: présise le répertoire de génération du fichier sql
+- `vertigo.domain.java`: génère les classes Java des DtObject
+- `vertigo.domain.java.targetSubDir`: précise le répertoire de génération (par défaut *~/javagen*)
+- `vertigo.domain.java.generateDtResources`: génère les fichiers .properties pour le i18n des libellés des champs
+- `vertigo.domain.sql`: génère le fichier crebase.sql pour régénérer la structure de la base
+- `vertigo.domain.sql.targetSubDir`: précise le répertoire de génération du SQL
 - `vertigo.domain.sql.baseCible`: Type de la base *(pour les syntaxes spécifiques)*
-- `vertigo.domain.sql.generateDrop`: génère les drop dans le script crebase.sql
-- `vertigo.domain.sql.generateMasterData`: génère les scripts de remplissage des données de référence par défaut
-- `vertigo.task`: génère les class Java des tâchs d'accçs au données..
-- `mermaid`: génère un fichier HTML permettant de visualiser le modèle de données graphiquement *(lib mermaid)*
-
+- `vertigo.domain.sql.generateDrop`: génère les DROP dans crebase.sql
+- `vertigo.domain.sql.generateMasterData`: génère les scripts de remplissage des données de référence
+- `vertigo.task`: génère les classes Java des tâches d'accès aux données
+- `mermaid`: génère un fichier HTML pour visualiser le modèle graphiquement
 
 ### Syntaxe KSP
 
 __Généralités__
-```json
+
+```ksp
 create <<type>> <<nom>> {
     <<corps de la déclaration>>
+}
 ```
 Permet de déclarer une nouvelle définition.
 
-
-```json
+```ksp
 alter <<type>> <<nom>> {
     <<corps de la déclaration>>
-```
-Permet de modifier/compléter une nouvelle définition.
-
-
-__DtDefinition__
-```json
-create DtDefinition DtUsager {
-    id usaId {domain: DoId label:"Id" cardinality:"1"}
-    field email {domain: DoEmail label:"E-mail" }
 }
 ```
-- `field` : déclare le champ de l'objet.
-	- `domain` : indique le `Domain` du champ. Ce domain pointe sur un SmartType du projet.
-	- `label` : indique le libellé par défaut du champ.
-	- `cardinality` : indique la cardinalité du champ (`?`:0-1, `1`: obligatoire, `*`:multiple)
-- `id` : précise que l'objet est une entité (persistante), et que ce champ correspond à la PK *(Note: dans Vertigo, il n'y a pas de PK multiple, sauf les tables d'association NN)*
+Permet de modifier/compléter une définition existante.
+
+__DtDefinition__
+
+```ksp
+create DtDefinition DtUsager {
+    id usaId {domain: DoId label:"Id" cardinality:"1"}
+    field email {domain: DoEmail label:"E-mail"}
+}
+```
+
+- `field` : déclare un champ de l'objet
+	- `domain` : SmartType du champ
+	- `label` : libellé du champ
+	- `cardinality` : `?` (0-1), `1` (obligatoire), `*` (multiple)
+- `id` : désigne l'entité persistante et sa clé primaire *(pas de PK multiple, sauf tables d'association N-N)*
 
 __StereoType__
-```json
+
+```ksp
 create DtDefinition DtReservation {
     stereotype: "KeyConcept"
 	...
 }
 ```
-- `stereotype` : précise que l'objet est taggé spécifiquement. Valeurs possible : 
-  -	`ValueObject`: //By default
-  - `MasterData` : Liste de référence
-  - `StaticMasterData` : Liste de référence static
-  - `KeyConcept` : Concept clé
-  - `Entity` : Entité (élément persistant)
-  - `Fragment` : Sous partie extraite d'une entité
+
+- `stereotype` : tag de l'objet. Valeurs possibles : `ValueObject` *(défaut)*, `MasterData`, `StaticMasterData`, `KeyConcept`, `Entity`, `Fragment`
 
 __StaticMasterData__
-```json
+
+```ksp
 create DtDefinition DtBaseType {
 	stereotype : "StaticMasterData"
 	id baseTypeId {domain: DoCode label:"Id"}
-	field label {domain: DoLabel label:"Base Type Label" }	
-	values : `{ "hydro" : 		{ "baseTypeId" : "HYDRO",  		"label" : "Hydroponic"},
-				"mine" : 		{ "baseTypeId" : "MINE", 		"label" : "Mining Complex" },
-        		"dwelling" : 	{ "baseTypeId" : "DWELLING", 	"label" : "Dwelling Complex"} }`
+	field label {domain: DoLabel label:"Base Type Label"}
+	values : `{ "hydro": {"baseTypeId":"HYDRO","label":"Hydroponic"},
+	          "mine": {"baseTypeId":"MINE","label":"Mining Complex"} }`
 }
 ```
-Les StaticMasterData sont un cas particulier de liste de référence, ou les valeurs sont figées.
-Le générateur propose alors un script sql d'insertion des données en BDD, et une enum listant les valeurs.
 
-*Note* : L'id d'une StaticMasterData est forcément de type String. En effet les StaticMasterData ont vocation a être utilisable directement dans les requetes sans faire de jointure, il faut alors que le code (qu'on retrouve dans les FK) soient "à peu près" signifiant.
-Par exemple les dossiers encours : 
-```sql select * from dossier dos where dos.ETA_CD = 'ENCOU'```
-
+Les StaticMasterData sont des listes de référence figées. L'id est de type String.
 
 __SmartTypes__
-```json
+
+```ksp
 create Domain DoVisitCount {
     dataType: Integer
 	storeType : "NUMERIC"
 }
 ```
+
 - `dataType` : Type Java de la donnée
-- `storeType` : Type de stockage SQL de la donnée *(dépend de la BDD)*
+- `storeType` : Type de stockage SQL *(dépend de la BDD)*
 
-Pour assurer la cohérence des déclarations, il est nécessaire de déclarer les smartTypes utilisés par les DtDefinition et les Task.
-Cette déclaration n'entraine pas de génération, les SmartTypes doivent être aussi déclarés en Java avec l'ensemble des informations portées par le SmartType, dans le KSP on ne met que ce qui est nécessaire à la génération des autres objets.
+__SmartTypes : ValueObject__
 
-
-**Note** : le terme Domain et le préfix Do sont historiques et font référence à une ancienne notion des bases de données. Dans le reste de Vertigo cette notion a été renommée en SmartType, mais comme vous le voyez il reste des traces du passé ici où là :)
-
-__SmartTypes : ValueObjet__
-```json
+```ksp
 create Domain DoFormulaire {
 	dataType : ValueObject
 	type : "fr.gouv.interieur.rdvpref.support.smarttypes.FormulaireDemarche"
 	storeType : "JSONB"
 }
 ```
-- `dataType: ValueObject` : Indique que la donnée représente un Objet, il sera convertit en type primitif par des `Adapater` correspondant aux différents cas d'usages (sql, ui, ...)
-- `type` : Objet Java de la donnée
-- `storeType` : Type de stockage SQL de la donnée *(dépend de la BDD)*
 
+- `dataType: ValueObject` : Objet converti par des `Adapter` selon le contexte *(SQL, UI…)*
+- `type` : Classe Java de la donnée
 
+**Note** : `Domain` et le préfixe `Do` sont historiques. Dans le reste de Vertigo, cette notion est `SmartType`.
 
+## TaskManager
 
+Le `TaskManager` gère l'exécution des tâches définies dans le KSP. Il expose `TaskDefinition`, `TaskBuilder`, `TaskResult` pour la programmation des tâches, et un système de proxy basé sur les annotations.
 
+### Proxy Annotations
+
+| Annotation | Rôle |
+|---|---|
+| `@TaskAnnotation` | Déclare une méthode comme proxy de tâche |
+| `@TaskProxyAnnotation` | Interface de proxy de tâche |
+| `@TaskInput` | Paramètre d'entrée de la tâche |
+| `@TaskOutput` | Résultat de sortie de la tâche |
+| `@TaskContextProperty` / `@TaskContextProperties` | Propriété du contexte d'exécution |
+
+L'implémentation `TaskAmplifierMethod` relie les annotations proxy aux `TaskDefinition` réelles.
+
+## SmartType Annotations
+
+Les SmartTypes peuvent être définis en Java avec des annotations, alternativement au KSP + enum classique :
+
+| Annotation | Rôle |
+|---|---|
+| `@SmartTypeDefinition` | Définit un SmartType pour un BasicType |
+| `@SmartTypeProperty` / `@SmartTypeProperties` | Propriétés du SmartType (storeType, etc.) |
+| `@Formatter` | Formateur associé |
+| `@Constraint` / `@Constraints` | Contraintes de validation |
+| `@Adapter` / `@Adapters` | Adaptateurs de conversion |
+
+## Stereotype Annotations
+
+Pour les DtObject, les annotations Java sont alternatives au KSP :
+
+| Annotation | Rôle |
+|---|---|
+| `@DataSpace` | Espace de données |
+| `@Field` | Champ d'un DtObject |
+| `@DisplayField` | Champ d'affichage |
+| `@SortField` | Champ de tri |
+| `@KeyField` | Champ de clé |
+| `@ForeignKey` | Clé étrangère |
+| `@Association` | Association 1-N |
+| `@AssociationNN` | Association N-N |
+| `@Fragment` | Fragment d'entité |
+
+## Criteria API
+
+L'API Criteria permet de construire des requêtes dynamiques :
+
+- `Criteria` / `Criterion` : Expressions de critère
+- `CriteriaEncoder` / `CriterionOperator` / `CriteriaLogicalOperator` : Codage et opérateurs
+- `CriteriaExpression` / `CriteriaCtx` : Expression et contexte
+- `CriterionLimit` / `Criterions` / `CriteriaUtil` : Utilitaires de construction
+
+## Associations
+
+Les associations entre objets sont définies par :
+
+| Classe | Rôle |
+|---|---|
+| `AssociationDefinition` | Définit une association |
+| `AssociationSimpleDefinition` | Association 1-N |
+| `AssociationNNDefinition` | Association N-N |
+| `AssociationNode` | Nœud d'association |
+| `DtListURIForAssociation` | URI vers liste d'association |
+| `DtListURIForSimpleAssociation` | URI association simple |
+| `DtListURIForNNAssociation` | URI association N-N |
+
+## Pour les experts
+
+### Managers
+
+| Manager | Impl | Activation |
+|---|---|---|
+| `SmartTypeManager` | `SmartTypeManagerImpl` | Toujours actif (`buildFeatures()`) |
+| `TaskManager` | `TaskManagerImpl` | Toujours actif (`buildFeatures()`) |
+
+### Composants internes (toujours actifs)
+
+| Composant | Rôle |
+|---|---|
+| `DataMetricsProvider` | Métriques d'accès aux données |
+| `TaskMetricsProvider` | Métriques d'exécution des tâches |
+| `ModelDefinitionProvider` | Fournisseur de définitions du modèle |
+| `SmartTypesLoader` | Chargement des SmartTypes |
+| `DtObjectsLoader` | Chargement des DtObjects |
+| `TaskAmplifierMethod` | Proxy Task -> DI (feature `taskProxyMethod`) |
+
+### Features
+
+Aucun `@Feature` — vertigo-datamodel est toujours actif. Tous les composants sont injectés par `buildFeatures()`.
+
+### Composition
+
+| Catégorie | Classes |
+|---|---|
+| **SmartType** | `SmartTypeDefinition`, `SmartTypeDefinitionBuilder`, `Properties`, `Property`, `PropertiesBuilder`, `DtProperty` |
+| **SmartType Annotations** | `@SmartTypeDefinition`, `@SmartTypeProperty`, `@Formatter`, `@Constraint`, `@Adapter` |
+| **SmartType Config** | `AdapterConfig`, `FormatterConfig`, `ConstraintConfig`, `SmarttypeResources` |
+| **Data Definitions** | `DataDefinition`, `DataDefinitionBuilder`, `DataField`, `DataFieldName`, `DataStereotype` |
+| **Data Stereotype Annotations** | `@DataSpace`, `@Field`, `@DisplayField`, `@SortField`, `@KeyField`, `@ForeignKey`, `@Association`, `@AssociationNN`, `@Fragment` |
+| **Data Model** | `Entity`, `DataObject`, `VAccessor`, `ListVAccessor`, `UID`, `DtList`, `DtListState`, `DtListURI`, `Fragment`, `MasterDataEnum`, `DtMasterData`, `DtStaticMasterData`, `KeyConcept` |
+| **Task Definitions** | `TaskDefinition`, `TaskDefinitionBuilder`, `TaskAttribute`, `TaskEngine` |
+| **Task Model** | `Task`, `TaskBuilder`, `TaskResult` |
+| **Task Proxy** | `@TaskAnnotation`, `@TaskProxyAnnotation`, `@TaskInput`, `@TaskOutput`, `@TaskContextProperty` |
+| **Criteria** | `Criteria`, `Criterion`, `CriteriaEncoder`, `CriterionOperator`, `CriteriaLogicalOperator`, `CriteriaExpression`, `CriteriaCtx`, `CriterionLimit`, `Criterions`, `CriteriaUtil` |
+| **Data Util** | `DataModelUtil`, `AssociationUtil`, `VCollectors` |

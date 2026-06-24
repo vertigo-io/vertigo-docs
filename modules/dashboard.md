@@ -84,7 +84,7 @@ Dépendances transitives utilisées par le code :
 - `vertigo-core`
 - `vertigo-commons`
 - `vertigo-datastore`
-- `vertigo-dynamo`
+- `vertigo-datastore`
 
 ### Configuration
 
@@ -167,3 +167,40 @@ La carte `healthchecksByFeature` produit un `Map<String, List<HealthCheck>>` acc
 - Les routes `/dashboard/...` sont codées en dur dans `DashboardRouter`. Aucun paramètre `prefix` n'existe pour les personnaliser.
 - `doBuildModel()` retourne `void`. C'est `buildModel()` qui retourne `Map<String, Object>`.
 - Les web services `DashboardDataProviderWebServices` sont des endpoints Vega. Ils ne sont pas injectables via `appSpace.getComponent()`.
+
+## Pour les experts
+
+### Managers
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `DataProvider` | Requête temps réel sur les séries temporelles, health checks, métriques et données tabulaires | `analytics` |
+| `DashboardUiManager` | Montée de `DashboardRouter` sur le serveur Javalin | Toujours actif (buildFeatures) |
+
+### Composants internes
+| Composant | Rôle |
+|---|---|
+| `DataProviderImpl` | Implémentation délèguant à `TimeSeriesManager` (InfluxDB) |
+| `DashboardDataProviderWebServices` | API REST sous `/dashboard/data` (4 endpoints) |
+| `DashboardRouter` | Routes HTTP + FreeMarker, préfixe `/dashboard/` en dur |
+| `AbstractDashboardModuleControler` | Template Method pour les contrôleurs de sous-module |
+| `CommonsDashboardControler` | Sous-module vertigo-commons (Daemons, EventBus, Caches) |
+| `DynamoDashboardControler` | Sous-module vertigo-dynamo (Entities, SmartTypes, Tasks) |
+| `VegaDashboardControler` | Sous-module vertigo-vega (Locations webservices) |
+| `VUiDashboardControler` | Sous-module vertigo-ui (Locations pages) |
+
+### Features (@Feature)
+| Flag | Composants |
+|---|---|
+| `analytics` | `DataProvider` + `DataProviderImpl`, `DashboardDataProviderWebServices` |
+
+### Plugins
+Aucun plugin. Les composants sont internes au module.
+
+### Configuration YAML
+```yaml
+modules:
+    io.vertigo.dashboard.DashboardFeatures:
+        features:
+            - analytics:
+                appName: "gestion-projet"
+```
