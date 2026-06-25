@@ -53,7 +53,7 @@ Ainsi, pour configurer le projet *MyProject* avec vertigo-ui, il suffit de crée
 
 ```java
 @ComponentScan({
-		//place here your controller packages for spring component scanning
+		//place here your controller packages for spring component scanning  })
 public class MarsVSpringWebConfig extends VSpringWebConfig {
 	// nothing basic config is enough
 	

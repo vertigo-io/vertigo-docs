@@ -27,7 +27,91 @@ Publisher n'est pas prévu pour :
 
 **Publisher** est basé sur le principe de la **fusion de documents** : il insère les données métier dans un document servant de modèle via une grammaire de tags (script).
 
-Le document en sortie est dans le même format que le modèle. Pour obtenir un autre format (ex. PDF), utiliser le module **Converter**.
+  ![](./images/publisher-1.png)
+
+!> Le document en sortie de fusion est donc dans le même format que le modèle. Ce document peut être converti dans un autre format grâce au module **Converter**.
+
+### Création du modèle — OpenOffice
+
+Les champs de fusion apparaissent surlignés en gris dans le document ODT.
+
+![](./images/publisher_odt_1.png)
+
+Pour modifier le champ il faut faire : Clic droit puis Champs et on obtient un navigateur nous permettant d'éditer tous les champs du modèle.
+
+![](./images/publisher_odt_2.png)
+
+Pour créer un champ : **Insertion → Champs → Autres** (ou Ctrl + F2), se placer dans l'onglet Fonctions :
+
+![](./images/publisher_odt_3.png)
+
+Remplir le champ Annotation avec le nom du champ à fusionner puis cliquer sur Insérer :
+
+![](./images/publisher_odt_4.png)
+
+Pour ajouter un mot clé de type « opération », on utilise une insertion de script : **Insertion → Script** :
+
+![](./images/publisher_odt_5.png)
+
+### Création du modèle — Microsoft Word 2010
+
+Ces mots clés et fonctions sont insérés dans le document word sous forme de champs, il n'y a pas de différence entre champs de fusion et opérations.
+L'insertion de ces champs peut se faire par la commande « **Insertion / QuickPart / Champ** ».
+
+Des raccourcis claviers peuvent aussi être utilisés :
+
+- `Ctrl-F9` : Ajout d'un champ
+- `Alt-F9` : Affiche/masque le contenu des champs
+
+### Installation et mise en place
+
+* Ajouter les dépendances quarto dans pom.xml et lancer mvn install :
+
+```xml
+<dependency>
+	<groupId>io.vertigo</groupId>
+	<artifactId>vertigo-quarto</artifactId>
+	<version>${vertigo.version}</version>
+</dependency>
+```
+
+Pour l'utilisation du plugin XDocReportConverterPlugin (gestion du DOCX) :
+```xml
+<dependency>
+    <groupId>fr.opensagres.xdocreport</groupId>
+    <artifactId>fr.opensagres.xdocreport.converter.docx.xwpf</artifactId>
+    <version>2.0.2</version>
+</dependency>
+```
+
+Pour l'utilisation du plugin OpenOfficeLocalConverterPlugin (gestion de l'ODT en local) :
+```xml
+<dependency>
+	<groupId>fr.opensagres.xdocreport</groupId>
+	<artifactId>fr.opensagres.xdocreport.converter.odt.odfdom</artifactId>
+	<version>2.0.2</version>
+</dependency>
+```
+
+* Définir le provider Java qui contiendra les fichiers de définition du modèle :
+
+```xml
+<module name="myApp-ressources">
+	<definitions>
+            <provider class="fr.projet.appli.MyPublisherDefinitionProvider" />
+	</definitions>
+</module>
+```
+
+* Ajouter le module dans foundation.xml :
+
+```xml
+<module name="vertigo-quarto">
+	<component api="PublisherManager" class="io.vertigo.quarto.publisher.impl.PublisherManagerImpl">
+		<plugin class="io.vertigo.quarto.plugins.publisher.odt.OpenOfficeMergerPlugin"/>
+	</component>
+</module>
+```
 
 ### Syntaxe des modèles
 

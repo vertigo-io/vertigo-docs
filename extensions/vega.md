@@ -216,7 +216,76 @@ Pour les objets dans une liste, le nom est `nomListe.idxN` (ex : `"persons.idx2"
 
 ### État Server-side
 
-Avec `ServerSideRead`, `ServerSideSave` et `ServerSideConsume`, Vega conserve un état côté serveur avec un `serverToken`. Couplé à `@IncludedFields` et `@ExcludedFields`, cela permet un contrôle fin de sécurité des données échangées.
+Vertigo Vega propose de conserver un état côté serveur.
+
+Cette fonctionnalité permet d'adresser simplement le besoin d'envoyer le minimum de données côté client (nécessaire pour des besoins de sécurité des données ou de contraintes réseau),
+et de continuer d'utiliser des objets complets côté serveur dans les services métier pour les garder les plus simples possibles et ne pas multiplier les API d'entrée.
+
+Grâce à cette fonctionnalité, vous pouvez :
+* conserver l'état d'un objet à l'envoi, filtrer les champs qui doivent être réellement nécessaires
+* au retour du client, Vega fusionne l'état conservé et le nouvel état envoyé par le client (filtré lui aussi)
+* utiliser un objet métier complet dans la couche métier.
+
+!> L'état server-side est limité dans le temps, lié à la session utilisateur et non-modifiable. S'il y a un besoin de modifications concurrentes, cela devra être traité au niveau du service.
+
+Pour ce faire, vous avez à votre disposition trois annotations :
+* `ServerSideSave` : appliquée sur une Méthode, elle indique à Vega de conserver l'objet retourné et poser une référence avec un `serverToken` id.
+* `ServerSideRead` : appliquée sur un Paramètre, elle indique à Vega qu'il attend un objet JSON avec quelques champs et une référence `serverToken`, Vega fusionnera l'ancien état avec les données reçues.
+* `ServerSideConsume` : Comme `ServerSideRead`, mais l'état conservé est consommé lors de l'appel.
+
+Exemple :
+```java
+@GET("/contact/{conId}")
+@ExcludedFields({ "birthday", "email", "passport" }) // All secret fields are excluded
+@ServerSideSave  // Full contact data are kept serverSide, exclusion are done on json convert only
+public Contact getContact(@PathParam("conId") final long conId) {
+	return loadContact(conId);
+}
+
+@PUT("/contact/{conId}")
+@ExcludedFields({ "birthday", "email", "passport" }) //All secret fields are re-excluded
+@ServerSideSave //will save the new state, and returns a new serverToken id
+public Contact updateFirstNameContact(
+	@ServerSideRead //will read the previous object state from sent serverToken
+	@IncludedFields({ "firstName" }) //check accepted/refused fields (or send a forbidden error)
+	final Contact contact) {
+		saveContact(contact); //save a full object, not just the firstName field, this ensure data consistency
+		return loadContact(conId); //returns updated contact
+}
+```
+
+Request: `GET http://localhost:8080/*maWebApp*/api/contact/1`
+
+Response:
+```json
+{
+	"conId":"1",
+	"honorificCode":"MR_",
+	"name":"Martin",
+	"firstName":"Jean",
+	"serverToken":"cb44ab11-4eac-41e9-a3d1-c0fc20ea55e1"
+}
+```
+
+Request: `PUT http://localhost:8080/*maWebApp*/api/contact/1`
+```json
+{
+	"firstName":"Jean-denis",
+	"serverToken":"cb44ab11-4eac-41e9-a3d1-c0fc20ea55e1"
+}
+```
+Response:
+```json
+{
+	"conId":"1",
+	"honorificCode":"MR_",
+	"name":"Martin",
+	"firstName":"Jean-denis",
+	"serverToken":"b04edfef-7385-4d5d-b5ca-23d195c87200"
+}
+```
+
+?> Cette fonction est traitée par `ServerSideStateWebServiceHandlerPlugin`
 
 ### Sécurité AccessToken
 
@@ -226,9 +295,92 @@ La gestion des tokens d'accès limitée est assurée par `TokenManager` / `Token
 - `AccessTokenMandatory` : Vérifie la présence d'un token valide (403 si invalide)
 - `AccessTokenConsume` : Idem, mais consomme (invalide) le token après usage
 
-### Sécurité Rate-Limit
+### Sécurité **Rate-Limit**
 
-Par défaut : 150 appels par utilisateur par fenêtre de 5 minutes. Headers de réponse : `X-Rate-Limit-Limit`, `X-Rate-Limit-Remaining`, `X-Rate-Limit-Reset`. Dépassement → HTTP 429.
+Pour des raisons de sécurité, tous les WebServices publiés par Vertigo Vega sont protégés (par défaut) contre les appels massifs. La limite est de 150 appels par utilisateur sur des fenêtres de 5 minutes, ce qui représente 1 appel toutes les 2 secondes.
+Les utilisateurs anonymes partagent le même compteur de limite. Notez que la limite est comptabilisée par instance serveur.
+
+Le serveur envoie des informations dans des *headers* de la *Response*
+* `X-Rate-Limit-Limit` : Le maximum d'appels autorisé pour cette requête
+* `X-Rate-Limit-Remaining` : Le nombre d'appels restant dans la fenêtre de temps en cours
+* `X-Rate-Limit-Reset` : Le nombre de secondes restant avant une remise à zéro du compteur
+
+Si la limite du serveur est dépassée, le serveur retourne une erreur `HTTP 429 TOO_MANY_REQUEST`.
+
+> Cette fonction est traitée par `RateLimitingWebServiceHandlerPlugin`
+> Le handler propose des paramètres optionnels :
+> - *windowSeconds* : Taille de la fenêtre en seconde
+> - *limitValue* : Nombre d'appels maximum (dans la durée de la fenêtre)
+
+### Objet d'IHM **DtListDelta**
+
+`DtListDelta` est un objet spécifique utilisé par Vertigo Vega.
+Il est utilisé pour agréger les modifications apportées à une liste : création, mise à jour ou suppression réalisées côté client et retournées au serveur en 1 appel.
+La requête JSON doit respecter ce format :
+```json
+{
+	"collCreates": {
+		"clientId1" : { ... object1 ... },
+		"clientId2" : { ... object2 ... }
+	},
+	"collUpdates": {
+		"clientId4" : { ... object4 ... },
+		"clientId5" : { ... object5 ... }
+	},
+	"collDeletes": {
+		"clientId6" : { ... object6 ... },
+		"clientId7" : { ... object7 ... }
+	}
+}
+```
+
+Exemple :
+```java
+@POST("/contacts/delta")
+@ExcludedFields({ "birthday", "email", "passport" }) // All secret fields are excluded
+public String updateContacts(final DtListDelta<Contact> contactsDelta) {
+	//objects were checked, just like single updates.
+	updateContacts(contactsDelta.getCreates(), contactsDelta.getUpdates(), contactsDelta.getDeletes());
+	return "OK : contacts updated";
+}
+```
+
+?> Il existe un équivalent `UiListDelta` qui permet de récupérer des UiObjects (c'est-à-dire avant formatage et validation)
+
+### Annotation **AutoSortAndPagination**
+
+L'annotation `AutoSortAndPagination` est le moyen le plus simple pour publier un service en ajoutant le support de la pagination et du tri.
+En partant d'un service métier qui retourne une DtList complète, il suffit d'ajouter un WebService avec cette annotation qui retourne directement le résultat du service.
+
+Exemple :
+```java
+@AutoSortAndPagination
+@GET("/contacts")
+public DtList<Contact> searchContacts(final ContactCriteria contactCriteria) {
+	//call specific search service, and return all datas (think to add a cpu/memory/user friendly limit like 250)
+	return contactService.search(contactCriteria);
+}
+```
+
+Comment ça marche :<br/>
+**Vega** conserve une copie de la liste côté serveur et retourne :
+* _header_ : `x-total-count` : la taille totale de la liste
+* _header_ : `listServerToken` : le token de la liste côté serveur. Il devra être renvoyé par le client lorsqu'il faudra trier ou filtrer la liste
+* _body_ : la portion de la liste au format JSON (triée et filtrée)
+
+Lorsque l'IHM trie ou change de page, il doit retourner :
+* _query_ : `top` : nombre max d'éléments à retourner
+* _query_ : `skip` : offset du premier élément à retourner
+* _query_ : `sortFieldName` : nom du champ portant le tri
+* _query_ : `sortDesc` : true/false pour l'ordre de tri
+* _query_ : `listServerToken` : token de la liste (issu des précédents appels)
+* n'importe quelles autres données nécessaires, comme n'importe quel service
+
+Notez que vous pouvez faire la même chose dans vos WebServices sans l'annotation (par exemple pour trier ou paginer dans la couche service ou dans la base de données).
+Pour avoir la même API, vous avez à ajouter un paramètre `@QueryParam(".") DtListState dtListState`.
+
+DtListState est une représentation de l'état d'une sous-liste, avec les champs `top`, `skip`, `sortFieldName`, `sortDesc` et `listServerToken`.
+Sans annotation, utiliser `@QueryParam("") DtListState dtListState` pour le même résultat.
 
 Le `RateLimitingManager` utilise un `RateLimitingStorePlugin` :
 - `RateLimitingMemStorePlugin` *(feature `rateLimiting.mem`)* — Stockage mémoire local

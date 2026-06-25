@@ -47,7 +47,7 @@ io.vertigo.orchestra.OrchestraFeatures:
         - orchestra.webapi:
 ```
 
-Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires).
+Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires) à l'aide de [ce](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-orchestra/src/main/database/scripts/install/orchestra_create_init_v1.0.0.sql) fichier SQL.
 
 ## A quoi cela ressemble-t-il dans le code ?
 

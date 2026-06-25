@@ -192,7 +192,11 @@ Vous pouvez compléter le contexte pour les autres éléments de votre page, et 
 
 ## Contenu
 
-### Modèle de données — SQL
+### Modèle de données
+
+![Diagramme des entités Planning](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/javagen/mermaid/mermaid-io-vertigo-planning.html)
+
+**SQL** :
 
 - `planning_create_init_4.3.0.sql` : pour la création de la base de données initiale
 
