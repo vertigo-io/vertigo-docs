@@ -1,6 +1,6 @@
 # DataStore
 
-Le module **DataStore** est le successeur de l'ancien module `vertigo-dynamo`. Il propose une abstraction de stockage multi-backend organisée autour de quatre managers : **EntityStore**, **FileStore**, **KVStore** et **Cache**.
+Le module **DataStore** propose une abstraction de stockage multi-backend organisée autour de quatre managers : **EntityStore**, **FileStore**, **KVStore** et **Cache**.
 
 ## EntityStore
 
@@ -52,7 +52,6 @@ Le `FileStoreManager` gère le stockage de fichiers avec résolution MIME et sup
 | `FsFileStorePlugin` | `filestore.filesystem` | Fichiers sur le système de fichiers local |
 | `FsFullFileStorePlugin` | `filestore.fullFilesystem` | Accès complet au système de fichiers (lecture/écriture libre) |
 | `DbFileStorePlugin` | `filestore.db` | Fichiers stockés en base de données (1 table) |
-| `TwoTablesDbFileStorePlugin` | — | Fichiers stockés en base de données (2 tables : infos + contenu) |
 | `S3FileStorePlugin` | `filestore.s3` | Stockage S3 / MinIO |
 
 ### Résolution MIME

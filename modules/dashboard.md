@@ -9,7 +9,7 @@ Le module expose une API REST pour les données de monitoring et une interface w
 L'architecture repose sur trois couches :
 
 1. **DataProvider** : abstraction de requête temps réel sur les séries temporelles, health checks, métriques et données tabulaires
-2. **Contrôleurs métier** : quatre sous-modules couvrant les composants du framework
+2. **Contrôleurs métier** : quatre sous-modules couvrant les composants de la plateforme
 3. **DashboardRouter** : routes HTTP + FreeMarker montées sur Javalin
 
 ## Composants
@@ -131,7 +131,7 @@ Chaque sous-module a un contrôleur dédié :
 | Module | Contrôleur | Données exposées |
 |---|---|---|
 | vertigo-commons | `CommonsDashboardControler` | Daemons (`DaemonModel`, `isLastExecSuccess()`), EventBus (`EventBusModel`), Caches (`CacheModel`, TTL, capacité, health vert/yellow/red) |
-| vertigo-dynamo | `DynamoDashboardControler` | Entities (`EntityModel`), SmartTypes (`SmartTypeModel`, `isOrphan()`), Tasks (`TaskModel`, `medianDuration` sur 24h) |
+| vertigo-datamodel | `DynamoDashboardControler` | Entities (`EntityModel`), SmartTypes (`SmartTypeModel`, `isOrphan()`), Tasks (`TaskModel`, `medianDuration` sur 24h) |
 | vertigo-vega | `VegaDashboardControler` | Locations webservices (`getTagValues("webservices", "location")`) |
 | vertigo-ui | `VUiDashboardControler` | Locations pages (`getTagValues("page", "location")`) |
 

@@ -1,21 +1,21 @@
 # DAO
 
-Dans les projets Vertigo, les accès aux données sont matérialiés dans des objets DAO et reposent sur l'utilisation d'un Store et de tâches.
+Dans les projets Vertigo, les accès aux données sont matérialisés dans des objets DAO et reposent sur l'utilisation d'un Store et de tâches.
 
 ## Store
 
 Dans les objets DAO générés lors du MDA, des méthodes d'accès aux données sont offertes. Elles permettent depuis une API Java les manipulations suivantes :
 
 - création
-- selection par la clé primaire
+- sélection par la clé primaire
 - mise à jour
 - suppression
-- selection par critère de recherche (utilisation de l'API [Criteria](#criteria))
+- sélection par critère de recherche (utilisation de l'API [Criteria](#criteria))
 - manipulation des relations de type N-N
 
-Ces méthodes permettent une manipulation du stockage directement depuis une API Java et sont donc facilement utilisables par un développeur. Elles permettent de faire une grande partie des intéractions avec le stockage moyennant un effort très faible.
+Ces méthodes permettent une manipulation du stockage directement depuis une API Java et sont donc facilement utilisables par un développeur. Elles permettent de faire une grande partie des interactions avec le stockage moyennant un effort très faible.
 
-Voici un exemple d'utilisation de la méthode de selection par clé primaire :
+Voici un exemple d'utilisation de la méthode de sélection par clé primaire :
 
 ```java
 @Override
@@ -29,7 +29,7 @@ public Movie getMovieById(final Long movId) {
 
 ?> Les méthodes qui sont offertes sont limitées à la manipulation d'une seule entité métier car c'est l'assurance de bonnes performances. La maîtrise des performances étant primordiale pour un système opérationnel, nous conseillons l'utilisation du store dans les cas simples et d'utiliser une [tâche](#tâches) dédiée dans les cas plus complexes, notamment lorsque plusieurs entités sont concernées.
 
-!> Il est important de toujours privilégier les manipulations de données ensemblistes (selection et modification) et d'éviter les appels unitaires multiples qui ont un coût en performances important et non-maitrisé.
+!> Il est important de toujours privilégier les manipulations de données ensemblistes (sélection et modification) et d'éviter les appels unitaires multiples qui ont un coût en performances important et non-maitrisé.
 
 
 ## Criteria
@@ -69,16 +69,16 @@ Une tâche (Task) permet d'abstraire le concept de manipulation des données que
 - un moteur d'exécution :  `className`
 - une requête : fournissant le traitement à effectuer
 - des paramètres d'entrée
-- un paramètre de sortie optionel
+- un paramètre de sortie optionnel
 
 Une tâche est créée en la déclarant dans un fichier KSP.
 
 ### Moteur d'exécution
 
-Vertigo embarque un certain nombre de moteurs d'exécution. De par la nature des applications construites avec Vertigo, ces moteurs sont concus pour l'ex&cution de requêtes SQL. En voici les principaux :
+Vertigo embarque un certain nombre de moteurs d'exécution. De par la nature des applications construites avec Vertigo, ces moteurs sont conçus pour l'exécution de requêtes SQL. En voici les principaux :
 
-- `io.vertigo.basics.task.TaskEngineSelect`: permet de faire une selection de données dans une base de données relationelle en SQL (requête de type *select*)
-- `io.vertigo.basics.task.TaskEngineProc`: permet de faire une manipulation de données dans une base de données relationelle en SQL (requêtes de type *update* et *delete*)
+- `io.vertigo.basics.task.TaskEngineSelect`: permet de faire une sélection de données dans une base de données relationnelle en SQL (requête de type *select*)
+- `io.vertigo.basics.task.TaskEngineProc`: permet de faire une manipulation de données dans une base de données relationnelle en SQL (requêtes de type *update* et *delete*)
 - `io.vertigo.basics.task.TaskEngineProcBatch`: permet de faire une requête de type batch avec un paramètre d'entrée de type `DtList`
 
 
@@ -134,7 +134,7 @@ Pour plus de détails sur l'utilisation de ces syntaxes, consulter la documentat
 
 Pour échapper un caractère comme le `"`, vous pouvez utiliser `\`
 
-Exemple souvant utilisé pour passer la clause de sécurité : 
+Exemple souvent utilisé pour passer la clause de sécurité : 
 
 `where ass.usr_Id = #usrId# and <%=securedAssignement.asSqlWhere(\"ass\", ctx)%>`
 
@@ -190,7 +190,7 @@ create Task TkUpdateActorsNameBatch {
         	SET name = #actors.name#
             WHERE act_id = #actors.actId#;
 			"
-	int actors		{domain : DoDtActor 		cardinality:"*"		}
+	in actors		{domain : DoDtActor 		cardinality:"*"		}
     out intSqlRowcount  {domain : DoNumber      cardinality: "1" }
 }
 ```

@@ -2,16 +2,16 @@
 
 L'ambition de Vertigo est de fabriquer plus vite et plus efficacement des services numériques.
 
-Pour les application webs, les interfaces utilisateurs sont fondamentales et se doter d'un Design System c'est se donner les moyens d'atteindre cet objectif.
+Pour les applications webs, les interfaces utilisateurs sont fondamentales et se doter d'un Design System c'est se donner les moyens d'atteindre cet objectif.
 
 Ce Design System nous l'avons pensé et réalisé avec la philosophie de Vertigo : simplicité, robustesse, sécurité, évolutivité.
 
-Vertigo est une solution _opinionated_ c'est à dire qui défend des convictions et qui cible plus particulièrement des cas d'usage précis, notamment les application métiers. Ce Design System possède les mêmes caractéristiques.
-Les choix que nous avons fait vous permettrons d'atteindre plus vite vos objectifs avec un meilleur niveau de qualité final.
+Vertigo est une solution _opinionated_ c'est à dire qui défend des convictions et qui cible plus particulièrement des cas d'usage précis, notamment les applications métiers. Ce Design System possède les mêmes caractéristiques.
+Les choix que nous avons faits vous permettront d'atteindre plus vite vos objectifs avec un meilleur niveau de qualité final.
 
 Les principes qui nous ont guidés dans la création de ce Design System sont :
 
-- la clareté des interfaces utilisateurs
+- la clarté des interfaces utilisateurs
 - la fiabilité de l'application
 - la sécurité de l'application
 - l'accessibilité

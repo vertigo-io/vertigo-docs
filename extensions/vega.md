@@ -18,20 +18,20 @@ Chaque requête traverse une chaîne de `WebServiceHandlerPlugin` classés par p
 
 | Priorité | Plugin | Rôle |
 |---|---|---|
+| 5 | `LogExceptionsHandlerPlugin` | Log des erreurs 5XX |
 | 10 | `ExceptionWebServiceHandlerPlugin` | Gestion des exceptions |
 | 20 | `CorsAllowerWebServiceHandlerPlugin` | Gestion CORS *(feature `webservices.cors`)* |
-| 30 | `SessionInvalidateWebServiceHandlerPlugin` | Invalidation de session *(feature `webservices.security`)* |
-| 40 | `SessionWebServiceHandlerPlugin` | Gestion session *(feature `webservices.security`)* |
-| 50 | `RateLimitingWebServiceHandlerPlugin` | Rate limiting *(feature `webservices.rateLimiting`)* |
-| 60 | `SecurityWebServiceHandlerPlugin` | Sécurité globale *(feature `webservices.security`)* |
-| — | `ApiKeyWebServiceHandlerPlugin` | Clé API *(feature `webservices.auth.apiKey`)* |
-| — | `AnalyticsWebServiceHandlerPlugin` | Analyse analytique |
-| 70 | `AccessTokenWebServiceHandlerPlugin` | Tokens d'accès *(feature `webservices.token`)* |
-| 80 | `JsonConverterWebServiceHandlerPlugin` | Conversion JSON |
-| 90 | `ValidatorWebServiceHandlerPlugin` | Validation DTO |
-| — | `ServerSideStateWebServiceHandlerPlugin` | État server-side *(feature `webservices.token`)* |
+| 30 | `AnalyticsWebServiceHandlerPlugin` | Tracing AnalyticsManager |
+| 40 | `JsonConverterWebServiceHandlerPlugin` | Conversion JSON (entrée/sortie) |
+| 45 | `ApiKeyWebServiceHandlerPlugin` | Clé API *(feature `webservices.auth.apiKey`)* |
+| 50 | `SessionInvalidateWebServiceHandlerPlugin` | Invalidation de session *(feature `webservices.security`)* |
+| 60 | `SessionWebServiceHandlerPlugin` | Gestion session *(feature `webservices.security`)* |
+| 70 | `SecurityWebServiceHandlerPlugin` | Sécurité globale *(feature `webservices.security`)* |
+| 80 | `ServerSideStateWebServiceHandlerPlugin` | État server-side *(feature `webservices.token`)* |
+| 90 | `AccessTokenWebServiceHandlerPlugin` | Tokens d'accès *(feature `webservices.token`)* |
+| 100 | `RateLimitingWebServiceHandlerPlugin` | Rate limiting *(feature `webservices.rateLimiting`)* |
+| 110 | `ValidatorWebServiceHandlerPlugin` | Validation DTO |
 | 120 | `RestfulServiceWebServiceHandlerPlugin` | Routage vers le service métier |
-| — | `LogExceptionsHandlerPlugin` | Journalisation |
 
 ## Quick start server
 
@@ -207,7 +207,7 @@ public UiContext testUiContext(@PathParam("contactIdFrom") final long contactIdF
 
 ### Validation
 
-Le framework de validation (`DtObjectValidator`, `DefaultDtObjectValidator`) intercepte les erreurs de saisie et retourne HTTP 422 avec une structure JSON détaillée :
+Le système de validation (`DtObjectValidator`, `DefaultDtObjectValidator`) intercepte les erreurs de saisie et retourne HTTP 422 avec une structure JSON détaillée :
 - `globalErrors`, `globalWarnings`, `globalInfos`, `globalSuccess`
 - `fieldErrors`, `fieldWarnings`, `fieldInfos`
 - `objectFieldErrors`, `objectFieldWarnings`, `objectFieldInfos`
@@ -228,7 +228,7 @@ La gestion des tokens d'accès limitée est assurée par `TokenManager` / `Token
 
 ### Sécurité Rate-Limit
 
-Par défaut : 150 appels par utilisateur par fenêtre de 5 minutes. Headers de réponse : `X-Rate-Limit-Limit`, `X-Rate-Limit-Remaining`, `X-Rate-Limit-Reset$. Dépassement → HTTP 429.
+Par défaut : 150 appels par utilisateur par fenêtre de 5 minutes. Headers de réponse : `X-Rate-Limit-Limit`, `X-Rate-Limit-Remaining`, `X-Rate-Limit-Reset`. Dépassement → HTTP 429.
 
 Le `RateLimitingManager` utilise un `RateLimitingStorePlugin` :
 - `RateLimitingMemStorePlugin` *(feature `rateLimiting.mem`)* — Stockage mémoire local
@@ -336,7 +336,7 @@ L'annotation `@SessionLess` indique de ne pas créer de session HTTP *(pour les 
 
 ### Plugins
 
-**Handler Chain** : `ExceptionWebServiceHandlerPlugin` (10), `CorsAllowerWebServiceHandlerPlugin` (20), `SessionInvalidateWebServiceHandlerPlugin` (30), `SessionWebServiceHandlerPlugin` (40), `RateLimitingWebServiceHandlerPlugin` (50), `SecurityWebServiceHandlerPlugin` (60), `ApiKeyWebServiceHandlerPlugin`, `AnalyticsWebServiceHandlerPlugin`, `AccessTokenWebServiceHandlerPlugin` (70), `JsonConverterWebServiceHandlerPlugin` (80), `ValidatorWebServiceHandlerPlugin` (90), `RestfulServiceWebServiceHandlerPlugin` (120), `ServerSideStateWebServiceHandlerPlugin`, `LogExceptionsHandlerPlugin`
+**Handler Chain** : `LogExceptionsHandlerPlugin` (5), `ExceptionWebServiceHandlerPlugin` (10), `CorsAllowerWebServiceHandlerPlugin` (20), `AnalyticsWebServiceHandlerPlugin` (30), `JsonConverterWebServiceHandlerPlugin` (40), `ApiKeyWebServiceHandlerPlugin` (45), `SessionInvalidateWebServiceHandlerPlugin` (50), `SessionWebServiceHandlerPlugin` (60), `SecurityWebServiceHandlerPlugin` (70), `ServerSideStateWebServiceHandlerPlugin` (80), `AccessTokenWebServiceHandlerPlugin` (90), `RateLimitingWebServiceHandlerPlugin` (100), `ValidatorWebServiceHandlerPlugin` (110), `RestfulServiceWebServiceHandlerPlugin` (120)
 
 **WebServer** : `JavalinWebServerPlugin`, `VegaJavalinFilter`
 

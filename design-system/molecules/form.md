@@ -12,12 +12,12 @@ Tout d'abord l'ensemble des composants de saisies (molécules) partagent des fon
 
 La capacité de chaque molécule à s'afficher selon les deux modes de rendu permet une cohérence maximale entre les page de saisie et les pages de consultation, l'utilisateur est ainsi parfaitement guidé dans son parcours. 
 
-D'autre part l'intégralité des composants que nous avons selectionnés peuvent fonctionner uniquement avec le clavier pour une accessibilité améliorée.
+D'autre part l'intégralité des composants que nous avons sélectionnés peuvent fonctionner uniquement avec le clavier pour une accessibilité améliorée.
 
 # Bonnes pratiques
 
 - Placez toujours à proximité les champs proches d'un point de vue fonctionnel
-- Privilégiez les controles globaux côté serveur qui sont les seuls à même de garantir l'intégrité de l'application. Utilisez les contrôles de surface côté client en complément.
+- Privilégiez les contrôles globaux côté serveur qui sont les seuls à même de garantir l'intégrité de l'application. Utilisez les contrôles de surface côté client en complément.
 - Essayez de densifier au maximum l'affichage vous éviterez alors à vos utilisateurs des "scrolls" superflus.
 - Le libellé doit être court et précis, toujours sur une seule ligne
 - Privilégiez des aides à la saisie courte, sur une ligne ou placez les en dehors du champs de saisie

@@ -1,6 +1,6 @@
-# Liste d'élements
+# Liste d'éléments
 
-La liste d'élements est en quelque sorte un intermédiaire entre tableau et carte.
+La liste d'éléments est en quelque sorte un intermédiaire entre tableau et carte.
 C'est un bon choix lorsque l'on souhaite afficher des contenus graphiques mais que les informations sont très majoritairement textuelles.
 
 C'est un format qui dans certains cas s'adapte bien sur mobile.

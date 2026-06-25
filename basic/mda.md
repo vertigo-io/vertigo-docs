@@ -55,7 +55,7 @@ mdaConfig:
 
 ## Utilisation
 
-Studio peut-etre utilisé selon deux modalités :
+Studio peut-être utilisé selon deux modalités :
 
 - via une extension __VisualStudioCode__
 - via une classe Main Java à lancer depuis son IDE favori
@@ -68,15 +68,15 @@ Ajouter l'extension [suivante](https://marketplace.visualstudio.com/items?itemNa
 
 L'extension s'active automatiquement lorsqu'un fichier ksp est ouvert. 
 
-?>En plus de mettre à disposition Vertigo-Studio l'extension VSCode aujoute le support des KSP (coloration syntaxique et language-server)
+?>En plus de mettre à disposition Vertigo-Studio l'extension VSCode ajoute le support des KSP (coloration syntaxique et language-server)
 
 Procéder ainsi :
 
 1. Placer le fichier `studio-config.yaml` à la racine du projet.
 2. Créer Editer vos fichiers ksp pour concevoir votre projet
-3. Dans VSCode : *Terminal* > *Run Task...* > *vertigo-sudio* > *clean-watch*
+3. Dans VSCode : *Terminal* > *Run Task...* > *vertigo-studio* > *clean-watch*
 
-?> Il existe plusieurs types de tasks, les tasks de type `watch` permettent de suveiller les modifications des fichiers KSP pour générer le code en continu.
+?> Il existe plusieurs types de tasks, les tasks de type `watch` permettent de surveiller les modifications des fichiers KSP pour générer le code en continu.
 
 ?> Pour que les modifications soient automatiquement détectées dans Eclipse pensez à activer les native hooks dans les préférences Eclipse.
 
@@ -85,7 +85,7 @@ Procéder ainsi :
 
 Studio est une application Java qui s'exécute en dehors du contexte d'exécution normal du projet. Son exécution est donc toujours à l'initiative du développeur.
 
-Il est possible de lancer Studio via une classe Main Java directement depuis l'IDE utilisé par le développeur. Cette manière de procéder permet une configuration simplifiée et de ne pas lier cette étape du développement à des outils tiers (Ant, Maven etc..) bien qu'il soit techniquement possible de le faire. 
+Il est possible de lancer Studio via une classe Main Java directement depuis l'IDE utilisé par le développeur. Cette manière de procéder permet une configuration simplifiée et de ne pas lier cette étape du développement à des outils tiers (Ant, Maven etc.) bien qu'il soit techniquement possible de le faire. 
 
 Ainsi, créons une classe  `my.project.mda.StudioGenerate.java`, contenant la méthode `main` qui sera exécutée.
 

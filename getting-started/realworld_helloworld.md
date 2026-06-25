@@ -348,7 +348,7 @@ modules:
   io.vertigo.datamodel.DataModelFeatures:
   io.vertigo.vega.VegaFeatures: # utilisation du module web services
   io.vertigo.datafactory.DataFactoryFeatures: # utilisation du module collections
-  io.vertigo.datastore.DataStoreFeatures: # utilisation du module vertigo-dynamo
+  io.vertigo.datastore.DataStoreFeatures: # utilisation du module vertigo-datastore
     features:
 	  - entitystore: # activation du support du stockage des entités de notre modèle
 	  - cache: # activation du cache
@@ -788,7 +788,7 @@ Installer un serveur Tomcat (version 9.0+) dans Eclipse et y ajouter notre proje
 Pour ce faire :
 
 - Vérifier l'encodage du workspace Eclipse (Window -> Preferences -> General -> Workspace et mettre Text file encoding sur UTF-8)
-- Télécharger l'archive du serveur tomcat depuis le site officiel :https://apache.mediamirrors.org/tomcat/tomcat-9/v9.0.43/bin/apache-tomcat-9.0.43.zip
+- Télécharger l'archive du serveur Tomcat depuis le site officiel : https://tomcat.apache.org/download-10.cgi
 - Extraire l'archive à l'endroit de votre convenance. Par exemple __%userprofile%/tomcat__
 - Dans la vue __Servers__ d'Eclipse cliquer sur _No Servers are available. Click this link to create a new server..._
 - Sélectionner Apache->Tomcat v9.0 Server

@@ -30,7 +30,7 @@ Le module s'intègre dans une application de Gestion de Projet, où la traçabil
 
 ## Activation
 
-Le module s'active exclusivement via les annotations `@Feature` dans la configuration YAML de `AuditFeatures`. Aucune méthode Java DSL n'est disponible.
+Le module s'active via les annotations `@Feature` dans la configuration YAML de `AuditFeatures`. Des méthodes Java DSL existent également (`withTrace()`, `withLedger()`, `withEthereumBlockChain(Param...)`, etc.) mais ne sont pas recommandées : privilégier YAML.
 
 | Feature YAML | Composants activés |
 |---|---|

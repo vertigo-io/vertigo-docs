@@ -16,12 +16,12 @@ Le pattern Master-Worker sépare l'émetteur de travail (Master) de l'exécutant
 
 Côté Master, `MasterManagerImpl` utilise un `Coordinator` pour suivre les travaux en cours et les résultats.
 
-Côté Worker, `WorkersManagerImpl` crée un pool d'exécution par workType. Les dispatchers pollent la file via le plugin de transport, puis délèguent à `WorkEngine` via l'injection de dépendances.
+Côté Worker, `WorkersManagerImpl` crée un pool d'exécution unique (`workersCount` threads). Les dispatchers (un par workType) pollent la file via le plugin de transport, puis délèguent à `WorkEngine` via l'injection de dépendances. Le master consomme les résultats via `DistributedWorkResultWatcher` qui poll les résultats finis à la même fréquence `pollFrequencyMs`.
 
 ### Transports
 
-- **Redis** : communication pair-à-pair via `RedisMasterPlugin` et `RedisWorkersPlugin`.
-- **REST** : communication via un serveur centralisé. `RestMasterPlugin`, `RestMasterWebService`, et `RestWorkersPlugin`.
+- **Redis** : communication pair-à-pair via `RedisMasterPlugin` et `RedisWorkersPlugin`. Files atomiques Redis (`lmove`), heartbeat via `SETEX`, namespace `vertigo:work:{workType}:{id}`. Sérialisation : Java + Base64.
+- **REST** : communication via un serveur centralisé. `RestMasterPlugin`, `RestMasterWebService`, et `RestWorkersPlugin`. Endpoints : `GET /pollWork/{type}`, `POST /event/{start,success,failure}/{uuid}`. Sérialisation : Java + GZip + Base64 + JSON.
 
 ## API
 
@@ -110,6 +110,23 @@ Stella s'active exclusivement via les annotations `@Feature` dans la configurati
 `RestMasterWebService` expose des endpoints sous le préfixe `/backend/workQueue` pour le polling et le signalement des événements de travail.
 
 ## Résilience
+
+### Retry automatique
+
+En cas d'échec d'un `WorkItem`, le système tente automatiquement jusqu'à 3 exécutions (`MAX_WORK_RETRY_COUNT = 3`) avant d'abandonner et de propager l'erreur au master.
+
+### Dead-node detection
+
+Un daemon planifié (`@DaemonScheduled`, période 20s) détecte les nœuds morts :
+- **Côté master** : scan des workTypes sans heartbeat worker actif. Les `WorkItem` en cours sont réinjectés dans la file Todo.
+- **Côté worker** : heartbeat publié (`SETEX` Redis / timestamp REST). Si le heartbeat dépasse `timeoutSeconds` (60s par défaut), le nœud est considéré mort.
+
+### Graceful shutdown
+
+Les nœuds master et worker implémentent un arrêt en deux phases :
+1. `shutdown()` — arrête l'acceptation de nouveaux travaux
+2. `awaitTermination(60s)` — laisse les travaux en cours se terminer
+3. `shutdownNow()` — force l'arrêt des tâches restantes
 
 ### workType inactif
 
@@ -271,8 +288,11 @@ modules:
 ## Vigilance
 
 - `WorkEngine` n'est pas thread-safe. Une instance est créée par appel via l'injection de dépendances. Ne pas partager d'état mutable entre les appels.
+- `WorkEngine` et ses paramètres (work et result) **doivent implémenter `Serializable`** (sérialisation Java nécessaire pour le transport Redis et REST).
 - `WorkPromise.join()` bloque le thread appelant. Utiliser `schedule()` avec `WorkResultHandler` pour les appels non bloquants.
-- En cas d'erreur durant le traitement, `WrappedException` est levée par `join()`. Le handler `onDone()` reçoit l'erreur en second paramètre.
+- En cas d'erreur durant le traitement, l'exception est relayée par `join()`. Le handler `onDone()` reçoit l'erreur en second paramètre.
+- Retry automatique : chaque `WorkItem` échoué est réessayé jusqu'à 3 fois avant abandon.
+- Les travaux orphelins (node mort) sont réinjectés dans la file Todo par le daemon de détection de nœuds morts (période 20s).
 
 ## Références
 
@@ -292,7 +312,7 @@ modules:
 | `WorkEngine<W,R>` | Interface contractuelle implémentée par le développeur |
 | `WorkPromise<R>` | Future bloquante (`join()`) pour l'appel synchrone |
 | `WorkResultHandler<R>` | Callback asynchrone (`onStart`, `onDone`) |
-| `Coordinator` | Interface de coordination des travaux entre master et workers |
+| `Coordinator` | Interface commune de soumission asynchrone de travaux (implémentée séparément par `MasterCoordinator` et `WorkersCoordinator`) |
 | `WorkListener` | Interfaces d'écoute des événements de travail |
 
 ### Features (@Feature)

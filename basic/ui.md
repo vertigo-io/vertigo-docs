@@ -36,6 +36,8 @@ Pour la partie *vue* nous utilisons :
 - **Vue.js** comme librairie de rendu client
 - **Quasar** comme bibliothèque de composants graphiques
 
+?> Les sections Configuration, Création d'un controller, et Création de la vue décrivent l'approche vertigo-ui avec SpringMVC. Pour les applications Vega/Javalin, le module vertigo-ui fonctionne en complément via les composants vu:.
+
 ## Configuration
 
 La configuration du module vertigo-ui se limite à la configuration d'une application SpringMVC classique via les mécanismes offerts.
@@ -51,7 +53,7 @@ Ainsi, pour configurer le projet *MyProject* avec vertigo-ui, il suffit de crée
 
 ```java
 @ComponentScan({
-		//place here your controller packages for spring component scanning  })
+		//place here your controller packages for spring component scanning
 public class MarsVSpringWebConfig extends VSpringWebConfig {
 	// nothing basic config is enough
 	
@@ -134,7 +136,7 @@ Ce controller offre plusieurs fonctions :
 - affichage d'un écran permettant la création d'une nouvelle personne via un appel de type `GET` sur l'url `/person/new`
 - passage en mode édition via un appel de type `POST` sur l'url `/person/_edit`
 - sauvegarde d'une nouvelle personne via un appel de type `POST` sur l'url `/person/_create`
-- sauvegarde d'une personne existante via un appel de type `POST` sur l'url `/person/_create`
+- sauvegarde d'une personne existante via un appel de type `POST` sur l'url `/person/_save`
 
 Le regroupement de l'ensemble de ces fonctions dans un controller unique est possible grâce à l'utilisation transparente du ViewContext qui permet à chaque requête de conserver les informations de l'appel précèdent. Ainsi, la méthode `doSave` peut récupérer dans le ViewContext (mis à jour via les paramètres inclus dans l'appel POST) l'objet Person à l'aide de l'annotation vertigo-ui `@ViewAttribute` et appeler le service métier adéquat.
 
@@ -175,7 +177,7 @@ Pour notre écran de détail, créons la vue suivante :
 	    <title>Person detail</title>		
 	</head>
 	
-	<body class="mat desktop no-touch platform-mat">
+	<body class="desktop">
 		<vu:page>
 			<div id="page" v-cloak>
 				<vu:form>

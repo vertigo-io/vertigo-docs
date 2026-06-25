@@ -1,6 +1,6 @@
 # vertigo-datafactory
 
-**vertigo-datafactory** est le module de recherche et d'indexation de l'écosystème Vertigo. Il expose deux mécanismes complémentaires : une recherche textuelle distribuée basée sur ElasticSearch et des collections in-mémoire utilisant Lucene. Aucune déclaration YAML dédiée n'est requise ; la configuration se fait via les Features et les paramètres décorés par `@ParamValue`.
+**vertigo-datafactory** est le module de recherche et d'indexation de la plateforme Vertigo. Il expose deux mécanismes complémentaires : une recherche textuelle distribuée basée sur ElasticSearch et des collections in-mémoire utilisant Lucene. La configuration se fait via les Features (YAML ou API Java) et les paramètres décorés par `@ParamValue`.
 
 Le module repose sur deux axes :
 
@@ -45,7 +45,7 @@ KeyConcept / DtList (données en mémoire ou persistées)
 </dependency>
 ```
 
-Aucun fichier YAML. Les composants sont activés par détection de classes sur le classpath. Les paramètres se configurent via `@ParamValue`, par exemple :
+Le composant `CollectionsManager` est toujours actif (`buildFeatures()`). Les autres nécessitent une feature YAML (cf. §Pour les experts). Les paramètres se configurent via `@ParamValue`, par exemple :
 
 - `@ParamValue("envIndexPrefix")` — préfixe des noms d'index
 - `@ParamValue("rowsPerQuery")` — taille des lots de chargement
@@ -160,7 +160,7 @@ Les classes internes du connecteur incluent `ESStatement`, `ESSearchRequestBuild
 
 ## DSL de requête
 
-Le moteur DSL utilise un parser PEG pour évaluer les expressions de filtrage. Treize règles composent la grammaire. Les opérateurs disponibles :
+Le moteur DSL utilise un parser PEG pour évaluer les expressions de filtrage. Dix-sept règles composent la grammaire (`Dsl*Rule`). Les opérateurs disponibles :
 
 | Règle | Syntaxe | Exemple |
 |---|---|---|
@@ -284,15 +284,15 @@ FacetedQuery(FacetedQueryDefinition definition, SelectedFacetValues selectedValu
 
 ### FacetDefinition
 
-La classe `FacetDefinition` est **finale** (non subclassable). Les facettes se créent exclusivement via des méthodes factory statiques :
+La classe `FacetDefinition` est **finale** (non subclassable). Les facettes se créent exclusivement via l'API fluide `FacetFactory` :
 
 | Factory | Type | Paramètres |
 |---|---|---|
-| `createFacetDefinitionByTerm()` | Terme | `name`, `dtField`, `label`, `multiSelectable`, `order` |
-| `createFacetDefinitionByRange()` | Range | `name`, `dtField`, `label`, `facetValues`, `multiSelectable`, `order` |
-| `createCustomFacetDefinition()` | Custom | `name`, `dtField`, `label`, `customParams` (Map&lt;String, String&gt;), `order` |
+| `FacetFactory.createFacetDefinitionByTerm()` | Terme | `name`, `dtField`, `label`, `multiSelectable`, `order` |
+| `FacetFactory.createFacetDefinitionByRange()` | Range | `name`, `dtField`, `label`, `facetValues`, `multiSelectable`, `order` |
+| `FacetFactory.createCustomFacetDefinition()` | Custom | `name`, `dtField`, `label`, `customParams` (Map&lt;String, String&gt;), `order` |
 
-Le type de facette est déterminé par la factory appelée, pas par une énumération `FacetType` (n'existe pas).
+La construction déclarative utilise `FacetTermDefinitionSupplier`, `FacetRangeDefinitionSupplier` et `FacetCustomDefinitionSupplier`. Le type de facette est déterminé par la factory appelée, pas par une énumération `FacetType` (n'existe pas).
 
 Exemple narratif pour le domaine Gestion de Projet :
 - `FctTacheCategorie` : facette terme sur le champ categorie — filtre par type de tâche (développement, test, documentation)
@@ -439,15 +439,15 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 - **Taille des facettes range** : les plages sont définies statiquement dans la `FacetDefinition`. Un document hors de toutes les plages n'apparaît dans aucune facette range. Inclure une plage catch-all en dernière position.
 - **LoadData du SearchLoader** : `loadData(SearchChunk<K>)` retourne `List<SearchIndex<K, I>>`, pas `void`. Ne pas utiliser `SearchChunk<String>`.
 - **ListFilterBuilder** : pas de méthode statique `.build()`. Utiliser le pattern de builder instance : `withListFilterQuery()` → `withCriteria()` → `build()`.
-- **ESDocumentCodec** : les documents ElasticSearch sont sérialisés en base64 compressé. Cela impacte la lisibilité directe des documents dans l'interface ES mais optimise le transfert réseau.
+- **ESDocumentCodec** : `ESDocumentCodec` gère l'encodage/décodage des documents ElasticSearch. La sérialisation passe par base64 et éventuellement compression (à confirmer par source). Cela impacte la lisibilité directe des documents dans l'interface ES.
 
 ## Pour les experts
 
 ### Managers
 | Manager | Rôle | Activé par |
 |---|---|---|
-| `CollectionsManager` | Facettage pur-Java + filtrage Lucene in-RAM | Toujours actif (buildFeatures) |
-| `SearchManager` | Reindexation (3 stratégies), requêtes ElasticSearch, opérations sur les metadata | `search` |
+| `CollectionsManager` | Facettage pur-Java + filtrage Lucene in-RAM | Always (`buildFeatures`) |
+| `SearchManager` | Reindexation (3 stratégies), requêtes ElasticSearch | `search` |
 
 ### Features (@Feature)
 | Flag | Composants |
@@ -456,6 +456,23 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 | `search.elasticsearch.client` | `ClientESSearchServicesPlugin` (Transport legacy) |
 | `search.elasticsearch.restHL` | `RestHLClientESSearchServicesPlugin` (RestHighLevelClient 7.17.x) |
 | `collections.luceneIndex` | `LuceneIndexPlugin` |
+
+### API fluide (Suppliers)
+| Supplier | Rôle |
+|---|---|
+| `SearchIndexDefinitionSupplier` | Construction fluide de `SearchIndexDefinition` |
+| `FacetedQueryDefinitionSupplier` | Construction fluide de `FacetedQueryDefinition` |
+| `FacetTermDefinitionSupplier` | Construction fluide d'une `FacetDefinition` terme |
+| `FacetRangeDefinitionSupplier` | Construction fluide d'une `FacetDefinition` range |
+| `FacetCustomDefinitionSupplier` | Construction fluide d'une `FacetDefinition` custom |
+
+### Utils & Pattern Filters
+| Classe | Rôle |
+|---|---|
+| `FacetFactory` | Factory de facettes (term/range/custom) et clusters |
+| `IndexFilterFunction<D>` | Filtrage indexé Lucene (keywords, sort, pagination) |
+| `DtListPatternFilter<D>` | Pattern runtime : `FIELD:VALUE` ou `FIELD:[MIN TO MAX]` |
+| `DtListPatternFilterUtil` | Parser regex : conversion BasicType, ranges, termes |
 
 ### Plugins
 | Plugin | Rôle | Feature |

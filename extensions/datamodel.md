@@ -7,15 +7,15 @@ Ce module est fortement basé sur des définitions qui ont vocation à être tra
 Il inclut :
 
 - de nombreuses définitions liées à la couche domaine :
-	- `DtDefinition`, `DataDefinition`, `DataField`
+ 	- `DataDefinition`, `DataField`
 	- Contraintes, Formatters
 	- Associations N-N, 1-N
-	- `TaskDefinition`, `TaskAttributes
+ 	- `TaskDefinition`, `TaskAttribute`
 - des concepts/API transverses :
 	- `UID`, `Entity`, `DataObject`, `VAccessor`
 	- `DtList`, `DtListState`, `DtListURI`
-	- `MasterData`, `StaticMasterData`, `KeyConcept`, `Fragment`
-	- `SmartType`, `Adapter`, `Formatter`, `Constraint`
+ 	- `DtMasterData`, `DtStaticMasterData`, `KeyConcept`, `Fragment`
+ 	- `SmartTypeDefinition`, `Formatter`, `Constraint`
 	- `Criteria`, `Criterion`, `CriteriaExpression`
 - les managers `SmartTypeManager` et `TaskManager`, toujours actifs
 
@@ -110,7 +110,7 @@ __SmartTypes : ValueObject__
 ```ksp
 create Domain DoFormulaire {
 	dataType : ValueObject
-	type : "fr.gouv.interieur.rdvpref.support.smarttypes.FormulaireDemarche"
+	type : "com.monde.ECommerce.models.CoinType"
 	storeType : "JSONB"
 }
 ```
@@ -200,29 +200,27 @@ Les associations entre objets sont définies par :
 
 | Composant | Rôle |
 |---|---|
+| `DataModelFeatures` | Classe `@Feature` qui active les managers via `buildFeatures()` |
 | `DataMetricsProvider` | Métriques d'accès aux données |
 | `TaskMetricsProvider` | Métriques d'exécution des tâches |
-| `ModelDefinitionProvider` | Fournisseur de définitions du modèle |
 | `SmartTypesLoader` | Chargement des SmartTypes |
 | `DtObjectsLoader` | Chargement des DtObjects |
-| `TaskAmplifierMethod` | Proxy Task -> DI (feature `taskProxyMethod`) |
-
-### Features
-
-Aucun `@Feature` — vertigo-datamodel est toujours actif. Tous les composants sont injectés par `buildFeatures()`.
+| `TaskAmplifierMethod` | Proxy Task → DI |
 
 ### Composition
 
 | Catégorie | Classes |
 |---|---|
-| **SmartType** | `SmartTypeDefinition`, `SmartTypeDefinitionBuilder`, `Properties`, `Property`, `PropertiesBuilder`, `DtProperty` |
-| **SmartType Annotations** | `@SmartTypeDefinition`, `@SmartTypeProperty`, `@Formatter`, `@Constraint`, `@Adapter` |
-| **SmartType Config** | `AdapterConfig`, `FormatterConfig`, `ConstraintConfig`, `SmarttypeResources` |
-| **Data Definitions** | `DataDefinition`, `DataDefinitionBuilder`, `DataField`, `DataFieldName`, `DataStereotype` |
+| **SmartType** | `SmartTypeDefinition`, `SmartTypeDefinitionBuilder`, `Properties`, `Property`, `PropertiesBuilder`, `DtProperty`, `FormatterConfig`, `ConstraintConfig`, `SmarttypeResources` |
+| **SmartType Annotations** | `@SmartTypeDefinition`, `@SmartTypeProperty`, `@SmartTypeProperties`, `@Formatter`, `@Constraint`, `@Constraints`, `@Adapter`, `@Adapters` |
+| **SmartType Implementations** | `Formatter`, `FormatterException`, `Constraint`, `ConstraintException` |
+| **Data Definitions** | `DataDefinition`, `DataDefinitionBuilder`, `DataField`, `DataFieldName`, `DataStereotype`, `DataDescriptor`, `DataAccessor` |
 | **Data Stereotype Annotations** | `@DataSpace`, `@Field`, `@DisplayField`, `@SortField`, `@KeyField`, `@ForeignKey`, `@Association`, `@AssociationNN`, `@Fragment` |
-| **Data Model** | `Entity`, `DataObject`, `VAccessor`, `ListVAccessor`, `UID`, `DtList`, `DtListState`, `DtListURI`, `Fragment`, `MasterDataEnum`, `DtMasterData`, `DtStaticMasterData`, `KeyConcept` |
+| **Data Model** | `Entity`, `DataObject`, `VAccessor`, `ListVAccessor`, `UID`, `DtList`, `DtListState`, `DtListURI`, `DtListURIForMasterData`, `Fragment`, `MasterDataEnum`, `DtMasterData`, `DtStaticMasterData`, `KeyConcept` |
+| **Associations** | `AssociationDefinition`, `AssociationSimpleDefinition`, `AssociationNNDefinition`, `AssociationNode`, `DtListURIForAssociation`, `DtListURIForSimpleAssociation`, `DtListURIForNNAssociation` |
 | **Task Definitions** | `TaskDefinition`, `TaskDefinitionBuilder`, `TaskAttribute`, `TaskEngine` |
 | **Task Model** | `Task`, `TaskBuilder`, `TaskResult` |
-| **Task Proxy** | `@TaskAnnotation`, `@TaskProxyAnnotation`, `@TaskInput`, `@TaskOutput`, `@TaskContextProperty` |
+| **Task Proxy** | `@TaskAnnotation`, `@TaskProxyAnnotation`, `@TaskInput`, `@TaskOutput`, `@TaskContextProperty`, `@TaskContextProperties` |
 | **Criteria** | `Criteria`, `Criterion`, `CriteriaEncoder`, `CriterionOperator`, `CriteriaLogicalOperator`, `CriteriaExpression`, `CriteriaCtx`, `CriterionLimit`, `Criterions`, `CriteriaUtil` |
 | **Data Util** | `DataModelUtil`, `AssociationUtil`, `VCollectors` |
+| **Impl/Loaders** | `Loader`, `DynamicDefinition`, `DynamicDefinitionSolver`, `SmartTypesLoader`, `DtObjectsLoader`, `TaskAmplifierMethod` |

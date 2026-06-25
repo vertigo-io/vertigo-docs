@@ -1,11 +1,11 @@
 # Quarto
 
-**Quarto** est le module de **conversion, export et publication documentaire** de Vertigo.
+**Quarto** est le module de **conversion, export et publication documentaire** de la plateforme Vertigo.
 
 Il fournit trois sous-systèmes indépendants :
 
 - **Publisher** : Fusion de données métier dans des modèles de documents bureautiques (ODT, DOCX). Les modèles sont éditables depuis OpenOffice ou Microsoft Word.
-- **Converter** : Conversion de documents d'un format vers un autre (ODT, DOC, DOCX, RTF, TXT → PDF, … ) grâce à OpenOffice (local ou remote) ou XDocReport.
+- **Converter** : Conversion de documents d'un format vers un autre (ODT, DOC, DOCX, RTF, TXT vers PDF, …) grâce à OpenOffice (local ou distant) ou XDocReport.
 - **Exporter** : Export de collections d'objets métier vers des formats utilitaires : CSV, PDF, RTF, XLS, XLSX, ODS.
 
 ## Publisher
@@ -111,7 +111,7 @@ Le **Converter** permet de convertir un document d'un format vers un autre.
 |---|---|---|
 | `OpenOfficeLocalConverterPlugin` | `converter.localOpenOffice` | Conversion via OpenOffice installé localement |
 | `OpenOfficeRemoteConverterPlugin` | `converter.remoteOpenOffice` | Conversion via un serveur OpenOffice distant |
-| `XDocReportConverterPlugin` | `converter.xDocReport` | Conversion via XDocReport (formats supportés : DOC, DOCX, ODT, RTF, TXT → PDF) |
+| `XDocReportConverterPlugin` | `converter.xDocReport` | Conversion via XDocReport (formats supportés : DOC, DOCX, ODT, RTF, TXT vers PDF) |
 
 `MimeTypesFileTypeDetector` détecte automatiquement le type de fichier à partir du MIME type.
 
@@ -140,17 +140,17 @@ final List<ExportField> fields = List.of(
 );
 
 final ExportSheet sheet = new ExportSheet(
-    "Catalogue",    // titre du feuillet
-    fields,         // colonnes
-    null,           // single DataObject (XOR avec DtList)
-    articlesDtList  // DtList à exporter
+    "Catalogue",
+    fields,
+    null,
+    articlesDtList
 );
 
 final Export export = new Export(
-    ExportFormat.CSV,       // format
-    "articles.csv",         // nom de fichier
-    "Export des articles",  // titre
-    "MonApp",               // auteur
+    ExportFormat.CSV,
+    "articles.csv",
+    "Export des articles",
+    "MonApp",
     Export.Orientation.Portrait,
     List.of(sheet)
 );
@@ -166,9 +166,9 @@ L'objet `Export` peut contenir plusieurs `ExportSheet`. Chaque colonne est un `E
 
 | Manager | Rôle | Activé par |
 |---|---|---|
-| `ConverterManager` (`ConverterManagerImpl`) | Conversion de documents entre formats | `converter` |
-| `ExporterManager` (`ExporterManagerImpl`) | Export de données vers fichiers tabulaires/documents | `exporter` |
-| `PublisherManager` (`PublisherManagerImpl`) | Fusion de données dans modèles de documents | `publisher` |
+| `ConverterManager` | Conversion de documents entre formats | `converter` |
+| `ExporterManager` | Export de données vers fichiers tabulaires/documents | `exporter` |
+| `PublisherManager` | Fusion de données dans modèles de documents | `publisher` |
 
 ### Plugins Converter
 
@@ -252,7 +252,7 @@ L'objet `Export` peut contenir plusieurs `ExportSheet`. Chaque colonne est un `E
 | `ExportHelper` | Utilitaires de construction d'export |
 | `ExporterUtil` | Utilitaires généraux de l'exporter |
 
-### Model Converter
+### Modèle Converter
 
 | Classe | Description |
 |---|---|
@@ -263,18 +263,18 @@ L'objet `Export` peut contenir plusieurs `ExportSheet`. Chaque colonne est un `E
 
 | Flag | Composants |
 |---|---|
-| `converter` | `ConverterManager` + `ConverterManagerImpl` |
+| `converter` | `ConverterManager` |
 | `converter.localOpenOffice` | `OpenOfficeLocalConverterPlugin` |
 | `converter.remoteOpenOffice` | `OpenOfficeRemoteConverterPlugin` |
 | `converter.xDocReport` | `XDocReportConverterPlugin` |
-| `exporter` | `ExporterManager` + `ExporterManagerImpl` |
+| `exporter` | `ExporterManager` |
 | `exporter.csv` | `CSVExporterPlugin` |
 | `exporter.pdf` | `PDFExporterPlugin` |
 | `exporter.rtf` | `RTFExporterPlugin` |
 | `exporter.xls` | `XLSExporterPlugin` (@Deprecated) |
 | `exporter.xlsx` | `XLSXExporterPlugin` |
 | `exporter.ods` | `ODSExporterPlugin` |
-| `publisher` | `PublisherManager` + `PublisherManagerImpl` |
+| `publisher` | `PublisherManager` |
 | `publisher.odt` | `OpenOfficeMergerPlugin` |
 | `publisher.docx` | `DOCXMergerPlugin` |
 
@@ -288,9 +288,9 @@ io.vertigo.quarto.QuartoFeatures:
         - publisher:
     featuresConfig:
         - converter.localOpenOffice:
-            openOfficePath: "/usr/lib/openoffice"
+              openOfficePath: "/usr/lib/openoffice"
         - exporter.csv:
-            separator: ";"
+              separator: ";"
         - exporter.pdf:
         - publisher.odt:
         - publisher.docx:

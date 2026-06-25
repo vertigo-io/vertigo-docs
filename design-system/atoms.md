@@ -4,8 +4,8 @@ Les atomes constituent les briques élémentaires dans un design système qui pa
 
 L'écosystème OpenSource regorge de bibliothèques de composants IHM. Il en existe un grand nombre qui sont d'un excellent niveau de qualité et de support.
 
-Au lieu d'en redeveloper une enième, nous avons fait le choix d'en sélectionner une qui correspondait à la fois au style général auquel nous souhaitions adéhérer, dont l'équipe de développement partagait des convictions communes avec celles de Vertigo et qui surtout disposait d'un niveau de qualité et de support de tout premier ordre.
-Autre élement qui peux sembler anodin aux yeux de certains et qui est néanmoins primordial, par ce choix nous souhaitions mettre à l'honneur une solution européenne.
+Au lieu d'en re-déveloper une énième, nous avons fait le choix d'en sélectionner une qui correspondait à la fois au style général auquel nous souhaitions adhérer, dont l'équipe de développement partagait des convictions communes avec celles de Vertigo et qui surtout disposait d'un niveau de qualité et de support de tout premier ordre.
+Autre élément qui peut sembler anodin aux yeux de certains et qui est néanmoins primordial, par ce choix nous souhaitions mettre à l'honneur une solution européenne.
 
 Ce choix est également motivé par notre conviction que le monde de l'OpenSource tire sa force dans la collaboration et l'échange.
 
