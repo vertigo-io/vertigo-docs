@@ -149,40 +149,80 @@ Les champs du modèle doivent correspondre à un `PublisherDataDefinition` const
 |---|---|
 | `stringField` | Chaîne de caractères |
 | `booleanField` | Booléen |
-| `nodeField` (`dataField`) | Sous-nœud de type `PublisherNode` |
+| `dataField` | Sous-nœud de type `PublisherNode` |
 | `listField` | Liste de `PublisherNode` |
 | `imageField` | Image (`VFile`) |
 
 #### Exemple de définition
 
 ```java
-final PublisherNodeDefinition ville = new PublisherNodeDefinitionBuilder()
-        .addStringField("nom")
-        .addStringField("codePostal")
-        .build();
+public final class MyPublisherDefinitionProvider implements SimpleDefinitionProvider {
 
-final PublisherNodeDefinition address = new PublisherNodeDefinitionBuilder()
-        .addStringField("rue")
-        .addNodeField("ville", ville)
-        .build();
+    private static PublisherDataDefinition createTestEnquete() {
+        final PublisherNodeDefinition ville = new PublisherNodeDefinitionBuilder()
+                .addStringField("nom")
+                .addStringField("codePostal")
+                .build();
 
-final PublisherDataDefinition pubDef = new PublisherDataDefinition("PuEnquete",
-    new PublisherNodeDefinitionBuilder()
-        .addBooleanField("enqueteTerminee")
-        .addStringField("codeEnquete")
-        .addNodeField("enqueteur", enqueteur)
-        .addListField("misEnCause", misEnCause)
-        .build()
-);
+        final PublisherNodeDefinition address = new PublisherNodeDefinitionBuilder()
+                .addStringField("rue")
+                .addNodeField("ville", ville)
+                .build();
+
+        final PublisherNodeDefinition enqueteur = new PublisherNodeDefinitionBuilder()
+                .addStringField("nom")
+                .addStringField("prenom")
+                .addNodeField("adresseRatachement", address)
+                .build();
+
+        final PublisherNodeDefinition misEnCause = new PublisherNodeDefinitionBuilder()
+                .addBooleanField("siHomme")
+                .addStringField("nom")
+                .addStringField("prenom")
+                .addListField("adresseConnues", address)
+                .build();
+
+        final PublisherNodeDefinition publisherNodeDefinition = new PublisherNodeDefinitionBuilder()
+                .addBooleanField("enqueteTerminee")
+                .addStringField("codeEnquete")
+                .addNodeField("enqueteur", enqueteur)
+                .addListField("misEnCause", misEnCause)
+                .addStringField("fait")
+                .addBooleanField("siGrave")
+                .build();
+
+        return new PublisherDataDefinition("PuEnquete", publisherNodeDefinition);
+    }
+
+    @Override
+    public List<Definition> provideDefinitions(final DefinitionSpace definitionSpace) {
+        return new ListBuilder<Definition>()
+                .add(createTestEnquete())
+                .build();
+    }
+}
 ```
 
 ### Utilisation
 
 ```java
-final PublisherData publisherData = createPublisherData("PuMyPublish");
-PublisherDataUtil.populateData(myData, publisherData.getRootNode());
-final URL modelFileURL = resourceManager.resolve("MyModel.odt");
-final VFile result = publisherManager.publish("MyPublish.odt", modelFileURL, publisherData);
+public void testMergerSimple() {
+    final MyData myData = loadMyData();
+    final PublisherData publisherData = createPublisherData("PuMyPublish");
+    PublisherDataUtil.populateData(myData, publisherData.getRootNode());
+    final URL modelFileURL = resourceManager.resolve(DATA_PACKAGE + "MyModel.odt");
+    final VFile result = publisherManager.publish(OUTPUT_PATH + "MyPublish.odt", modelFileURL, publisherData);
+    // Ne pas oublier de sauver le fichier (c'est un fichier temporaire qui sera purgé)
+    save(result);
+}
+
+private static PublisherData createPublisherData(final String definitionName) {
+    final PublisherDataDefinition publisherDataDefinition = Home.getApp().getDefinitionSpace().resolve(definitionName, PublisherDataDefinition.class);
+    Assert.assertNotNull(publisherDataDefinition);
+    final PublisherData publisherData = new PublisherData(publisherDataDefinition);
+    Assert.assertNotNull(publisherData);
+    return publisherData;
+}
 ```
 
 ## Converter

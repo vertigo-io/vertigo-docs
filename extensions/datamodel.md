@@ -7,7 +7,7 @@ Ce module est fortement basé sur des définitions qui ont vocation à être tra
 Il inclut :
 
 - de nombreuses définitions liées à la couche domaine :
- 	- `DataDefinition`, `DataField`
+ 	- `DtDefinition`
 	- Contraintes, Formatters
 	- Associations N-N, 1-N
  	- `TaskDefinition`, `TaskAttribute`

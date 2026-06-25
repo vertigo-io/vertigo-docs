@@ -45,6 +45,7 @@ io.vertigo.planning.agenda.AgendaFeatures:
     featuresConfig:
         - services.config:
         - foConsultation.db:
+              __flags__: ["!redis"]
         - foConsultation.redis2Unified:
             __flags__: ["redis && redisCluster"]
 ```
