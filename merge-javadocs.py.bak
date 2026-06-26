@@ -1,0 +1,714 @@
+#!/usr/bin/env python3
+"""
+Merge -javadoc.jar files from multiple Vertigo modules into one browsable Javadoc site.
+Target: JDK 17 javadoc output format.
+Version: 3.0 (CRLF-safe, proper index.html, correct titles)
+Usage:
+    python merge-javadocs.py
+"""
+
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
+
+import zipfile
+import os
+import re
+import json
+import shutil
+
+SOURCE = r"c:\Projets\@GitHub\vertigo-release\4.3.2 - OpenCode"
+OUT = r"C:\Projets\@GitHub\vertigo-docs\apidocs"
+TITLE = "Vertigo 4.3.2 API"
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def read_jar_string(z, name):
+    """Read a file from a JAR, normalize CRLF to LF, return as string."""
+    return z.read(name).decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+
+
+def write_file(path, content):
+    """Write content with newline='' to prevent Windows CRLF conversion."""
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(content)
+
+
+# ---------------------------------------------------------------------------
+# Bootstrap
+# ---------------------------------------------------------------------------
+
+if os.path.exists(OUT):
+    shutil.rmtree(OUT)
+os.makedirs(OUT)
+
+# Collect all -javadoc.jar files
+jars = []
+for root, _, files in os.walk(SOURCE):
+    for f in files:
+        if f.endswith("-javadoc.jar"):
+            jars.append(os.path.join(root, f))
+jars.sort()
+print(f"Found {len(jars)} javadoc JARs:")
+for j in jars:
+    print(f"  {os.path.basename(j)}")
+
+# Files at JAR root that require special merging (not simple extraction)
+GLOBAL_FILES = {
+    "allclasses-index.html", "allpackages-index.html",
+    "constant-values.html", "deprecated-list.html",
+    "element-list",
+    "index-all.html", "index.html",
+    "member-search-index.js", "module-search-index.js",
+    "overview-summary.html", "overview-tree.html",
+    "package-search-index.js", "tag-search-index.js", "type-search-index.js",
+}
+
+# ---------------------------------------------------------------------------
+# Step 1: Extract all JAR contents except GLOBAL_FILES at root level
+# ---------------------------------------------------------------------------
+print("\n--- Step 1: Extraction ---")
+for j in jars:
+    with zipfile.ZipFile(j) as z:
+        for name in z.namelist():
+            if name in GLOBAL_FILES:
+                continue
+            z.extract(name, OUT)
+print("Package files extracted.")
+
+# ---------------------------------------------------------------------------
+# Step 2: Merge JSON-based search indices (reads from JARs)
+# ---------------------------------------------------------------------------
+print("\n--- Step 2: Search indices ---")
+
+
+def extract_json_array(content, var_name):
+    """Robustly extract JSON array for a given variable name.
+    Handles nested brackets, escaped quotes, and long arrays."""
+    m = re.search(re.escape(var_name) + r"\s*=\s*", content)
+    if not m:
+        return None
+    rest = content[m.end():]
+    depth = 0
+    in_str = False
+    esc = False
+    end = 0
+    for i, ch in enumerate(rest):
+        if esc:
+            esc = False
+            continue
+        if ch == "\\" and in_str:
+            esc = True
+            continue
+        if ch == '"':
+            in_str = not in_str
+        if not in_str:
+            if ch == "[":
+                depth += 1
+            elif ch == "]":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    break
+    return json.loads(rest[:end])
+
+
+def merge_json_index(filename, var_name, suffix=";"):
+    """Merge a JSON-based search index across all JARs with deduplication."""
+    entries = []
+    seen = set()
+    found_count = 0
+
+    for j in jars:
+        with zipfile.ZipFile(j) as z:
+            if filename not in z.namelist():
+                continue
+            found_count += 1
+            try:
+                content = read_jar_string(z, filename)
+            except Exception as e:
+                print(f"  Error reading {filename} from {os.path.basename(j)}: {e}")
+                continue
+
+            arr = extract_json_array(content, var_name)
+            if arr is None:
+                print(f"  Could not extract {var_name} from {os.path.basename(j)}")
+                continue
+
+            for e in arr:
+                key = json.dumps(e, sort_keys=True)
+                if key not in seen:
+                    seen.add(key)
+                    entries.append(e)
+
+    if found_count == 0:
+        print(f"  {filename}: not found in any JAR (skipping)")
+        return
+
+    outpath = os.path.join(OUT, filename)
+    write_file(outpath, f"{var_name} = {json.dumps(entries, ensure_ascii=False)}{suffix}\n")
+    print(f"  {filename}: {len(entries)} entries (from {found_count} JARs)")
+
+
+merge_json_index("member-search-index.js", "memberSearchIndex", suffix=";updateSearchResults();")
+merge_json_index("type-search-index.js", "typeSearchIndex", suffix=";updateSearchResults();")
+merge_json_index("package-search-index.js", "packageSearchIndex", suffix=";updateSearchResults();")
+merge_json_index("tag-search-index.js", "tagSearchIndex", suffix=";")
+merge_json_index("module-search-index.js", "moduleSearchIndex", suffix=";")
+
+# ---------------------------------------------------------------------------
+# Step 3: Merge element-list (unique package names, sorted)
+# ---------------------------------------------------------------------------
+print("\n--- Step 3: element-list ---")
+packages = set()
+for j in jars:
+    with zipfile.ZipFile(j) as z:
+        if "element-list" not in z.namelist():
+            continue
+        try:
+            for line in read_jar_string(z, "element-list").splitlines():
+                line = line.strip()
+                if line:
+                    packages.add(line)
+        except Exception as e:
+            print(f"  Error reading element-list from {os.path.basename(j)}: {e}")
+
+packages = sorted(packages)
+write_file(os.path.join(OUT, "element-list"), "\n".join(packages) + "\n")
+print(f"  {len(packages)} packages")
+
+# ---------------------------------------------------------------------------
+# Step 4: Merge table-based HTML (allpackages, allclasses, index)
+# ---------------------------------------------------------------------------
+print("\n--- Step 4: Table-based HTML ---")
+
+
+def collect_table_data(filename):
+    """Walk all JARs, extract header/footer + rows from a summary-table page.
+    Returns (header_str, footer_str, list-of-(name, col_first_html, col_last_html)).
+    Header/footer from first JAR only."""
+    header = None
+    footer = None
+    rows = []
+    seen = set()
+
+    for j in jars:
+        with zipfile.ZipFile(j) as z:
+            if filename not in z.namelist():
+                continue
+            try:
+                html = read_jar_string(z, filename)
+            except Exception as e:
+                print(f"  Error reading {filename} from {os.path.basename(j)}: {e}")
+                continue
+
+            # Look for either id="all-packages-table" or class="summary-table"
+            tstart_m = re.search(r'<div (?:class="summary-table|id="all-packages-table)', html)
+            if not tstart_m:
+                continue
+            mend_m = re.search(r"</main>", html)
+            if not tstart_m or not mend_m:
+                continue
+
+            tstart = tstart_m.start()
+            mend = mend_m.start()
+
+            # --- First JAR: capture header + footer ---
+            if header is None:
+                region = html[tstart:mend]
+                first_row = re.search(r'<div class="col-first', region)
+                if first_row:
+                    header = html[:tstart + first_row.start()]
+                    footer = html[mend:]
+                else:
+                    header = html[:tstart]
+                    footer = html[mend:]
+
+            # --- Collect rows ---
+            region = html[tstart:mend]
+            col_first_positions = [
+                m.start()
+                for m in re.finditer(r'<div class="col-first', region)
+            ]
+            col_last_positions = [
+                m.start()
+                for m in re.finditer(r'<div class="col-last', region)
+            ]
+
+            for idx in range(len(col_first_positions)):
+                cf_start = col_first_positions[idx]
+                cf_end = col_last_positions[idx] if idx < len(col_last_positions) else len(region)
+                cl_start = col_last_positions[idx] if idx < len(col_last_positions) else len(region)
+                cl_end = col_first_positions[idx + 1] if idx + 1 < len(col_first_positions) else len(region)
+
+                col_first_html = region[cf_start:cf_end].replace("\r\n", "\n").replace("\r", "\n").strip()
+                col_last_html = region[cl_start:cl_end].replace("\r\n", "\n").replace("\r", "\n").strip()
+
+                # Extract display name for dedup
+                nm_m = re.search(r">([^<]+)</a>", col_first_html)
+                if nm_m:
+                    n = nm_m.group(1)
+                    if n in seen:
+                        continue
+                    seen.add(n)
+
+                rows.append((n, col_first_html, col_last_html))
+
+    return header, footer, rows
+
+
+def write_table_file(outname, title_override, rows):
+    """Write a merged table HTML file with clean formatting."""
+    header, footer, rows = collect_table_data(outname)
+    if header is None:
+        print(f"  {outname}: no table found in any JAR (skipping)")
+        return
+
+    # Replace module-specific title with generic one
+    header = re.sub(r"<title>[^<]*</title>", f"<title>{TITLE}</title>", header)
+
+    # Build rows with proper formatting
+    row_parts = []
+    for i, (_n, col_first, col_last) in enumerate(rows):
+        color = "even-row-color" if i % 2 == 0 else "odd-row-color"
+
+        # Recalculate even/odd colors in BOTH divs
+        cf = re.sub(r"\b(even-row-color|odd-row-color)\b", color, col_first)
+        cl = re.sub(r"\b(even-row-color|odd-row-color)\b", color, col_last)
+
+        row_parts.append(cf)
+        row_parts.append(cl)
+
+    # Join rows with blank line between each div (JDK 17 style: div\n\ndiv)
+    rows_str = "\n\n".join(row_parts)
+
+    out = header + rows_str + "\n\n" + footer
+    write_file(os.path.join(OUT, outname), out)
+    print(f"  {outname}: {len(rows)} rows")
+
+
+write_table_file("allpackages-index.html", TITLE, None)
+
+# ---------------------------------------------------------------------------
+# allclasses-index.html — special merge preserving tab structure
+# ---------------------------------------------------------------------------
+
+def merge_allclasses_index():
+    """Merge allclasses-index.html preserving tab buttons and tab classes."""
+    print("\n--- allclasses-index.html ---")
+
+    # Collect from all JARs
+    ac_header = None
+    ac_tab_buttons = None
+    ac_body_wrapper = None      # <div id="all-classes-table.tabpanel"> + <div class="summary-table"> + headers
+    ac_closing_divs = None      # </div></div></div> before </main>
+    ac_footer = None            # from </main> to end
+    # Rows: {href_key: (col_first_html, col_last_html)}  — deduped across all JARs
+    all_rows = {}
+
+    for j in jars:
+        with zipfile.ZipFile(j) as z:
+            if "allclasses-index.html" not in z.namelist():
+                continue
+            try:
+                html = read_jar_string(z, "allclasses-index.html")
+            except Exception as e:
+                print(f"  Error reading allclasses-index.html from {os.path.basename(j)}: {e}")
+                continue
+
+            main_end = html.find("</main>")
+            if main_end < 0:
+                continue
+
+            # --- Capture header/tab/footer from first JAR ---
+            if ac_header is None:
+                tbl_start = html.find('<div id="all-classes-table">')
+                if tbl_start > 0:
+                    ac_header = html[:tbl_start]
+                    # Everything from </main> onward
+                    ac_footer = html[main_end:]
+                else:
+                    ac_header = html
+                    ac_footer = ""
+
+            if ac_tab_buttons is None:
+                tab_m = re.search(r'<div class="table-tabs"[^>]*>', html)
+                if tab_m:
+                    # Find the matching </div> for the table-tabs div
+                    tab_content = html[tab_m.end():]
+                    # The tabs div is single-line (all <button> on same line), ends with </div>
+                    close_idx = tab_content.find("</div>")
+                    if close_idx >= 0:
+                        ac_tab_buttons = html[tab_m.start():tab_m.end() + close_idx + 6]
+
+            if ac_body_wrapper is None:
+                # Capture header + tab buttons + tabpanel + summary-table + table headers
+                hdr_start = html.find('<div id="all-classes-table">')
+                if hdr_start < 0:
+                    continue
+                # Find where the rows start: after the last <div class="table-header col-last">
+                first_row = html.find('<div class="col-first', hdr_start)
+                if first_row < 0:
+                    first_row = hdr_start
+                ac_body_wrapper = html[hdr_start:first_row]
+
+            if ac_closing_divs is None:
+                # Find the 3 closing </div> before </main>
+                # Scan backward from </main>
+                pre_main = html[:main_end]
+                # Remove trailing whitespace
+                pre_main_stripped = pre_main.rstrip()
+                # The 3 closing divs are the last 30 chars or so
+                close_start = pre_main_stripped.rfind("</div>", 0, len(pre_main_stripped))
+                count = 1
+                pos = close_start
+                while count < 3 and pos > 0:
+                    pos = pre_main_stripped.rfind("</div>", 0, pos)
+                    if pos > 0 and pos < close_start:
+                        count += 1
+                        close_start = pos
+                    else:
+                        break
+                ac_closing_divs = pre_main_stripped[close_start:]
+
+            # --- Extract rows using position-based parsing ---
+            tbl_pos = html.find('<div id="all-classes-table">')
+            row_start = html.find('<div class="col-first', tbl_pos if tbl_pos >= 0 else 0)
+            if row_start < 0:
+                continue
+
+            # Find region: from first col-first row to the closing </div></div></div>
+            # closing_divs position is at (main_end - len(closing_divs))
+            if ac_closing_divs:
+                region_end = main_end - len(ac_closing_divs.rstrip())
+            else:
+                region_end = main_end
+            region = html[row_start:region_end]
+
+            cf_starts = [m.start() for m in re.finditer(r'<div class="col-first', region)]
+
+            for idx in range(len(cf_starts)):
+                cf_pos = cf_starts[idx]
+
+                # Find the </div> that closes this <div class="col-first...">
+                cf_close = region.find("</div>", cf_pos)
+                if cf_close < 0:
+                    continue
+                cf_html = region[cf_pos:cf_close + 6]
+
+                # col-last starts after cf
+                cl_pos = region.find('<div class="col-last', cf_close + 6)
+                if cl_pos < 0:
+                    continue
+
+                # col-last ends at the next col-first or at region_end
+                next_cf = cf_starts[idx + 1] if idx + 1 < len(cf_starts) else len(region)
+                cl_html = region[cl_pos:next_cf]
+
+                # Extract href for dedup
+                href_m = re.search(r'href="([^"]+)"', cf_html)
+                if not href_m:
+                    continue
+                href_key = href_m.group(1)
+
+                if href_key in all_rows:
+                    continue
+                all_rows[href_key] = (cf_html, cl_html)
+
+    # Build output
+    if ac_header is None:
+        print("  allclasses-index.html: no header found")
+        return
+
+    ac_header = re.sub(r"<title>[^<]*</title>", f"<title>{TITLE}</title>", ac_header)
+
+    # Sort entries alphabetically by the text inside the <a> tag
+    def get_name(cf_html):
+        m = re.search(r'>([^<]+)</a>', cf_html)
+        return m.group(1).lower() if m else ""
+
+    sorted_entries = sorted(all_rows.items(), key=lambda kv: get_name(kv[1][0]))
+
+    # Build rows with even/odd colors
+    row_parts = []
+    for i, (_href, (cf_html, cl_html)) in enumerate(sorted_entries):
+        color = "even-row-color" if i % 2 == 0 else "odd-row-color"
+        cf = re.sub(r"\b(even-row-color|odd-row-color)\b", color, cf_html)
+        cl = re.sub(r"\b(even-row-color|odd-row-color)\b", color, cl_html)
+        row_parts.append(cf)
+        row_parts.append(cl)
+
+    out = ac_header
+    out += ac_body_wrapper if ac_body_wrapper else ''
+    out += "\n\n".join(row_parts)
+    out += ac_closing_divs if ac_closing_divs else '</div>\n</div>\n</div>'
+    out += ac_footer if ac_footer else "</main>\n</body>\n</html>"
+
+    write_file(os.path.join(OUT, "allclasses-index.html"), out)
+    print(f"  allclasses-index.html: {len(sorted_entries)} entries")
+
+
+merge_allclasses_index()
+
+# ---------------------------------------------------------------------------
+# Step 5: Merge index-all.html (alphabetical index)
+# ---------------------------------------------------------------------------
+print("\n--- Step 5: index-all.html ---")
+
+
+def parse_index_all_sections(html):
+    """Parse index-all.html into letter sections.
+    Returns dict: letter -> list of (dt_html, dd_html_or_None)."""
+    sections = {}
+    for h2_m in re.finditer(r'<h2 class="title" id="I:([A-Z])">[A-Z]</h2>', html):
+        letter = h2_m.group(1)
+        dl_start = re.search(r'<dl class="index">', html[h2_m.end():])
+        if not dl_start:
+            continue
+        dl_abs_start = h2_m.end() + dl_start.start()
+        dl_content = html[dl_abs_start:]
+        dl_close = re.search(r'</dl>', dl_content)
+        if not dl_close:
+            continue
+        dl_text = dl_content[:dl_close.start()]
+        entries = []
+        for dt_m in re.finditer(r'<dt>(.*?)</dt>', dl_text, re.DOTALL):
+            dt_text = dt_m.group(1)
+            dd_m = re.search(r'.*?<dd>(.*?)</dd>', dl_text[dt_m.end():], re.DOTALL)
+            dd_text = None
+            if dd_m:
+                dd_text = dd_m.group(1).strip()
+                if dd_text == "&nbsp;":
+                    dd_text = None
+            entries.append((dt_text, dd_text))
+        sections[letter] = entries
+    return sections
+
+
+# Collect header/footer + sections from all JARs
+ia_header = None
+ia_footer = None
+all_sections = {}  # letter -> {href_key: (dt_html, dd_html_or_None)}
+
+for j in jars:
+    with zipfile.ZipFile(j) as z:
+        if "index-all.html" not in z.namelist():
+            continue
+        try:
+            html = read_jar_string(z, "index-all.html")
+        except Exception as e:
+            print(f"  Error reading index-all.html from {os.path.basename(j)}: {e}")
+            continue
+        main_end = re.search(r"</main>", html)
+        if not main_end:
+            continue
+        # Capture header/footer from first JAR
+        if ia_header is None:
+            first_h2 = re.search(r'<h2 class="title" id="I:', html)
+            if first_h2:
+                ia_header = html[:first_h2.start()]
+            else:
+                ia_header = html
+            ia_footer = html[main_end.start() + len("</main>"):]
+        # Parse and merge sections
+        sections = parse_index_all_sections(html)
+        for letter, entries in sections.items():
+            if letter not in all_sections:
+                all_sections[letter] = {}
+            for dt_text, dd_text in entries:
+                href_m = re.search(r'<a href="([^"]+)"', dt_text)
+                if href_m:
+                    href_key = href_m.group(1)
+                    if href_key not in all_sections[letter]:
+                        all_sections[letter][href_key] = (dt_text, dd_text)
+
+# Build output
+if ia_header is not None:
+    ia_header = re.sub(r"<title>[^<]*</title>", f"<title>{TITLE}</title>", ia_header)
+    # Strip old alpha nav: everything after </div> (end of header block) to end
+    ia_header = re.sub(
+        r'(.*<h1>Index</h1>\s*</div>).*',
+        r'\1',
+        ia_header,
+        flags=re.DOTALL,
+    )
+
+body_parts = []
+letters = sorted(all_sections.keys())
+alpha_links = "&nbsp;".join(f'<a href="#I:{l}">{l}</a>' for l in letters)
+body_parts.append(alpha_links)
+
+for letter in letters:
+    body_parts.append(f'<h2 class="title" id="I:{letter}">{letter}</h2>')
+    body_parts.append('<dl class="index">')
+    for _href_key, (dt_text, dd_text) in all_sections[letter].items():
+        body_parts.append(f'<dt>{dt_text}</dt>')
+        if dd_text is not None:
+            body_parts.append(f'<dd>{dd_text}</dd>')
+    body_parts.append('</dl>')
+
+bottom_nav = (
+    f'{alpha_links}<br>'
+    f'<a href="allclasses-index.html">All&nbsp;Classes&nbsp;and&nbsp;Interfaces</a>'
+    f'<span class="vertical-separator">|</span>'
+    f'<a href="allpackages-index.html">All&nbsp;Packages</a>'
+    f'<span class="vertical-separator">|</span>'
+    f'<a href="constant-values.html">Constant&nbsp;Field&nbsp;Values</a>'
+)
+idx_out = ia_header + "\n".join(body_parts) + "\n" + bottom_nav + ia_footer
+write_file(os.path.join(OUT, "index-all.html"), idx_out)
+total_dt = sum(len(v) for v in all_sections.values())
+print(f"  index-all.html: {total_dt} entries, {len(letters)} letters")
+
+# ---------------------------------------------------------------------------
+# Step 6: index.html — full Javadoc overview page
+# ---------------------------------------------------------------------------
+print("\n--- Step 6: index.html ---")
+# Build index.html from first JAR's template, replace title + pack rows
+index_header = None
+index_footer = None
+index_rows = []
+index_seen = set()
+
+for j in jars:
+    with zipfile.ZipFile(j) as z:
+        if "index.html" not in z.namelist():
+            continue
+        html = read_jar_string(z, "index.html")
+        # index.html uses id="all-packages-table" then summary-table inside
+        table_m = re.search(r'<div id="all-packages-table">', html)
+        if not table_m:
+            # Some JARs put everything under summary-table directly
+            table_m = re.search(r'<div class="summary-table', html)
+        main_end = re.search(r"</main>", html)
+        if not table_m or not main_end:
+            continue
+
+        region = html[table_m.end():main_end.start()]
+        col_firsts = list(re.finditer(r'<div class="col-first', region))
+        col_lasts = list(re.finditer(r'<div class="col-last', region))
+
+        if index_header is None:
+            index_header = html[:table_m.start()]
+            index_footer = html[main_end.start():]
+
+        for idx in range(len(col_firsts)):
+            cf_s = col_firsts[idx].end()
+            cl_s = col_lasts[idx].end() if idx < len(col_lasts) else len(region)
+            cf_end = col_lasts[idx].start() if idx < len(col_lasts) else len(region)
+            cl_end = col_firsts[idx + 1].start() if idx + 1 < len(col_firsts) else len(region)
+
+            cf = region[cf_s:cf_end].strip()
+            cl = region[cl_s:cl_end].strip()
+
+            nm = re.search(r">([^<]+)</a>", cf)
+            if nm:
+                n = nm.group(1)
+                if n in index_seen:
+                    continue
+                index_seen.add(n)
+            index_rows.append((n, cf, cl))
+
+# Sort
+index_rows.sort(key=lambda r: r[0].lower())
+
+# Build output
+if index_header is not None:
+    ih = re.sub(r"<title>[^<]*</title>", f"<title>{TITLE}</title>", index_header)
+
+    parts = []
+    for i, (_n, cf, cl) in enumerate(index_rows):
+        color = "even-row-color" if i % 2 == 0 else "odd-row-color"
+        parts.append(re.sub(r"\b(even-row-color|odd-row-color)\b", color, cf))
+        parts.append(re.sub(r"\b(even-row-color|odd-row-color)\b", color, cl))
+
+    idx_out = ih + "\n\n".join(parts) + "\n\n" + index_footer
+    write_file(os.path.join(OUT, "index.html"), idx_out)
+    print(f"  index.html: {len(index_rows)} rows")
+else:
+    # Fallback: simple redirect
+    write_file(
+        os.path.join(OUT, "index.html"),
+        '<!DOCTYPE html>\n'
+        '<html>\n'
+        '<head>\n'
+        '  <meta charset="utf-8">\n'
+        '  <meta http-equiv="refresh" content="0;url=allpackages-index.html">\n'
+        f'  <title>{TITLE}</title>\n'
+        "</head>\n"
+        '<body>\n'
+        '  <p><a href="allpackages-index.html">Click here...</a></p>\n'
+        "</body>\n"
+        "</html>\n",
+    )
+    print("  index.html: fallback redirect")
+
+# ---------------------------------------------------------------------------
+# Step 7: Other global HTML pages (single-JAR fallback)
+# ---------------------------------------------------------------------------
+print("\n--- Step 7: Global fallback pages ---")
+fallback_pages = [
+    "overview-tree.html",
+    "overview-summary.html",
+    # index-all.html already merged in Step 5
+    "constant-values.html",
+    "deprecated-list.html",
+]
+for fname in fallback_pages:
+    found = False
+    for j in jars:
+        with zipfile.ZipFile(j) as z:
+            if fname in z.namelist():
+                try:
+                    content = read_jar_string(z, fname)
+                    write_file(os.path.join(OUT, fname), content)
+                    print(f"  {fname}")
+                    found = True
+                    break
+                except Exception as e:
+                    print(f"  Error copying {fname}: {e}")
+    if not found:
+        print(f"  {fname}: not found")
+
+# ---------------------------------------------------------------------------
+# Step 8: Validation
+# ---------------------------------------------------------------------------
+print("\n--- Step 8: Validation ---")
+critical = [
+    "member-search-index.js",
+    "type-search-index.js",
+    "package-search-index.js",
+    "element-list",
+    "allpackages-index.html",
+    "allclasses-index.html",
+    "index.html",
+    "stylesheet.css",
+    "script.js",
+    "search.js",
+]
+missing = []
+for fname in critical:
+    ok = os.path.exists(os.path.join(OUT, fname))
+    print(f"  {'OK' if ok else 'MISSING'}  {fname}")
+    if not ok:
+        missing.append(fname)
+
+html_count = sum(
+    1 for _r, _, _fs in os.walk(OUT) for _f in _fs if _f.endswith(".html")
+)
+js_count = sum(
+    1 for _r, _, _fs in os.walk(OUT) for _f in _fs if _f.endswith(".js")
+)
+
+print(f"\n{'='*60}")
+print(f"Output: {OUT}")
+print(f"  HTML files : {html_count}")
+print(f"  JS files   : {js_count}")
+print(f"  Packages   : {len(packages)}")
+if missing:
+    print(f"  MISSING: {', '.join(missing)}")
+    print(f"  Status     : INCOMPLETE")
+else:
+    print(f"  Status     : OK")
+print(f"{'='*60}")
