@@ -43,7 +43,7 @@ Pour modifier le champ il faut faire : Clic droit puis Champs et on obtient un n
 
 Pour créer un champ : **Insertion → Champs → Autres** (ou Ctrl + F2), se placer dans l'onglet Fonctions :
 
-![](./images/publisher_odt_3.png)
+![](./images/publisher_odt3.png)
 
 Remplir le champ Annotation avec le nom du champ à fusionner puis cliquer sur Insérer :
 
@@ -80,7 +80,7 @@ Pour l'utilisation du plugin XDocReportConverterPlugin (gestion du DOCX) :
 <dependency>
     <groupId>fr.opensagres.xdocreport</groupId>
     <artifactId>fr.opensagres.xdocreport.converter.docx.xwpf</artifactId>
-    <version>2.0.2</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -89,7 +89,7 @@ Pour l'utilisation du plugin OpenOfficeLocalConverterPlugin (gestion de l'ODT en
 <dependency>
 	<groupId>fr.opensagres.xdocreport</groupId>
 	<artifactId>fr.opensagres.xdocreport.converter.odt.odfdom</artifactId>
-	<version>2.0.2</version>
+	<version>2.1.0</version>
 </dependency>
 ```
 
@@ -125,8 +125,8 @@ Deux implémentations existent : **ODT** (OpenOffice) et **DOCX** (Microsoft Wor
 | Condition inverse | `<#ifnot nomChamp#>` … `<#endifnot#>` | `{ifnot nomChamp}` … `{endifnot}` |
 | Condition sur code | `<#ifequals champ = "CODE"#>` … `<#endifequals#>` | `{ifequals champ = "CODE"}` … `{endifequals}` |
 | Condition inverse code | `<#ifnotequals champ = "CODE"#>` … `<#endifnotequals#>` | `{ifnotequals champ = "CODE"}` … `{endifnotequals}` |
-| Boucle sur liste | `<#loop var : collection#>` … `<#endloop#>` | `{loop var : collection}` … `{endloop}` |
-| Parcours objet | `<#var var : objet#>` … `<#endvar#>` | Non implémenté |
+| Champ de fusion boucle | `<#loop maVariable : nomCollection#>`<br/>`  <#=nomChamp #>`<br/>`<#endloop#>` | `{loop maVariable : nomCollection}`<br/>`  {=nomChamp}`<br/>`{endloop}` |
+| Parcours d'un objet seul 	| `<#var maVariable : nomObjet#>`<br/>`  <#=nomChamp #>`<br/>`<#endvar#>` | *Non implémenté* |
 | Image | `<#image nomImage#>` | Non implémenté |
 
 ### Sous OpenOffice
@@ -135,7 +135,8 @@ Les champs de fusion apparaissent surlignés en gris. Pour créer un champ : **I
 
 Pour les tags opérationnels (if, loop, …) : **Insertion → Script**.
 
-Pour les images : placer une image dans le modèle, puis clic droit → Propriétés → Options → Nom : `<#image IMAGE_FIELD_NAME>`.
+Pour les images : placer une image dans le modèle. Cette image servira pour définir la taille maximum de l'image qui sera fusionner. Le ratio de l'image fusionnée sera conservé.
+Puis il faut nommer l'image : Click-droit sur l'image -> Propriétés -> Options -> Remplir le Nom : `<#image IMAGE_FIELD_NAME>`
 
 ### Sous Microsoft Word
 
@@ -143,15 +144,19 @@ Les champs s'insèrent via **Insertion → QuickPart → Champ** (`Ctrl+F9`), af
 
 ### Définition du dictionnaire
 
-Les champs du modèle doivent correspondre à un `PublisherDataDefinition` constitué d'un `PublisherNode` racine. Types de champs :
+Les champs du modèle doivent correspondre à un dictionnaire de mot prévu par le système. Ce dictionnaire est nommé PublisherDefinition.
+Une PublisherDefinition est constituée d'une PublisherNode racine.
 
-| Type de champ | Description |
-|---|---|
-| `stringField` | Chaîne de caractères |
-| `booleanField` | Booléen |
-| `dataField` | Sous-nœud de type `PublisherNode` |
-| `listField` | Liste de `PublisherNode` |
-| `imageField` | Image (`VFile`) |
+Un PublisherNode est constitué de champs et est réutilisable, dans d'autre PublisherDefinition par exemple.
+Les champs peuvent être de 5 types :
+
+| Syntaxe | Description | Exemple |
+| --- 					| --- | --- |
+| stringField | Champ de type chaine de caractères | `stringField nom {}` |
+| booleanField | Champ de type booléen | `booleanField siGrave {}`  |
+| dataField 			| Champ de type PublisherNode | `dataField emetteur { type : PnPersonne }` |
+| listField 			| Champ de type liste de PublisherNode | `listField destinataires { type : PnPersonne }` |
+| imageField 			| Champ de type image (doit être un VFile) | `imageField logo` |
 
 #### Exemple de définition
 
@@ -205,6 +210,17 @@ public final class MyPublisherDefinitionProvider implements SimpleDefinitionProv
 
 ### Utilisation
 
+Le cas d'usage le plus simple suit les étapes suivantes :
+
+1. Récupération des données
+2. Création d'un PublisherData correspondant au modèle
+3. Peuplement du PublisherData à partir des données de la base
+4. Récupération du Model de document
+5. Création du document à partir du modèle et des données
+6. Sauvegarde du document résultat
+
+Voici le code résultant :
+
 ```java
 public void testMergerSimple() {
     final MyData myData = loadMyData();
@@ -217,7 +233,7 @@ public void testMergerSimple() {
 }
 
 private static PublisherData createPublisherData(final String definitionName) {
-    final PublisherDataDefinition publisherDataDefinition = Home.getApp().getDefinitionSpace().resolve(definitionName, PublisherDataDefinition.class);
+    final PublisherDataDefinition publisherDataDefinition = Node.getNode().getDefinitionSpace().resolve(definitionName, PublisherDataDefinition.class);
     Assert.assertNotNull(publisherDataDefinition);
     final PublisherData publisherData = new PublisherData(publisherDataDefinition);
     Assert.assertNotNull(publisherData);

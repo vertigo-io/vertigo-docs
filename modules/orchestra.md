@@ -32,7 +32,9 @@ Orchestra offre les fonctionnalités suivantes :
   - Mémoire
 - Une API REST pour gérer les processus, les exécutions, la planification et la supervision
 
-Lorsque le module Orchestra est ajouté à votre application, il est possible de l'utiliser en mode intégré ou comme un nœud standalone dans une architecture micro-services.
+Lorsque le module Orchestra est ajouté à votre application, il est possible de l'utiliser en mode intégré ou comme un nœud standalone dans une architecture micro-services (voir le projet vertigo-orchestra-demo).
+
+> Une IHM Vue.js embarquée existe (4 vues, i18n fr/en, Vite build) mais n'est pas prod-ready.
 
 La configuration YAML pour Orchestra en mode base de données est la suivante :
 
@@ -47,7 +49,7 @@ io.vertigo.orchestra.OrchestraFeatures:
         - orchestra.webapi:
 ```
 
-Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires) à l'aide de [ce](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-orchestra/src/main/database/scripts/install/orchestra_create_init_v1.0.0.sql) fichier SQL.
+Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires) à l'aide de [ce](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-orchestra/src/main/database/scripts/install/orchestra_create_init_v1.0.0.sql) fichier SQL.
 
 ## A quoi cela ressemble-t-il dans le code ?
 
@@ -131,7 +133,7 @@ Par exemple :
 ```java
 orchestraServices.getScheduler().scheduleAt(myFirstProcessDefinition, Instant.now(), Collections.emptyMap());
 orchestraServices.getReport().getSummaryByDate(myFirstProcessDefinition,
-		LocalDate.of(2017, 1, 1), LocalDate.of(2017, 12, 31));
+		Instant.parse("2017-01-01T00:00:00Z"), Instant.parse("2017-12-31T23:59:59Z"));
 ```
 
 ## Cas des évolutions des processus

@@ -10,7 +10,10 @@ Vega propose également un client de WebService pour appeler simplement des WebS
 
 En interne, le module utilise [Javalin](https://github.com/tipsy/javalin) pour le serveur embarqué et Servlet pour les environnements WAR.
 Il propose une publication de l'API par le standard [Swagger](https://swagger.io/).
-Pour publier les WebServices, il suffit d'un ensemble d'annotations sur une façade de vos services métier. Les annotations sont volontairement une sous-partie du standard [JAX-RS](https://javaee.github.io/javaee-spec/javadocs/javax/ws/rs/package-summary.html).
+Pour publier les WebServices, il suffit d'un ensemble d'annotations sur une façade de vos services métier. Les annotations sont volontairement une sous-partie du standard [JAX-RS](https://javaee.github.io/javaee-spec/javadocs/javax/ws/rs/package-summary.html)
+
+Pour la partie cliente, le module utilise le HttpClient du JDK.
+Pour appeler des WebServices, il suffit d'une interface avec les annotations standard de Vega.
 
 ### Handler Chain (Pipe)
 
@@ -35,7 +38,7 @@ Chaque requête traverse une chaîne de `WebServiceHandlerPlugin` classés par p
 
 ## Quick start server
 
-1. La classe du webservice doit implémenter l'interface `WebServices`
+1. La classe du webservice doit implémenter l'interface [WebServices](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/webservice/WebServices.java)
 2. La classe doit être déclarée comme un *Composant* Vertigo, concrètement, cela est fait par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application)
 3. Ajouter les annotations sur les méthodes, exemple :
 ```java
@@ -71,19 +74,19 @@ modules:
 6. Démarrer l'application
 7. **C'est bon**. Vous pouvez appeler votre webservice : [http://localhost:8080/*maWebApp*/api/anonymousTest](http://localhost:8080/*maWebApp*/api/anonymousTest)
 
-Vertigo propose des WebServices intégrés : **Swagger**, **Catalog** et **Healthcheck** :
-
-- Feature `webservices.swagger` → `SwaggerWebServices` (interface Swagger UI + API JSON)
+Vertigo propose des WebServices intégrés [SwaggerWebServices](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/impl/webservice/catalog/SwaggerWebServices.java) qui vous donnent la vue de l'API des WebServices disponibles.<br/>
+* IHM Swagger :  [http://localhost:8080/*maWebApp*/api/swaggerUi](http://localhost:8080/*maWebApp*/api/swaggerUi)
+* API Swagger seule : [http://localhost:8080/*maWebApp*/api/swaggerApi](http://localhost:8080/*maWebApp*/api/swaggerApi)
 - Feature `webservices.catalog` → `CatalogWebServices` (catalogue des services)
 - Feature `webservices.healthcheck` → `HealthcheckWebServices` (tests de santé)
 
-?> Vega peut être lancé en mode serveur intégré avec la feature `webservices.javalin` (paramètre `embeddedServer: true`), dans ce cas, il est inutile de spécifier un filtre dans le *web.xml*.
+?> Vega peux être lancé en mode serveur intégré avec le paramètre *webservices.embeddedServer*, dans ce cas, il est inutile de spécifier un filtre dans le *web.xml*
 
 ## Quick start client
 
 Pour appeler un WebService distant :
 
-1. Reproduire l'API du WebService avec une interface Java ayant l'annotation `@WebServiceProxyAnnotation`. Elle sera détectée par Vertigo comme les autres composants par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application)
+1. Reproduire l'API du WebService avec une interface Java. Cette interface doit hériter de `io.vertigo.core.node.component.Amplifier` et avoir l'annotation `@WebServiceProxyAnnotation`. Elle sera détectée par Vertigo comme les autres composants par [l'autodiscovery du module métier](getting-started/realworld_helloworld.md#_5-configuration-de-l39application)
 2. Ajouter la feature `webservices.proxyclient` dans la configuration de Vega :
 ```yaml
   io.vertigo.vega.VegaFeatures:
@@ -103,7 +106,7 @@ Pour appeler un WebService distant :
 ```java
 @WebServiceProxyAnnotation
 @PathPrefix("/test")
-public interface SimplerClientTestWebServices {
+public interface SimplerClientTestWebServices extends Amplifier {
 
   @AnonymousAccessAllowed
   @GET("/login")
@@ -117,16 +120,22 @@ public interface SimplerClientTestWebServices {
   Contact testRead(@PathParam("conId") final long conId);
 }
 ```
-5. Utiliser le WebService en injectant l'interface dans votre service métier :
+5. Utiliser le WebService en injectant l'interface dans votre service métier.
+L'autocloseable `HttpClientCookie` permet de conserver les cookies pour effectuer des appels succéssifs :
 ```java
   @Inject
   private SimplerClientTestWebServices otherWService;
 
   public void myBusinessService() {
-    otherWService.login();
-    final Contact result = otherWService.testRead(2);
+    try (HttpClientCookie httpClientCookie = new HttpClientCookie()) {
+      otherWService.login();
+      final Contact result = otherWService.testRead(2);
+    }
   }
 ```
+!> Le `HttpClientCookie` conserve le cookie distant dans un threadlocal.
+Il est donc adapté pour des WebServices appellés dans un batch ou dans le traitement d'un écran de l'application.
+Mais pas pour être conservé tout le temps d'une navigation utilisateur.
 
 ?> Le connecteur `HttpClient` propose d'autres paramètres optionnels :
 - `name` pour gérer plusieurs *endpoint*, il faut alors préciser le nom de la connexion dans l'annotation `@WebServiceProxyAnnotation`
@@ -136,7 +145,7 @@ public interface SimplerClientTestWebServices {
 ## API
 
 ### Code exemples :
-De nombreux exemples complets sont présents dans les tests de Vertigo sur GitHub
+De nombreux exemples complets sont présents dans les tests de Vertigo sur GitHub : [Tests Exemples](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/test/java/io/vertigo/vega/webservice/data/ws)
 
 ### Syntaxe des routes
 
@@ -150,10 +159,15 @@ public Contact getContact(@PathParam("id") final int contactId) { ... }
 
 Vega mappe automatiquement la requête JSON entrante vers votre méthode. Les annotations indiquent la source des données (paramètres URL, body, headers…). Par défaut, le contenu est attendu dans le body (**Attention** : HTTP spécifie que les requêtes *GET* n'ont pas de body).
 
+Le cas le plus courant est de réceptionner directement un DtObject. Dans ce cas, Vega s'occupe de formater le JSON en type Java et de valider l'objet vis-à-vis des contraintes des domains.
+Il est possible de récupérer directement la saisie utilisateur en utilisant les objets génériques `UiObject` ou `UiList<MyDto>`.
+
 Vega peuple quelques paramètres implicites :
-- `UiMessageStack` : pile des messages à retourner (Success, Info, Warning, Error)
+- `UiMessageStack` : pile des messages à retourner (Success, Info, Warning, Error). Avec une portée (globale, par objet, par champ)
 - `HttpServletRequest` : Requête HTTP
 - `HttpServletResponse` : Réponse HTTP
+
+?> Voir les annotations directement pour le détail
 
 ### JSON Reader
 
@@ -182,37 +196,100 @@ Le résultat est automatiquement sérialisé en JSON. La sérialisation est opti
 
 ```java
 @GET("/uiContext/{contactIdFrom}/{contactIdTo}")
-public UiContext testUiContext(@PathParam("contactIdFrom") final long contactIdFrom, @PathParam("contactIdTo") final long contactIdTo) {
+public UiContext testMultiPartBody(@PathParam("contactIdFrom") final long contactIdFrom, @PathParam("contactIdTo") final long contactIdTo) {
 	final UiContext uiContext = new UiContext();
 	uiContext.put("contactFrom", loadContact(contactIdFrom));
 	uiContext.put("contactTo", loadContact(contactIdTo));
+	uiContext.put("testLong", 12);
+	uiContext.put("testString", "the String test");
+	uiContext.put("testDate", DateUtil.newDate());
 	return uiContext;
+}
+```
+Result :
+```json
+{
+	"testDate":"2014-07-29T00:00:00.000Z",
+	"contactFrom":{
+			"honorificCode":"MR_",
+			"name":"Martin",
+			"firstName":"Jean"
+		},
+	"testString":"the String test",
+	"contactTo":{
+			"honorificCode":"MIS",
+			"name":"Dubois",
+			"firstName":"Marie"
+		},
+	"testLong":12
 }
 ```
 
 ### Handler des Exceptions
 
-| Code HTTP | Exception | Rôle |
-|---|---|---|
-| `200` | — | Succès |
-| `201` | — | Créé (méthode commence par `create`) |
-| `204` | — | Succès, pas de données en retour |
-| `400` | `JsonSyntaxException` | Erreur de syntaxe |
-| `401` | `SessionException` | Pas de session valide |
-| `403` | `VSecurityException` | Droits insuffisants |
-| `404` | — | Pas de WebService trouvé |
-| `422` | `ValidationUserException` | Erreur de validation (message détaillé avec `globalErrors`, `fieldErrors`, `objectFieldErrors`) |
-| `429` | `TooManyRequestException` | Rate limiting dépassé |
-| `500` | — | Erreur interne |
+En cas d'Exceptions levées dans le service, un code HTTP est automatiquement positionné et un message d'erreur JSON est envoyé. Le retour d'erreur est volontairement simplifié pour des raisons de sécurité de l'application (pas de stacktrace par exemple).
+```json
+{
+  "globalErrors": "Error message or simple class name"
+}
+```
 
-### Validation
+Si le service lance une **Exception utilisateur** (saisie utilisateur ou une erreur métier), le message est plus complet et précise les informations pour le positionnement des erreurs dans l'écran :
+```json
+{
+  "globalErrors": [ "list of error messages", ...],
+  "globalWarnings": [ "list of warning messages", ...],
+  "globalInfos": [ "list of infos messages", ...],
+  "globalSuccess": [ "list of success messages", ...],
+	
+  "fieldErrors": { 
+    "field1": [ "list of error messages for this field", ...], 
+    "field2": [ ... ], 
+    ... 
+  },
+  "fieldWarnings": { /* same structure than fieldErrors but for warnings */ },
+  "fieldInfos": { /* same structure than fieldErrors but for infos */ },
 
-Le système de validation (`DtObjectValidator`, `DefaultDtObjectValidator`) intercepte les erreurs de saisie et retourne HTTP 422 avec une structure JSON détaillée :
-- `globalErrors`, `globalWarnings`, `globalInfos`, `globalSuccess`
-- `fieldErrors`, `fieldWarnings`, `fieldInfos`
-- `objectFieldErrors`, `objectFieldWarnings`, `objectFieldInfos`
+  "objectFieldErrors": { 
+    "object1": { 
+      "field1": [ "list of error messages for this field", ... ],
+      "field2": [ ... ],
+      ... 
+    },
+    "object2": { 
+      "field1": [ "list of error messages for this field", ... ],
+      ... 
+    },                        
+  "objectFieldWarnings": { /* same structure than objectFieldErrors but for warnings */ },
+  "objectFieldInfos": { /* same structure than objectFieldErrors but for infos*/ },
+}
+```
 
-Pour les objets dans une liste, le nom est `nomListe.idxN` (ex : `"persons.idx2"`).
+Pour les erreurs sur un object, le nom repris dans le JSON d'erreur est le même que celui envoyé lors de la request. Pour un object dans une liste, le nom utilisé est :
+`nom de la liste dans la request`+ `idx` + index dans la liste (commence à 0)
+Exemple : 
+```json
+Request : 
+{ 
+  "persons" : [
+    { "name":"Julius", "isValid":"true" },
+    { "name":"Bob", "isValid":"true" },
+    { "name":"Elmond", "isValid":"false" },
+    { "name":"Mark", "isValid":"false" }
+  ]
+}
+
+Response : 
+{
+  "objectFieldErrors": { 
+    "persons.idx2": { 
+      "isValid": [ "personn must be valid" ]
+    },
+    "persons.idx3": { 
+      "isValid": [ "personn must be valid" ],
+    }
+}
+```
 
 ### État Server-side
 
@@ -227,6 +304,8 @@ Grâce à cette fonctionnalité, vous pouvez :
 * utiliser un objet métier complet dans la couche métier.
 
 !> L'état server-side est limité dans le temps, lié à la session utilisateur et non-modifiable. S'il y a un besoin de modifications concurrentes, cela devra être traité au niveau du service.
+
+En conservant les services métier sur des objets complets, ceux-ci sont plus facilement testables car il n'est pas nécessaire de gérer la combinatoire des entrées/sorties des WebServices.
 
 Pour ce faire, vous avez à votre disposition trois annotations :
 * `ServerSideSave` : appliquée sur une Méthode, elle indique à Vega de conserver l'objet retourné et poser une référence avec un `serverToken` id.
@@ -292,7 +371,7 @@ Response:
 La gestion des tokens d'accès limitée est assurée par `TokenManager` / `TokenManagerImpl` et trois annotations :
 
 - `AccessTokenPublish` : Génère un token temporaire dans le header `x-access-token`
-- `AccessTokenMandatory` : Vérifie la présence d'un token valide (403 si invalide)
+- `AccessTokenMandatory` : Vérifie la présence d'un token valide. Sinon le serveur retourne une erreur `HTTP 403 FORBIDDEN` `Invalid access token`
 - `AccessTokenConsume` : Idem, mais consomme (invalide) le token après usage
 
 ### Sécurité **Rate-Limit**
@@ -307,8 +386,8 @@ Le serveur envoie des informations dans des *headers* de la *Response*
 
 Si la limite du serveur est dépassée, le serveur retourne une erreur `HTTP 429 TOO_MANY_REQUEST`.
 
-> Cette fonction est traitée par `RateLimitingWebServiceHandlerPlugin`
-> Le handler propose des paramètres optionnels :
+?> Cette fonction est traitée par [`RateLimitingWebServiceHandlerPlugin`](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/plugins/webservice/handler/RateLimitingWebServiceHandlerPlugin.java)
+?> Le handler propose des paramètres optionnels :
 > - *windowSeconds* : Taille de la fenêtre en seconde
 > - *limitValue* : Nombre d'appels maximum (dans la durée de la fenêtre)
 

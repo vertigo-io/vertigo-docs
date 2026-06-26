@@ -162,7 +162,7 @@ __Compléments JavaScript__
 __Exemple__
 
 ```html
-<vu:agenda-week eventIconAgenda="ri-folder-fill" hasAuthzAdmin="${authz.hasAuthorization('Projet$agendaPersonnel')}">
+<vu:agenda-week eventIconAgenda="ri-folder-fill" hasAuthzAdmin="${authz.hasAuthorization('Demarche$agendaPersonnel')}">
     <vu:slot name="agenda_actions_slot">
         <vu:button icon="ri-add-line" label="#{projet.bo.projet.agenda.action.create-plage-horaire}" @click="onCreatePlageHoraireDefault" vu:authz="Projet$agendaPersonnel" />
         <vu:button icon="ri-file-copy-line" label="#{projet.bo.projet.agenda.action.duplicate-week}" @click="onDuplicateWeek" vu:authz="Projet$agendaPersonnel"/>
@@ -195,7 +195,7 @@ Vous pouvez compléter le contexte pour les autres éléments de votre page, et 
 
 ### Modèle de données
 
-![Diagramme des entités Planning](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/javagen/mermaid/mermaid-io-vertigo-planning.html)
+[Diagramme des entités Planning](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/javagen/mermaid/mermaid-io-vertigo-planning.html)
 
 **SQL** :
 
@@ -242,9 +242,9 @@ Les seuils utilisés lors des contrôles de validité sont paramétrables via `A
 - `createMaxNbGuichet` : nombre maximal de guichets pour une plage horaire (9)
 - `createMaxDaysFromNow` : jours maximum à l'avance pour créer (365)
 - `publishMaxDaysFromNow` : jours maximum à l'avance pour publier (365)
-- `publishMaxDaysPeriode` : jours maximum publiés à la fois (60)
+- `publishMaxDaysPeriode` : jours maximum publiés à la fois (90)
 - `publishNowDelaySecond` : délai avant publication effective (60 s)
-- `duplicateMaxDaysPeriode` : jours maximum à dupliquer (90)
+- `duplicateMaxDaysPeriode` : jours maximum à dupliquer (93)
 - `duplicateMaxDaysFromNow` : jours maximum à l'avance pour dupliquer (365)
 
 ## Pour les experts

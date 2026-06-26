@@ -19,7 +19,7 @@ Sur ce cœur se greffent des options innovantes, activables en fonction des obje
 **Vertigo** se présente comme une plateforme **Opinionated** (c'est-à-dire un *Opinionated Software Development Framework* — un framework qui prend des positions claires sur l'architecture et les bonnes pratiques).
 Ce principe lui permet de maximiser l'efficacité des développements pour la réalisation des applications métier de type "Applications de gestion" : très efficace sur son domaine, mais qui permet d'en sortir. Là où d'autres frameworks généralistes auront une efficacité moyenne mais sur un pan très large (*trop ?*) de cas d'application.
 
-**Vertigo**, en cœur applicatif de la plateforme, embarque nativement l'ensemble des composants indispensables à une application moderne : recherche, sécurité, analytics, dataviz...
+**Vertigo**, en cœur applicatif de la plateforme, embarque nativement l'ensemble des composants indispensables à une application moderne : recherche, sécurité, mobilité, analytics, dataviz...
 
 Vertigo est composé de :
 

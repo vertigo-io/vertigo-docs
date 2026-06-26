@@ -305,7 +305,7 @@ L'exécution passe par `SqlStatementDriver`, classe qui bridge les appels JDBC v
 **Connexion SQL**
 - `C3p0ConnectionProviderPlugin` — pool de connections C3P0 intégré avec configuration complète (driver, URL, credentials, pool params)
 - `DataSourceConnectionProviderPlugin` — wrapper autour d'un `DataSource` externe (JNDI, Spring, etc.)
-- `SqlAdapterSupplierPlugin` — adaptation des types JDBC spécifiques au vendor
+- `SqlAdapterSupplierPlugin` (interface) — adaptation des types JDBC spécifiques au vendor
 
 **TimeSeries**
 - `FluxInfluxDbTimeSeriesPlugin` — backend InfluxDB avec requêtes Flux et écritures Line Protocol
@@ -318,7 +318,7 @@ L'exécution passe par `SqlStatementDriver`, classe qui bridge les appels JDBC v
 - `H2SqlDialect` — dialecte H2 pour dev et test
 - `PostgreSqlDialect` — dialecte PostgreSQL
 - `OracleDialect` — dialecte Oracle 12c+
-- `Oracle11Dialect` — dialecte Oracle 11g (sous-classe de `OracleDialect`)
+- `Oracle11Dialect` — dialecte Oracle 11g (classe sœur de `OracleDialect`)
 - `SqlServerDialect` — dialecte SQL Server
 
 ### Interfaces clés

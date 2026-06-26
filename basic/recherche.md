@@ -65,6 +65,10 @@ modules:
 Exemple de configuration pour le mode Embedded :
 ```yaml
 modules:
+  io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
+    features:
+      - restHL:
+          servers.names: ${esHost}
   io.vertigo.datafactory.DataFactoryFeatures:
     features:
       - search:

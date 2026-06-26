@@ -92,7 +92,7 @@ Les APIs **Vertigo** utilisent cette notion pour guider les développeurs.
 
 ### DtList *(interface)*
 
-Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de rendre les listes transverses de l'IHM au stockage. 
+Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de compenser l'absence de liste fortement typée en Java et de rendre les listes transverses de l'IHM au stockage. 
 
 
 
