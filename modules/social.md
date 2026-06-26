@@ -123,7 +123,7 @@ L'utilisation des Notifications est simple :
 - **getCurrentNotifications(UID\<Account\>)** : Récupère les notifications d'un utilisateur
 - **remove(UID\<Account\>, notificationUUID)** : Supprime une notification pour un utilisateur (n'affecte pas les autres utilisateurs)
 - **removeAll(type, targetUrl)** : Supprime toutes les notifications par type et targetUrl
-- **updateUserContent(UID\<Account\>, notificationUUID, userContent)** : Permet de modifier l'information par utilisateur sur une notification (notion de tags ou de flags)
+- **updateUserContent(UID\<Account\>, notificationUUID, userContent)** : Permet de modifier (annule et remplace) l'information par utilisateur sur une notification (notion de tags ou de flags)
 
 ##### Notification
 
@@ -141,14 +141,15 @@ Exemple de création et envoi d'une notification :
 
 ```java
 final Notification notification = Notification.builder()
-    .withSender("System")
+    .withSender("System") //we could keep the user who did this update
     .withTitle("Base updated")
     .withContent("Base " + base.getCode() + " informations updated")
     .withTTLInSeconds(600)
-    .withType("MARS-BASE")
-    .withTargetUrl("/mars/basemanagement/base/information/" + base.getBaseId())
+    .withType("MARS-BASE") //should prefix by app, in case of multi-apps notifications
+    .withTargetUrl("/mars/basemanagement/base/information/" + base.getBaseId()) //we may use a parameter to reference the good url
     .build();
 
+//sendNotificationToAll(notification); //use with care, in a true app we should use security rules to get the users list
 final Set<UID<Account>> accountUIDs = personServices.getPersons(DtListState.of(null))
     .stream()
     .map((person) -> UID.of(Account.class, String.valueOf(person.getPersonId())))
@@ -228,13 +229,17 @@ modules:
                  developmentMode: true
                  developmentMailTo: "team@vertigo.io"
                  charset: "UTF-8"
-           - sms.ovh:
-                 ovhAppKey: "..."
-                 ovhAppSecret: "..."
-                 ovhConsumerKey: "..."
-                 smsSender: "MonApp"
-           - sms.linkmobility:
-                 smsLogin: "..."
-                 smsPassword: "..."
-                 smsSender: "MonApp"
+            - sms.ovh:
+                  appKey: "..."
+                  appSecret: "..."
+                  consumerKey: "..."
+                  serviceName: "MonApp"
+                  whitelistPrefixes: "..."
+                  creditLeftThreshold: 10
+            - sms.linkmobility:
+                  username: "..."
+                  password: "..."
+                  smsSender: "MonApp"
+                  whitelistPrefixes: "..."
+                  maxSmsPerMinute: 10
 ```
