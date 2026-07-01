@@ -16,4 +16,4 @@ This type of representation is very useful when your application will be used bo
 
 # Design & Try me
 
-<iframe src="/vertigo-docs/design-system/iframes/organismes/cards.html" height="1500px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/en/design-system/iframes/organismes/cards.html" height="1500px" scrolling="no" style="border:none;" ></iframe>

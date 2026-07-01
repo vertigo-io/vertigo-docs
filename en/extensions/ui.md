@@ -2,7 +2,7 @@
 
 Extension vertigo-ui enables creation of rich screens, simply and securely.
 
-General principles are explained in [basic/ui](basic/ui):
+General principles are explained in [basic/ui](/en/basic/ui):
 
 Here we present more specific elements to help onboard to the Vertigo-ui module.
 

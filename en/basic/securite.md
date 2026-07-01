@@ -11,7 +11,7 @@ This module offers related user management features:
 ## Configuration
 
 To use **Account** features, you must add this module to the application configuration.
-For more details, refer to the chapter dedicated to application [configuration](basic/configuration).
+For more details, refer to the chapter dedicated to application [configuration](/en/basic/configuration).
 
 Here is a typical configuration for an application using the Account module:
 

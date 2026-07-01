@@ -325,7 +325,7 @@ create FacetedQueryDefinition QryEquipment {
 
 #### **Generated Code**
 
-The [MDA](basic/mda) module of Vertigo (*vertigo-studio*) uses this information to generate a method for each FacetedQueryDefinition in the DAO associated with the index Dt *(there can be multiple indexes per KeyConcept)*.
+The [MDA](/en/basic/mda) module of Vertigo (*vertigo-studio*) uses this information to generate a method for each FacetedQueryDefinition in the DAO associated with the index Dt *(there can be multiple indexes per KeyConcept)*.
 
 ### Data Loading Service
 

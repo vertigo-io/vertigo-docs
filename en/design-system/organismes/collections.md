@@ -4,9 +4,9 @@ Displaying collections of elements is very common.
 
 We have selected three methods for visualizing collections:
 
-- as a list of [cards](design-system/organismes/cards.md)
-- as a list of [lines](design-system/organismes/items.md)
-- as a [table](design-system/organismes/table.md)
+- as a list of [cards](/en/design-system/organismes/cards.md)
+- as a list of [lines](/en/design-system/organismes/items.md)
+- as a [table](/en/design-system/organismes/table.md)
 
 These three visualization methods share common sorting and pagination functions.
 
@@ -32,4 +32,4 @@ This is made possible in particular by the very simple use of faceted full-text 
 
 # Design
 
-You can find the various designs here: [cards](design-system/organismes/cards.md), [lines](design-system/organismes/items.md), [table](design-system/organismes/table.md)
+You can find the various designs here: [cards](/en/design-system/organismes/cards.md), [lines](/en/design-system/organismes/items.md), [table](/en/design-system/organismes/table.md)

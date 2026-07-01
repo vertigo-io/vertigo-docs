@@ -16,7 +16,7 @@ The elements that can be generated via vertigo-studio are:
 
 - JAVA entities (POJOs) derived from the model
 - Database creation scripts (SQL in particular)
-- DAOs (Data Access Objects) that offer simplified storage access through a dedicated component per business entity (see [here](basic/dao) for more details)
+- DAOs (Data Access Objects) that offer simplified storage access through a dedicated component per business entity (see [here](/en/basic/dao) for more details)
 - JavaScript and TypeScript entities for Single Page Applications
 
 

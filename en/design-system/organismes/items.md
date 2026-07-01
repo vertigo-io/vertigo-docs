@@ -11,4 +11,4 @@ This format adapts well to mobile in certain cases.
 
 # Design & Try me
 
-<iframe src="/vertigo-docs/design-system/iframes/organismes/items.html" height="1500px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/en/design-system/iframes/organismes/items.html" height="1500px" scrolling="no" style="border:none;" ></iframe>

@@ -33,7 +33,7 @@ Because an *Opinionated* platform stands by its convictions, Vertigo rests on fi
 
 Vertigo is composed of:
 
-- [**Vertigo-Core**](overview/core): An ultra-powerful and super-light Java engine
-- [**Vertigo-Libs**](overview/libs): A collection of extension modules addressing all key challenges of business applications, enabling rapid development
-- [**Vertigo-Connectors**](overview/connectors): A collection of low-level connectors to third-party libraries and products, simplifying edge-case development
-- [**Vertigo-Studio**](overview/studio): A dedicated design tool for business applications to gain efficiency and consistency
+- [**Vertigo-Core**](/en/overview/core): An ultra-powerful and super-light Java engine
+- [**Vertigo-Libs**](/en/overview/libs): A collection of extension modules addressing all key challenges of business applications, enabling rapid development
+- [**Vertigo-Connectors**](/en/overview/connectors): A collection of low-level connectors to third-party libraries and products, simplifying edge-case development
+- [**Vertigo-Studio**](/en/overview/studio): A dedicated design tool for business applications to gain efficiency and consistency

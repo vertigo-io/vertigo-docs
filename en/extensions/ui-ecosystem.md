@@ -1,6 +1,6 @@
 # Vertigo UI Ecosystem
 
-The Vertigo platform UI ecosystem consists of four libraries integrating with the main [vertigo-ui](extensions/ui.md) module. Each extends the VueJS component offerings available for application pages.
+The Vertigo platform UI ecosystem consists of four libraries integrating with the main [vertigo-ui](/en/extensions/ui.md) module. Each extends the VueJS component offerings available for application pages.
 
 ## Library `vertigo-ui-vuejs` — Advanced Vue 3 Components
 

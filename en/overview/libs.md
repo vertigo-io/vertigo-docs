@@ -10,7 +10,7 @@ The modules listed here are those that form the central core of Vertigo. They ar
 These modules are extensions because they enrich a Vertigo application and provide solutions to one or more business application challenges.
 We classify these extensions into two groups: *libs* and *modules*.
 *Libs* are primarily components aimed at solving technical challenges, while *modules* are akin to functional modules and aim to solve a business challenge as a whole.
-*Modules* generally provide a service API, a data model, and sometimes a UI [Module overview](overview/modules).
+*Modules* generally provide a service API, a data model, and sometimes a UI [Module overview](/en/overview/modules).
 
 Below is the list of *Libs* along with a brief description of their contents.
 
@@ -25,7 +25,7 @@ Below is the list of *Libs* along with a brief description of their contents.
 * __script__: transforms simple character strings into executable scripts from your source code (because sometimes mixing code and data is the right approach)
 * __transaction__: adds transaction management to your application
 
-[Access the documentation](extensions/commons)
+[Access the documentation](/en/extensions/commons)
 
 ## vertigo-database
 
@@ -34,7 +34,7 @@ Below is the list of *Libs* along with a brief description of their contents.
 * __sql__: with native support for the following RDBMS: Oracle, MSSql, Postgresql, H2
 * __timeseries__: with native support for the InfluxDB time-series database
 
-[Access the documentation](extensions/database)
+[Access the documentation](/en/extensions/database)
 
 ## vertigo-datamodel
 
@@ -45,7 +45,7 @@ Below is the list of *Libs* along with a brief description of their contents.
 * __criteria__: a unified API for building filters independent of their usage (Java predicates, SQL...)
 * __task__: create and execute various tasks (e.g., direct access to relational databases)
 
-[Access the documentation](extensions/datamodel)
+[Access the documentation](/en/extensions/datamodel)
 
 ## vertigo-datastore
 
@@ -55,7 +55,7 @@ Below is the list of *Libs* along with a brief description of their contents.
 * __kvstore__: key/value storage space
 * __fileStore__: file storage management via a unified API
 
-[Access the documentation](extensions/datastore)
+[Access the documentation](/en/extensions/datastore)
 
 ## vertigo-datafactory
 
@@ -64,7 +64,7 @@ Below is the list of *Libs* along with a brief description of their contents.
 * __search__: enables use of a search engine within your application—from indexing and updates to consumption via complex faceted queries
 * __collections__: tools for manipulating object collections (includes: full-text indexing, faceting, filtering)
 
-[Access the documentation](extensions/datafactory)
+[Access the documentation](/en/extensions/datafactory)
 
 ## vertigo-basics
 
@@ -74,7 +74,7 @@ Below is the list of *Libs* along with a brief description of their contents.
 * __constraint__: Text, number, date, etc. constraints
 * __task__: SQL TaskEngine for manipulating data in relational databases
 
-[Access the documentation](extensions/basics)
+[Access the documentation](/en/extensions/basics)
 
 
 ## vertigo-vega
@@ -82,13 +82,13 @@ Below is the list of *Libs* along with a brief description of their contents.
 
 * __rest__: Adds a REST web service layer to your application. These services are suited for both Machine2Machine exchanges and Single Page Application construction, with dedicated features (security management, rate limiting, token handling...)
 
-[Access the documentation](extensions/vega)
+[Access the documentation](/en/extensions/vega)
 
 ## vertigo-ui
 
 > Create stunning Web interfaces securely and efficiently with the Vertigo-UI extension, leveraging the best of VueJS and Quasar with a highly effective and ergonomic Design System
 
-[Access the documentation](extensions/ui)
+[Access the documentation](/en/extensions/ui)
 
 ## vertigo-account
 > Manage your application's users, not just from a technical perspective.
@@ -97,7 +97,7 @@ Below is the list of *Libs* along with a brief description of their contents.
 * __authorization__: provides a security model that associates users with both global rights and fine-grained data rights (Role Based and Attribute Based)
 * __identity__: a mechanism to store and retrieve user identities from authoritative sources
 
-[Access the documentation](extensions/account)
+[Access the documentation](/en/extensions/account)
 
 ## vertigo-stella
 
@@ -106,4 +106,4 @@ Below is the list of *Libs* along with a brief description of their contents.
 - __rest__: Communication between nodes is performed via HTTP
 - __redis__: Tasks to execute are centralized in a REDIS database
 
-[Access the documentation](extensions/stella)
+[Access the documentation](/en/extensions/stella)
