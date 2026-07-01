@@ -2,7 +2,9 @@
 
 **vertigo-commons** regroupe les composants transverses de la plateforme : gestion des codecs, bus d'événements, découverte de topologie, exécution de scripts, système de commandes, gestion transactionnelle et moteur de parsing PEG.
 
-Les composants sont orthogonaux et sont généralement consommés par des modules de plus haut niveau. L'activation se fait par features YAML ou par l'API Java.
+Le module respecte le principe de modularité et met en oeuvre le design pattern Strategy comme les autres modules Vertigo.
+
+Les composants sont orthogonaux et sont généralement consommés par des modules de plus haut niveau. L'activation se fait par features YAML ou par l'API Java. Pour plus de détails, vous pouvez vous rapporter au chapitre dédié à la [configuration](/basic/configuration) de l'application.
 
 Cinq composants sont démarrés automatiquement : CodecManager, EventBusManager, AppManager, VTransactionManager et VTransactionAspect. Les autres nécessitent une déclaration de feature.
 

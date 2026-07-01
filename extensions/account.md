@@ -292,10 +292,10 @@ Mais si l'utilisateur n'a pas les authorisations suffisantes, une exception est 
 - **assertAuthorizations(message*(optionnel)*, AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre et lance une exception sinon
 - **assertOperations(Entity, OperationName, message*(optionnel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
 - **assertOperationsOnOriginalEntity(Entity, OperationName, message*(optionnel)*)** : Comme **assertOperations** mais reload d'abord l'objet original pour faire le contrôle de sécurité AVANT d'appliquer les modifications de l'utilisateur
- - **assertOr(BooleanSupplier...)** : Permet d'assembler plusieurs contrôle en OR
- - **hasAuthorization(BooleanSupplier...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre
- - **authorizationCriteria(Class\<Entity\>, OperationName)** : Construit un criteria représentant le filtre de sécurité pour un type d'opération sur une entity
- - **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optionnel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** porté par cette accessor (FK), l'accessor sera chargé si besoin 
+- **assertOr(BooleanSupplier...)** : Permet d'assembler plusieurs contrôle en OR
+- **hasAuthorization(AuthorizationName...)** : Retourne un `BooleanSupplier` vérifiant que l'utilisateur a l'une des autorisations passées en paramètre
+- **authorizationCriteria(Class\<Entity\>, OperationName)** : Construit un criteria représentant le filtre de sécurité pour un type d'opération sur une entity
+- **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optionnel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** porté par cette accessor (FK), l'accessor sera chargé si besoin
  
  Exemple:
 ```Java

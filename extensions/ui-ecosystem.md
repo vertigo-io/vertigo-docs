@@ -4,10 +4,10 @@ L'écosystème UI de la plateforme Vertigo se compose de quatre bibliothèques q
 
 ## Bibliothèque `vertigo-ui-vuejs` — Composants Vue 3 avancés
 
-La bibliothèque de base (package `@vertigo-io/vertigo-ui-vuejs` v4.3.2) fournit des composants Vue 3 prêts à l'emploi, construits sur Quasar et OpenLayers.
+La bibliothèque de base (package `@vertigo-io/vertigo-ui-vuejs` v4.3.0) fournit des composants Vue 3 prêts à l'emploi, construits sur Quasar et OpenLayers.
 
 Le plugin s'installe via `Vue.use(VertigoUi, { axios: ... })` et expose :
-- 16 composants globaux (préfixe `v-`)
+- 15 composants globaux (préfixe `v-`)
 - 5 directives Vue (préfixe `v-`)
 - Un objet global `$vui` avec des méthodes utilitaires
 - Du support i18n (français, anglais)
@@ -20,10 +20,8 @@ Composants disponibles :
 | `v-comments` | Zone de commentaires | `concept`, `id`, `baseUrl`, `connectedAccount` |
 | `v-notifications` | Bell de notifications | `baseUrl`, `targetUrlPrefix`, `icon`, `color` |
 | `v-handles` | Recherche rapide par handles | `baseUrl` |
-| `v-comments` | Zone de commentaires collaborative | `concept`, `id`, `baseUrl`, `connectedAccount` |
 | `v-chatbot` | Interface chatbot conversationnelle | `botUrl`, `botAvatar`, `botName`, `devMode` |
 | `v-commands` | Invite de commande (CLI-like) | `baseUrl` |
-| `v-comments` | Échange de commentaires sur un concept métier | `concept`, `id`, `baseUrl`, `connectedAccount` |
 | `v-extensions-store` | Grille des modules Vertigo activés | `activeSkills` (Array<String>) |
 | `v-geopoint-input` | Saisie latitude/longitude | `modelValue` (Object) |
 | `v-json-editor` | Édition JSON sous forme de champs | `modelValue` (String JSON), `readonly`, `cols` |
@@ -52,7 +50,7 @@ Le composant `v-map` utilise OpenLayers avec tuiles OSM par défaut. Le composan
 
 ## Bibliothèque `vertigo-ui-dsfr` — Design System français
 
-La bibliothèque DSFR (package `vertigo-dsfr` v4.3.2) intégre le Design System de l'État français (`@gouvfr/dsfr` 1.12.1 + `@gouvminint/vue-dsfr` 8.6.0) au sein de Vertigo.
+La bibliothèque DSFR (package `vertigo-dsfr` v4.3.0) intégre le Design System de l'État français (`@gouvfr/dsfr` 1.12.1 + `@gouvminint/vue-dsfr` 8.6.0) au sein de Vertigo.
 
 Elle installe le plugin `VueDsfr` (qui expose tous les composants DSFR standards), puis ajoute des composants personnalisés adaptés à l'usage Vertigo :
 

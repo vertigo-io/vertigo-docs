@@ -128,7 +128,7 @@ D'autre part, il est également possible d'apporter du dynamisme dans les requê
 ```
 
 
-Pour plus de détails sur l'utilisation de ces syntaxes, consulter la documentation sur les [Tâches](/basic/dao#tâches).
+Pour plus de détails sur l'utilisation de ces syntaxes, un [atelier](/guide/samples_dao) complet est disponible.
 
 ### Exemple d'échappement
 

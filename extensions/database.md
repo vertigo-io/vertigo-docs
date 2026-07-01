@@ -45,9 +45,8 @@ Le module expose un DSL pour construire des requêtes SQL de manière typée et 
 |---|---|
 | `SqlStatement` | Requête SQL paramétrée (immutable) |
 | `SqlStatementBuilder` | Constructeur fluide de `SqlStatement` |
-| `SqlParameter` | Paramètre positionnel typé avec direction (IN, OUT, INOUT) |
-| `SqlNamedParam` | Paramètre identifié par un nom, pour les requêtes nommées |
-| `SqlMapping` | Mapping Java → JDBC et JDBC → Java des types |
+| `SqlParameter` | Paramètre typé : record `(Class<O> dataType, O value)` — direction déterminée par le type, sans enum IN/OUT |
+| `SqlMapping` | Interface de mapping Java → JDBC et JDBC → Java des types |
 
 La démarche typique :
 
@@ -69,7 +68,7 @@ Deux plugins de connexion sont disponibles :
 
 | Plugin | Feature | Description |
 |---|---|---|
-| `C3p0ConnectionProviderPlugin` | `sql.c3p0` | Pool de connections C3P0 intégré. Paramètres : `driverClassName`, `jdbcUrl`, `userId`, `userPassword`, et paramètres de pool |
+| `C3p0ConnectionProviderPlugin` | `sql.c3p0` | Pool de connections C3P0 intégré. Paramètres : `dataBaseClass`, `jdbcDriver`, `jdbcUrl`, `minPoolSize`, `maxPoolSize`, `acquireIncrement`, `configName`, `name` |
 | `DataSourceConnectionProviderPlugin` | `sql.datasource` | Utilisation d'un `DataSource` injecté (JNDI, Spring, etc.) |
 
 Le `SqlAdapterSupplierPlugin` complète la couche de connexion en fournissant les adaptateurs de types JDBC spécifiques au vendor.
@@ -91,30 +90,30 @@ Chaque dialecte implémente la syntaxe spécifique du vendor : pagination, gesti
 
 Le mécanisme de détection fonctionne automatiquement : au moment de l'ouverture de la première connexion, le `SqlStatementDriver` identifie le vendor depuis la métadonnée JDBC et applique le `SqlDialect` correspondant.
 
-La classe `SqlMapping` définit les correspondances entre les types Java et les types JDBC pour chaque dialecte.
+L'interface `SqlMapping` définit les correspondances entre les types Java et les types JDBC pour chaque dialecte.
 
 ### Exemple
 
 ```java
-// Requête paramétrée
-SqlStatement selectStatement = new SqlStatementBuilder()
-    .withSql("SELECT tacha_id, tacha_libelle, tacha_budget FROM TACHES WHERE tacha_statut = ?")
-    .withParam(SqlParameter.of(SqlMapping.STRING, "EN_COURS"))
+// Requête paramétrée — la syntaxe #name# est convertie en ? interne par le SqlStatementBuilder
+SqlStatement selectStatement = SqlStatement
+    .builder("SELECT tacha_id, tacha_libelle, tacha_budget FROM TACHES WHERE tacha_statut = #statut#")
+    .bind("statut", String.class, "EN_COURS")
     .build();
 
 List<DtTache> resultats = sqlManager.executeQuery(
-        selectStatement, DtTache.class, basicTypeAdapters, null, sqlConnection);
+    selectStatement, DtTache.class, basicTypeAdapters, null, sqlConnection);
 
 // Update avec generated key
-SqlStatement insertStatement = new SqlStatementBuilder()
-    .withSql("INSERT INTO TACHES (tacha_libelle, tacha_budget) VALUES (?, ?)")
-    .withParam(SqlParameter.of(SqlMapping.STRING, "Ma tâche"))
-    .withParam(SqlParameter.of(SqlMapping.INTEGER, 5000))
+SqlStatement insertStatement = SqlStatement
+    .builder("INSERT INTO TACHES (tacha_libelle, tacha_budget) VALUES (#libelle#, #budget#)")
+    .bind("libelle", String.class, "Ma tâche")
+    .bind("budget", Integer.class, 5000)
     .build();
 
 Tuple<Integer, Long> result = sqlManager.executeUpdateWithGeneratedKey(
-        insertStatement, GenerationMode.GENERATED_KEYS, "tacha_id", Long.class,
-        basicTypeAdapters, sqlConnection);
+    insertStatement, GenerationMode.GENERATED_KEYS, "tacha_id", Long.class,
+    basicTypeAdapters, sqlConnection);
 ```
 
 ---
@@ -133,10 +132,9 @@ Le modèle repose sur cinq concepts fondamentaux :
 
 | Classe | Rôle |
 |---|---|
-| `Measure` | Mesure individuelle (timestamp, nom de série, valeur, tags) |
-| `MeasureBuilder` | Constructeur de `Measure` |
-| `DataFilter` / `DataFilterBuilder` | Filtre sur les séries par nom, tags, et valeurs |
-| `TimeFilter` / `TimeFilterBuilder` | Filtre temporel par période (début/fin) |
+| `Measure` | Record immuable `(measurement, instant, fields:Map, tags:Map)` — accès par factory `Measure.builder()` |
+| `DataFilter` | Record immuable `(measurement, filters:Map<String, String>)` — accès par factory `DataFilter.builder()` |
+| `TimeFilter` | Record immuable `(from, to, dim)` — bornes en `String` — accès par factory `TimeFilter.builder()` |
 | `TimedDatas` | Résultat d'agrégation temporelle (séries par intervalle) |
 | `TabularDatas` | Résultat au format tableau (lignes de données) |
 
@@ -155,23 +153,22 @@ Un seul plugin `TimeSeriesPlugin` peut être actif à la fois. Si aucun plugin n
 
 ```java
 // Stocker une mesure
-Measure measure = new MeasureBuilder()
-    .withSeriesName("temperature.salle1")
-    .withValue(22.5)
-    .withTag("localisation", "bureau")
+Measure measure = Measure.builder("temperature")
+    .addField("value", 22.5)
+    .tag("localisation", "bureau")
     .build();
 timeSeriesManager.insertMeasure("my_metrics", measure);
 
 // Requêter avec filtres
-DataFilter dataFilter = new DataFilterBuilder()
-    .withSeriesName("temperature.*")
+DataFilter dataFilter = DataFilter.builder("temperature")
+    .addFilter("localisation", "bureau")
     .build();
-TimeFilter timeFilter = new TimeFilterBuilder()
-    .withStart(Instant.now().minusHours(24))
+TimeFilter timeFilter = TimeFilter
+    .builder(Instant.now().minusHours(24).toString(), Instant.now().toString())
     .build();
 
 TimedDatas result = timeSeriesManager.getTimeSeries(
-        "my_metrics", Arrays.asList("temperature.*"), dataFilter, timeFilter);
+    "my_metrics", Arrays.asList("temperature.*"), dataFilter, timeFilter);
 ```
 
 ---
@@ -231,16 +228,14 @@ modules:
       - migration:
     featuresConfig:
       - sql.c3p0:
-          driverClassName: org.postgresql.Driver
+          dataBaseClass: org.postgresql.PGDatabase
+          jdbcDriver: org.postgresql.Driver
           jdbcUrl: jdbc:postgresql://localhost:5432/mydb
-          userId: user
-          userPassword: secret
       - timeseries.influxdb:
-          host: localhost
-          port: 8086
-          database: my_metrics
+          connectorName: main
+          dbNames: my_metrics
       - migration.liquibase:
-          changeLogFile: db/changelog/changelog-master.xml
+          masterFile: db/changelog/changelog-master.xml
 ```
 
 Chaque feature `sql.*` de connexion (`sql.c3p0`, `sql.datasource`) est incompatible avec les autres : un seul plugin de connexion `SqlConnectionProvider` peut être actif. De même, un seul `TimeSeriesPlugin` et un seul `MigrationPlugin` peuvent être actifs simultanément.
@@ -268,7 +263,7 @@ Chaque feature `sql.*` de connexion (`sql.c3p0`, `sql.datasource`) est incompati
 | Manager | Impl | Feature |
 |---|---|---|
 | `SqlManager` | `SqlManagerImpl` (final) | `sql` |
-| `TimeSeriesManager` | `TimeSeriesManagerImpl` (final) | `timeseries` |
+| `TimeSeriesManager` | `TimeSeriesManagerImpl` | `timeseries` |
 | `MigrationManager` | `MigrationManagerImpl` (final) | `migration` |
 
 ### Impl — SqlManager
@@ -292,20 +287,20 @@ L'exécution passe par `SqlStatementDriver`, classe qui bridge les appels JDBC v
 | Flag | Params | Composants ajoutés |
 |---|---|---|
 | `sql` | — | `SqlManager` (`SqlManagerImpl`) |
-| `sql.c3p0` | `driverClassName`, `jdbcUrl`, `userId`, `userPassword`, params pool | `C3p0ConnectionProviderPlugin` |
+| `sql.c3p0` | `name`, `dataBaseClass`, `jdbcDriver`, `jdbcUrl`, `minPoolSize`, `maxPoolSize`, `acquireIncrement`, `configName` | `C3p0ConnectionProviderPlugin` |
 | `sql.datasource` | params DataSource | `DataSourceConnectionProviderPlugin` |
 | `timeseries` | — | `TimeSeriesManager` (`TimeSeriesManagerImpl`) |
-| `timeseries.influxdb` | `host`, `port`, `database`, params connexion | `FluxInfluxDbTimeSeriesPlugin` |
+| `timeseries.influxdb` | `connectorName`, `dbNames` (requis : `InfluxDbConnector`) | `FluxInfluxDbTimeSeriesPlugin` |
 | `timeseries.fake` | — | `FakeTimeSeriesPlugin` |
 | `migration` | `Param...` | `MigrationManager` (`MigrationManagerImpl`) |
-| `migration.liquibase` | `Param...` | `LiquibaseMigrationPlugin` |
+| `migration.liquibase` | `masterFile`, `connectionName`, `contexts` | `LiquibaseMigrationPlugin` |
 
 ### Plugins
 
 **Connexion SQL**
 - `C3p0ConnectionProviderPlugin` — pool de connections C3P0 intégré avec configuration complète (driver, URL, credentials, pool params)
 - `DataSourceConnectionProviderPlugin` — wrapper autour d'un `DataSource` externe (JNDI, Spring, etc.)
-- `SqlAdapterSupplierPlugin` — adaptation des types JDBC spécifiques au vendor
+- `SqlAdapterSupplierPlugin` (interface) — adaptation des types JDBC spécifiques au vendor
 
 **TimeSeries**
 - `FluxInfluxDbTimeSeriesPlugin` — backend InfluxDB avec requêtes Flux et écritures Line Protocol
@@ -318,7 +313,7 @@ L'exécution passe par `SqlStatementDriver`, classe qui bridge les appels JDBC v
 - `H2SqlDialect` — dialecte H2 pour dev et test
 - `PostgreSqlDialect` — dialecte PostgreSQL
 - `OracleDialect` — dialecte Oracle 12c+
-- `Oracle11Dialect` — dialecte Oracle 11g (sous-classe de `OracleDialect`)
+- `Oracle11Dialect` — dialecte Oracle 11g (extends `OracleDialect`)
 - `SqlServerDialect` — dialecte SQL Server
 
 ### Interfaces clés
@@ -345,7 +340,7 @@ L'exécution passe par `SqlStatementDriver`, classe qui bridge les appels JDBC v
 | **TimeSeries Model** | `Measure`, `MeasureBuilder`, `DataFilter`, `DataFilterBuilder`, `TimeFilter`, `TimeFilterBuilder`, `TimedDatas`, `TabularDatas` |
 | **TimeSeries Plugins** | `TimeSeriesPlugin`, `FluxInfluxDbTimeSeriesPlugin`, `FakeTimeSeriesPlugin` |
 | **Migration Plugins** | `MigrationPlugin`, `LiquibaseMigrationPlugin` |
-| **Connexion Plugins** | `SqlConnectionProviderPlugin` (abstract), `C3p0ConnectionProviderPlugin`, `DataSourceConnectionProviderPlugin` |
+| **Connexion Plugins** | `SqlConnectionProviderPlugin` (interface), `C3p0ConnectionProviderPlugin`, `DataSourceConnectionProviderPlugin` |
 
 ### Configuration YAML
 

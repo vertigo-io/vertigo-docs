@@ -7,7 +7,7 @@ Ce module est fortement basé sur des définitions qui ont vocation à être tra
 Il inclut :
 
 - de nombreuses définitions liées à la couche domaine :
- 	- `DataDefinition`, `DataField`
+ 	- `DtDefinition`
 	- Contraintes, Formatters
 	- Associations N-N, 1-N
  	- `TaskDefinition`, `TaskAttribute`
@@ -200,7 +200,7 @@ Les associations entre objets sont définies par :
 
 | Composant | Rôle |
 |---|---|
-| `DataModelFeatures` | Classe `@Feature` qui active les managers via `buildFeatures()` |
+| `DataModelFeatures` | Classe de Features qui active les managers via `buildFeatures()` |
 | `DataMetricsProvider` | Métriques d'accès aux données |
 | `TaskMetricsProvider` | Métriques d'exécution des tâches |
 | `SmartTypesLoader` | Chargement des SmartTypes |

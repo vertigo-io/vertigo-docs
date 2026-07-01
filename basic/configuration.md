@@ -32,8 +32,6 @@ final NodeConfig nodeConfig = NodeConfig.builder()
 
 L'API fluent de création de la configuration permet d'être guidé dans sa création. Par ce biais, il est possible de configurer les éléments suivants :
 
-- **boot** : méthode `beginBoot` , `endBoot`
-
 - **modules** : méthode `addModule`
 
   - ajout d'un **composant** :  méthode `addComponent`

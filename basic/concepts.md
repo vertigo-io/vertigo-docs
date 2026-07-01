@@ -92,7 +92,7 @@ Les APIs **Vertigo** utilisent cette notion pour guider les développeurs.
 
 ### DtList *(interface)*
 
-Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de rendre les listes transverses de l'IHM au stockage. 
+Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de compenser l'absence de liste fortement typée en Java et de rendre les listes transverses de l'IHM au stockage. 
 
 
 
@@ -121,7 +121,7 @@ Par ce mécanisme, **Vertigo** favorise une utilisation efficace et maîtrisée 
 
 `@Transactional` est l'une des annotations proposées par **Vertigo**. Elle est présentée ici car elle est d'une importance capitale dans les applications de gestion. 
 Comme son nom l'indique, elle ajoute le caractère transactionel sur une méthode (par un principe d'*AOP*).
-Elle a vocation a être positionnée sur les façades de services et se comporte comme étant **REQUIRES_NEW**, c'est à dire que l'annotation s'assure qu'une transaction est présente : s'il n'y en a pas encore, on en crée une, s'il y en a déjà une, on la réutilise.
+Elle a vocation à être positionnée sur les façades de services et se comporte comme étant **REQUIRED**, c'est à dire que l'annotation s'assure qu'une transaction est présente : s'il n'y en a pas encore, on en crée une, s'il y en a déjà une, on la réutilise.
 
 ## Studio 
 

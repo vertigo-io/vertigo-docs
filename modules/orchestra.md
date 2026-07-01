@@ -32,7 +32,9 @@ Orchestra offre les fonctionnalités suivantes :
   - Mémoire
 - Une API REST pour gérer les processus, les exécutions, la planification et la supervision
 
-Lorsque le module Orchestra est ajouté à votre application, il est possible de l'utiliser en mode intégré ou comme un nœud standalone dans une architecture micro-services.
+Lorsque le module Orchestra est ajouté à votre application, il est possible de l'utiliser en mode intégré ou comme un nœud standalone dans une architecture micro-services (voir le projet vertigo-orchestra-demo).
+
+> Une IHM Vue.js embarquée existe (4 vues, i18n fr/en, Vite build) mais n'est pas prod-ready.
 
 La configuration YAML pour Orchestra en mode base de données est la suivante :
 
@@ -47,7 +49,7 @@ io.vertigo.orchestra.OrchestraFeatures:
         - orchestra.webapi:
 ```
 
-Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires).
+Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires) à l'aide de [ce](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-orchestra/src/main/database/scripts/install/orchestra_create_init_v1.0.0.sql) fichier SQL.
 
 ## A quoi cela ressemble-t-il dans le code ?
 
@@ -99,12 +101,12 @@ Maintenant que nous avons un ActivityEngine, nous allons l'associer à notre pre
 ### Définir un nouveau processus
 
 Pour créer un nouveau processus, nous devons créer une nouvelle `ProcessDefinition`.
-Pour construire une `ProcessDefinition`, il est nécessaire d'utiliser la classe `ProcessDefinitionBuilder`.
+Pour construire une `ProcessDefinition`, il est nécessaire d'utiliser la factory statique `ProcessDefinition.builder()` (le constructeur de `ProcessDefinitionBuilder` est package-private).
 
 Voici notre première ProcessDefinition :
 
 ```java
-final ProcessDefinition myFirstProcessDefinition = new ProcessDefinitionBuilder("MY_FIRST_ONE", "My first process")
+final ProcessDefinition myFirstProcessDefinition = ProcessDefinition.builder("MY_FIRST_ONE", "My first process")
 				.addActivity("ACTIVITY", "First activity", MyFirstActivityEngine.class)
 				.build();
 ```
@@ -131,7 +133,7 @@ Par exemple :
 ```java
 orchestraServices.getScheduler().scheduleAt(myFirstProcessDefinition, Instant.now(), Collections.emptyMap());
 orchestraServices.getReport().getSummaryByDate(myFirstProcessDefinition,
-		LocalDate.of(2017, 1, 1), LocalDate.of(2017, 12, 31));
+		Instant.parse("2017-01-01T00:00:00Z"), Instant.parse("2017-12-31T23:59:59Z"));
 ```
 
 ## Cas des évolutions des processus
@@ -141,7 +143,7 @@ Par défaut, la définition est conservée en base de données. Lorsqu'il est n�
 avec needUpdate=true (en général, cela est réalisé par un script liquibase). Avec ce paramètre, au démarrage le système mettra à jour la définition dans la base à partir de la définition dans le code.
 
 Pour une modification du paramétrage du déclenchement, ce n'est pas directement dans la définition mais dans la "ProcessTriggeringStrategy".
-Ces informations sont modifiables avec l'API (updateProcessProperties), et certaines IHM proposent de modifier le cron directement par l'interface utilisateur.
+Ces informations sont modifiables avec l'API (updateProcessDefinitionProperties), et certaines IHM proposent de modifier le cron directement par l'interface utilisateur.
 
 ## Pour les experts
 

@@ -6,7 +6,7 @@
 
 **Vertigo** est une plateforme Java pour construire des applications ou systèmes d'information métier modernes, complets, maintenables et évolutifs.
 
-Elle conçue pour maximiser l'ajout de valeur :
+Elle est conçue pour maximiser l'ajout de valeur :
 - les choses simples se font simplement,
 - les choses plus compliquées sont ajoutées par des *plug-in* en minimisant leurs impacts,
 - plusieurs briques à forte valeur ajoutée sont fournies *out-of-the-box* : IHM moderne, recherche, sécurité, analytics, dataviz...
@@ -16,10 +16,20 @@ A cette base s'ajoutent une série d'options et de personnalisations qui apporte
 
 **Vertigo**, transposition de ce principe dans la création de systèmes d'information et de services numériques, se traduit par un cœur applicatif garantissant la robustesse, la qualité et l'efficacité des développements.
 Sur ce cœur se greffent des options innovantes, activables en fonction des objectifs métier.
-**Vertigo** se présente comme une plateforme **Opinionated**.
-C'est ce principe qui lui permet de maximiser l'efficacité des développements pour la réalisation des applications métier de type "Applications de gestion" : très efficace sur son domaine, mais qui permet d'en sortir. Là où d'autres frameworks généralistes auront une efficacité moyenne mais sur un pan très large (*trop ?*) de cas d'application.
+**Vertigo** se présente comme une plateforme **Opinionated** (c'est-à-dire un *Opinionated Software Development Framework* — un framework qui prend des positions claires sur l'architecture et les bonnes pratiques).
+Ce principe lui permet de maximiser l'efficacité des développements pour la réalisation des applications métier de type "Applications de gestion" : très efficace sur son domaine, mais qui permet d'en sortir. Là où d'autres frameworks généralistes auront une efficacité moyenne mais sur un pan très large (*trop ?*) de cas d'application.
 
-**Vertigo**, en cœur applicatif de la plateforme, embarque nativement l'ensemble des composants indispensables à une application moderne : recherche, sécurité, analytics, dataviz...
+**Vertigo**, en cœur applicatif de la plateforme, embarque nativement l'ensemble des composants indispensables à une application moderne : recherche, sécurité, mobilité, analytics, dataviz...
+
+## Choix architecturaux
+
+Parce qu'une plateforme *Opinionated* assume ses convictions, Vertigo s'appuie sur cinq piliers techniques qui protègent vos projets des dérives classiques des applications métier. Chaque choix élimine une source de complexité, de bugs ou de rework.
+
+- **Architecture MDA (Model Driven)** : La déclaration de vos modèles est l'unique source de vérité. Code, interfaces, webservices et stockage sont générés automatiquement — synchronisation garantie, plus de divergences.
+- **Typage fort (SmartTypes, BasicTypes)** : Un prix reste un prix, une date reste une date. Validés dès l'entrée dans le système, ils préservent l'intégrité de la donnée partout (IHM, base, JSON) et suppriment les erreurs de formatage.
+- **Aucune exception checked (Runtime only)** : La logique métier ne doit pas être polluée par la capture systématique d'exceptions techniques. Vertigo gère les erreurs de manière centralisée, pour un code plus lisible et un développement accéléré.
+- **Séparation ComponentSpace / DefinitionSpace** : Structure figée au démarrage, immuable et non corruptible à chaud. Résultat : une robustesse maximale, un comportement prévisible et une sécurité renforcée en production.
+- **UI hybride Server-Side / Client-Side** : La plateforme combine la solidité du rendu serveur pour la structure et la fluidité de VueJS pour l'interaction. Le meilleur des deux mondes, sans la complexité d'une SPA pure.
 
 Vertigo est composé de :
 

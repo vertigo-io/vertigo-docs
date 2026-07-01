@@ -27,7 +27,91 @@ Publisher n'est pas prévu pour :
 
 **Publisher** est basé sur le principe de la **fusion de documents** : il insère les données métier dans un document servant de modèle via une grammaire de tags (script).
 
-Le document en sortie est dans le même format que le modèle. Pour obtenir un autre format (ex. PDF), utiliser le module **Converter**.
+  ![](./images/publisher-1.png)
+
+!> Le document en sortie de fusion est donc dans le même format que le modèle. Ce document peut être converti dans un autre format grâce au module **Converter**.
+
+### Création du modèle — OpenOffice
+
+Les champs de fusion apparaissent surlignés en gris dans le document ODT.
+
+![](./images/publisher_odt_1.png)
+
+Pour modifier le champ il faut faire : Clic droit puis Champs et on obtient un navigateur nous permettant d'éditer tous les champs du modèle.
+
+![](./images/publisher_odt_2.png)
+
+Pour créer un champ : **Insertion → Champs → Autres** (ou Ctrl + F2), se placer dans l'onglet Fonctions :
+
+![](./images/publisher_odt3.png)
+
+Remplir le champ Annotation avec le nom du champ à fusionner puis cliquer sur Insérer :
+
+![](./images/publisher_odt_4.png)
+
+Pour ajouter un mot clé de type « opération », on utilise une insertion de script : **Insertion → Script** :
+
+![](./images/publisher_odt_5.png)
+
+### Création du modèle — Microsoft Word 2010
+
+Ces mots clés et fonctions sont insérés dans le document word sous forme de champs, il n'y a pas de différence entre champs de fusion et opérations.
+L'insertion de ces champs peut se faire par la commande « **Insertion / QuickPart / Champ** ».
+
+Des raccourcis claviers peuvent aussi être utilisés :
+
+- `Ctrl-F9` : Ajout d'un champ
+- `Alt-F9` : Affiche/masque le contenu des champs
+
+### Installation et mise en place
+
+* Ajouter les dépendances quarto dans pom.xml et lancer mvn install :
+
+```xml
+<dependency>
+	<groupId>io.vertigo</groupId>
+	<artifactId>vertigo-quarto</artifactId>
+	<version>${vertigo.version}</version>
+</dependency>
+```
+
+Pour l'utilisation du plugin XDocReportConverterPlugin (gestion du DOCX) :
+```xml
+<dependency>
+    <groupId>fr.opensagres.xdocreport</groupId>
+    <artifactId>fr.opensagres.xdocreport.converter.docx.xwpf</artifactId>
+    <version>2.1.0</version>
+</dependency>
+```
+
+Pour l'utilisation du plugin OpenOfficeLocalConverterPlugin (gestion de l'ODT en local) :
+```xml
+<dependency>
+	<groupId>fr.opensagres.xdocreport</groupId>
+	<artifactId>fr.opensagres.xdocreport.converter.odt.odfdom</artifactId>
+	<version>2.1.0</version>
+</dependency>
+```
+
+* Définir le provider Java qui contiendra les fichiers de définition du modèle :
+
+```xml
+<module name="myApp-ressources">
+	<definitions>
+            <provider class="fr.projet.appli.MyPublisherDefinitionProvider" />
+	</definitions>
+</module>
+```
+
+* Ajouter le module dans foundation.xml :
+
+```xml
+<module name="vertigo-quarto">
+	<component api="PublisherManager" class="io.vertigo.quarto.publisher.impl.PublisherManagerImpl">
+		<plugin class="io.vertigo.quarto.plugins.publisher.odt.OpenOfficeMergerPlugin"/>
+	</component>
+</module>
+```
 
 ### Syntaxe des modèles
 
@@ -41,8 +125,8 @@ Deux implémentations existent : **ODT** (OpenOffice) et **DOCX** (Microsoft Wor
 | Condition inverse | `<#ifnot nomChamp#>` … `<#endifnot#>` | `{ifnot nomChamp}` … `{endifnot}` |
 | Condition sur code | `<#ifequals champ = "CODE"#>` … `<#endifequals#>` | `{ifequals champ = "CODE"}` … `{endifequals}` |
 | Condition inverse code | `<#ifnotequals champ = "CODE"#>` … `<#endifnotequals#>` | `{ifnotequals champ = "CODE"}` … `{endifnotequals}` |
-| Boucle sur liste | `<#loop var : collection#>` … `<#endloop#>` | `{loop var : collection}` … `{endloop}` |
-| Parcours objet | `<#var var : objet#>` … `<#endvar#>` | Non implémenté |
+| Champ de fusion boucle | `<#loop maVariable : nomCollection#>`<br/>`  <#=nomChamp #>`<br/>`<#endloop#>` | `{loop maVariable : nomCollection}`<br/>`  {=nomChamp}`<br/>`{endloop}` |
+| Parcours d'un objet seul 	| `<#var maVariable : nomObjet#>`<br/>`  <#=nomChamp #>`<br/>`<#endvar#>` | *Non implémenté* |
 | Image | `<#image nomImage#>` | Non implémenté |
 
 ### Sous OpenOffice
@@ -51,7 +135,8 @@ Les champs de fusion apparaissent surlignés en gris. Pour créer un champ : **I
 
 Pour les tags opérationnels (if, loop, …) : **Insertion → Script**.
 
-Pour les images : placer une image dans le modèle, puis clic droit → Propriétés → Options → Nom : `<#image IMAGE_FIELD_NAME>`.
+Pour les images : placer une image dans le modèle. Cette image servira pour définir la taille maximum de l'image qui sera fusionner. Le ratio de l'image fusionnée sera conservé.
+Puis il faut nommer l'image : Click-droit sur l'image -> Propriétés -> Options -> Remplir le Nom : `<#image IMAGE_FIELD_NAME>`
 
 ### Sous Microsoft Word
 
@@ -59,46 +144,101 @@ Les champs s'insèrent via **Insertion → QuickPart → Champ** (`Ctrl+F9`), af
 
 ### Définition du dictionnaire
 
-Les champs du modèle doivent correspondre à un `PublisherDataDefinition` constitué d'un `PublisherNode` racine. Types de champs :
+Les champs du modèle doivent correspondre à un dictionnaire de mot prévu par le système. Ce dictionnaire est nommé PublisherDefinition.
+Une PublisherDefinition est constituée d'une PublisherNode racine.
 
-| Type de champ | Description |
-|---|---|
-| `stringField` | Chaîne de caractères |
-| `booleanField` | Booléen |
-| `nodeField` (`dataField`) | Sous-nœud de type `PublisherNode` |
-| `listField` | Liste de `PublisherNode` |
-| `imageField` | Image (`VFile`) |
+Un PublisherNode est constitué de champs et est réutilisable, dans d'autre PublisherDefinition par exemple.
+Les champs peuvent être de 5 types :
+
+| Syntaxe | Description | Exemple |
+| --- 					| --- | --- |
+| stringField | Champ de type chaine de caractères | `stringField nom {}` |
+| booleanField | Champ de type booléen | `booleanField siGrave {}`  |
+| dataField 			| Champ de type PublisherNode | `dataField emetteur { type : PnPersonne }` |
+| listField 			| Champ de type liste de PublisherNode | `listField destinataires { type : PnPersonne }` |
+| imageField 			| Champ de type image (doit être un VFile) | `imageField logo` |
 
 #### Exemple de définition
 
 ```java
-final PublisherNodeDefinition ville = new PublisherNodeDefinitionBuilder()
-        .addStringField("nom")
-        .addStringField("codePostal")
-        .build();
+public final class MyPublisherDefinitionProvider implements SimpleDefinitionProvider {
 
-final PublisherNodeDefinition address = new PublisherNodeDefinitionBuilder()
-        .addStringField("rue")
-        .addNodeField("ville", ville)
-        .build();
+    private static PublisherDataDefinition createTestEnquete() {
+        final PublisherNodeDefinition ville = new PublisherNodeDefinitionBuilder()
+                .addStringField("nom")
+                .addStringField("codePostal")
+                .build();
 
-final PublisherDataDefinition pubDef = new PublisherDataDefinition("PuEnquete",
-    new PublisherNodeDefinitionBuilder()
-        .addBooleanField("enqueteTerminee")
-        .addStringField("codeEnquete")
-        .addNodeField("enqueteur", enqueteur)
-        .addListField("misEnCause", misEnCause)
-        .build()
-);
+        final PublisherNodeDefinition address = new PublisherNodeDefinitionBuilder()
+                .addStringField("rue")
+                .addNodeField("ville", ville)
+                .build();
+
+        final PublisherNodeDefinition enqueteur = new PublisherNodeDefinitionBuilder()
+                .addStringField("nom")
+                .addStringField("prenom")
+                .addNodeField("adresseRatachement", address)
+                .build();
+
+        final PublisherNodeDefinition misEnCause = new PublisherNodeDefinitionBuilder()
+                .addBooleanField("siHomme")
+                .addStringField("nom")
+                .addStringField("prenom")
+                .addListField("adresseConnues", address)
+                .build();
+
+        final PublisherNodeDefinition publisherNodeDefinition = new PublisherNodeDefinitionBuilder()
+                .addBooleanField("enqueteTerminee")
+                .addStringField("codeEnquete")
+                .addNodeField("enqueteur", enqueteur)
+                .addListField("misEnCause", misEnCause)
+                .addStringField("fait")
+                .addBooleanField("siGrave")
+                .build();
+
+        return new PublisherDataDefinition("PuEnquete", publisherNodeDefinition);
+    }
+
+    @Override
+    public List<Definition> provideDefinitions(final DefinitionSpace definitionSpace) {
+        return new ListBuilder<Definition>()
+                .add(createTestEnquete())
+                .build();
+    }
+}
 ```
 
 ### Utilisation
 
+Le cas d'usage le plus simple suit les étapes suivantes :
+
+1. Récupération des données
+2. Création d'un PublisherData correspondant au modèle
+3. Peuplement du PublisherData à partir des données de la base
+4. Récupération du Model de document
+5. Création du document à partir du modèle et des données
+6. Sauvegarde du document résultat
+
+Voici le code résultant :
+
 ```java
-final PublisherData publisherData = createPublisherData("PuMyPublish");
-PublisherDataUtil.populateData(myData, publisherData.getRootNode());
-final URL modelFileURL = resourceManager.resolve("MyModel.odt");
-final VFile result = publisherManager.publish("MyPublish.odt", modelFileURL, publisherData);
+public void testMergerSimple() {
+    final MyData myData = loadMyData();
+    final PublisherData publisherData = createPublisherData("PuMyPublish");
+    PublisherDataUtil.populateData(myData, publisherData.getRootNode());
+    final URL modelFileURL = resourceManager.resolve(DATA_PACKAGE + "MyModel.odt");
+    final VFile result = publisherManager.publish(OUTPUT_PATH + "MyPublish.odt", modelFileURL, publisherData);
+    // Ne pas oublier de sauver le fichier (c'est un fichier temporaire qui sera purgé)
+    save(result);
+}
+
+private static PublisherData createPublisherData(final String definitionName) {
+    final PublisherDataDefinition publisherDataDefinition = Node.getNode().getDefinitionSpace().resolve(definitionName, PublisherDataDefinition.class);
+    Assert.assertNotNull(publisherDataDefinition);
+    final PublisherData publisherData = new PublisherData(publisherDataDefinition);
+    Assert.assertNotNull(publisherData);
+    return publisherData;
+}
 ```
 
 ## Converter
@@ -281,17 +421,19 @@ L'objet `Export` peut contenir plusieurs `ExportSheet`. Chaque colonne est un `E
 ### Configuration YAML
 
 ```yaml
-io.vertigo.quarto.QuartoFeatures:
-    features:
-        - converter:
-        - exporter:
-        - publisher:
-    featuresConfig:
-        - converter.localOpenOffice:
-              openOfficePath: "/usr/lib/openoffice"
-        - exporter.csv:
-              separator: ";"
-        - exporter.pdf:
-        - publisher.odt:
-        - publisher.docx:
+modules:
+   io.vertigo.quarto.QuartoFeatures:
+       features:
+           - converter:
+           - exporter:
+           - publisher:
+       featuresConfig:
+           - converter.localOpenOffice:
+                 unoport: 2002
+                 convertTimeoutSeconds: 30
+           - exporter.csv:
+                 charset: "UTF-8"
+           - exporter.pdf:
+           - publisher.odt:
+           - publisher.docx:
 ```

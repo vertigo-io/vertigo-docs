@@ -45,6 +45,7 @@ io.vertigo.planning.agenda.AgendaFeatures:
     featuresConfig:
         - services.config:
         - foConsultation.db:
+              __flags__: ["!redis"]
         - foConsultation.redis2Unified:
             __flags__: ["redis && redisCluster"]
 ```
@@ -161,7 +162,7 @@ __Compléments JavaScript__
 __Exemple__
 
 ```html
-<vu:agenda-week eventIconAgenda="ri-folder-fill" hasAuthzAdmin="${authz.hasAuthorization('Projet$agendaPersonnel')}">
+<vu:agenda-week eventIconAgenda="ri-folder-fill" hasAuthzAdmin="${authz.hasAuthorization('Demarche$agendaPersonnel')}">
     <vu:slot name="agenda_actions_slot">
         <vu:button icon="ri-add-line" label="#{projet.bo.projet.agenda.action.create-plage-horaire}" @click="onCreatePlageHoraireDefault" vu:authz="Projet$agendaPersonnel" />
         <vu:button icon="ri-file-copy-line" label="#{projet.bo.projet.agenda.action.duplicate-week}" @click="onDuplicateWeek" vu:authz="Projet$agendaPersonnel"/>
@@ -192,7 +193,11 @@ Vous pouvez compléter le contexte pour les autres éléments de votre page, et 
 
 ## Contenu
 
-### Modèle de données — SQL
+### Modèle de données
+
+[Diagramme des entités Planning](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/javagen/mermaid/mermaid-io-vertigo-planning.html)
+
+**SQL** :
 
 - `planning_create_init_4.3.0.sql` : pour la création de la base de données initiale
 
@@ -237,9 +242,9 @@ Les seuils utilisés lors des contrôles de validité sont paramétrables via `A
 - `createMaxNbGuichet` : nombre maximal de guichets pour une plage horaire (9)
 - `createMaxDaysFromNow` : jours maximum à l'avance pour créer (365)
 - `publishMaxDaysFromNow` : jours maximum à l'avance pour publier (365)
-- `publishMaxDaysPeriode` : jours maximum publiés à la fois (60)
+- `publishMaxDaysPeriode` : jours maximum publiés à la fois (62 = 31*2)
 - `publishNowDelaySecond` : délai avant publication effective (60 s)
-- `duplicateMaxDaysPeriode` : jours maximum à dupliquer (90)
+- `duplicateMaxDaysPeriode` : jours maximum à dupliquer (93)
 - `duplicateMaxDaysFromNow` : jours maximum à l'avance pour dupliquer (365)
 
 ## Pour les experts
