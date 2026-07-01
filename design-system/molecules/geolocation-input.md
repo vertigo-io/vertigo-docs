@@ -3,8 +3,6 @@
 En règle générale une information de localisation est apportée par un dispositif matériel, ou via un outil cartographique et la saisie de cette information reste exceptionnelle.
 Cependant il n'est pas rare de devoir visualiser et corriger cette information.
 
-
-
 # Bonnes pratiques
 
 - Une carte est le choix idéal pour visualiser ce type d'information.

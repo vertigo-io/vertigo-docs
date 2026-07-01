@@ -32,8 +32,6 @@ final NodeConfig nodeConfig = NodeConfig.builder()
 
 L'API fluent de création de la configuration permet d'être guidé dans sa création. Par ce biais, il est possible de configurer les éléments suivants :
 
-- **boot** : méthode `beginBoot` , `endBoot`
-
 - **modules** : méthode `addModule`
 
   - ajout d'un **composant** :  méthode `addComponent`
@@ -55,16 +53,16 @@ L'API fluent de création de la configuration permet d'être guidé dans sa cré
 > Lorsque des objets intermédiaires sont requis (par exemple `DefinitionProviderConfig`) il existe toujours un builder associé (`DefinitionProviderConfig.builder()`)
 
 Afin d'aider à la construction des modules, chaque module ou extension de Vertigo contient une classe Java nommée *NomDuModule*__Features__ située à la racine du package dudit module.
-Cette classe permet une configuration plus aisée d'un module en abstrayant le choix des composants et des plugins par une activation / desactivation de fonctionalités.
+Cette classe permet une configuration plus aisée d'un module en abstrayant le choix des composants et des plugins par une activation / désactivation de fonctionnalités.
 
 Dans l'exemple, il est possible d'activer la fonctionalité **EmbeddedServer** (donc un serveur web embarqué) uniquement en appelant une méthode et en fournissant le port.
 
 > Il est possible de créer autant de classes de Features que souhaité. La configuration des modules métier des applications peut être réalisée selon la même procédure.
 
-Une fois cet objet AppConfig créé, il est possible de démarrer l'application : 
+Une fois cet objet NodeConfig créé, il est possible de démarrer l'application : 
 
 ```java
-try (AutoCloseableApp app = new AutoCloseableApp(nodeConfig)) {
+try (AutoCloseableNode app = new AutoCloseableNode(nodeConfig)) {
 	//do whatever you want
 }
 ```
@@ -78,13 +76,13 @@ try (AutoCloseableApp app = new AutoCloseableApp(nodeConfig)) {
 La configuration par fichier YAML s'appuie *in fine* sur la configuration Java présentée ci-dessus. Elle permet via un fichier texte de configurer les différents modules de l'application en activant les fonctionnalités souhaitées et en les paramétrant selon les besoins de chaque projet.
 _Note : En interne, le fichier Yaml est mappé sur l'objet `io.vertigo.core.node.config.yaml.YamlAppConfig`_
 
-### Généralité
+### Généralités
 
-Pour la configuration Vertigo, les éléments important sont :
+Pour la configuration Vertigo, les éléments importants sont :
 > - Le format Yaml utilise les indentations pour donner du sens, il faut y faire attention.
 > - L'indentation avec `-` n'est utilisée que pour déclarer les listes. ie. pour le nom des plugins actives (1er niveau sous `features:` et `featuresConfig:`), pour les plugins custom (1er niveau sous `plugins:`) et les initialisers (1er niveau sous `initializers:`)
-> - L'indentation seule, sans `-` est utilisée pour les attributs et les maps. Notament les Features sous `modules:` et les paramètres en général (de plugin, feature, ...)
-> - Des valeurs peuvent venir de paramètres extérieur avec `${ }`. _Ceux du `boot` viennent de sources limitée et doivent être préfixé par `boot.`_
+> - L'indentation seule, sans `-` est utilisée pour les attributs et les maps. Notamment les Features sous `modules:` et les paramètres en général (de plugin, feature, ...)
+> - Des valeurs peuvent venir de paramètres externes avec `${ }`. _Ceux du `boot` viennent de sources limitées et doivent être préfixés par `boot.`_
 !> - Vertigo support l'attribut particulier `__flags__:` placé sous n'importe quels éléments il permet de conditionner l'inclusion de l'élément dans la configuration en fonction des activeFlags (paramètre de démarrage de l'application : ligne de commande, web.xml, etc...). _le flag peut être inclus : `__flags__: ["redis"]` ou exclus : `__flags__: ["!redis"]`
 
 
@@ -94,7 +92,7 @@ Extrait de [Wikipedia](https://fr.wikipedia.org/wiki/YAML) :
 - Il est possible d'inclure une syntaxe JSON dans une syntaxe YAML.
 - Les éléments de listes sont dénotés par le tiret `-`, suivi d'une espace, à raison d'un élément par ligne.
 - Les tableaux sont de la forme `clé: valeur`, à raison d'un couple par ligne.
-- Les scalaires peuvent être entourés de guillemets doubles `"`, ou simples `'`, sachant qu'un guillemet s'échappe avec un antislash `\`, alors qu'une apostrophe s'échappe avec une autre apostrophe5. Ils peuvent de plus être représentés par un bloc indenté avec des modificateurs facultatifs pour conserver `|` ou éliminer `>` les retours à la ligne.
+- Les scalaires peuvent être entourés de guillemets doubles `"`, ou simples `'`, sachant qu'un guillemet s'échappe avec un antislash `\`, alors qu'une apostrophe s'échappe avec une autre apostrophe. Ils peuvent de plus être représentés par un bloc indenté avec des modificateurs facultatifs pour conserver `|` ou éliminer `>` les retours à la ligne.
 - Plusieurs documents rassemblés dans un seul fichier sont séparés par trois traits d'union `---` ; trois points `...` optionnels marquent la fin d'un document dans un fichier.
 - Les nœuds répétés sont initialement signalés par une esperluette `&` puis sont référencés avec un astérisque `*` ; JSON, un langage concurrent de YAML, est compatible avec la syntaxe de JavaScript mais ne supporte pas cette notion de référence.
 - L'indentation, par des espaces, manifeste une arborescence.
@@ -105,36 +103,36 @@ La structure des fichiers YAML de configuration est la suivante :
 
 ```yaml
 ---
-node: // optionel : uniquement requis dans un système consitué de plusieurs noeuds
-	appName : // le nom de l'application dont fait partie le noeud
-	nodeId : // optionnel : l'id du noeud courant. En général, il s'agit d'un paramètre évalué de type ${nomDuParamètre}. Par défaut, un UUID est généré. L'id doit être unique au sein du cluster
-	endPoint : // optionnel : spécifie l'url racine permettant d'interroger le noeud sur ses capacités et sa configuration
+node: // optionnel : uniquement requis dans un système consitué de plusieurs noeuds
+  appName : // le nom de l'application dont fait partie le noeud
+  nodeId : // optionnel : l'id du noeud courant. En général, il s'agit d'un paramètre évalué de type ${nomDuParamètre}. Par défaut, un UUID est généré. L'id doit être unique au sein du cluster
+  endPoint : // optionnel : spécifie l'url racine permettant d'interroger le noeud sur ses capacités et sa configuration
 boot:
   params:
- 	// paramètres du boot
+    // paramètres du boot
   plugins:
     // liste de plugins identifiés par leur nom complet de classe
-    - my.boot.Plugin: 
-    	// paramètres d'un plugin
-    	paramName : paramValue
+    - my.boot.Plugin:
+        // paramètres d'un plugin
+        paramName : paramValue
 modules:
   // map des modules identifiés par leurs classes de manifest
   my.module.MyModuleFeatures:
     features:
       // liste des fonctionalités activées. Une fonctionnalité est identifiée par son nom
       - myFeature:
-      	// paramètres d'une fonctionnalité
+          // paramètres d'une fonctionnalité
     featuresConfig:
-    	// liste des configurations des fonctionalités activées. Une configuration est identifiée par son nom composé du nom de la fonctionnalité et de la solution technique retenue
+      // liste des configurations des fonctionalités activées. Une configuration est identifiée par son nom composé du nom de la fonctionnalité et de la solution technique retenue
       - myFeature.mySolution:
         // paramètres d'une configuration de fonctionnalités
     plugins:
       // liste de plugins additionnels identifiés par leur nom complet de classe
-      - my.additional.Plugin: 
+      - my.additional.Plugin:
         // paramètres d'un plugin
         paramName : paramValue
 initializers:
-  // liste d'initializers identifiés par leur nom complet de classe 
+  // liste d'initializers identifiés par leur nom complet de classe
   - my.module.Initializer:
 
 ```
@@ -168,7 +166,7 @@ boot:
     - io.vertigo.core.plugins.resource.classpath.ClassPathResourceResolverPlugin: {}
     - io.vertigo.core.plugins.resource.url.URLResourceResolverPlugin: {}
     - io.vertigo.core.plugins.param.properties.PropertiesParamPlugin:
-       url : file:./src/test/java/fr/gouv/interieur/rdvpref/support/env-test.properties
+        url : file:./src/test/java/com/example/gestionprojet/support/env-test.properties
     - io.vertigo.core.plugins.param.env.EnvParamPlugin: {}
 ```
 
@@ -179,7 +177,7 @@ Cette section déclare les modules de l'application :
 - > `xx.xxx.XxxFeatures` le chemin complet de la class déclarant la feature
 - > `features` déclare les features optionnelles (et leurs paramètres) effectivement activées _les features possibles sont déclarées avec `@Feature` sur la classe de Features_
 - > `featuresConfig` déclare les plugins (et leurs paramètres) des features _les features doivent avoir été activées_
-- > `plugins` _(optionel)_ il est possible de déclarer des plugins complémentaires non prévus dans la Feature
+- > `plugins` _(optionnel)_ il est possible de déclarer des plugins complémentaires non prévus dans la Feature
 
 Typiquement, on déclare les Modules Vertigo utilisés, puis ceux de l'application.
 ```
@@ -252,21 +250,21 @@ node:
 boot:
   params:
   plugins:
-    - my.boot.Plugin: 
-    	__flags__ : ["flag1", "flag2"]
-    	paramName : paramValue
+    - my.boot.Plugin:
+        __flags__ : ["flag1", "flag2"]
+        paramName : paramValue
 modules:
   my.module.MyModuleFeatures:
-  	__flags__ : ["flag3"]
+    __flags__ : ["flag3"]
     features:
       - myFeature:
     featuresConfig:
       - myFeature.mySolution1:
-      	__flags__ : ["flag1"]
+          __flags__ : ["flag1"]
       - myFeature.mySolution2:
-      	__flags__ : ["flag2"]
+          __flags__ : ["flag2"]
     plugins:
-      - my.additional.Plugin: 
+      - my.additional.Plugin:
         __flags__ : ["flag4"]
         paramName : paramValue
 initializers:
@@ -288,9 +286,11 @@ Dans l'exemple ci-dessus :
 
 Il est alors possible de changer la configuration par l'intermédiaire d'un fichier de paramètrage.
 
-> La configuration par fichier xml est également décrite par un fichier XSD disponible [ici](https://github.com/KleeGroup/vertigo/blob/master/vertigo-core/src/main/java/io/vertigo/app/config/xml/vertigo_1_0.xsd)
+> La configuration par fichier xml est également décrite par un fichier XSD disponible [ici](https://github.com/vertigo-io/vertigo/blob/master/vertigo-core/src/main/java/io/vertigo/app/config/xml/vertigo_1_0.xsd)
 
 # Utilisation
+
+?> Cette section décrit la configuration legacy Servlet/Tomcat. Avec Javalin standalone, ces configurations ne sont plus nécessaires.
 
 Dans le cadre des applications Web, un *listener* doit être paramétré sur la servlet.
 
@@ -346,7 +346,7 @@ boot:
         url: "${boot.apiKeysUrl}"
     - io.vertigo.core.plugins.param.properties.PropertiesParamPlugin:
         __flags__: ["home"]
-        url: ${user.home}\mars\marsconf\marsApiKeys.properties
+        url: "${user.home}/mars/marsconf/marsApiKeys.properties"
     - io.vertigo.vega.plugins.webservice.servlet.WebAppContextParamPlugin: {}
     - io.vertigo.core.plugins.analytics.log.SocketLoggerAnalyticsConnectorPlugin:
         __flags__: ["klee"]

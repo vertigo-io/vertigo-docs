@@ -12,7 +12,7 @@ Le module de recherche Vertigo permet :
 - de placer la **recherche au centre** : toutes les entités clés peuvent être indexées et recherchées par les utilisateurs. C'est un point d'accès privilégié : on entre par la recherche, on navigue par la recherche. Les critères restent simples et l'on affine par les facettes.
 - de rendre **accessible** l'information : l'utilisateur est soit un néophyte soit auto-formé. La recherche proposée reprend les standards actuels du net et permet une prise en main rapide. 
 - au **développeur de paramétrer le mécanisme** de recherche. Le paramétrage ouvre les possibilités, tout en outillant et stabilisant les composants techniques sous-jacents.
-- de **générer les façades d'appel aux recherches** paramétrées lors du MDA. L'usage du moteur de recherche est donc décorélé du paramétrage des recherches mis à disposition.
+- de **générer les façades d'appel aux recherches** paramétrées lors du MDA. L'usage du moteur de recherche est donc découplé du paramétrage des recherches mis à disposition.
 
 Le module de recherche Vertigo supporte les trois cas d'usage principaux :
 
@@ -51,23 +51,20 @@ Le module propose deux modes de fonctionnement :
 
 Exemple de configuration pour le mode Standard :
 ```yaml
-modules
-  io.vertigo.commons.CommonsFeatures:
-  io.vertigo.dynamo.DynamoFeatures:
+modules:
+  io.vertigo.datafactory.DataFactoryFeatures:
     features:
-      - search
+      - search:
     featuresConfig:
-      - search.elasticsearchTransport:
-          servers.names: ${esHost}
-          envIndex: mars
-          cluster.name: mars
+      - search.elasticsearch.restHL:
+          envIndexPrefix: mars
           rowsPerQuery: 50
           config.file: search/elasticsearch.yml
 ```
 
 Exemple de configuration pour le mode Embedded :
 ```yaml
-modules
+modules:
   io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
     features:
       - restHL:
@@ -123,8 +120,8 @@ index :
 
 
 ### Identifier vos **KeyConcept** *(entités métiers clés)*
-Soit dans vos fichiers **KSP**: 
-```javascript
+Soit dans vos fichiers **KSP**:
+```json
 alter DtDefinition DtEquipment {
   stereotype : "KeyConcept"
 }
@@ -133,11 +130,11 @@ alter DtDefinition DtEquipment {
 Soit dans votre fichier **OOM** : <br/>
 Sur vos classes, indiquer le **Stereotype**: `KeyConcept`
 
-### Ajout un DtObject représentant vos données d'index
+### Ajout **d'**un DtObject représentant vos données d'index
 
 Les index sont très puissants et gèrent des données **documentaires**. Il n'y pas de relationnel, il faut donc convertir votre grappe d'objets partant de votre **KeyConcept** en **Document**.<br/>
 Très simplement, il s'agit de créer un DtObject mettant les données à plat.
-```javascript
+```json
 create DtDefinition DtEquipmentIndex {
   field equipmentId {domain: DoId label:"Id" cardinality: "1"}
   field name {domain: DoLabel label: "Name" }
@@ -152,7 +149,7 @@ create DtDefinition DtEquipmentIndex {
   field baseName {domain: DoLabel label: "Base Name" }
   field geoLocation {domain: DoGeoPoint label:"Geographic Location" }
   
-  /* Must contains security fields */
+  /* Must contain security fields */
 }
 ```
 
@@ -320,7 +317,7 @@ create FacetedQueryDefinition QryEquipment {
    keyConcept : DtEquipment
    facets : [FctEquipmentEquipmentTypeName, FctEquipmentPurchaseDate ]
    domainCriteria : DoLabel
-   listFilterBuilderClass : "io.vertigo.dynamox.search.DslListFilterBuilder"  
+    listFilterBuilderClass : "io.vertigo.datafactory.impl.search.dsl.DslListFilterBuilder"
    listFilterBuilderQuery : "allText:#+query*#"
    geoSearchQuery : "geoLocation: [#geoUpperLeft# to #geoLowerRight#]"
 }
@@ -532,10 +529,10 @@ Les dates supportent le mot clef `now` et des opérations "+ ou - un délai"
 `+(content:#query#^4 content:#query*#^2 contentPhonetic:#query#)` : on cherche le maximum de mots dans *content* avec des poids plus ou moins forts selon les cas.
 
 #### Recherche multi-champs :
-La préconisation Lucene est de créer un champ qui concatène toutes les données à rechercher (par exemple `nomPrenom`, `codePostalComune`, etc ...)<br/>
+La préconisation Lucene est de créer un champ qui concatène toutes les données à rechercher (par exemple `nomPrenom`, `codePostalCommune`, etc ...)<br/>
 La propriété `indexCopyTo` de l'IndexDefinition est utilisée pour ça.
 
-* `+_all:#+query*#` : on recherche dans tous les champs. C'est la préconsiation Lucene : on crée un champ qui concatène les champs de recherche. Ce champ est paramétrable. 
+* `+_all:#+query*#` : on recherche dans tous les champs. C'est la préconisation Lucene : on crée un champ qui concatène les champs de recherche. Ce champ est paramétrable. 
 * `+[codePostal,commune]:#+query*#` : on recherche les critères dans code postal et commune.
 * `+[field1,field2]:#+query*#` : Tous les préfixes de la query doivent être présent soit dans `field1` soit dans `field2`
 * `+[field1^2,field2]:#+query*#` : Idem, mais le `field1` à un poids de 2
@@ -561,7 +558,7 @@ Les techniques les plus intuitives ne donnent pas de bons résultats :
 
 La recherche sur différents champs, avec les mots saisis en OU :
 `+(field1:#query*# field2:#query*#)` <br/>
-**KO** : les mots sont en `Optionel` et des mots saisis peuvent être absents des résultats.
+**KO** : les mots sont en `Optionnel` et des mots saisis peuvent être absents des résultats.
 
 La recherche sur différent champs, avec les mots saisis en ET :
 `+(field1:#+query*# field2:#+query*#)` <br/>
@@ -611,7 +608,7 @@ create Domain DoVisitCount {
 }
 ```
 
-#### Recherche multi-champs :
+#### Variante : approche mixte
 
 !> Cette solution ne convient pas à tous les cas, en revanche elle peut être utilisée pour tester des évolutions de la recherche avant l'ajout d'un custom field.
 
@@ -665,7 +662,7 @@ searchQueryBuilder.withSecurityFilter(session.getSearchSecurityFilter())
 Il correspond à une expression de recherche qui sera directement ajoutée à la recherche en mode obligatoire. (avec `+()`)
 La saisie utilisateur ne peut pas désactiver ce filtre : non seulement il y a des échappements, mais de plus elle est cloisonnée dans une autre sous-requête.
 
-Il aussi est possible d'ajouter un filtre pour une action particuliere :
+Il aussi est possible d'ajouter un filtre pour une action particulière :
 
 ```java
 final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read));

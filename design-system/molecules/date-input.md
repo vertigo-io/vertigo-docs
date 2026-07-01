@@ -1,11 +1,11 @@
 # Saisie de date
 
-Saisir une date peut sembler trivial au premier abord mais cela peut se réveler très complexe si les concepts afférents ne sont pas maitrisés.
+Saisir une date peut sembler trivial au premier abord mais cela peut se révéler très complexe si les concepts afférents ne sont pas maîtrisés.
 Tentons de présenter cela de manière concise.
 Il existe deux grandes familles de données qui apportent des informations temporelles :
 
 - les dates : qui sont issues d'un calendrier. Un calendrier est une représentation logique et humaine du temps qui dépend (entre autres) d'une localisation spatiale.
-- les horodatages (timestamp ou instant en anglais) : qui représente de manière universelle un point sur l'échelle du temps
+- les horodatages (timestamps ou instants en anglais) : qui représentent de manière universelle un point sur l'échelle du temps
 
 Il est possible de "projeter" un horodatage en date en lui adjoignant une zone de temps (timezone en anglais)
 Cette projection est toujours un choix métier : le choix de la zone à utiliser peut être la zone de l'utilisateur qui consulte la donnée ou une information portée par le contexte métier.
@@ -17,15 +17,15 @@ Une saisie utilisateur se fait à deux niveaux de précision :
 
 Une précision à la seconde ou inférieure sera en général uniquement nécessaire en consultation.
 
-Ainsi nous avons selectionné deux composants de saisie de données temporelles :
+Ainsi nous avons sélectionné deux composants de saisie de données temporelles :
 
 - date : qui permet de saisir une date au format jour/mois/année
-- datetime : qui permet de saisir une heure et une date au format jour/mois/annee heure:minutes
+- datetime : qui permet de saisir une heure et une date au format jour/mois/année heure:minutes
 
 Ces deux composants permettent la saisie selon deux modalités complémentaires :
 
 - via une saisie texte pour les utilisateurs les plus avertis ou lorsque la date est connue à l'avance
-- via un widget de selection 
+- via un widget de sélection 
 
 Lorsqu'il est nécessaire d'un point de vue métier de saisir une information de zone de temps (timezone) nous privilégions de saisir cette information dans un autre champ.
 

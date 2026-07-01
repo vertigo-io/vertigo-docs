@@ -34,21 +34,21 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
 ### Annotations Vertigo-ui
 
 - `@ViewAttribute("nomDuParam")` : Map une variable de type objet, avec les données de formulaire lors d'un POST. Le nom doit correspondre à une clé du context (voir [ViewContextKey](#ViewContextKey)). L'objet est récupéré du context, mis à jour par les données du POST, validées puis passées à la méthode.
-- `@QueryParam("paramName")` : Utiliser dans quelques cas pour indiquer le nom du paramètre de la request. Typiquement pour opérations sur les fichiers ([VFile](VFile) et [FileInfoURI](FileInfoURI))
-- `@Secured("authname")` : Utiliser sur les controllers ou les méthodes de controller pour vérifier que l'utilisateur à bien ces authorisations. (Utilise la configuration de vertigo-account authorization)
+- `@QueryParam("paramName")` : Utiliser dans quelques cas pour indiquer le nom du paramètre de la request. Typiquement pour opérations sur les fichiers (`VFile` et `FileInfoURI`)
+- `@Secured("authname")` : Utiliser sur les controllers ou les méthodes de controller pour vérifier que l'utilisateur a bien ces autorisations. (Utilise la configuration de vertigo-account authorization)
 
 ### ArgumentResolver Vertigo-ui
 
-- `ViewContext` : Objet représentant le context de la page. Vierge sur un GET, il a vocation a être peuplé, récupérer et mis à jour sur un POST il est utlisé pour réaliser l'action.
+- `ViewContext` : Objet représentant le context de la page. Vierge sur un GET, il a vocation à être peuplé, récupéré et mis à jour sur un POST il est utilisé pour réaliser l'action.
 - `DtListState` : Objet représentant l'état d'affichage d'une page : tri et pagination.
 - `UiMessageStack` : Objet contenant la pile des messages de l'action : erreurs de format et de surface (validation des contraintes et du caractère non null), il peut être passé au service et complété avec des messages d'erreur, de warning, d'info ou de succès globaux, par objet ou par champs 
-- `FileInfoURI` : Permet de recevoir une uri de fichier. Nécessite de nommer le paramètre avec `@QueryParam`. A noter que les URI de fichiers sont protégées dans la page (transformées), lorsqu'elle reviens sur le serveur on fait la traduction inverse.
+- `FileInfoURI` : Permet de recevoir une uri de fichier. Nécessite de nommer le paramètre avec `@QueryParam`. Les URI de fichiers sont protégées dans la page (transformées), lors du retour sur le serveur on fait la traduction inverse.
 - `VFile` : Permet de recevoir un fichier. Nécessite de nommer le paramètre avec `@QueryParam`. Le fichier est temporaire et doit être persisté si besoin dans un service.
-- `Optional<AutreType> ` : Permet de supporter les paramètres optionnels.
+- `Optional<AutreType>` : Permet de supporter les paramètres optionnels.
 
 ### ReturnValueHandler Vertigo-ui
 
-- `void` : Lorsqu'une méthode du controller mappée en POST ou autre ne retourne rien (`void`), la page est rafraîchit en prenant en compte les modifications du context effectuées dans la méthode du controller. *(ce évidement pas vraiment un ReturnValueHandler)*
+- `void` : Lorsqu'une méthode du controller mappée en POST ou autre ne retourne rien (`void`), la page est rafraîchie en prenant en compte les modifications du context effectuées dans la méthode du controller. *(ce n'est évidemment pas vraiment un ReturnValueHandler)*
 - `ViewContext` : Retourne spécifiquement un viewContext mis à jour. Ceci est utilisé dans le cas des appels Ajax, qui ne doivent recevoir en retour que des données Json et non la page HTML.
 - `FileInfoURI` : Permet d'envoyer une uri fichier. L'uri est protégée (transformée) et n'est pas envoyée en clair.
 - `VFile` : Permet d'envoyer un fichier.
@@ -68,7 +68,7 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
         (la première partie est évaluée comme `${model.myEntity}`)
      - 3- Avec une expression évaluée (commence par `${` )
         `vu:authz="${authz.hasAuthorization('myGlobalAuthz') && authz.hasAuthorization('mySecuredEntityAuthz$read')}"`
-        => exactement équivalent à `th:if`. Mais gardez `th:if` pour la logique métier et `th:authz` pour la logique sécurité
+        => exactement équivalent à `th:if`. Mais gardez `th:if` pour la logique métier et `vu:authz` pour la logique sécurité
 
 API du **ViewContext**
 - `publishRef` : Ajoute au context un simple objet sérialisable
@@ -97,10 +97,10 @@ Comme nous l'avons déjà présenté, l'IHM est la composition de plusieurs briq
 Avant de rentrer dans le détail de chacune de ces briques, voici quelques éléments pour s'y retrouver.
 
 - La page est rendue en deux endroits : sur le serveur par Thymeleaf et les composants Vertigo-ui, et sur le client par VueJS et Quasar.
-- le préfix `th:` indique à thymeleaf d'interpréter le composant ou l'attribut
-- le préfix `:` indique à VueJS d'interpréter le composant ou l'attribut
-- le préfix `th::` est la composition de `th:` et `:`, thymeleaf interprétera et laissera le `:` pour VueJS
-- le préfix `layout:` est une extension thymeleaf qui propose du templating comme *Tiles*.
+- le préfixe `th:` indique à thymeleaf d'interpréter le composant ou l'attribut
+- le préfixe `:` indique à VueJS d'interpréter le composant ou l'attribut
+- le préfixe `th::` est la composition de `th:` et `:`, thymeleaf interprétera et laissera le `:` pour VueJS
+- le préfixe `layout:` est une extension thymeleaf qui propose du templating comme *Tiles*.
 - les attributs commençant par `v-` sont des directives VueJS
 - les tags commençant par `<q-` sont des composants Quasar.  
 - les tags commençant par `<vu:` sont des composants Vertigo-ui.  
@@ -113,14 +113,12 @@ La documentation de VueJS sur [vuejs.org](https://vuejs.org/v2/guide/)
 VueJS propose une approche WebComponent avec une IHM réactive mappée sur un model de vue, selon le pattern Observer/Observable. 
 
 - **inline** `{{abc}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de `abc` dans le DOM. La valeur est *réactive* et encodé en HTML
-- **prefix** `:` : Ce préfix indique que VueJS doit interpréter l'attribut qui suit. Cela permet de faire du VueJS sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
-- `v-if="..."` : Donne la condition d'affichage sur un noeud du DOM. La condition peut-être une variable du vueData ou une expression a évaluer. Attention l'élément disparaît du DOM, mais est présent coté client, ne convient pas à la mise ne place de la sécurité.
+- **prefix** `:` : Ce préfixe indique que VueJS doit interpréter l'attribut qui suit. Cela permet de faire du VueJS sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
+- `v-if="..."` : Donne la condition d'affichage sur un noeud du DOM. La condition peut être une variable du vueData ou une expression à évaluer. Attention l'élément disparaît du DOM, mais est présent côté client, ne convient pas à la mise en place de la sécurité.
 - `v-for="item in items"` : L'élément sur lequel est posé le `v-for` est dupliqué pour chaque élément. La variable de boucle peut-être utilisé pour changer le rendu de chaque boucle
 - `v-model` : Indique la donnée du vueData bindé sur le composant
 - `@click` : Précise une action a réaliser sur l'évenement `click` du composant. Il existe une variante `@click.native` pour mapper directement le onClick du composant HTML
-- `v-cloak` : Indique a vue que cette partie du DOM doit être caché jusqu'a ce qu'il soit interprété par Vue. Permet d'éviter des "scintillements" lors de l'affichage de la page
-
-!> Sous IE, il y a parfois un soucis avec les composants vueJs *closed inline* : comme `<myComposant />`. Dans certains cas le composant n'est pas reconnu. <br/>Il est préférable d'avoir le tag ouvrant et fermant : `<myComposant ></myComposant>`
+- `v-cloak` : Indique à Vue que cette partie du DOM doit être cachée jusqu'à ce qu'elle soit interprétée. Permet d'éviter des "scintillements" lors de l'affichage de la page
 
 ## Bibliothèque de composant : Quasar
 
@@ -128,7 +126,7 @@ La documentation de Quasar sur [quasar.dev](https://quasar.dev/vue-components/)
 
 !> Vertigo-ui 2.1.0 utilise la version 1.4.1 de Quasar.
 
-Les composants les plus utils/courants sont : 
+Les composants les plus courants sont : 
 
 - `q-page`
 - `q-layout`
@@ -147,23 +145,23 @@ Nécessite :
 ```
 La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html)
 
-- **inline** `__${...}__` : Préprocesseur. Indique à Thymeleaf que cette portion doit-être préprocessée. C'est utilisé pour des expressions à l'interieur d'autre expression plus globale.
-- **inline** `|...|` : Literal substitution. Permet d'écrire une chaîne contenant des parties à évaluer, c'est un moyen de simplifier l'écriture et évite des concaténations de chaîne.
+- **inline** `__${...}__` : Préprocesseur. Indique à Thymeleaf que cette portion doit être prétraitée. C'est utilisé pour des expressions à l'intérieur d'une autre expression plus globale.
+- **inline** `|...|` : Literal substitution. Permet d'écrire une chaîne contenant des parties à évaluer, afin de simplifier l'écriture et éviter des concaténations de chaînes.
 - **inline html** `[[...]]` : Literal substitution. Permet d'écrire une chaîne contenant du texte dynamique dans le html directement (`[(...)]` pour l'équivalent du `th:utext`). Il faut un `th:inline` dans un des tags parents du contenu.
-- **prefix** `th:` : Ce préfix indique que Thymeleaf doit interpréter l'attribut qui suit. Cela permet de faire du Thymeleaf sur des attributs HTML standards. Sur les tags, cela correspond au namespace des tags spécifiques Thymeleaf.
+- **prefix** `th:` : Ce préfixe indique que Thymeleaf doit interpréter l'attribut qui suit. Cela permet de faire du Thymeleaf sur des attributs HTML standards. Sur les tags, cela correspond au namespace des tags spécifiques Thymeleaf.
 - `abc?:bcd` : Souvent utilisé pour simplifier l'écriture, équivalent de `abc != null ? abc : bcd`
 - `${...}` : Evalue une expression de variable. Ex : `${name}` ou `${user.name}`
 - `@{...}` : Reconstruit l'url d'un lien.
 - `#{...}` : Référence une ressource i18n.
 - `~{abc::bcd}` : Sélectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le selector est soit le nom d'un fragment, soit un selector javascript standard (`#id`, `.class`, ...)
-- `th:if` : Donne la condition d'affichage sur un tag (et son body). Le filtre est effectué coté serveur et convient pour la sécurité.
+- `th:if` : Donne la condition d'affichage sur un tag (et son body). Le filtre est effectué côté serveur et convient pour la sécurité.
 - `th:with="var1=${...}, var2=${...}"` : Déclare des variables locales. Le scope est le contenu du tag, même hors du fichier : lorsqu'on include d'autres fragments la variable reste accessible. 
 - `th:attr="var1=${...}, var2=${...}"` : Déclare des variables globales. A utiliser avec attention.
 - `th:text` : Evalue le contenu de l'attribut et l'ajoute dans le body du tag. 
 - `th:each="abc : bcd"` : Permet de créer une boucle sur le tag qui le porte. Boucle sur `bcd`, élément courant dans la variable `abc`.
-- `th:include="abc::bcd"` : Composant de base du templating thymeleaf. Le body du tag du template est recopié dans le tag portant l'attribut, le tag du template est perdu. La syntaxe est la même que pour le sélecteur de fragment `~{abc::bcd}`. 
-- `th:replace="abc::bcd"` : Composant du templating thymeleaf. Le tag portant l'attribut est remplacé par celui du template. La syntaxe est la même que pour le sélecteur de fragment `~{abc::bcd}`. 
-- `th:remove="*mode*"` : Retire des tags du DOM, en fonction du mode. Les plus courants sont : 
+- `th:include="abc::bcd"` : Composant de base du templating Thymeleaf. Le body du tag du template est recopié dans le tag portant l'attribut, le tag du template est perdu. La syntaxe est la même que pour le sélecteur de fragment `~{abc::bcd}`.
+- `th:replace="abc::bcd"` : Composant du templating Thymeleaf. Le tag portant l'attribut est remplacé par celui du template. La syntaxe est la même que pour le sélecteur de fragment `~{abc::bcd}`.
+- `th:remove="*mode*"` : Retire des tags du DOM, en fonction du mode. Les modes les plus courants sont : 
   - `all` retire le tag et ses enfants
   - `tag` retire le tag et conserve ses enfants
 - `th:fragment="fragName"` : Composant de base du templating thymeleaf. Utilisé pour nommer un template réutilisable.
@@ -186,7 +184,7 @@ Nécessite :
 
 Les layouts permettent de mutualiser tout la partie récurrente des pages : bandeau, menu, footer, ...
 Le principe est qu'un layout est une page *à trou*, les trous sont nommés dans le template et peuvent avoir une valeur par défaut. Lorsque l'on écrit une page, on indique que l'on *décore* un layout particulier, et on ne précise que la valeur des *trous*. Le but étant que les éléments écrits dans la page ne sont que les éléments spécifiques à cette page, tous le contenu commun est dans le layout.
-L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-mars/tree/master/src/main/webapp/WEB-INF/views/templates) qui peuvent être adaptés et réutilisés.
+L'application de démo Mars fait une proposition de [layout](https://github.com/vertigo-io/vertigo-mars/tree/develop/src/main/webapp/WEB-INF/views/templates) qui peuvent être adaptés et réutilisés.
 
 
 ## Composants nommés Vertigo-ui
@@ -194,7 +192,7 @@ L'application de démo Mars fait une proposition de [layout](https://github.com/
 Les composants Vertigo-ui utilisent le templating Thymeleaf, chaque composant est en fait un `th:replace` avec un peu d'intelligence complémentaire.
 Le principe (et du code) est repris de [thymeleaf-component-dialect](https://github.com/Serbroda/thymeleaf-component-dialect)
 
-Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués coté serveur et plusieurs d'entre eux encapsulent ainsi un composant VueJS ou quasar.
+Les composants vertigo-ui sont des fragments Thymeleaf, ils sont évalués côté serveur et plusieurs d'entre eux encapsulent ainsi un composant VueJS ou quasar.
 Vertigo-ui n'a pas vocation à encapsuler ainsi tous les composants d'ihm, la stratégie sur les composants vertigo-ui est étudiée en fonction des points suivants :
 
 - le composant est un composant de haut-niveau représentant un composant logique. Sous jacent il y aura plusieurs composants d'ihm, un comportement enrichi, des choix ergonomiques adaptés à notre contexte.
@@ -208,8 +206,8 @@ Nécessite :
 
 ### Paramètres de composant
 - `abc_slot` : Permet de récupérer un `vu:slot` dans le body du tag appelant et de le placer dans le composant (Ex: `vu:table`)
-- `abc_attrs` : Agrégation de tous les paramètres préfixés par `abc_` passés lors de l'appel du composant. Ex: sur `vu:table` on peux passer l'attribut `tr_class`, le paramètre `class` (avec sa valeur) sera récupérée dans le composant par le paramètre `tr_attrs` pour le placer sur le tag `tr` interne. *Evite de prévoir tous les cas lors de la conception du composant.*
-- `other_attrs` : Agrégation de tous les paramètres non identifié comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifiés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round` donnera `<q-input round`)
+- `abc_attrs` : Agrégation de tous les paramètres préfixés par `abc_` passés lors de l'appel du composant. Ex: sur `vu:table` on peut passer l'attribut `tr_class`, le paramètre `class` (avec sa valeur) sera récupérée dans le composant par le paramètre `tr_attrs` pour le placer sur le tag `tr` interne. *Evite de prévoir tous les cas lors de la conception du composant.*
+- `other_attrs` : Agrégation de tous les paramètres non identifiés comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifiés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round` donnera `<q-input round`)
 - `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de `contentItem`. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. `contentItem` permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocks et `vu:grid-cell` possède un comportement particulier)
 
 ### Composants Vertigo-UI : layout
@@ -253,7 +251,7 @@ Nécessite :
   - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
   - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
   
-Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-mars/blob/master/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
+Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-mars/blob/develop/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
 ```HTML
   <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
 
@@ -268,7 +266,7 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
 ```
 
 - `vu:content` : Tag utilisé dans les composants pour marquer l'insertion du `content` (ie : le body du tag lors de l'utilisation de ce composant). Le body peut-être utilisé pour définir le rendu par défaut.
-- `vu:content-item` : Tag utilisé dans les composants pour marquer l'insertion du `contentItem`. Utilisé dans les cas particulier ou les composants placé dans le corps d'un autre composant doivent être interprétés séparément. Le cas d'exemple est le composant `grid`. Pour être utilisé correctement, il faut que le composant parent ait un attribut contentTags, pose une boucle dessus avec pour nom d'item `contentItem`. (cf. [grid](https://raw.githubusercontent.com/vertigo-io/vertigo-extensions/master/vertigo-ui/src/main/resources/io/vertigo/ui/components/layout/grid.html) )
+- `vu:content-item` : Tag utilisé dans les composants pour marquer l'insertion du `contentItem`. Utilisé dans les cas particulier ou les composants placé dans le corps d'un autre composant doivent être interprétés séparément. Le cas d'exemple est le composant `grid`. Pour être utilisé correctement, il faut que le composant parent ait un attribut contentTags, pose une boucle dessus avec pour nom d'item `contentItem`. (cf. [grid](https://raw.githubusercontent.com/vertigo-io/vertigo-libs/master/vertigo-ui/src/main/resources/io/vertigo/ui/components/quasar/layout/grid.html) )
 - `vu:slot` *tag* : Composant permettant de passer le contenu d'un slot au composant parent. Les slots du composant parent sont référencés par le suffix `_slot`.
   - `name` : Nom du slot
   - `content` : Le body du tag est passé au composant parent et sera inséré soit avec l'attribut `vu:slot` soit le tag `<vu:content-slot />`  
@@ -281,24 +279,24 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
 
 Ces composants sont des composants techniques. 
 Les composants `include-data-*` ont tous le même rôle : ils indiquent au server de transférer une donnée du context serveur (`CTX`) dans le context Vue (objet `vueData`). 
-Cette stratégie permet d'assurer que seules les données utiles sont poussées coté client. La plupart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
+Cette stratégie permet d'assurer que seules les données utiles sont poussées côté client. La plupart du temps ils ne sont pas utilisé directement, car ils sont posés par les composants `inputs` qui en ont besoin.
 Ils restent utile pour ajouter précisément des données dans le `vueData`, pour des composants vue spécifiques par exemple. 
 
 - `vu:include-data` : Inclus le champ d'un objet 
   - `object` : Nom de l'objet du context
   - `field` : Nom du champ
-  - `modifiable` : Indique que le champ est modifiable coté client et peut-être renvoyé au serveur
+  - `modifiable` : Indique que le champ est modifiable côté client et peut-être renvoyé au serveur
   - `modifiableAllLines` : Indique que toutes les lignes sont modifiables
 - `vu:include-data-primitive` : Inclus une donnée primitive du context
   - `key` : Clé de la donnée
-  - `modifiable` : Indique que le champ est modifiable coté client et peut-être renvoyé au serveur
+  - `modifiable` : Indique que le champ est modifiable côté client et peut-être renvoyé au serveur
 - `vu:include-data-map` : Inclus le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
   - `object` : Nom de l'objet du context
   - `field` : Nom du champ
   - `list` : Liste du mapping à appliquer
   - `listKey` : Champ clé de la liste du mapping
   - `listDisplay` : Champ libellé de la liste du mapping 
-- `vu:include-data-protected` : Inclus le champ d'un objet. La valeur posée coté client est protégée (non en clair et non modifiable), la valeur réelle reste coté serveur. Ce système est utilisé pour les identifiants de fichier par exemple.
+- `vu:include-data-protected` : Inclus le champ d'un objet. La valeur posée côté client est protégée (non en clair et non modifiable), la valeur réelle reste coté serveur. Ce système est utilisé pour les identifiants de fichier par exemple.
   - `object` : Nom de l'objet du context
   - `field` : Nom du champ
 <!-- - `vu:vue-data` : Pose les données de vue pour VueJS. **Ne doit pas être utilisé directement**, il est posé par `vu:page` -->
@@ -417,7 +415,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
   - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-select>`) 
 - `vu:fileupload` : Composant d'ajout de fichier (contrairement aux autres composants input, l'id du fichier n'est pas stocké dans un objet métier)
-  - `url`* : Url du WebService d'ubload
+  - `url`* : Url du WebService d'upload
   - `key`* : Clé du contexte réceptionnant les fichiers
   - `multiple` : Indique si on autorise plusieurs fichiers
   - `uploader_attrs` : Listes des attributs à ajouter sur le input (tag `<q-uploader>`) 
@@ -502,8 +500,6 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - ariaLabel : libellé aria pour l'accessibilité
   - other_attrs : tous autres attribut. Posés sur le `<q-btn`
 
-<th:block th:fragment="button-submit-confirm(actions_slot, label, icon, action, ariaLabel, formId, confirmMessage, labelOk, labelCancel, other_attrs)"
-
 - `vu:button-submit-confirm` : Pose un bouton de type submit (tag `<q-btn type="submit"`)
   - actions_slot : slot des boutons d'annulation et de confirmation
   - label : libellé du bouton
@@ -525,3 +521,153 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
 - `v-scroll-spy`
 - `v-json-editor`
 - `v-chatbot`
+
+## Pour les experts
+
+### Managers & Configuration
+
+Le module vertigo-ui ne dispose pas de `XxxFeatures.java` dédié. Les composants UI sont injectés automatiquement via `DefaultUiModuleFeatures.addUi()` qui ajoute `VSpringMvcConfigDefinitionProvider` avec les paramètres `name`, `packages` et `componentDirs`.
+
+### ViewContext
+
+`ViewContext` est l'objet central de la couche UI, représentant le contexte d'une page. Il permet de publier et lire des objets, listes et primitives entre le contrôleur et la vue.
+
+| Méthode | Description |
+|---|---|
+| `publishDto` | Publie un objet formulaire (DtObject) dans le contexte |
+| `readDto` | Lit et valide l'objet formulaire (lance `ExpiredViewContextException` en cas d'erreur) |
+| `publishDtList` | Publie une liste (DtList) dans le contexte |
+| `publishDtListModifiable` | Publie une liste modifiable |
+| `publishMdl` | Publie une liste de référence (Master Data List) |
+| `publishFacetedQueryResult` | Publie le résultat d'une recherche à facettes |
+| `getUiObject` / `getUiList` | Récupère les données telles que reçues depuis l'IHM |
+| `ViewContextMap` | Map typée pour accéder aux éléments du contexte via `ViewContextKey` |
+| `ViewContextUpdateSecurity` | Contrôle la sécurité des mises à jour du contexte |
+
+### Spring MVC
+
+| Composant | Description |
+|---|---|
+| `VSpringWebConfig` | Configuration Spring MVC de base |
+| `VSpringMvcConfigDefinition` | Définition de la configuration MVC |
+| `AbstractVSpringMvcController` | Controller parent à étendre |
+| `VSpringMvcControllerAdvice` | Gestion globale des exceptions et données partagées |
+| `VSpringMvcExceptionHandler` | Gestionnaire d'exceptions centralisé |
+| `VSpringMvcUiMessageStack` | Pile de messages UI pour le rendrement des erreurs |
+| `VRequestToViewNameTranslator` | Traduction des requests vers les noms de vues |
+| `VertigoLocaleResolver` | Résolution de la locale par utilisateur |
+
+#### Argument Resolvers
+
+| Resolver | Type Supporté |
+|---|---|
+| `ViewContextReturnValueAndArgumentResolver` | `ViewContext` (lecture et retour) |
+| `ViewAttributeMethodArgumentResolver` | Objets annotés `@ViewAttribute` |
+| `UiMessageStackMethodArgumentResolver` | `UiMessageStack` |
+| `UserSessionMethodArgumentResolver` | Session utilisateur |
+| `DtListStateMethodArgumentResolver` | `DtListState` (tri, pagination) |
+| `VFileMethodArgumentResolver` | `VFile` (avec `@QueryParam`) |
+| `FileInfoURIConverter` | `FileInfoURI` (conversion URI protégée) |
+| `VegaJsonHttpMessageConverter` | Conversion JSON Vega |
+
+#### Return Value Handlers
+
+| Handler | Type Retour |
+|---|---|
+| `VFileReturnValueHandler` | `VFile` |
+| `UiFileInfoReturnValueHandler` | `UiFileInfo` |
+| `FileInfoURIConverterValueHandler` | `FileInfoURI` |
+
+#### Interceptors
+
+| Interceptor | Priorité | Description |
+|---|---|---|
+| `VSpringMvcAuthorizationInterceptor` | — | Vérification `@Secured` sur les contrôleurs |
+| `VSpringMvcViewContextInterceptor` | — | Initialisation du ViewContext |
+| `VSpringMvcErrorInterceptor` | — | Interception et rendu des erreurs |
+| `RateLimitingHandlerInterceptor` | — | Rate limiting sur les requêtes MVC |
+| `VAnnotationHandlerInterceptorImpl` | — | Interception basée sur `@VControllerInterceptor` |
+| `VControllerInterceptorEngine` | — | Moteur d'exécution des intercepteurs |
+
+### Thymeleaf
+
+| Composant | Description |
+|---|---|
+| `VUiStandardDialect` | Dialecte Thymeleaf personnalisé (`vu:`) |
+| `VuiResourceTemplateResolver` | Résolution de templates depuis classpath/webapp |
+| `VSpringTemplateEngine` | Moteur de template Spring-thymeleaf configuré |
+
+#### Composants `vu:` (dialecte Thymeleaf)
+
+| Composant | Classe |
+|---|---|
+| `vu:named` | `NamedComponentDefinition`, `NamedComponentParser`, `NamedComponentElementProcessor` |
+| `vu:content` | `ContentComponentProcessor` |
+| `vu:content-item` | `ContentItemComponentProcessor` |
+| `vu:content-slot` | `ContentSlotComponentProcessor` |
+| `vu:slot` | `SlotComponentProcessor`, `SlotAttributeTagProcessor` |
+| `vu:authz` | `AuthzAttributeTagProcessor` |
+| `vu:once` | `OnceAttributeTagProcessor` |
+| `vu:text` | `VuiTextTagProcessor` |
+| Utilitaires | `FragmentUtil`, `ResourcePathFinder` |
+
+### UI Data Wrappers
+
+| Classe | Description |
+|---|---|
+| `UiListUnmodifiable` | Liste en lecture seule |
+| `BasicUiListModifiable` | Liste modifiable côté client |
+| `UiMdList` | Liste de Master Data (référence) |
+| `MapUiObject` | Objet UI sous forme de Map |
+| `UiFileInfo` / `UiFileInfoList` | Informations fichier sécurisées |
+| `ClusterUiList` | Liste pour l'affichage cluster |
+| `UiSelectedFacetValues` | Facettes sélectionnées dans une recherche |
+| `ComponentRef` / `ComponentStates` | Référence et état des composants Vue |
+| `FormMode` | Mode de formulaire (edit/read) |
+| `AjaxResponseBuilder` | Construction de réponses AJAX |
+| `ProtectedValueUtil` / `FileInfoURIAdapter` | Encodage de valeurs protégées |
+
+### Quasar Tree
+
+| Classe | Description |
+|---|---|
+| `Tree` | Représentation d'un arbre |
+| `TreeNode` / `TreeNodeData` | Nœud de l'arbre |
+| `TreeBuilder` | Construction fluide d'arbres |
+| `LevelContext` / `ListContext` | Contexte de rendu par niveau |
+
+### Jetty Boot
+
+| Classe | Description |
+|---|---|
+| `JettyBoot` | Démarrage du serveur Jetty embarqué |
+| `JettyBootParams` | Paramètres de configuration de Jetty |
+| `JettyBootParamsBuilder` | Construction des paramètres |
+| `KVSessionDataStoreFactory` | Fabricant de store de sessions Jetty |
+| `KVSessionDataStore` | Stockage des sessions Jetty via KVStore |
+
+### Vue.js SSR
+
+| Classe | Description |
+|---|---|
+| `VuejsSsrFilter` | Filter Servlet pour le Server-Side Rendering Vue.js |
+| `VuejsSsrServletResponseWrapper` | Wrapper de la réponse HTTP SSR |
+| `VuejsSsrResponseStream` | Stream de sortie du rendu SSR |
+| `UnAutoCloseTagsFilter` | Filter pour corriger les tags ouverts en double |
+
+### Exceptions
+
+| Exception | Description |
+|---|---|
+| `ExpiredViewContextException` | Lancée quand le ViewContext est expiré |
+
+### Configuration YAML
+
+```yaml
+io.vertigo.ui.DefaultUiModuleFeatures:
+    buildFeatures:
+        - addUi:
+            name: "my-ui"
+            packages: "io.myapp.controllers"
+            componentDirs: "/io/vertigo/ui/components"
+```

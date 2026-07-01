@@ -9,11 +9,11 @@ Voici une liste des concepts clés, fondateurs, qui sont nécessaires à avoir e
 
 Les `Modules` représentent un concept de découpage du code applicatif ou technique. C'est un regroupement cohérent d'un ensemble de services, d'objets et d'implémentations autour d'une notion plus large qui fait sens.
 Les `Modules` ont une granularité raisonnée pour une bonne maîtrise des dépendances, à la fois en matière de point d'entrée (dépendances entre API) qu'en matière d'orientation. 
-Par exemple : `Dynamo` module autour de la gestion et le stockage de la données. `Vega` module autour de la gestion de WebService. `Studio` module autour de l'outilage projet de la gestion du developpement (dont le MDA).
+Par exemple : `Dynamo` module autour de la gestion et le stockage de la donnée. `Vega` module autour de la gestion de WebService. `Studio` module autour de l'outilage projet de la gestion du développement (dont le MDA).
 
 ### Extension *(concept)*
 
-Les `Extensions` sont un concept de module particulier, clé en main et optionnel. Les `Extensions` ont vocation à proposer une fonctionalité complète en vertical (de l'IHM au stockage), ajoutable à l'application avec le minimum d'efforts.
+Les `Extensions` sont un concept de module particulier, clé en main et optionnel. Les `Extensions` ont vocation à proposer une fonctionnalité complète en vertical (de l'IHM au stockage), ajoutable à l'application avec le minimum d'efforts.
 
 ### Component *(interface)*
 
@@ -24,25 +24,25 @@ Il s'agit juste d'un marqueur déclaratif.
 ### Manager *(interface)*
 
 Les `Managers` sont des `Components`. Ils représentent des facades de service de haut niveau pour des traitements transverses ou technique. 
-C'est essentiellement des APIs avec une forte contrainte de **DX** (*Developpers Experience*) : simples à utiliser et à comprendre, centrées sur les cas d'usage métier.
+C'est essentiellement des APIs avec une forte contrainte de **DX** (*Developers Experience*) : simples à utiliser et à comprendre, centrées sur les cas d'usage métier.
 Exemple : SearchManager, NotificationManager, ...
 
 ### Plugin *(interface)*
 
-Les `Plugins` sont des `Components` également, ils ont vocaction à être liés et utilisés uniquement par un `Manager`. 
+Les `Plugins` sont des `Components` également, ils ont vocation à être liés et utilisés uniquement par un `Manager`. 
 Ils représentent les options d'implémentation d'un besoin particulier, nécessaires pour rendre le service de leur `Manager`.
 Ils permettent de systématiser le découplage entre le coeur applicatif et les dépendances tierces nécessaires. 
 Ce principe assure le côté pérenne et stable des applications : l'évolution ou le remplacement d'une bibliothèque tierce est absorbé par le plugin concerné.
 
 ### Connector *(interface)*
 
-Les `Connectors` sont des `Components` également, ils ont vocaction à être liés et utilisés  soit par des `Plugins` soit par d'autre composants. 
-Ils permettent de configurer et d'accèder sans API intermédiaire aux clients de librairies / produits tiers.
-Les `Plugins` natifs dans Vertigo utilisent des `Connectors` quand ils s'appuient sur une librairie ou un produit tiers. Ces connecteurs peuvent alors être reutilisés directement par le développeur de l'application en cas de besoin impératif.
+Les `Connectors` sont des `Components` également, ils ont vocation à être liés et utilisés  soit par des `Plugins` soit par d'autres composants.
+Ils permettent de configurer et d'accéder sans API intermédiaire aux clients de librairies / produits tiers.
+Les `Plugins` natifs dans Vertigo utilisent des `Connectors` quand ils s'appuient sur une librairie ou un produit tiers. Ces connecteurs peuvent alors être réutilisés directement par le développeur de l'application en cas de besoin impératif.
 
 ### Definition *(interface)*
 
-Les `Definitions` répresentent les porteurs d'informations. Là où les `Managers` portent les traitements, les `Definitions` portent la description des données.
+Les `Definitions` représentent les porteurs d'informations. Là où les `Managers` portent les traitements, les `Definitions` portent la description des données.
 De manière générale, tout élément qui sert à établir le modèle (*tout ce qui tourne autour des données*) est porté par une `Definition`.
 Les `Definitions` servent **à modéliser** le métier. Elles sont uniques, chargées au démarrage du serveur et immuables. 
 
@@ -66,11 +66,11 @@ Trois types sont utilisés :
 
 ### SmartType *(concept)*
 
-Les `SmartType` sont le permier niveau de déclaration du modèle et à ce titre sont des `Definitions`. 
+Les `SmartType` sont le premier niveau de déclaration du modèle et à ce titre sont des `Definitions`. 
 Ils représentent un *super-type*, c'est un typage fort de la donnée, enrichi par des métadonnées pour décupler ses possibilités.
 Globalement, un `SmartType` possède : un type Java, porte une validation (avec une liste de contraintes), un formatteur et des adapteurs, et des métadonnées complémentaires : le type de stockage SQL, la taille du champ d'affichage, l'unité pour les quantités, etc...
 
-Les `SmartType` définissent des `Adapter` afin de transformer de manière bi-directionnelle la donnée vers un `BasicType` (exemple : un POJO avec différentes propriétés peut etre transformé vers le `BasicType` **String** via une serialisation JSON)
+Les `SmartType` définissent des `Adapter` afin de transformer de manière bi-directionnelle la donnée vers un `BasicType` (exemple : un POJO avec différentes propriétés peut être transformé vers le `BasicType` **String** via une serialisation JSON)
 
 Dans `Vertigo` le `SmartType` remplace la notion de type Java dans les déclarations, ainsi la déclaration des entrées/sorties dans les `Tasks` (voir ci-dessous) utilise la notion de `SmartType`.
 Toutefois, dans le code Java, c'est bien le type Java qui est utilisé (Par exemple une `String` pour un `Domain` *SIRET*).
@@ -83,45 +83,45 @@ Les objets concrets implémentant `DtObject` sont des POJOs avec annotations et 
 
 ### Entity *(interface)*
 
-Les `Entity` sont des `DtObject` persistants. Elless possèdent un identifiant.
+Les `Entity` sont des `DtObject` persistants. Elles possèdent un identifiant.
 
 ### KeyConcept *(interface)*
 
-Les `KeyConcept` sont des `Entity` clés de l'application. Cette interface est un marqueur aidant à la compréhension et à la maitrise de l'application sur la durée, en identifiant les objets métier principaux.
+Les `KeyConcept` sont des `Entity` clés de l'application. Cette interface est un marqueur aidant à la compréhension et à la maîtrise de l'application sur la durée, en identifiant les objets métier principaux.
 Les APIs **Vertigo** utilisent cette notion pour guider les développeurs.
 
 ### DtList *(interface)*
 
-Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de compenser l'absence de liste fortement typée en Java. 
+Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de compenser l'absence de liste fortement typée en Java et de rendre les listes transverses de l'IHM au stockage. 
 
 
 
 ### Constraint *(interface)*
 
-Les `Constraints` représentent les contrôles associés à un `SmartType`. `Vertigo` propose de base de nombreuses `Constraints` standard et il est très simple d'en ajouter. Les `Contraints` standards peuvent posséder des paramètres pour adapter leur comportement ou changer le message d'erreur.
+Les `Constraints` représentent les contrôles associés à un `SmartType`. `Vertigo` propose de base de nombreuses `Constraints` standard et il est très simple d'en ajouter. Les `Contraintes` standards peuvent posséder des paramètres pour adapter leur comportement ou changer le message d'erreur.
 Les `Constraints` sont appliquées et validées automatiquement lorsque des données saisies par les utilisateurs sont intégrées dans le système (ie : sur les données saisies). Il est possible de forcer une validation des contraintes.
 En général, une violation de contrainte génère une exception utilisateur.
 
 
 ### Formatter *(interface)*
 
-Les `Formatters` sont des convertisseurs associés à un `SmartType`. Ils permettent de transformer une donnée depuis son format typé de manipulation dans les services Java en chaîne de caractères manipulée par l'utilisateur. Les `Formatters` sont biderectionnels et sont souvent plus permissifs lors de la traduction de la saisie utilisateur vers le type technique (une date peut être saisie 10/01/2019 ou 10/01/19 ou 10/1/19 ou 10 01 19).
+Les `Formatters` sont des convertisseurs associés à un `SmartType`. Ils permettent de transformer une donnée depuis son format typé de manipulation dans les services Java en chaîne de caractères manipulée par l'utilisateur. Les `Formatters` sont bidirectionnels et sont souvent plus permissifs lors de la traduction de la saisie utilisateur vers le type technique (une date peut être saisie 10/01/2019 ou 10/01/19 ou 10/1/19 ou 10 01 19).
 Dans l'ensemble, ils sont utilisés (*automatiquement*) lors des communications avec l'IHM ou dans les exports de données.
 
 
 ### Task *(concept)*
 
-Les `Task` sont des définitions, elles représentent les points d'accès à une source de données. Elles sont constituées de paramètres d'entrée et de sortie, d'une requete et d'un moteur d'exécution.
-De base, le moteur le plus souvent utilisé est celui permettant d'exécuter des requètes SQL. 
+Les `Task` sont des définitions, elles représentent les points d'accès à une source de données. Elles sont constituées de paramètres d'entrée et de sortie, d'une requête et d'un moteur d'exécution.
+De base, le moteur le plus souvent utilisé est celui permettant d'exécuter des requêtes SQL. 
 C'est le cas d'usage le plus courant des `Tasks`, elles sont utilisées pour déclarer des requêtes SQL spécifiques utilisées dans l'application.
-Par ce mecanisme, **Vertigo** favorise une utilisation efficace et maîtrisée des accès à la base de données : les accès simples (c'est-à-dire sans risque opérationnel, typiquement CRUD avec ou sans critères) sont automatisés, les accès complexes (avec jointures, ou comportement spécifiques) sont externalisés dans un fichier de resource en syntaxe SQL native pour une maîtrise complète du comportement.
+Par ce mécanisme, **Vertigo** favorise une utilisation efficace et maîtrisée des accès à la base de données : les accès simples (c'est-à-dire sans risque opérationnel, typiquement CRUD avec ou sans critères) sont automatisés, les accès complexes (avec jointures, ou comportement spécifiques) sont externalisés dans un fichier de resource en syntaxe SQL native pour une maîtrise complète du comportement.
 
 
 ### @Transactional *(annotation)*
 
 `@Transactional` est l'une des annotations proposées par **Vertigo**. Elle est présentée ici car elle est d'une importance capitale dans les applications de gestion. 
 Comme son nom l'indique, elle ajoute le caractère transactionel sur une méthode (par un principe d'*AOP*).
-Elle a vocation a être positionnée sur les façades de services et se comporte comme étant **REQUIRES_NEW**, c'est à dire que l'annotation s'assure qu'une transaction est présente : s'il n'y en a pas encore, on en crée une, s'il y en a déjà une, on la réutilise.
+Elle a vocation à être positionnée sur les façades de services et se comporte comme étant **REQUIRED**, c'est à dire que l'annotation s'assure qu'une transaction est présente : s'il n'y en a pas encore, on en crée une, s'il y en a déjà une, on la réutilise.
 
 ## Studio 
 

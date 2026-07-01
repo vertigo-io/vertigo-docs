@@ -9,7 +9,7 @@ Le format d'échange JSON a été privilégié pour sa popularité, mais égalem
 ## Configuration
 
 Afin d'utiliser les fonctionnalités de Vega il convient d'ajouter à la configuration de l'application ce module.
-Pour plus de détail vous pouvez vous rapporter au chapitre dédié à la [configuration](/basic/configuration) de l'application.
+Pour plus de détails vous pouvez vous rapporter au chapitre dédié à la [configuration](/basic/configuration) de l'application.
 
 Vega propose deux méthodes de fonctionnements :
 
@@ -23,7 +23,7 @@ Vega propose deux méthodes de fonctionnements :
 Voici une configuration Yaml typique d'une application utilisant le module Vega et le connecteur vers Javalin
 
 ```yaml
-modules
+modules:
   io.vertigo.connectors.javalin.JavalinFeatures:
     features:
       - standalone:
@@ -58,11 +58,11 @@ D'autre part voici le filtre à ajouter dans la servlet dans ce cas de figure :
 Voici une configuration Yaml typique d'une application utilisant le module Vega avec le mode serveur embarqué
 
 ```yaml
-modules
+modules:
   io.vertigo.connectors.javalin.JavalinFeatures:
     features:
       - embeddedServer:
-          - port : 8080
+          port: 8080
   io.vertigo.datamodel.DataModelFeatures:
   io.vertigo.vega.VegaFeatures:
     features:
@@ -76,7 +76,7 @@ modules
 
 
 
-> Pour connaitre l'intégralité des fonctionnalités disponibles se rapporter au chapitre dédié à [Vega](/advanced/vega)
+> Pour connaitre l'intégralité des fonctionnalités disponibles se rapporter au chapitre dédié à [Vega](/extensions/vega)
 
 ## Création d'un WebService
 
@@ -118,7 +118,7 @@ public class HelloWebServices implements WebServices {
 }
 ```
 
-La méthode `hello` ne prend aucun argument et retourne une chaine de caractère. Il s'agit donc d'un exemple minimal en guise de démonstration.
+La méthode `hello` ne prend aucun argument et retourne une chaîne de caractères. Il s'agit donc d'un exemple minimal en guise de démonstration.
 
 L'annotation `@GET` permet de spécifier 
 
@@ -127,7 +127,7 @@ L'annotation `@GET` permet de spécifier
 
 Il existe des annotations similaires pour les différents verb HTTP : `@POST`, `@PUT`, `@DELETE`, `@PATCH`
 
-> Pour en savoir plus sur le routes et les verb vous pouvez vous référer à des bonnes pratiques que nous proposons [ici](https://github.com/KleeGroup/vertigo/wiki/routes).
+> Pour en savoir plus sur le routes et les verb vous pouvez vous référer à des bonnes pratiques que nous proposons [ici](https://github.com/vertigo-io/vertigo-core/wiki/routes).
 
 Par souci de simplicité et de concision il est possible d'ajouter un préfix à toutes les routes des méthodes d'une même classe en utilisant l'annotation `@PathPrefix` sur la classe.
 

@@ -29,7 +29,7 @@ A l'issu de cette création votre fichier __pom.xml__ doit ressembler à ça :
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-vega</artifactId>
-			<version>3.0.0</version>
+			<version>4.3.2</version>
 		</dependency>
 	</dependencies>
 	
@@ -64,7 +64,7 @@ public class HelloWebServices implements WebServices {
 }
 ```
 
-> Avec Vertigo tout est sécurisé par défaut. L'annotation `@AnonymousAccessAllowed` permet de s'affranchir de ce contrôle pour les besoins du Helloworld. Ce n'est évidement par à utiliser en production.
+> Avec Vertigo tout est sécurisé par défaut. L'annotation `@AnonymousAccessAllowed` permet de s'affranchir de ce contrôle pour les besoins du Helloworld. Ce n'est évidemment pas à utiliser en production.
 
 
 ## Création de la classe Main
@@ -102,7 +102,7 @@ public class HelloWorld {
 						.build())
 				.build();
 
-		try (AutoCloseableApp app = new AutoCloseableApp(nodeConfig)) { // start the app
+		try (AutoCloseableNode app = new AutoCloseableNode(nodeConfig)) { // start the app
 			System.in.read(); // wait for connection (this is not real world code...)
 		}
 

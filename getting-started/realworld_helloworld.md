@@ -2,7 +2,7 @@
 
 ## Création du projet dans l'IDE
 
-Nous utiliserons ici Eclipse. A l'heure de la rédaction de ce guide, la version utilisée est la 2018-09.
+Nous utiliserons ici Eclipse. A l'heure de la rédaction de ce guide, la version utilisée est la 2024-06 (ou supérieure).
 
 
 
@@ -35,7 +35,7 @@ Rajouter les dépendances suivantes dans le fichier pom.xml :
 * Module vertigo-ui (cette dépendance tirera l'ensemble des modules Vertigo requis pour l'application)
 * Module vertigo-studio (celui-ci nous simplifie la tâche en générant des parties de code sans valeur ajoutée)
 * Les dépendances externes vers des outils nécessaires : 
-  * La dépendance `provided` à l'API servlet 4.0.1 ou supérieure
+   * La dépendance `provided` à l'API servlet 6.0.0 ou supérieure
   * Une base de données H2 (il s'agit d'une base mémoire, facile à utiliser à des fins de tests)
   * Le gestionnaire de pool de connexions C3P0 pour la connexion à la base de données
 
@@ -59,20 +59,20 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 	
 	<dependencies>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>4.0.1</version>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-ui</artifactId>
-			<version>3.0.0</version>
+			<version>4.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.vertigo</groupId>
 			<artifactId>vertigo-studio</artifactId>
-			<version>3.0.0</version>
+			<version>4.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -348,7 +348,7 @@ modules:
   io.vertigo.datamodel.DataModelFeatures:
   io.vertigo.vega.VegaFeatures: # utilisation du module web services
   io.vertigo.datafactory.DataFactoryFeatures: # utilisation du module collections
-  io.vertigo.datastore.DataStoreFeatures: # utilisation du module vertigo-dynamo
+  io.vertigo.datastore.DataStoreFeatures: # utilisation du module vertigo-datastore
     features:
 	  - entitystore: # activation du support du stockage des entités de notre modèle
 	  - cache: # activation du cache
@@ -788,7 +788,7 @@ Installer un serveur Tomcat (version 9.0+) dans Eclipse et y ajouter notre proje
 Pour ce faire :
 
 - Vérifier l'encodage du workspace Eclipse (Window -> Preferences -> General -> Workspace et mettre Text file encoding sur UTF-8)
-- Télécharger l'archive du serveur tomcat depuis le site officiel :https://apache.mediamirrors.org/tomcat/tomcat-9/v9.0.43/bin/apache-tomcat-9.0.43.zip
+- Télécharger l'archive du serveur Tomcat depuis le site officiel : https://tomcat.apache.org/download-10.cgi
 - Extraire l'archive à l'endroit de votre convenance. Par exemple __%userprofile%/tomcat__
 - Dans la vue __Servers__ d'Eclipse cliquer sur _No Servers are available. Click this link to create a new server..._
 - Sélectionner Apache->Tomcat v9.0 Server

@@ -19,7 +19,7 @@ Voici une configuration typique d'une application utilisant le module Account
 
 ```yaml
 
-modules
+modules:
   io.vertigo.account.AccountFeatures:
     features:
       - security:
@@ -63,7 +63,7 @@ modules
   - accountFilePattern : RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508) : id, displayName, email, authToken, photoUrl)
   - groupFilePath : Chemin du fichier des *AccountGroup* 
   - groupFilePattern :  RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508) : id, displayName, accountIds)
-- **account.store.loader** : Stockage des *Account* délégué à un loader spécifique *(implements [AccountLoader](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-account/src/main/java/io/vertigo/account/plugins/account/store/loader/AccountLoader.java))*
+- **account.store.loader** : Stockage des *Account* délégué à un loader spécifique *(implements [AccountLoader](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-account/src/main/java/io/vertigo/account/plugins/account/store/loader/AccountLoader.java))*
 - **account.cache.memory** : Active le cache mémoire (**Attention** : pas de purge automatique)
 - **account.cache.redis** : Active le cache Redis via le *RedisConnector* (**Attention** : pas de purge automatique)
 
@@ -87,9 +87,9 @@ Vertigo propose, de base, deux types de moyens d'authentification :
 - **UsernamePasswordAuthenticationToken** : Deux informations texte, de type *Login* / *Password*
 
 Vertigo propose quatre types de source d'authentification :
-- **LdapAuthenticationPlugin** : Authentification par Login/Password au près d'un LDAP. 
+- **LdapAuthenticationPlugin** : Authentification par Login/Password auprès d'un LDAP.
   - Si authentifié retourne le Login.
-- **StoreAuthenticationPlugin** : Authentification par Login/Password ou Login seul au près de la base de données.
+- **StoreAuthenticationPlugin** : Authentification par Login/Password ou Login seul auprès de la base de données.
   - Si authentifié peut retourner une autre colonne de la table (pour un token de sécurité par exemple)
   - Le Password doit être salé et hashé par le `PasswordHelper` de Vertigo (ie : PBKDF2)
 - **TextAuthenticationPlugin** : Authentification par Login/Password ou Login seul à partir d'un fichier texte.
@@ -172,7 +172,7 @@ Dans un système où la gestion des utilisateurs est centralisée, le **Profil**
 
 Le modèle présenté ci-dessus permet déjà de gérer de nombreux cas. Mais plus les clients sont gros et plus ils ont une organisation forte qui pèse sur la sécurité de l'application. 
 Il apparaît alors que la sécurité doit être relative à un contexte. Ce contexte peut être géographique, organisationnel, lié à un état, à une date ou autre, voir tout ça en même temps. <br/>
-Ce *contexte de sécurité* est aussi appellé **Périmètre** de sécurité.
+Ce *contexte de sécurité* est appelé **Périmètre** de sécurité.
 
 Le mécanisme de Vertigo permet d’assurer et de mettre en place ce type de sécurité de manière générique dans les projets.
 Au sens vertigo le *contexte de sécurité* est une notion :
@@ -218,7 +218,7 @@ Deux types d'autorisations sont proposés :
       - Ecriture simple pour les axes **TREE** : GEO <= ${geo} : On sélectionne les `SecuredEntities` *inférieur ou égale* dans le périmètre géographique de l'utilisateur (Ex: toutes les communes ou dans le département d'un responsable départementale)
       - Ecriture simple pour les axes **ENUM** : etaCd>=PUB AND etaCd<ARC (Ex : tous les `SecuredEntities` dont l'état est *supérieur ou égale* à 'PUB'*lié* et *strictement inférieur* à 'ARC'*hivé*)
 
-> Chaque **Secured Entity Operation** est associée à une authorization générée. Il ainsi possible de vérifier si un utilisateur a "à priori" le droit d'éffectuer une opération sur une entité avant même de regarder le contexte de sécurité de l'utilisateur.
+> Chaque **Secured Entity Operation** est associée à une authorization générée. Il est ainsi possible de vérifier si un utilisateur a "à priori" le droit d'effectuer une opération sur une entité avant même de regarder le contexte de sécurité de l'utilisateur.
 > Ceci est utilisé, notamment pour gérer les éléments d'IHM affiché.<br/>
 > **Exemple:** Récupération des opérations possibles sur une entité pour déterminer les menus à proposer
 
@@ -233,8 +233,8 @@ L'API proposée par le AuthorizationManager permet de gérer la plupart des cas 
 - **hasAuthorization(AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre
 - **isAuthorized(Entity, OperationName)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
 - **getCriteriaSecurity(Class<Entity>, OperationName)** : Génère un [Criteria] valable pour l'utilisateur connecté, un type d'entité et une opération. Le Criteria permet de nombreux usages, voir détails plus bas.
-- **getSearchSecurity(Class<KeyConcept>, OperationName)** : Génère le filtre de sécurité dans la syntaxe ElasticSearch applicable pour l'utilisateur connecté, un type d'entité et une opération.
-- **getAuthorizedOperations(KeyConcept)** : Liste des opérations possibles par l'utilisateur connecté sur l'entité passée en paramètre (utilisé par la couche IHM pour adapter les actions possibles)
+- **getSearchSecurity(Class<Entity>, OperationName)** : Génère le filtre de sécurité dans la syntaxe ElasticSearch applicable pour l'utilisateur connecté, un type d'entité et une opération.
+- **getAuthorizedOperations(Entity)** : Liste des opérations possibles par l'utilisateur connecté sur l'entité passée en paramètre (utilisé par la couche IHM pour adapter les actions possibles)
 
 #### Criteria
 
@@ -289,21 +289,21 @@ Cet utilitaire propose des méthodes static facilement utilisable pour vérifer 
 Il est préférable de faire les controles le plus tôt possible dans le traitement pour des questions de performances. 
 Mais si l'utilisateur n'a pas les authorisations suffisantes, une exception est lancée ce qui rollbackera la transaction et affichera une erreur à l'utilisateur.
 
-- **assertAuthorizations(message*(optionel)*, AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre et lance une exception sinon
-- **assertOperations(Entity, OperationName, message*(optionel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
-- **assertOperationsOnOriginalEntity(Entity, OperationName, message*(optionel)*)** : Comme **assertOperations** mais reload d'abord l'objet original pour faire le controle de sécurité AVANT d'appliquer les modifications de l'utilisateur
- - **assertOr(BooleanSupplier...)** : Permet d'assembler plusieurs controle en OR
- - **hasAuthorization(BooleanSupplier...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre
- - **authorizationCriteria(<Class<Entity>, OperationName)** : Construit un criteria représentant le filtre de sécurité pour un type d'opération sur une entity
- - **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optionel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** porté par cette accessor (FK), l'accessor sera loadé si besoin 
+- **assertAuthorizations(message*(optionnel)*, AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre et lance une exception sinon
+- **assertOperations(Entity, OperationName, message*(optionnel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** avec son contexte de sécurité actif
+- **assertOperationsOnOriginalEntity(Entity, OperationName, message*(optionnel)*)** : Comme **assertOperations** mais reload d'abord l'objet original pour faire le contrôle de sécurité AVANT d'appliquer les modifications de l'utilisateur
+- **assertOr(BooleanSupplier...)** : Permet d'assembler plusieurs contrôle en OR
+- **hasAuthorization(AuthorizationName...)** : Retourne un `BooleanSupplier` vérifiant que l'utilisateur a l'une des autorisations passées en paramètre
+- **authorizationCriteria(Class\<Entity\>, OperationName)** : Construit un criteria représentant le filtre de sécurité pour un type d'opération sur une entity
+- **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optionnel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entity** porté par cette accessor (FK), l'accessor sera chargé si besoin
  
  Exemple:
 ```Java
-  //check d'opération sur une entity
+  // check d'opération sur une entity
  AuthorizationUtil.assertOperations(baseDAO.get(baseId), SecuredEntities.BaseOperations.read);
- 
- //util pour les FK
- AuthorizationUtil.assertOperationsWithLoadIfNeeded(ticket.equipment(), SecuredEntities.EquipmentOperations.readTickets);
+
+  // utilitaires pour les FK
+  AuthorizationUtil.assertOperationsWithLoadIfNeeded(ticket.equipment(), SecuredEntities.EquipmentOperations.readTickets);
 ```
 	
 #### UiAuthorizationUtil
@@ -328,8 +328,8 @@ Api:
 
 **Vertigo Authorization** propose deux annotations permettant l'implémentation des controles de sécurité par AOP.
 
-- **@Secured({`liste de nom d'authorization`})** : Permet de sécuriser une *méthode* seule ou toute une *class* en vérifiant que l'utilisateur a l'une des autorisations
-- **@SecuredOperation(`nom d'authorization`)** : Permet de sécuriser une `SecuredEntity` passée en paramètre en vérifiant que l'utilisateur est autorisé à réaliser cette opération sur l'entité
+- **@Secured** (`{liste de nom d'authorization}`) : Permet de sécuriser une *méthode* seule ou toute une *class* en vérifiant que l'utilisateur a l'une des autorisations
+- **@SecuredOperation** (`nom d'opération`) : Permet de sécuriser une `SecuredEntity` passée en paramètre en vérifiant que l'utilisateur est autorisé à réaliser cette opération sur l'entité
 
 > Dans ces annotations, il n'est pas nécessaire d'utiliser le préfix `Atz` pour le nom des authorisations
  
@@ -381,9 +381,9 @@ Arbre géographique :
 
 Vertigo propose un manager de haut niveau pour simplifier la synchronisation des comptes utilisateurs de l'application avec un source d'identité externe (**IdP** ou **Id**entity **P**rovider).
 Typiquement, l'API proposée permet de récupérer les utilisateurs au format de l'Entity gérée localement.
- - soit utilisateur par utilisateur à partir de son TokenAuthentification (récupéré par le `AuthenticationManager`)
- - soit la photo seule d'un utilisateur
- - soit par la liste des utilisateurs
+  - soit utilisateur par utilisateur à partir de son Token d'authentification (récupéré par le `AuthenticationManager`)
+  - soit la photo seule d'un utilisateur
+  - soit par la liste complète des utilisateurs
 
 ### Configuration
 
@@ -406,17 +406,88 @@ Vertigo propose de base trois types de sources d'identité :
   - userIdentityEntity : Nom de l'entité portant l'identité (ie: du User au sens application)
   - ldapUserAttributeMapping : Mapping des champs du LDAP vers l'entité d'identité
 - **identityProvider.text** : Provision des *Identités* depuis un fichier texte
-  - identityFilePath : Chemin du fichier des *Identités* 
+  - identityFilePath : Chemin du fichier des *Identités*
   - identityFilePattern : RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508))
   - userAuthField : Nom du champ relié à l'authentification *(authToken)*
   - userIdentityEntity : Nom de l'entité portant l'identité (ie: du User au sens application)
 
+## Pour les experts
 
+### Managers
 
+| Manager | Rôle | Activé par |
+|---|---|---|
+| `VSecurityManager` | Gestion des sessions utilisateur et authentification session | `security` |
+| `AuthenticationManager` | Authentification des utilisateurs (login/mot de passe, token) | `authentication` |
+| `AuthorizationManager` | Contrôle des autorisations (globales et entités sécurisées) | `authorization` |
+| `AccountManager` | Gestion des comptes et groupes | `account` |
+| `IdentityProviderManager` | Synchronisation avec les fournisseurs d'identité externes | `identityProvider` |
 
+### Features (@Feature)
 
+| Flag | Composants |
+|---|---|
+| `security` | `VSecurityManagerImpl` — session, utilisateur connecté |
+| `authentication` | `AuthenticationManagerImpl` — moteur d'authentification |
+| `authentication.text` | `TextAuthenticationPlugin` — auth depuis fichier texte (PBKDF2) |
+| `authentication.store` | `StoreAuthenticationPlugin` — auth depuis base de données |
+| `authentication.ldap` | `LdapAuthenticationPlugin` — auth depuis annuaire LDAP |
+| `authentication.mock` | `MockAuthenticationPlugin` — auth fictive pour tests |
+| `account` | `AccountManagerImpl`, `AccountDefinitionProvider` |
+| `account.store.store` | `StoreAccountStorePlugin` — comptes persistés en base |
+| `account.store.text` | `TextAccountStorePlugin` — comptes depuis fichier texte |
+| `account.store.loader` | `LoaderAccountStorePlugin` — comptes chargés par `AccountLoader`/`GroupLoader` |
+| `account.cache.memory` | `MemoryAccountCachePlugin` — cache mémoire des comptes |
+| `account.cache.redis` | `RedisAccountCachePlugin` — cache Redis (`Base64File`, `PhotoCodec`) |
+| `authorization` | `AuthorizationManagerImpl`, `AuthorizationAspect` |
+| `identityProvider` | `IdentityProviderManagerImpl` |
+| `identityProvider.store` | `StoreIdentityProviderPlugin` — identités depuis base |
+| `identityProvider.ldap` | `LdapIdentityProviderPlugin` — identités depuis LDAP |
+| `identityProvider.text` | `TextIdentityProviderPlugin` — identités depuis fichier texte |
 
+### Plugins d'authentification
 
+| Plugin | Description |
+|---|---|
+| `TextAuthenticationPlugin` | Authentification par login/mot de passe depuis un fichier texte |
+| `StoreAuthenticationPlugin` | Authentification par login/mot de passe depuis la base (via EntityStore) |
+| `LdapAuthenticationPlugin` | Authentification par binding LDAP, retourne le login |
+| `MockAuthenticationPlugin` | Toujours valide, pour les tests unitaires |
 
+### DSL de règles de sécurité
 
+Les règles sont traduites dans trois cibles via des `SecurityRuleTranslator` :
 
+| Traducteur | Usage |
+|---|---|
+| `SqlSecurityRuleTranslator` | Traduction en clause `WHERE` SQL pour les requêtes DAO |
+| `SearchSecurityRuleTranslator` | Traduction en syntaxe Elasticsearch pour `SearchManager` |
+| `CriteriaSecurityRuleTranslator` | Traduction en `Criteria` Vertigo (filtre transversal) |
+
+Les éléments du DSL sont : `DslSyntaxRules`, `DslParserUtil`, `DslExpressionRule`, `DslFixedQueryRule`, `DslOperatorRule`, `DslMultiExpressionRule`, `DslUserPropertyValueRule`.
+
+### Chargers d'autorisations
+
+| Classe | Rôle |
+|---|---|
+| `JsonSecurityDefinitionProvider` | Chargement des règles depuis fichier JSON |
+| `AuthorizationDeserializer` | Désérialisation des définitions d'autorisation |
+| `SecuredEntityDeserializer` | Désérialisation des entités sécurisées |
+| `AdvancedSecurityConfiguration` | Configuration avancée de la sécurité |
+
+### Annotations
+
+| Annotation | Cible | Description |
+|---|---|---|
+| `@Secured` | Classe/Méthode | Vérifie les autorisations globales |
+| `@SecuredOperation` | Paramètre | Vérifie l'opération sur une SecuredEntity |
+
+### Exceptions
+
+| Exception | Rôle |
+|---|---|
+| `VSecurityException` | Lancée quand le contrôle d'autorisation échoue |
+
+### Configuration YAML
+
+Voir section [Configuration](#configuration) pour les détails de chaque Feature et [Configuration](#configuration-1) pour la configuration IdentityProvider.

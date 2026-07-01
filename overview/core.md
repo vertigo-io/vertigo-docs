@@ -1,6 +1,6 @@
 # Core
 
-Vertigo-core est le mini framework qui permet de faire fonctionner une application Vertigo.
+Vertigo-core est le socle léger qui permet de faire fonctionner une application Vertigo.
 Il est très léger, très robuste mais a tout d'un grand, sa conception étant le fruit de plusieurs décennies d'efforts.
 
 Ses missions pour une application Vertigo sont :
@@ -9,12 +9,12 @@ Ses missions pour une application Vertigo sont :
 - **Run** : démarre l'application et l'arrête
 - **Monitor** : recueille des statistiques permettant d'évaluer son état à tout instant
 
-Pour faire cela une application est consituée de deux espaces distincts :
+Pour faire cela une application est constituée de deux espaces distincts :
 - **ComponentSpace** : l'espace des composants, ce qui correspond aux traitements (des fonctions mathématiques pures et sans état)
 - **DefinitionSpace** : l'espace des définitions, ce qui correspond aux informations immuables qui décrivent les éléments manipulés par l'application.
 
-Le cycle de démarrage a donc pour but de remplir ces deux espaces. Une fois l'application démarrée ces deux espaces sont vérouillés (ils ne peuvent plus être modifiés), l'état de l'application ne peut plus altéré.
-Il en resulte une application robuste, dont le comportement est reproductible, sans effet de bord, en un mot __fiable__.
+Le cycle de démarrage a donc pour but de remplir ces deux espaces. Une fois l'application démarrée ces deux espaces sont verrouillés (ils ne peuvent plus être modifiés), l'état de l'application ne peut plus être altéré.
+Il en résulte une application robuste, dont le comportement est reproductible, sans effet de bord, en un mot __fiable__.
 
 ## Configuration
 
@@ -55,7 +55,7 @@ Un module d'analytics est nativement présent dans Vertigo pour permettre un sui
 Il permet de suivre trois types d'indicateurs :
 
 - **HealthStatus** : Permet d'indiquer un état de santé (rouge, orange, vert) pour une fonction précise
-- **AProcess** : Permet de tracer des executions complètes au sein de l'application en passant par différents point de contrôle. Cela permet notament de compter la nature et la durée des différents processus?
+- **Trace** : Permet de tracer des exécutions complètes au sein de l'application via des `TraceSpan` imbriquables. Chaque span représente un point de contrôle et permet de mesurer la nature et la durée des processus.
 - **Metric** : Permet de relever des métriques a interval de temps régulier pour suivre l'évolution dans le temps d'une caractéristique d'une application.
 
 Des sondes sont placés aux endroits stratégiques des traitements dans les différentes extensions Vertigo. Chaque projet / module complémentaire peut ajouter des nouveaux points de contrôle pour chaque type d'indicateurs.

@@ -1,46 +1,47 @@
 # Objectives
-Our goal in building Vertigo is to provide an application framework that is:
 
-- Centered around needs
-- Informed by experience
-- Consistent, yet flexible
-- Simple—making straightforward tasks easy
-- Open—allowing for more complex operations
+Our goal in building Vertigo is to provide an application foundation that is:
 
-To achieve this, Vertigo adheres to the following design principles.
+* Needs-driven
+* Born from experience
+* Consistent, non-uniform
+* Simple—simple things must be easy to do
+* Open—less simple things must still be possible
 
-# Design Principles
+To this end, Vertigo follows the guidelines described below.
+
+# Design principles
 
 ![](./images/designPrinciples.png)
 
 # Simple
-![](./images/simple-icon.png)John Maeda, a design professor at MIT, authored a book titled The Laws of Simplicity, where he outlines principles of simplicity. The final law succinctly captures the essence :
+![](./images/simple-icon.png)John Maeda, design professor at MIT, wrote a short book titled *The laws of simplicity* outlining the laws of simplicity. The final law synthesizes the preceding ones.
 
 **Simplicity is about subtracting the obvious, and adding the meaningful.**
 
 # Modular
-![](./images/modular-icon.png)Modularity is a key element in computer systems and forms the foundation of UNIX. As Eric Raymond states in his work Basics of the Unix Philosophy:
+![](./images/modular-icon.png)Modularity is a key element of computing systems, foundational to UNIX. As Erich Raymond writes in *Basics of the Unix Philosophy*,
 
-**Rule of Modularity : Write simple parts connected by clean interfaces.** 
+**Rule of Modularity: Write simple parts connected by clean interfaces.**
 
 ![](./images/modularity.png)
 
 # Elastic
-![](./images/elastic-icon.png)Elasticity refers to a system’s ability to distribute processing in order to:
+![](./images/elastic-icon.png)The ability of the system to distribute processing in order to:
 
-- Handle heavy loads
-- Confine specific tasks to dedicated servers
+* absorb heavy loads
+* confine certain tasks to dedicated servers
 
 ![](./images/elastic.png)
 
 # Fast
-![](./images/fast-icon.png)According to usability expert Jacob Nielsen, there are three critical timeframes for user attention. Our goal is to **build applications that respond instantly**.
+![](./images/fast-icon.png)According to Jacob Nielsen, a leading authority in computing systems ergonomics, here are the three critical delays. Our objective is to **build applications that respond instantaneously**.
 
-- 0.1 seconds provides an instantaneous feeling of response
-- 1 second maintains the user’s flow of thought
-- 10 seconds is the limit for keeping the user engaged in the dialogue
+* 0.1 seconds gives the feeling of instantaneous response
+* 1 second keeps the user's flow of thought seamless.
+* 10 seconds is about the limit for keeping the user's attention focused on the dialogue.
 
 ![](./images/fast.png)
 
 # Fluid
-![](./images/fluid-icon.png)Because users perceive applications through their interfaces, it’s crucial for the interface to be fluid and ergonomic.
+![](./images/fluid-icon.png)Because an application is perceived only through its user interface, that interface must be fluid and ergonomic.

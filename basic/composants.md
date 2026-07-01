@@ -1,9 +1,9 @@
 # Composants
 
 Les composants sont des objets offrant des services.
-Ils doivent à minima implémenter l'interface `io.vertigo.core.component.Component` qui n'est rien d'autre qu'un simple marqueur ou bien implémenter une interface métier qui contractualise les services offerts.
+Ils doivent à minima implémenter l'interface `io.vertigo.core.node.component.Component` qui n'est rien d'autre qu'un simple marqueur ou bien implémenter une interface métier qui contractualise les services offerts.
 
-!> Les composants sont des singletons, ils doivent donc avoir un comportant **threadsafe**. Un moyen simple de s'en assurer est d'en faire des objets totalement **stateless**.
+!> Les composants sont des singletons, ils doivent donc avoir un comportement **threadsafe**. Un moyen simple de s'en assurer est d'en faire des objets totalement **stateless**.
 
 Voici les principaux types de composants utilisés dans un projet Vertigo :
 - les **Manager** qui sont les composants internes de Vertigo et qui offrent des fonctionnalités essentielles (ex: `StoreManager`,  `AuthorizationManager`, etc...) 
@@ -19,12 +19,12 @@ Les composants sont instantiés par le moteur d'injection et sont utilisables pa
 Pour être créé, un composant doit donc avoir au choix :
 
 - aucun constructeur (c'est donc le constructeur par défaut qui sera utilisé)
-- un (et un seul) constructeur public déclaré. Lorqu'un constructeur est déclaré, celui-ci doit porter l'annotation `@Inject`. 
+- un (et un seul) constructeur public déclaré. Lorsqu'un constructeur est déclaré, celui-ci doit porter l'annotation `@Inject`. 
 
 
 Il est possible d'injecter dans un composant, soit sous la forme de variables d'instance, soit sous la forme de paramètres du constructeur, les éléments suivants :
 
-- un paramètre de type primitif portant l'annotation `@Named` afin de spécifier son nom
+- un paramètre de type primitif portant l'annotation `@ParamValue` afin de spécifier son nom
 - un composant
 - un plugin
 - une liste de plugins du même type 
@@ -32,12 +32,12 @@ Il est possible d'injecter dans un composant, soit sous la forme de variables d'
 
 ```java
 @Inject
-public Calculator3(@Named("offset") final Optional<Integer> offset) {
+public Calculator3(@ParamValue("offset") final Optional<Integer> offset) {
 	this.offset = offset.orElse(0);
 }
 ```
 
-?> L'injection de paramètres permet la gestion des `Optional` lorsque ceux-ci peuvent-être nuls
+?> L'injection de paramètres permet la gestion des `Optional` lorsque ceux-ci peuvent être nuls
 
 
 ```java
@@ -57,7 +57,7 @@ private OperationPlugin operationPlugin;
 
 ```java
 @Inject
-@Named("log")
+@ParamValue("log")
 private boolean log;
 ```
 
@@ -78,7 +78,7 @@ private Calculator1 calculator1;
 
 > C'est le cas des DAO qui sont utilisés par les services métier ou les services métier eux-même utilisés par les webservices.
 
-Dans le cas où l'objet n'est pas lui-même un composant et donc n'est pas créé par le moteur d'injection, il est possible d'activer manuellement l'injection de dépedances :
+Dans le cas où l'objet n'est pas lui-même un composant et donc n'est pas créé par le moteur d'injection, il est possible d'activer manuellement l'injection de dépendances :
 - soit lors de la création de l'instance :
 ```java
 DIInjector.newInstance(Samples.class, Node.getNode().getComponentSpace())
@@ -96,7 +96,7 @@ Il est également possible de récupérer le composant directement dans l'espace
 ```java
 final Calculator2 calculator2 = Node.getNode().getComponentSpace().resolve(Calculator2.class)
 ```
-!> Attention : cette pratique n'est à utiliser que dans les cas très particuliers (et extrèmement rares) où l'injection n'est pas disponible.
+!> Attention : cette pratique n'est à utiliser que dans les cas très particuliers (et extrêmement rares) où l'injection n'est pas disponible.
 
 Il est ensuite possible d'utiliser les services offerts par ce composant
 
@@ -129,7 +129,7 @@ public List<Definition> provideDefinitions(final DefinitionSpace definitionSpace
 
 ## Exemple
 
-Voici un exemple de service métier qui peut être implémenté avec Vertigo. Ce dernier utilise un autre composant DAO ainsi qu'un aspect `@Transactional` permettant de gérér la transactionalité des méthodes de services.
+Voici un exemple de service métier qui peut être implémenté avec Vertigo. Ce dernier utilise un autre composant DAO ainsi qu'un aspect `@Transactional` permettant de gérer la transactionnalité des méthodes de services.
 
 ```java
 @Transactional

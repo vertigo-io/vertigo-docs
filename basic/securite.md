@@ -16,7 +16,7 @@ Pour plus de détails vous pouvez vous rapporter au chapitre dédié à la [conf
 Voici une configuration typique d'une application utilisant le module Account :
 
 ```yaml
-modules
+modules:
   io.vertigo.account.AccountFeatures:
     features:
       - security:
@@ -108,7 +108,7 @@ Pour rester compatible avec le mécanisme prévu par Vertigo, l'application doit
 ### Types d'autorisation
 
 Deux types d'autorisations sont proposés :
-- **Global Authorizations** : Autorisations globales utilisées pour protéger des fonctions de l'application (écrans, bouttons, traitements, ...)
+- **Global Authorizations** : Autorisations globales utilisées pour protéger des fonctions de l'application (écrans, boutons, traitements, ...)
 
 - **Secured Entity Operations** : Autorisations pour une opération sur une entité sécurisée
   - securityDimensions : Liste de dimensions de sécurité (pseudo-champs de sécurité déduit d'autres champs de l'entité)
@@ -118,13 +118,13 @@ Deux types d'autorisations sont proposés :
   - operations : Liste des opérations possibles sur l'entité
     - name : Code de l'opération
     - rules : Liste de règles de sécurité. 
-      - Syntaxe proche du SQL ( myField *operateur* value (and|or)? )*
+      - Syntaxe proche du SQL ( myField *opérateur* value (and|or)? )*
       - Les différentes règles de la liste sont considérées en **OU**
       - **${myParam}** pour placer une propriété du contexte utilisateur (propriété de périmètre dans la session du user)
       - Ecriture simple pour les axes **TREE** : GEO <= ${geo} : On sélectionne les `SecuredEntities` *inférieur ou égal* dans le périmètre géographique de l'utilisateur (Ex: toutes les communes ou dans le département d'un responsable départemental)
       - Ecriture simple pour les axes **ENUM** : etaCd>=PUB AND etaCd<ARC (Ex : tous les `SecuredEntities` dont l'état est *supérieur ou égal* à 'PUB'*lié* et *strictement inférieur* à 'ARC'*hivé*)
 
-> Chaque **Secured Entity Operations** est associée à une *authorization* générée. Il est ainsi possible de vérifier si un utilisateur a "à priori" le droit d'éffectuer une opération sur une entité avant même de regarder le contexte de sécurité de l'utilisateur.
+> Chaque **Secured Entity Operations** est associée à une *authorization* générée. Il est ainsi possible de vérifier si un utilisateur a "à priori" le droit d'effectuer une opération sur une entité avant même de regarder le contexte de sécurité de l'utilisateur.
 > Ceci est utilisé, notamment pour gérer les éléments d'IHM affichés.<br/>
 > **Exemple:** Récupération des opérations possibles sur une entité pour déterminer les menus à proposer.
 
@@ -147,11 +147,11 @@ Voici un fichier type de configuration de la sécurité
     "securityFields" : ["honorificCode", "name"],
     "securityDimensions": [],
     "operations": [  {
-      "__comment": "Test de lecture : Tout le monde à le droit de lire",
+      "__comment": "Test de lecture : Tout le monde a le droit de lire",
       "name": "read", "label" : "Lecture",
       "rules": [ "true" ]
     }, {
-      "__comment": "Test d'ecriture : Droit limité, l'utilisateur est autorisé à modifier les contacts d'un même titre honorifique et un contact particulier par son nom",
+      "__comment": "Test d'écriture : Droit limité, l'utilisateur est autorisé à modifier les contacts d'un même titre honorifique et un contact particulier par son nom",
       "name": "write", "label" : "Ecriture",
       "grants": ["read"],
       "rules": [

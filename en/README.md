@@ -20,9 +20,9 @@ The automotive industry has embraced the concept of a “platform,” allowing r
 
 Here’s a breakdown of the components that make up Vertigo:
 
-- [**Vertigo-Core**](/overview/core) : A powerful and lightweight Java framework.
-- [**Vertigo-Extensions**](/overview/extensions) : A collection of extension modules that address key challenges in business applications, allowing rapid development
-- [**Vertigo-Connectors**](/overview/connectors) : A set of low-level connectors to third-party libraries and products, simplifying development in edge cases
-- [**Vertigo-Studio**](/overview/studio) :  A dedicated design tool for business applications, enhancing efficiency and consistency
+- [**Vertigo-Core**](overview/core) : A powerful and lightweight Java framework.
+- [**Vertigo-Extensions**](overview/extensions) : A collection of extension modules that address key challenges in business applications, allowing rapid development
+- [**Vertigo-Connectors**](overview/connectors) : A set of low-level connectors to third-party libraries and products, simplifying development in edge cases
+- [**Vertigo-Studio**](overview/studio) :  A dedicated design tool for business applications, enhancing efficiency and consistency
 
 Vertigo empowers developers to create robust and efficient applications while maintaining flexibility beyond typical management applications. It’s a platform designed to maximize value and accelerate project delivery

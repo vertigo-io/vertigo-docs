@@ -2,28 +2,30 @@
 
 ## Features
 
-Allows a functional administrator to create and modify dynamic forms, which will then be filled out by the application's users.
+EasyForms allows a functional administrator to create and modify dynamic forms, then filled out by application users.
 
-The module offers administrators rich functionalities such as:
+The module offers administrators advanced features:
 
-- Multilingual configuration of input fields
-- Adding rich text blocks with a WYSIWYG editor
-- Configuring dynamic display rules for fields, allowing conditional visibility based on responses to other fields
-- Setting business constraints for each field
+* Multilingual configuration of input fields
+* Addition of rich text blocks via a WYSIWYG editor
+* Dynamic field display rules, enabling conditional visibility based on responses to other fields
+* Definition of specific business constraints per field
 
-This module is also extensible, allowing:
+This module is extensible and allows:
 
-- Adding new field types
-- Configuring specific constraints tailored to your business
-- Adapting the form creation and management workflow to the project context
+* Adding new field types
+* Configuring constraints specific to your business
+* Adapting the form creation and management workflow to the project context
 
-EasyForms relies on a flexible JSON-based storage model, ensuring full autonomy with the database.
+EasyForms relies on a flexible JSON storage model, guaranteeing total autonomy from the database.
+
+---
 
 ## Installation
 
-### Adding the Module to `pom.xml`
+### Adding the module to `pom.xml`
 
-Add the following dependency in the `pom.xml` file to include the EasyForms module in your project:
+Add the following dependency to the `pom.xml` file:
 
 ```xml
 <dependency>
@@ -33,9 +35,9 @@ Add the following dependency in the `pom.xml` file to include the EasyForms modu
 </dependency>
 ```
 
-### Adding to the Vertigo Configuration
+### Adding to Vertigo configuration
 
-You need to add the `EasyFormsFeatures` feature in the YAML configuration.
+In the YAML configuration, activate the `EasyFormsFeatures` feature:
 
 ```yaml
   io.vertigo.easyforms.EasyFormsFeatures:
@@ -46,29 +48,31 @@ You need to add the `EasyFormsFeatures` feature in the YAML configuration.
           filestore.tmp: temp
 ```
 
-#### Parameter Descriptions
+#### Parameter description
 
-- `languages`: Defines the supported languages for the forms (e.g., en, fr).
-- `filestore.persist`: Specifies the name of the previously declared `filestore` in the configuration, used for permanently storing files associated with forms.
-- `filestore.tmp`: Similar to the previous one, but for temporarily storing files before saving the form.
+* `languages`: List of languages supported for forms (e.g.: en, fr).
+* `filestore.persist`: Name of the `filestore` declared in the configuration, used for permanent storage of form-related files.
+* `filestore.tmp`: Name of the `filestore` for temporary file storage before saving.
 
-## Adding to the Project
+---
 
-The module's data persistence in database is divided into two parts:
+## Adding to the project
 
-- Form models are stored in a dedicated table (`EASY_FORM`).
-- Form responses are stored in business tables via a column using the `DoEfFormData` domain.
+Database persistence is organized in two parts:
 
-### Configuring VertigoStudio
+* Form templates are stored in a dedicated table (`EASY_FORM`).
+* Form responses are saved in business tables, via a column of type `DoEfFormData`.
 
-Add the EasyForms definitions to the Studio configuration (e.g., `studio-config.yaml`):
+### VertigoStudio configuration
+
+Add EasyForms definitions to the Studio configuration (e.g. `studio-config.yaml`):
 
 ```yaml
 resources:
   - { type: kpr, path: classpath:io/vertigo/easyforms/studio/application.kpr}
 ```
 
-### Creating Database Tables
+### Creating database tables
 
 If using Liquibase:
 
@@ -80,107 +84,120 @@ If using Liquibase:
 
 Or manually execute the `easyforms_create_init-4.2.0.sql` file.
 
-### Adding the Response Column to Business Tables
+### Adding the response column to business tables
 
-In the corresponding KSP file, add an attribute like this:
+In the corresponding KSP file:
 
 ```ksp
-field response {domain: DoEfFormData label:"Response Form" cardinality:"1"}
+field response {domain: DoEfFormData label:"Form response" cardinality:"1"}
 ```
 
-### Integrating the Administration Page into the Business Application
+---
 
-#### In the Controller
+## Integration in the application
 
-- Inject the designer controller:
+### Form administration
+
+#### Controller side
+
+* Inject the designer controller:
 
 ```java
 @Inject
 private EasyFormsDesignerController easyFormsDesignerController;
 ```
 
-- During `initContext`, initialize the designer with:
+* Initialization during `initContext`:
 
 ```java
 easyFormsDesignerController.initContext();
 ```
 
-- For saving:
-    - Retrieve the form using `easyFormsController.readEasyForm(viewContext)`.
-    - In the service method (to ensure a transaction), save with `easyFormsDesignerServices.saveForm(easyForm)`.
+* Save:
 
-#### In the HTML Page
+  * Retrieve the form via `easyFormsController.readEasyForm(viewContext)`.
+  * Save in service (transaction) via `easyFormsDesignerServices.saveForm(easyForm)`.
 
-- Add the required JS file:
+#### HTML side
+
+* Add the required script:
 
 ```html
 <script th:src="@{/vertigo-ui/static/easyforms/js/vertigo-easyforms.js}" th:data-context="@{/}"></script>
 ```
 
-- Add the following tag to display the form administration:
+* Add the tag:
 
 ```html
 <vu:easy-forms-admin />
 ```
 
-*Note:* It is recommended to add a version-related parameter at the end of the JS URL to invalidate the browser cache on updates, e.g., `...js?t=__${appBuildTime}__`.
+*Tip*: Add a version parameter in the JS URL to invalidate browser cache on updates, e.g.:
+`...js?t=__${appBuildTime}__`
 
-### Integrating a Form into a Business Page
+---
 
-#### In the Controller
+### Integrating a form in a business page
 
-- Inject the runner controller:
+#### Controller side
+
+* Inject the runner controller:
 
 ```java
 @Inject
 private EasyFormsRunnerController easyFormsRunnerController;
 ```
 
-- During `initContext`, initialize EasyForms with:
+* Initialization during `initContext`:
 
 ```java
 easyFormsRunnerController.initEditContext();
 ```
 
-- On saving, the form response is stored as JSON in the business object.
+* Save: the response is saved as JSON in the business object.
 
-#### In the HTML Page
+#### HTML side
 
-- Add the required JS file:
+* Add the required script:
 
 ```html
 <script th:src="@{/vertigo-ui/static/easyforms/js/vertigo-easyforms.js}" th:data-context="@{/}"></script>
 ```
 
-- Add the following tag to display the dynamic form:
+* Add the tag:
 
 ```html
 <vu:easy-forms object="myObject" field="formResponse" template="${model.formModel}" />
 ```
 
-*Note:* It is recommended to add a version-related parameter at the end of the JS URL to invalidate the browser cache on updates, e.g., `...js?t=__${appBuildTime}__`.
+*Tip*: same recommendation as for administration regarding the version parameter.
 
+---
 
-## Advanced Features
+## Advanced features
 
-### Additional Context
+### Additional context
 
-It is possible to use business context information in the form configuration (default values, display conditions, etc.). To do this, declare it:
+It is possible to use business context information in form configuration (default values, display conditions, etc.):
 
-- In the designer's `initContext` (`additionalContext` parameter) to accept these parameters.
-- Optionally in the runner's `initContext` (`additionalContextKeys` parameter) so that these data are added to `VueData`.
+* In the designer's `initContext` (`additionalContext`) to accept these parameters.
+* Optionally in the runner's (`additionalContextKeys`) to add them to `VueData`.
 
-### Custom Field Types
+---
 
-To declare additional field types, create a class inheriting from `DefinitionProvider<EasyFormsFieldTypeDefinition>`.
+### Custom field types
 
-See built-in types in EasyForms: [FieldTypeDefinitionProvider.java](https://github.com/vertigo-io/vertigo-modules/blob/develop/vertigo-easyforms/src/main/java/io/vertigo/easyforms/runner/pack/provider/FieldTypeDefinitionProvider.java)
+To declare new field types:
 
-Example from the Mars project: [MarsEasyFormsFieldTypeDefinitionProvider.java](https://github.com/vertigo-io/vertigo-mars/blob/develop/src/main/java/io/mars/support/easyforms/MarsEasyFormsFieldTypeDefinitionProvider.java)
+* Create a class extending `DefinitionProvider<EasyFormsFieldTypeDefinition>`.
+* See built-in types in: [FieldTypeDefinitionProvider.java](https://github.com/vertigo-io/vertigo-modules/blob/develop/vertigo-easyforms/src/main/java/io/vertigo/easyforms/runner/pack/provider/FieldTypeDefinitionProvider.java)
+* Example: [MarsEasyFormsFieldTypeDefinitionProvider.java](https://github.com/vertigo-io/vertigo-mars/blob/develop/src/main/java/io/mars/support/easyforms/MarsEasyFormsFieldTypeDefinitionProvider.java)
 
-Additionally, you can declare new UI rendering types by creating a class inheriting from `DefinitionProvider<EasyFormsUiComponentDefinition>` and implementing the desired rendering inside the `<vu:easy-forms>` tag.
+To add a custom UI rendering:
 
-Example, if declaring a type named 'slider':
+* Create a class extending `DefinitionProvider<EasyFormsUiComponentDefinition>` and implement the rendering in the `<vu:easy-forms>` tag.
+
+Example for a `slider` type:
 
 ```html
 <vu:easy-forms ...>
@@ -190,11 +207,109 @@ Example, if declaring a type named 'slider':
 </vu:easy-forms>
 ```
 
-The labels for these new elements must be declared in Vertigo's i18n engine. The naming convention for the i18n key is `EfFty` followed by the field type name. If the field type includes parameters, the key for the parameter label is the field type name, followed by `$` and the parameter name. An example can be found [here](https://github.com/vertigo-io/vertigo-modules/blob/develop/vertigo-easyforms/src/main/resources/io/vertigo/easyforms/runner/pack/EfPackResources_en.properties).
+Labels must be added to the Vertigo i18n engine with the convention `EfFty<TypeName>` or `EfFty<TypeName>$<ParamName>`.
 
-### Custom Validators
+---
 
-Business field types include several validators that can be enabled via the form administration interface. To add custom validators, create a class inheriting from `DefinitionProvider<EasyFormsFieldValidatorTypeDefinition>`.
+### Custom validators
 
-Built-in validators are available here: [FieldValidatorTypeDefinitionProvider.java](https://github.com/vertigo-io/vertigo-modules/blob/develop/vertigo-easyforms/src/main/java/io/vertigo/easyforms/runner/pack/provider/FieldValidatorTypeDefinitionProvider.java).
+To add specific validators:
 
+* Create a class extending `DefinitionProvider<EasyFormsFieldValidatorTypeDefinition>`.
+* See built-in validators here: [FieldValidatorTypeDefinitionProvider.java](https://github.com/vertigo-io/vertigo-modules/blob/develop/vertigo-easyforms/src/main/java/io/vertigo/easyforms/runner/pack/provider/FieldValidatorTypeDefinitionProvider.java)
+
+## For Experts
+
+### Managers & Services
+
+| Manager | Role | Associated components |
+|---|---|---|
+| `EasyFormsRunnerManager` | Form execution engine | `EasyFormsRunnerServices`, `EasyFormsRunnerController`, `EasyFormsFileUploadController` |
+| `EasyFormsDesignerManager` | Form design engine | `EasyFormsDesignerServices`, `EasyFormsDesignerController` |
+
+### Definition Providers (always active via `buildFeatures()`)
+
+| Provider | Description |
+|---|---|
+| `FieldTypeDefinitionProvider` | Built-in field types: LABEL, EMAIL, DATE, PHONE, TEXT, FILE, CUSTOM_LIST\_*, YES_NO, … |
+| `UiComponentDefinitionProvider` | UI components: TEXT_FIELD, TEXT_AREA, SELECT, RADIO, CHECKBOX, FILE, NUMBER, DATE, READ_ONLY, … |
+| `FieldValidatorTypeDefinitionProvider` | Validators: EMAIL_NOT_IN_BLACKLIST, GTE_18_ANS, IN_FUTURE, PHONE_FR, … |
+| `ModelDefinitionProvider` | Definitions of DtObjects and SmartTypes |
+
+### Extension interfaces (Suppliers)
+
+| Interface | Usage |
+|---|---|
+| `IEasyFormsFieldTypeDefinitionSupplier` | Adding custom field types |
+| `IEasyFormsUiComponentDefinitionSupplier` | Adding custom UI components |
+
+### Constraints (`EasyFormsConstraint`)
+
+| Constraint | Usage |
+|---|---|
+| `ConstraintPhone` | Phone number validation |
+| `ConstraintAgeMinimum` | Minimum age check |
+| `ConstraintAgeMaximum` | Maximum age check |
+| `ConstraintLocalDateMinimum` | Minimum date check |
+| `ConstraintLocalDateMaximum` | Maximum date check |
+| `ConstraintEmailBlackList` | Check email not in blacklist |
+
+### Rule engine
+
+| Class | Role |
+|---|---|
+| `EasyFormsRuleParser` | Parsing of conditional rules |
+| `EasyFormsRule` | Rule representation |
+| `ValueRule` | Rule based on field value |
+| `FormContextDescription` | Context description for rules |
+
+### Adapters
+
+| Adapter | Role |
+|---|---|
+| `EasyFormsJsonAdapter` | JSON adaptation |
+| `EasyFormsMapInputAdapter` | Map → model adaptation |
+
+### Domain Model (DtObjects)
+
+| DtObject | Description |
+|---|---|
+| `EasyForm` | Form |
+| `EasyFormsSectionUi` | Form section |
+| `EasyFormsLabelUi` | Label |
+| `EasyFormsItemUi` | Item / field |
+| `EasyFormsFieldTypeUi` | Field type |
+| `EasyFormsFieldValidatorTypeUi` | Validator type |
+
+### Template Model
+
+| Class | Description |
+|---|---|
+| `EasyFormsTemplate` | Form template |
+| `EasyFormsTemplateSection` | Template section |
+| `EasyFormsTemplateItemField` | Template field |
+| `EasyFormsTemplateItemBlock` | Template block |
+| `EasyFormsData` | Form data |
+
+### DAO
+
+| DAO | Role |
+|---|---|
+| `EasyFormDAO` | Form persistence |
+
+### Features
+
+| Flag | Parameters | Components |
+|---|---|---|
+| `easyforms` | `filestore.persist`, `filestore.tmp`, `languages` | `EasyFormsRunnerManager` + controllers |
+
+### Configuration YAML
+
+```yaml
+io.vertigo.easyforms.EasyFormsFeatures:
+    features:
+        - easyforms:
+            languages: en, fr
+            filestore.persist: main
+            filestore.tmp: temp
+```
