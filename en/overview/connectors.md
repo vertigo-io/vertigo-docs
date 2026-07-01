@@ -1,22 +1,22 @@
 # Vertigo-Connectors
 
-The *Connectors* are somewhat special components. Their purpose is to provide other components with a pre-configured client/driver for a third-party product or library to simplify its use for the application developer.
-The advantage of such an approach is twofold:
+Connectors are a special type of component. Their purpose is to provide other components with a pre-configured client/driver to a third-party product or library, simplifying its use for application developers.
+The advantage of this approach is twofold:
 
-- **Simplify** the technological openness of Vertigo to include more innovation with controlled risk
-- **Help** the developer in edge cases that require the use of advanced functions of third-party products and libraries
+- **Simplify** Vertigo's technological openness to include more innovation with controlled risk
+- **Assist** developers in edge cases requiring advanced features from third-party products and libraries
 
-While the __extensions__ offer "high-level" usage-oriented APIs and therefore of great stability, the __connectors__ provide "low-level" access directly subject to the evolutions of third-party solutions.
+While __extensions__ provide "high-level" usage-oriented APIs with strong stability, __connectors__ provide "low-level" access directly exposed to third-party solution evolutions.
 
-!> The use of __connectors__ in an application must be reasoned in order to minimize and centralize adhesions to third-party products and thus facilitate the scalability of the application.
+!> The use of __connectors__ in an application must be deliberate, to minimize and centralize coupling to third-party products, thus facilitating application evolution.
 
-?> The plugins included in the Vertigo extensions use the __connectors__ to access third-party products and libraries.
+?> The plugins included in Vertigo extensions use __connectors__ to access third-party products and libraries.
 
-In the context of a project, it is very simple to add a new *Connector* if needed. This allows in particular to take advantage of the configuration mechanisms of a Vertigo application to configure the client/driver of the third-party library
+Within a project, it is very easy to add a new *Connector* when needed. This notably allows leveraging Vertigo application configuration mechanisms to parameterize the third-party library's client/driver.
 
-Each third-party solution has a dedicated module and possibly offers several *Connectors* if several access modalities are possible.
+Each third-party solution has a dedicated module and may offer multiple *Connectors* if several access methods are possible.
 
-The __connectors__ included in Vertigo are as follows
+The __connectors__ included in Vertigo are:
 
 ## vertigo-redis-connector
 
@@ -24,11 +24,11 @@ The __connectors__ included in Vertigo are as follows
 
 ## vertigo-elasticsearch-connector
 
-> Access to the [elasticsearch](https://github.com/elastic/elasticsearch) client, and starts an embedded ElasticSearch server
+> Access to the [elasticsearch](https://github.com/elastic/elasticsearch) client, and embedded ElasticSearch server startup
 
 ## vertigo-javalin-connector
 
-> Starts a local [Javalin](https://github.com/tipsy/javalin) server or in Servlet Filter mode
+> Starts a [Javalin](https://github.com/tipsy/javalin) server locally or in servlet Filter mode
 
 ## vertigo-influxdb-connector
 
@@ -36,42 +36,65 @@ The __connectors__ included in Vertigo are as follows
 
 ## vertigo-keycloak-connector
 
-> Access to the Java client [KeyCloak](https://github.com/keycloak/keycloak)
+> Access to the [KeyCloak](https://github.com/keycloak/keycloak) Java client
 
 ## vertigo-ldap-connector
 
-> Accesses an LDAP server via native Java APIs
+> Connects to an LDAP server via native Java APIs
 
 ## vertigo-mail-connector
 
-> Provides a mail client via native Java APIs either directly or a JNDI resource
+> Provides a mail client via native Java APIs, either directly or through a JNDI resource
 
 ## vertigo-mongodb-connector
 
-> Access to the Java client [mongodb-driver-sync](https://github.com/mongodb/mongo-java-driver)
+> Access to the [mongodb-driver-sync](https://github.com/mongodb/mongo-java-driver) Java client
 
 ## vertigo-mqtt-connector
 
-> Access to the MQTT Java client [Paho](https://github.com/eclipse/paho.mqtt.java)
+> Access to the [Paho](https://github.com/eclipse/paho.mqtt.java) MQTT Java client
 
 ## vertigo-neo4j-connector
 
-> Access to the Java bolt client of [Neo4j](https://github.com/neo4j/neo4j-java-driver)
-!> Starts a local Neo4J server (GPLv3 license)
+> Access to the [Neo4j](https://github.com/neo4j/neo4j-java-driver) Java bolt client
+!> Local Neo4J server startup (GPLv3 license)
 
 ## vertigo-openstack-connector
 
-> Access to the Java client [openstack4j](https://github.com/openstack4j/openstack4j)
+> Access to the [openstack4j](https://github.com/openstack4j/openstack4j) Java client
 
 ## vertigo-spring-connector
 
-> Enriches the spring component space with Vertigo components to allow interoperability with [Spring](https://github.com/spring-projects/spring-framework) via the `@EnableVertigoSpringBridge` annotation
+> Enriches the Spring component space with Vertigo components to enable interoperability with [Spring](https://github.com/spring-projects/spring-framework) via the `@EnableVertigoSpringBridge` annotation
 
 ## vertigo-twitter-connector
 
-> Access to the Java client [Twitter4j](https://github.com/Twitter4J/Twitter4J)
+> Access to the [Twitter4j](https://github.com/Twitter4J/Twitter4J) Java client
 
-## vertigo-iftt-connector
+## vertigo-ifttt-connector
 
-> Accesses certain functions of the IFFT API via native code
+> Accesses certain IFTTT API functions via native code
 
+## vertigo-azure-connector
+
+> Access to the [MSAL4j](https://github.com/AzureAD/microsoft-authentication-library-for-java) client for Azure Active Directory authentication
+
+## vertigo-httpclient-connector
+
+> Access to the standard Java HTTP client [java.net.http.HttpClient](https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html) with proxy, truststore, and cookie support
+
+## vertigo-jsch-connector
+
+> Access to the [JSch](https://github.com/mwiede/jsch) SSH client with private key authentication from a PKCS12 keystore
+
+## vertigo-oidc-connector
+
+> Access to the [Nimbus OIDC](https://github.com/connect2id/nimbus-oauth-openid-connect-sdk) client for OpenID Connect authentication
+
+## vertigo-s3-connector
+
+> Access to the [MinIO](https://github.com/minio/minio-java) client for S3-compatible storage
+
+## vertigo-saml2-connector
+
+> Access to the [OpenSAML](https://github.com/Jasig/OpenSAML) framework for SAML2 authentication with SP and IP key configuration

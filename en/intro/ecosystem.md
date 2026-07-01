@@ -1,16 +1,15 @@
-# Technological Ecosystem
+# Technology ecosystem
 
-Vertigo is a base built on standard infrastructure bricks
+Vertigo is a foundation built on standard infrastructure components
 
 ![](./images/techno_infra.png)
 
 
-It aggregates and binds specialized technologies…
+It aggregates and bridges specialized technologies...
 
 ![](./images/techno_impl.png)
 
 
-…and allows you to simply extend your applications to complete market tools
+...and enables seamless extension of your applications toward full-featured market tools
 
-![](./images/techno_extension.png) 
-
+![](./images/techno_extension.png)
