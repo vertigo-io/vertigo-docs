@@ -81,6 +81,7 @@
     - [Edition/Consultation](design-system/templates/read-edit.md)
     - [Recherche](design-system/templates/search.md)
 - <a href="apidocs/index.html" target="_blank">API documentation</a>
+- [Migration Guide](migration.md)
 - [Changelog Core](changes)
 - [Changelog Libs](changes-extensions)
 - [Changelog Modules](changes-modules)
