@@ -44,6 +44,8 @@ You may need it, if you have some input component in table. It force a `vue-js c
 
 # from 4.2.0 to 4.3.0
 
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+
 * **[DataModel] Package renamed `io.vertigo.datamodel.structure.*` → `io.vertigo.datamodel.data.*`**. Update your imports:
 * **[DataModel] `Criteria`, `Task`, and property-related classes moved to DataFactory** module. Update your pom.xml if you import these classes directly (they're no longer in vertigo-datamodel).
 * **[Core] Renamed `MessageKey` to `LocaleMessageKey`**. Update your imports and class references.
@@ -140,9 +142,13 @@ Example, before `th:` not needed :
 * ElasticSearchFeatures, restHL feature (RestHighLevelElasticSearchConnector) have now mandatory boolean parameter `ssl` 
 
 # from 3.6.0 to 4.0.0
+
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+
 * [Core] Update to JDK17
-* [Core] Rename MessageText to LocaleMessageText
-* [Core] Rename @Analytics to @Trace
+* [Core] Rename MessageText to LocaleMessageText (included in renaming tool)
+* **[Core] Rename @Analytics to @Trace** — signature changed, must be done manually :
+  - `@Analytics(processName = "xxx")` → `@Trace(category = "yyy", name = "xxx")`
 * [Core] Rename Tuple.getValX() to Tuple.valX()
 * [Core] Rename record's getter from getMyProperty to myProperty()
 * **[Ui, Vega] jakarta namespace : Spring 6, Javalin 5, Jetty 11**
