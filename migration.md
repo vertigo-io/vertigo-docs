@@ -13,22 +13,9 @@
   - `EmbeddedServer` removed — use testcontainer for tests
   - `_all` field removed from index mapping
   - `markToOptimize` only applies to deletes (removeByQuery)
-
 * **[DataFactory] Remove deprecated `searchManager.findIndexDefinitionByKeyConcept`** — you must use `findFirstIndexDefinitionByKeyConcept` instead
-
-Example:
-```java
-// Before
-final SearchIndexDefinition index = searchManager.findIndexDefinitionByKeyConcept(MyEntity.class);
-
-// After
-final SearchIndexDefinition index = searchManager.findFirstIndexDefinitionByKeyConcept(MyEntity.class);
-```
-
 * **[Ui] Reset componentStates each request.** If you relied on component states persisting across multiple requests within the same context, you must manage them explicitly.
-
 * **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. If you use Sentinel, switch to the `withJedisSentineled` connector.
-
 * [Ui] Remove specific css rules from vertigo-ui.css affecting projects that uses quasar components and dsfr css (more detail, see https://github.com/vertigo-io/vertigo-libs/commit/1e4d857028171a81c02f26bd1b280fe6c9b383f0)
 
 # from 4.3.1 to 4.3.2
@@ -58,25 +45,9 @@ You may need it, if you have some input component in table. It force a `vue-js c
 # from 4.2.0 to 4.3.0
 
 * **[DataModel] Package renamed `io.vertigo.datamodel.structure.*` → `io.vertigo.datamodel.data.*`**. Update your imports:
-
-Before:
-```java
-import io.vertigo.datamodel.structure.definitions.DataDefinition;
-import io.vertigo.datamodel.structure.model.DataObject;
-```
-
-After:
-```java
-import io.vertigo.datamodel.data.definitions.DataDefinition;
-import io.vertigo.datamodel.data.model.DataObject;
-```
-
 * **[DataModel] `Criteria`, `Task`, and property-related classes moved to DataFactory** module. Update your pom.xml if you import these classes directly (they're no longer in vertigo-datamodel).
-
 * **[Core] Renamed `MessageKey` to `LocaleMessageKey`**. Update your imports and class references.
-
 * **[Planning] vueData date format changed to ISO (yyyy-MM-dd).** If you have custom JS handling Planning dates, update your parsers.
-
 * **[Ui] `vu:page` attributes moved to `vu:head` : `vuiDevMode`, `vuejsDevMode`, `quasarVersion`, `vertigoUiVersion`**
 * **[Ui] Default format for date is now iso: `YYYY-MM-DD`. You may change some of your js code. If needed you can include data formatted with suffix `_fmt`**
 
