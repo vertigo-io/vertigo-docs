@@ -1,4 +1,4 @@
-# from 4.3.x to 5.0.0
+# from 4.4.x to 5.0.0
 
 * **[Core] Upgrade to JDK25**. Update your `pom.xml` source/target and IDE settings.
 * **[Vega] ContentSecurityPolicyFilter ${..} are now resolved by the paramManager. Old syntax must be updated :**
