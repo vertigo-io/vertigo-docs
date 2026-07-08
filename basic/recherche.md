@@ -595,8 +595,8 @@ Cette fonction permet de créer des champs de recherche multichamps, mais peut a
 Pour utiliser les champs ``copy_to``, il faut que le champ existe dans le Dt de l'index et que les champs copiés dedans aient tous un indexType.<br/>
 Pour cela, nous préconisons d'ajouter des champs computed :
 ```json
-computed modelPhonetic { domain:DoPhonetic label:"model sort" expression:"throw new io.vertigo.lang.VSystemException(\"Can't use index copyTo field\");"}
-computed allText { domain:DoFullText label:"index all" expression:"throw new io.vertigo.lang.VSystemException(\"Can't use index copyTo field\");"}
+computed modelPhonetic { domain:DoPhonetic label:"model sort" expression:"throw new io.vertigo.core.lang.VSystemException(\"Can't use index copyTo field\");"}
+computed allText { domain:DoFullText label:"index all" expression:"throw new io.vertigo.core.lang.VSystemException(\"Can't use index copyTo field\");"}
 ```
 
 Pour l'indexType des types primitifs, nous préconisons de définir l'indexType standard : 

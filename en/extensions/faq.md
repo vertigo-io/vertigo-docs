@@ -56,6 +56,8 @@ Includes server context data into client vueData.
 Normally display components handle include-data automatically.
 In some cases, no display component (no vu:textfield, vu:column, ...) but client-side data is needed (e.g., to build a link); include manually.
 
+Common pitfall: publishing the data (`publishDto`, `publishMdl`, ...) is not enough — a mustache expression `{{...}}` or a purely client-side binding (`:color`, `openModal(...)`, building a link) shows "undefined" if no `vu:` component actually renders that field. Include it explicitly with `<vu:include-data .../>`. Invisible pitfall in HTTP/curl testing: the symptom only shows in a real browser.
+
 ## [Ui] I have `<vu:select>` in my form, it displays label instead of id, how to reproduce in a list with `<vu:column>`?
 Often the underlying list object is a specific UI object; add a field to the list and adapt SQL to retrieve label directly.
 For reference lists (watch performance), this can be done automatically by defining column content:
@@ -77,7 +79,7 @@ This activates selection binding in `componentStates.${componentId}.selected`.
 To emit selection to server, specific code is needed.
 Developer must use it to send to server in desired format.
 
-UI-side: display certain buttons when items selected with `v-if="componentStates.reservationsTable.selected.length > 0"`
+UI-side: display certain buttons when items selected with `v-if="componentStates.equipmentsTable.selected.length > 0"`
 
 Example sending id list via Ajax (to delete items):
 ```Javascript
@@ -326,7 +328,7 @@ public VFile loadFile(@PathVariable("protectedUrl") final String protectedUrl) t
 
 @PostMapping("/upload")
 public FileInfoURI uploadFile(@QueryParam("file") final VFile vFile) {
-   final String fullPath = fileService.loadMyFile(fullPath);
+   final String fullPath = fileService.saveMyFile(vFile);
    final String protectedPath = ProtectedValueUtil.generateProtectedValue(fullPath);
    return new FileInfoURI(new FileInfoDefinition("FiDummy", "none"), protectedPath);
 }
@@ -679,6 +681,10 @@ Facet is automatic.
 ElasticSearch splits tag column values by `|`. Uppercase and spaces preserved.
 Automatically populates facet with values.
 
+## [DataStore] Should my authentication (credential) entity be a reference list?
+No. Never declare the credential entity in a `MasterDataDefinitionProvider`: it breaks authentication (login fails silently, empty response or 404).
+Keep this entity out of reference data.
+
 ## [Orchestra] An Orchestra activity goes to ABORTED even though the code did not fail
 **Symptom**: The activity ends with `status: "ok"` in the workspace, but its state in the database is `ABORTED`. Error message: `DbProcessExecutorPlugin - Error in activity state, activity execution N is already terminated`.
 
@@ -688,3 +694,13 @@ Automatically populates facet with values.
 1. Find your long-running daemons (>60s) via the analytics dashboard (`/dashboard`)
 2. If necessary, increase `threadPoolSize` in `boot.params` of `configuration.yaml` (minimum 4 recommended)
 3. Move very long-running tasks out of the daemon pool (execute in a dedicated thread)
+
+## [Config] Liquibase: checksum error at startup after a regeneration
+Liquibase stores the **md5sum** of each applied `changeSet` and compares it at every startup.
+Never reference a regenerable file (studio generation output, `javagen/sqlgen/…`): as soon as it changes, any already-migrated database refuses to start (*checksum mismatch*).
+Copy the creation script to a **frozen**, versioned folder (e.g. `src/main/resources/sql/`), and never modify an already-delivered `changeSet` (create a new one instead).
+
+## [Config] Must some features be enabled even if I don't use them directly?
+Yes, whenever a component you use injects a manager in a non-optional way.
+For example, the generic autocomplete controller (`io.vertigo.ui.controllers.ListAutocompleteController`) injects `CollectionsManager`: the `dataFactory` feature (bare, without an index plugin) is therefore required as soon as a `vu:autocomplete` is present, without pulling in Lucene or Elasticsearch.
+Likewise, storing *Account* via the *StoreManager* (`account.store.store`) injects a non-optional `FileStoreManager`: the `filestore` feature (bare) is required even without file management.

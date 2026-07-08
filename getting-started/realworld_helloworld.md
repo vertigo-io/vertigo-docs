@@ -29,7 +29,7 @@ Cliquer sur __Finish__.
 
 Ouvrir le fichier __pom.xml__ à la racine du projet.
 
-Rajouter les propriétés permettant de spécifier la version de Java (ici 11) ainsi que l'encodage des fichiers à utiliser.
+Rajouter les propriétés permettant de spécifier la version de Java (ici 17) ainsi que l'encodage des fichiers à utiliser.
 
 Rajouter les dépendances suivantes dans le fichier pom.xml : 
 * Module vertigo-ui (cette dépendance tirera l'ensemble des modules Vertigo requis pour l'application)
@@ -52,8 +52,8 @@ Le fichier pom.xml devrait maintenant ressembler à ceci :
 	<packaging>war</packaging>
 	
 	<properties>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
@@ -350,12 +350,12 @@ modules:
   io.vertigo.datafactory.DataFactoryFeatures: # utilisation du module collections
   io.vertigo.datastore.DataStoreFeatures: # utilisation du module vertigo-datastore
     features:
-	  - entitystore: # activation du support du stockage des entités de notre modèle
-	  - cache: # activation du cache
+      - entitystore: # activation du support du stockage des entités de notre modèle
+      - cache: # activation du cache
       - kvStore: # activation du support du stockage clé/valeur (utilisé pour la conservation des état de écrans)
     featuresConfig:
-	  - entitystore.sql: # nous utilisons un store de type SQL (avec notre base H2)
-	  - cache.memory: # nous utilisons une implémentation mémoire du cache
+      - entitystore.sql: # nous utilisons un store de type SQL (avec notre base H2)
+      - cache.memory: # nous utilisons une implémentation mémoire du cache
       - kvStore.berkeley:  # nous utilisons un stockage clé valeur avec la base de donnée BerkeleyDB
           collections: VViewContext;TTL=43200
           dbFilePath: ${java.io.tmpdir}/vertigo-ui/VViewContext
@@ -393,8 +393,8 @@ import javax.inject.Inject;
 import io.vertigo.commons.transaction.Transactional;
 import io.vertigo.core.node.component.Component;
 import io.vertigo.datamodel.criteria.Criterions;
-import io.vertigo.datamodel.structure.model.DtList;
-import io.vertigo.datamodel.structure.model.DtListState;
+import io.vertigo.datamodel.data.model.DtList;
+import io.vertigo.datamodel.data.model.DtListState;
 import io.vertigo.core.lang.Assertion;
 import your.group.id.gs.modulemetier1.dao.MovieDAO;
 import your.group.id.gs.modulemetier1.domain.Movie;
