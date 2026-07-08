@@ -17,6 +17,7 @@
 * **[Ui] Reset componentStates each request.** If you relied on component states persisting across multiple requests within the same context, you must manage them explicitly.
 * **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. If you use Sentinel, switch to the `withJedisSentineled` connector.
 * [Ui] Remove specific css rules from vertigo-ui.css affecting projects that uses quasar components and dsfr css (more detail, see https://github.com/vertigo-io/vertigo-libs/commit/1e4d857028171a81c02f26bd1b280fe6c9b383f0)
+* **[Ui][DSFR] `dsfr.icons4quasar.js` updated for DSFR 1.14.4**. 21 icon names changed (RemixIcon → DSFR native SVG). If you have a custom icon mapping extending the default, check the [diff](https://github.com/vertigo-io/vertigo-libs/commit/131aa8d536) for updated names. 41 icons remain unchanged.
 
 # from 4.3.1 to 4.3.2
 
