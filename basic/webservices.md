@@ -53,6 +53,13 @@ D'autre part voici le filtre à ajouter dans la servlet dans ce cas de figure :
 
 !> Ici nous avons choisi d'utiliser un préfix pour l'ensemble des routes de webservices `/api`. C'est une pratique que nous encourageons car elle permet d'éviter des conflits de nommage.
 
+#### AbstractFilter
+
+Tout filtre dérivant d'`AbstractFilter` supporte deux paramètres de filtrage par URL :
+
+- `url-include-pattern` : restreint le filtre aux URLs correspondant au pattern
+- `url-exclude-pattern` : exclut les URLs correspondant au pattern
+
 ### Cas du serveur web embarqué
 
 Voici une configuration Yaml typique d'une application utilisant le module Vega avec le mode serveur embarqué
@@ -215,12 +222,59 @@ public ContactView updateContactView(
 
 > Ici on vérifie que utilisateur connecté possède autorisation d'écriture sur l'entité ContactView. Ce contrôle de sécurité dépend des à la fois des attributs de l'utilisateur et du Contact. Il s'agit donc d'une contrôle de sécurité très fin.
 
+## CORS (Cross-Origin Resource Sharing)
+
+Le plugin `CorsAllowerWebServiceHandlerPlugin` permet de gérer les requêtes cross-origin. Il s'active via la fonctionnalité `webservices.cors`.
+
+Les paramètres de configuration sont :
+
+- `originCORSFilter` (obligatoire) : filtre les origines autorisées
+- `methodCORSFilter` (optionnel) : filtre les méthodes HTTP autorisées, par défaut `GET/POST/DELETE/PUT/OPTIONS`
+
+La validation des URIs est stricte : seules les URI complètes sans path ni query string sont acceptées.
+
+Les paramètres `url-include-pattern` et `url-exclude-pattern` permettent de restreindre le plugin aux URLs correspondantes.
+
+## OIDC (OpenID Connect)
+
+Vega supporte l'authentification OIDC via les interfaces et classes suivantes :
+
+- `AppLoginHandler<T>` : interface de gestion de connexion applicative
+- `OIDCAppLoginHandler` : marqueur pour un handler de connexion OIDC
+- `WebAuthenticationPlugin<T>` : plugin d'authentification web générique
+- `OIDCWebAuthenticationPlugin` : plugin d'authentification OIDC avec les paramètres :
+  - `scopes` : les scopes OIDC à demander
+  - `urlPrefix` : préfixe d'URL
+  - `urlHandlerPrefix` : préfixe d'URL pour les handlers
+  - `externalUrl` : URL externe de l'application
+  - `connectorName` : nom du connecteur OIDC
+
 ## SwaggerApi
 
-L'api ainsi crée avec ce module est exposée au format standard Swagger. Vertigo inclus la mise à disposition de l'Api via l'UI standard de Swagger.
+L'api ainsi crée avec ce module est exposée au format standard Swagger **2.0**. Vertigo inclus la mise à disposition de l'Api via l'UI standard de Swagger.
 Il suffit d'ajouter la facade webService : `io.vertigo.vega.impl.webservice.catalog.SwaggerWebServices`
 
 ![](./images/swaggerUi.png)
+
+L'objet `SwaggerApi` est représenté comme un `LinkedHashMap<String, Object>`.
+
+Règles de mappage des noms de paramètres dans le body JSON :
+
+- Le caractère `$` dans les noms de champs du body sert de séparateur (split) pour créer des structures imbriquées
+- Le caractère `_` en début de nom de champ est effacé (collapse)
+- Il n'y a **pas** de remplacement automatique de `$` par `_`
+
+En Vega V5 : l'attribut `isMultiSelectable` est ajouté sur les facettes du JSON Swagger.
+
+## LogExceptionsHandlerPlugin
+
+Le plugin `LogExceptionsHandlerPlugin` est activé par défaut, sans paramètre de configuration. Il est toujours actif et génère un log d'erreur pour toute réponse HTTP avec un code entre 500 et 599.
+
+## Rate Limiting
+
+Le rate limiting permet de limiter le nombre d'appels autorisé sur une fenêtre de temps glissante.
+
+L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est ajoutée par défaut à la liste des IP exclues.
 
 ## Pour aller plus loin
 

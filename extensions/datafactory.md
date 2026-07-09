@@ -6,7 +6,7 @@ Le module repose sur deux axes :
 
 | Axe | Usage | Dépendance |
 |---|---|---|
-| **ElasticSearch** | Indexation automatique des KeyConcepts via EventBus, reindexation 3 stratégies, facettage + DSL PEG | `vertigo-elasticsearch-connector` (optionnel), ES 7.17.x |
+| **ElasticSearch** | Indexation automatique des KeyConcepts via EventBus, reindexation 3 stratégies, facettage + DSL PEG | `vertigo-elasticsearch-connector` (optionnel), ES9 |
 | **Collections** | Facettage pur-Java + filtrage Lucene in-RAM sur DtList | Lucene 8.11.3 (bundlé) |
 
 ```
@@ -38,7 +38,7 @@ KeyConcept / DtList (données en mémoire ou persistées)
     <artifactId>vertigo-datafactory</artifactId>
 </dependency>
 
-<!-- Optionnel : client ElasticSearch 7.17.x -->
+<!-- Optionnel : client ElasticSearch 9 -->
 <dependency>
     <groupId>io.vertigo</groupId>
     <artifactId>vertigo-elasticsearch-connector</artifactId>
@@ -49,7 +49,8 @@ Le composant `CollectionsManager` est toujours actif (`buildFeatures()`). Les au
 
 - `@ParamValue("envIndexPrefix")` — préfixe des noms d'index
 - `@ParamValue("rowsPerQuery")` — taille des lots de chargement
-- `@ParamValue("connectorName")` — nom du connecteur ElasticSearch
+- `@ParamValue("connectorName")` — nom du connecteur ElasticSearch (défaut : `"main"`)
+- `@ParamValue("config.file")` — chemin du fichier de configuration ES9
 
 ---
 
@@ -147,12 +148,21 @@ Chaque méthode retourne un `Future<Long>` indiquant le nombre de documents inde
 
 ### Plugins ElasticSearch
 
-Le module fournit deux implémentations du contract `SearchServicesPlugin` :
+Avec la migration vers ES9, un seul plugin REST est fonctionnel :
 
 | Plugin | Implémentation | Notes |
 |---|---|---|
-| `RestHLClientESSearchServicesPlugin` | RestHighLevelClient 7.17.x | Mode production, recommandé |
-| `ClientESSearchServicesPlugin` | Transport legacy | Compatibilité ascendante |
+| `RestClientESSearchServicesPlugin` | ES9 REST API (`ElasticsearchClient` v9, injecte `RestElasticSearchConnector`) | Mode production, recommandé |
+| `ClientESSearchServicesPlugin` | Transport legacy | **Déprécié** — lève `ForbiddenOperationException` |
+
+Paramètres du plugin `RestClientESSearchServicesPlugin` :
+
+| Paramètre | Type | Obligatoire | Défaut |
+|---|---|---|---|
+| `envIndexPrefix` | String | Oui | — |
+| `rowsPerQuery` | int | Oui | — |
+| `config.file` | String | Oui | — |
+| `connectorName` | Optional\<String\> | Non | `"main"` |
 
 Les classes internes du connecteur incluent `ESStatement`, `ESSearchRequestBuilder`, `ESDocumentCodec` (sérialisation base64 compressée) et `IndexType`.
 
@@ -357,7 +367,7 @@ La méthode reconstruit l'index Lucene à chaque appel sur les données fournies
 | Facettes | Agrégats ES | Comptage pur-Java in-process |
 | Reindexation | Full / Modified / Delta via SearchManager | Index rebuilt à chaque appel |
 | Indexation auto | EventBus StoreEvent sur KeyConcept | Manuel, sur DtList fournie |
-| Dépendance | `vertigo-elasticsearch-connector`, ES 7.17.x | Lucene 8.11.3 (bundlé) |
+| Dépendance | `vertigo-elasticsearch-connector`, ES9 | Lucene 8.11.3 (bundlé) |
 | Usage typique | Catalogue, recherche applicative, index partagé | Filtres UI, tables de données, rapports |
 
 ---
@@ -440,6 +450,13 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 - **LoadData du SearchLoader** : `loadData(SearchChunk<K>)` retourne `List<SearchIndex<K, I>>`, pas `void`. Ne pas utiliser `SearchChunk<String>`.
 - **ListFilterBuilder** : pas de méthode statique `.build()`. Utiliser le pattern de builder instance : `withListFilterQuery()` → `withCriteria()` → `build()`.
 - **ESDocumentCodec** : `ESDocumentCodec` gère l'encodage/décodage des documents ElasticSearch. La sérialisation passe par base64 et éventuellement compression (à confirmer par source). Cela impacte la lisibilité directe des documents dans l'interface ES.
+- **ES9 — `_all` supprimé** : le champ `_all` n'existe plus dans ES9. Utiliser `copy_to` pour la recherche multicritères sur plusieurs champs. La map copyTo de `SearchIndexDefinition` (type `Map<DataField, List<DataField>>`) est le mécanisme Vertigo correspondant.
+- **ES9 — Client par défaut** : depuis la version 4.4.0, le client ES9 (`ElasticsearchClient` API v9) est le seul client fonctionnel. `ClientESSearchServicesPlugin` lève `ForbiddenOperationException`.
+- **ES9 — `indexNameIsPrefix` supprimé** : ce paramètre n'existe plus dans la configuration du plugin ES9.
+- **ES9 — `withESClient` interdit** : toute tentative d'accès direct au client sous-jacent lève `UnsupportedOperationException`.
+- **ES9 — `markToOptimize` forcemerge** : l'optimisation se limite au forcemerge des documents marqués pour suppression (removeByQuery).
+- **ES9 — `findIndexDefinitionByKeyConcept` supprimé** : seule `findFirstIndexDefinitionByKeyConcept` existe.
+- **`_innerWriteTo` obsolète** : ce mécanisme était lié au transport client supprimé. Ne plus l'utiliser avec le plugin ES9.
 
 ## Pour les experts
 
@@ -453,8 +470,9 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 | Flag | Composants |
 |---|---|
 | `search` | `SearchManager` + `SearchManagerImpl` |
-| `search.elasticsearch.client` | `ClientESSearchServicesPlugin` (Transport legacy) |
-| `search.elasticsearch.restHL` | `RestHLClientESSearchServicesPlugin` (RestHighLevelClient 7.17.x) |
+| `search.elasticsearch.rest` | `RestClientESSearchServicesPlugin` (ES9 REST) ← recommandé |
+| `search.elasticsearch.restHL` | Alias déprécié vers `search.elasticsearch.rest` |
+| `search.elasticsearch.client` | **Déprécié** — lève `ForbiddenOperationException` |
 | `collections.luceneIndex` | `LuceneIndexPlugin` |
 
 ### API fluide (Suppliers)
@@ -478,8 +496,8 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 | Plugin | Rôle | Feature |
 |---|---|---|
 | `LuceneIndexPlugin` | Index Lucene en RAM pour le facettage in-mémoire | `collections.luceneIndex` |
-| `ClientESSearchServicesPlugin` | Client Transport legacy ElasticSearch | `search.elasticsearch.client` |
-| `RestHLClientESSearchServicesPlugin` | Client REST High Level ElasticSearch 7.17.x | `search.elasticsearch.restHL` |
+| `RestClientESSearchServicesPlugin` | Client REST ElasticSearch 9 | `search.elasticsearch.rest` |
+| `ClientESSearchServicesPlugin` | **Déprécié** — lève `ForbiddenOperationException` | `search.elasticsearch.client` |
 
 ### Configuration YAML
 ```yaml
@@ -489,7 +507,61 @@ modules:
             - search:
             - collections.luceneIndex:
         featuresConfig:
-            - search.elasticsearch.restHL:
+            - search.elasticsearch.rest:
                   envIndexPrefix: "prod_"
+                  rowsPerQuery: 100
+                  config.file: "/opt/vertigo/es.yml"
                   connectorName: "main"
 ```
+
+### Connecteur ElasticSearch
+
+Pour connecter un serveur ES9, utiliser la feature du connecteur :
+
+```yaml
+modules:
+    io.vertigo.elasticsearchconnector.ElasticsearchConnectorFeatures:
+        features:
+            - vertigo-elasticsearch-connector#rest:
+                  name: "main"
+                  servers.names: "es1:9200,es2:9200"
+                  username: "elastic"
+                  password: "secret"
+                  ssl: true
+                  trustStoreUrl: "file:///opt/vertigo/conf/truststore.p12"
+                  trustStorePassword: "changeit"
+```
+
+#### ServerParameters
+
+| Paramètre | Type | Obligatoire | Défaut |
+|---|---|---|---|
+| `name` | Optional\<String\> | Non | `"main"` |
+| `servers.names` | String | Oui | — |
+| `username` | Optional\<String\> | Non | — |
+| `password` | Optional\<String\> | Non | — |
+| `apiKeyId` | Optional\<String\> | Non | — |
+| `apiKeySecret` | Optional\<String\> | Non | — |
+| `ssl` | boolean | Non | `false` |
+| `trustStoreUrl` | Optional\<String\> | Non | — |
+| `trustStorePassword` | Optional\<String\> | Non | — |
+
+#### Serveur embarqué (tests)
+
+La feature `vertigo-elasticsearch-connector#embeddedServer` lance un Docker testcontainer avec ES 9.4.3 pour l'environnement de test.
+
+### API SearchManager
+
+En plus des méthodes de reindexation et de requête, `SearchManager` expose :
+
+| Méthode | Rôle |
+|---|---|
+| `findFirstIndexDefinitionByKeyConcept` | Recherche la première définition d'index pour un KeyConcept donné |
+| `markAsDirty` | Marque un KeyConcept comme modifié pour déclencher une reindexation incrémentale |
+| `getReindexAllProgress` | Retourne la progression de la reindexation en cours |
+| `putAll`, `put` | Indexation manuelle de documents |
+| `loadList` (×2) | Exécution de requête facettée |
+| `count` | Comptage des documents correspondants |
+| `remove` (×2) | Suppression de documents |
+| `putMetaData`, `getMetaData` | Gestion des métadonnées d'index |
+| `waitForRefresh` | Attend que le refresh ElasticSearch soit effectué |
