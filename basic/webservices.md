@@ -277,13 +277,85 @@ Le rate limiting permet de limiter le nombre d'appels autorisé sur une fenêtre
 
 L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est ajoutée par défaut à la liste des IP exclues.
 
-## Pour aller plus loin
+## Pour les experts
 
-Il est possible d'enrichir le comportement d'un Webservice à l'aide de Vega en utilisant les fonctionnalités offertes suivantes :
+### HandlerChain — Architecture interne
 
-- **rate-limiting** : Limitation du nombre d'appel autorisé sur une fenêtre de temps glissante
-- **tokens** : generation et consommation de tokens pour sécuriser des opérations critiques
-- **server-side** : conservation d'un état côté serveur pour gérer efficacement certains traitements
-- **etc...**
+Vega traite chaque requête HTTP via une chaîne de plugins (`WebServiceHandlerPlugin`) triés par `getStackIndex()`. La `HandlerChain` itère sur les handlers actifs et appelle `accept(WebServiceDefinition)` pour déterminer si un handler s'applique à ce webservice. Le premier qui accepte exécute `handle()` et passe au suivant via `chain.handle()`. Si le dernier handler ne produit pas de body, une `IllegalStateException` est levée.
 
-L'ensemble de ces fonctionnalités et leurs API sont disponibles dans [ce](/extensions/vega) chapitre
+Le nombre maximum de handlers dans une chaîne est 50 (détection de boucle infinie via `MAX_NB_HANDLERS`).
+
+#### Ordre des handlers
+
+| Index | Handler | Activé par |
+|---|---|---|
+| 5 | `LogExceptionsHandlerPlugin` | Toujours actif |
+| 10 | `ExceptionWebServiceHandlerPlugin` | Toujours actif |
+| 20 | `CorsAllowerWebServiceHandlerPlugin` | `webservices.cors` |
+| 30 | `AnalyticsWebServiceHandlerPlugin` | Toujours actif |
+| 40 | `JsonConverterWebServiceHandlerPlugin` | Toujours actif |
+| 45 | `ApiKeyWebServiceHandlerPlugin` | `webservices.auth.apiKey` |
+| 50 | `SessionInvalidateWebServiceHandlerPlugin` | `webservices.security` |
+| 60 | `SessionWebServiceHandlerPlugin` | `webservices.security` |
+| 70 | `SecurityWebServiceHandlerPlugin` | `webservices.security` |
+| 80 | `ServerSideStateWebServiceHandlerPlugin` | `webservices.token` |
+| 90 | `AccessTokenWebServiceHandlerPlugin` | `webservices.token` |
+| 100 | `RateLimitingWebServiceHandlerPlugin` | `webservices.rateLimiting` |
+| 110 | `ValidatorWebServiceHandlerPlugin` | Toujours actif |
+| **120** | `RestfulServiceWebServiceHandlerPlugin` | Toujours actif ← **toujours dernier** |
+
+Un handler personnalisé doit avoir un `getStackIndex()` entre 0 et 119. Le dernier (`RestfulServiceWebServiceHandlerPlugin`, index 120) est celui qui exécute la méthode Java cible et retourne le body.
+
+### Servlet Filters vs HandlerChain
+
+Les Servlet Filters s'exécutent **avant** la HandlerChain et opèrent au niveau Servlet Spec (pas Vega). Ils ne filtrent pas par `WebServiceDefinition` mais par URL pattern (`url-include-pattern` / `url-exclude-pattern` via `AbstractFilter`).
+
+| Filter | Rôle |
+|---|---|
+| `SetCharsetEncodingFilter` | Force charset UTF-8 sur les requêtes |
+| `CompressionFilter` | Compresse la réponse si `Accept-Encoding: gzip/deflate` |
+| `CacheControlFilter` | Pose les headers `Cache-Control` (private, max-age, no-cache) |
+| `SecurityFilter` | Ajoute les headers sécurité HTTP (X-Frame-Options, X-XSS-Protection) |
+| `ContentSecurityPolicyFilter` | Gère les headers CSP |
+| `HeaderControlFilter` | Contrôle des headers d'entrée/sortie |
+| `AuthorizationWebFilter` | Vérification `@Secured` au niveau Servlet |
+| `RateLimitingFilter` | Rate limiting au niveau Servlet (separate de handler) |
+| `AnalyticsFilter` | Collecte métriques au niveau Servlet |
+| `DelegateAuthenticationFilterHandler` | Délégation de l'authentification vers un provider externe |
+
+### Cycle de vie
+
+1. **DefinitionSpace** : `AnnotationsWebServiceScannerPlugin` scanne les composants implémentant `WebServices`, extrait les méthodes annotées (`@GET`, `@POST`, ...) et génère les `WebServiceDefinition`
+2. **ComponentSpace** : `WebServiceManager` assemble les `WebServiceDefinition` et trie les `WebServiceHandlerPlugin` par `getStackIndex()`
+3. **Runtime** : Requête HTTP → Servlet Filter chain → HandlerChain → méthode Java cible → JSON response
+
+### Authentication Plugins
+
+| Plugin | Feature | Description |
+|---|---|---|
+| `LocalWebAuthenticationPlugin` | `authentication.local` | Authentification locale via formulaire |
+| `OIDCWebAuthenticationPlugin` | `authentication.oidc` | OpenID Connect |
+| `SAML2WebAuthenticationPlugin` | `authentication.saml2` | SAML 2.0 |
+| `AzureAdWebAuthenticationPlugin` | `authentication.aad` | Azure Active Directory |
+
+### RateLimiting
+
+Le `RateLimitingWebServiceHandlerPlugin` implémente le rate limiting via une fenêtre glissante. Le backend de stockage est configurable :
+
+| Backend | Feature | Description |
+|---|---|---|
+| Mémoire locale | `rateLimiting.mem` | Stockage local, non persisté, non partagé |
+| Redis | `rateLimiting.redis` | Stockage partagé via Redis, compatible cluster |
+
+L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est exclue par défaut de toute limitation.
+
+### WebServiceClient (Proxy)
+
+La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClientAmplifierMethod` qui génère dynamiquement des proxies Java à partir d'une `WebServiceDefinition`. Le proxy utilise un `HttpRequestBuilder` interne pour construire les requêtes HTTP (méthode, URL, headers, body JSON).
+
+### Debug
+
+- Activer le logging du `WebServiceManager` pour tracer le chargement des webservices et l'assemblage de la HandlerChain
+- Le `LogExceptionsHandlerPlugin` log automatiquement toutes les réponses 5xx avec la stack trace complète
+- Le `AnalyticsWebServiceHandlerPlugin` expose les métriques de performance (temps d'exécution par webservice)
+- Pour déboguer l'ordre des handlers, vérifier que chaque `accept()` retourne `true` uniquement pour les webservices ciblés
