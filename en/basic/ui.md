@@ -207,7 +207,7 @@ We can see here that:
 
 - the view is a standard Thymeleaf HTML template
 - the view uses components with the `vu:` prefix, which are components provided by vertigo-ui covering main needs
-- The `vu:head-meta`, `vu:page`, and `vu:form` components handle technical code at page initialization, JavaScript file imports, Vue.js instance initialization, and must be present on the page. This technical code can be abstracted through *layouts* (see [here](extensions/ui))
+- The `vu:head-meta`, `vu:page`, and `vu:form` components handle technical code at page initialization, JavaScript file imports, Vue.js instance initialization, and must be present on the page. This technical code can be abstracted through *layouts* (see [here](/en/extensions/ui))
 - The same view is used for both editing and viewing, ensuring maximum consistency while also simplifying development
 
 The page is actually a Vue.js template that will be interpreted client-side. The Vue.js instance of each page is accessible simply via the *VUiPage* variable.
@@ -222,7 +222,7 @@ The ViewContext is made available to Vue.js components via the `vueData` key of 
 
 !> To maximize application security, only data requested by the server-side template is available in the `vueData` variable. You can request data inclusion on the client side either by including a high-level component (for example, `vu:text-field` natively includes the concerned object's field for client transfer) or through the `vu:include-data` component, which allows specifying the context key to include.
 
-The list of available components in vertigo-ui is available in the chapter dedicated to [vertigo-ui](extensions/ui)
+The list of available components in vertigo-ui is available in the chapter dedicated to [vertigo-ui](/en/extensions/ui)
 
 ## Dynamism
 

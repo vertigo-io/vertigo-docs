@@ -9,7 +9,7 @@ Naturally, when challenges are closely related, they are encapsulated within the
 The modules listed here are those that form the central core of Vertigo. They are designed to be used together, providing a cohesive whole for creating Java applications.
 These modules are extensions because they enrich a Vertigo application and provide solutions to one or more business application challenges.
 We classify these extensions into two groups: *libs* and *modules*.
-*Libs* are primarily components aimed at solving technical challenges, while *modules* are akin to functional modules and aim to solve a business challenge as a whole [Libs overview](overview/libs).
+*Libs* are primarily components aimed at solving technical challenges, while *modules* are akin to functional modules and aim to solve a business challenge as a whole [Libs overview](/en/overview/libs).
 *Modules* generally provide a service API, a data model, and sometimes a UI.
 
 Below is the list of *Modules* along with a brief description of their contents.
@@ -25,7 +25,7 @@ Below is the list of *Modules* along with a brief description of their contents.
 * __sms__: Send SMS messages
 * __handle__: (Beta feature): Associate meaningful 'handles' with your application's entities, enabling simplified external referencing and improved application navigation.
 
-[Access the documentation](modules/social)
+[Access the documentation](/en/modules/social)
 
 ## vertigo-orchestra
 
@@ -36,7 +36,7 @@ Below is the list of *Modules* along with a brief description of their contents.
 * __schedule__: schedules recurring executions or delegates this processing to third-party solutions
 * __execute__: executes processes using various strategies while minimizing impact on the host application
 
-[Access the documentation](modules/orchestra)
+[Access the documentation](/en/modules/orchestra)
 
 ## vertigo-quarto
 
@@ -46,7 +46,7 @@ Below is the list of *Modules* along with a brief description of their contents.
 - __converter__: Converts documents between formats (existing plugins support: ODT, DOC, DOCX, RTF, TXT to PDF)
 - __export__: Exports collections or business objects to utility formats (existing plugins support: CSV, PDF, RTF, XLS)
 
-[Access the documentation](modules/quarto)
+[Access the documentation](/en/modules/quarto)
 
 ## vertigo-audit
 
@@ -55,7 +55,7 @@ Below is the list of *Modules* along with a brief description of their contents.
 - __ledger__: Uses Blockchain mechanisms to securely trace important information (supports Ethereum blockchain, public and/or private, and/or sidechain)
 - __trace__: Traces actions using various strategies (log, db, etc.)
 
-[Access the documentation](modules/audit)
+[Access the documentation](/en/modules/audit)
 
 ## vertigo-dashboard
 
@@ -63,7 +63,7 @@ Below is the list of *Modules* along with a brief description of their contents.
 
 This module is likely to be significantly reworked / relocated in the near future.
 
-[Access the documentation](modules/dashboard)
+[Access the documentation](/en/modules/dashboard)
 
 ## vertigo-geo
 
@@ -72,7 +72,7 @@ This module is likely to be significantly reworked / relocated in the near futur
 * __geocoder__: Convert positions to addresses and vice versa, via various services (GoogleMaps and BAN included)
 * __geosearch__: Use mapping functions to search for business entities within a geographic zone (ElasticSearch included)
 
-[Access the documentation](modules/geo)
+[Access the documentation](/en/modules/geo)
 
 
 ## vertigo-easyforms
@@ -80,7 +80,7 @@ This module is likely to be significantly reworked / relocated in the near futur
 > Adds a dynamic form tool to your application. This module is designed to allow functional administrators to adapt forms that require flexibility.
 > This module provides a VertigoUi-based UI.
 
-[Access the documentation](modules/easyforms)
+[Access the documentation](/en/modules/easyforms)
 
 
 ## vertigo-planning
@@ -88,4 +88,4 @@ This module is likely to be significantly reworked / relocated in the near futur
 > Adds a scheduling tool to your application. This module offers both slot planning (BackOffice side) and slot selection (FrontOffice side).
 > This module provides a VertigoUi-based UI.
 
-[Access the documentation](modules/planning)
+[Access the documentation](/en/modules/planning)

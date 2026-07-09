@@ -24,7 +24,7 @@ These different levels compose successively to create pages.
 
 https://atomicdesign.bradfrost.com/
 
-This Design System is entirely implemented by the [Vertigo-Ui](extensions/ui.md) module, so you can start developing your application using it right away.
+This Design System is entirely implemented by the [Vertigo-Ui](/en/extensions/ui.md) module, so you can start developing your application using it right away.
 
 Here are some examples of screens built with this design system:
 

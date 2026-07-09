@@ -39,7 +39,7 @@ Each request traverses a chain of `WebServiceHandlerPlugin` sorted by priority:
 ## Quick start server
 
 1. WebService class must implement [WebServices](https://github.com/vertigo-io/vertigo-extensions/blob/master/vertigo-vega/src/main/java/io/vertigo/vega/webservice/WebServices.java)
-2. Class must be declared as a Vertigo *Component*, done via [business module autodiscovery](getting-started/realworld_helloworld.md#_5-configuration-de-l39application)
+2. Class must be declared as a Vertigo *Component*, done via [business module autodiscovery](/en/getting-started/realworld_helloworld.md#_5-configuration-de-l39application)
 3. Add annotations on methods, example:
 ```java
 @AnonymousAccessAllowed
@@ -94,7 +94,7 @@ Vertigo provides built-in WebServices [SwaggerWebServices](https://github.com/ve
 
 To call a remote WebService:
 
-1. Reproduce the WebService API with a Java interface. Interface must extend `io.vertigo.core.node.component.Amplifier` and have `@WebServiceProxyAnnotation`. Detected by Vertigo like other components via [business module autodiscovery](getting-started/realworld_helloworld.md#_5-configuration-de-l39application)
+1. Reproduce the WebService API with a Java interface. Interface must extend `io.vertigo.core.node.component.Amplifier` and have `@WebServiceProxyAnnotation`. Detected by Vertigo like other components via [business module autodiscovery](/en/getting-started/realworld_helloworld.md#_5-configuration-de-l39application)
 2. Add feature `webservices.proxyclient` to Vega configuration:
 ```yaml
   io.vertigo.vega.VegaFeatures:

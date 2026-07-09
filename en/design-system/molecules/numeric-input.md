@@ -22,4 +22,4 @@ When entering a numeric value via text input, Vertigo will automatically verify 
 
 # Design & Try me
 
-<iframe src="/vertigo-docs/design-system/iframes/molecules/numeric-input.html" height="1000px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/en/design-system/iframes/molecules/numeric-input.html" height="1000px" scrolling="no" style="border:none;" ></iframe>

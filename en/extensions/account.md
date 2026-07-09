@@ -11,7 +11,7 @@ The module offers user management features across three orthogonal axes:
 ## Configuration
 
 To use **Account** features, add this module to the application configuration.
-For more details, refer to the [configuration](basic/configuration) chapter.
+For more details, refer to the [configuration](/en/basic/configuration) chapter.
 
 Typical configuration for an application using the Account module:
 

@@ -8,7 +8,7 @@ This type of screen is composed of three main areas:
 
 - a text search bar that allows the user to enter search criteria
 - a list of facets that allow easy filtering of elements. This area presents both the selected criteria and those that can be added to narrow down the number of results and find the desired information
-- the results themselves; see [here](design-system/organismes/collections) for more information on possible representation types
+- the results themselves; see [here](/en/design-system/organismes/collections) for more information on possible representation types
 
 This type of screen allows strong user interaction because results are automatically updated in real time as the user refines their search via text or facets.
 

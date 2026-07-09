@@ -23,4 +23,4 @@ When many actions are available, they should be placed in a group. This group, d
 
 # Design & Try me
 
-<iframe src="/vertigo-docs/design-system/iframes/molecules/buttons.html" height="600px" scrolling="no" style="border:none;" ></iframe>
+<iframe src="/vertigo-docs/en/design-system/iframes/molecules/buttons.html" height="600px" scrolling="no" style="border:none;" ></iframe>

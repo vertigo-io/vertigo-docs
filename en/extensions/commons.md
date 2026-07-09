@@ -4,7 +4,7 @@
 
 The module follows the modularity principle and implements the Strategy design pattern like other Vertigo modules.
 
-Components are orthogonal and are typically consumed by higher-level modules. Activation is done via YAML features or the Java API. For more details, refer to the [configuration](basic/configuration) chapter.
+Components are orthogonal and are typically consumed by higher-level modules. Activation is done via YAML features or the Java API. For more details, refer to the [configuration](/en/basic/configuration) chapter.
 
 Five components start automatically: CodecManager, EventBusManager, AppManager, VTransactionManager, and VTransactionAspect. Others require a feature declaration.
 

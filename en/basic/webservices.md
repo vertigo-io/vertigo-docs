@@ -9,7 +9,7 @@ The JSON exchange format was preferred for its popularity and its ability to be 
 ## Configuration
 
 To use Vega features, this module must be added to the application configuration.
-For more details, refer to the chapter dedicated to application [configuration](basic/configuration).
+For more details, refer to the chapter dedicated to application [configuration](/en/basic/configuration).
 
 Vega offers two operating methods:
 
@@ -76,7 +76,7 @@ modules:
 
 
 
-> For the complete list of available features, refer to the chapter dedicated to [Vega](extensions/vega)
+> For the complete list of available features, refer to the chapter dedicated to [Vega](/en/extensions/vega)
 
 ## Creating a WebService
 
@@ -88,7 +88,7 @@ Vega allows exposing a Java method on the web and defining the behavior of this 
 
 In Vertigo, any object offering services is a component. A webservice is no exception; it is a component, but with its own specifics.
 
-Therefore, first of all, reading the [chapter](basic/composants) dedicated to components is useful.
+Therefore, first of all, reading the [chapter](/en/basic/composants) dedicated to components is useful.
 
 A webservice is a component that must implement the `io.vertigo.vega.webservice.WebServices` interface.
 
@@ -231,4 +231,4 @@ It is possible to enrich Webservice behavior with Vega by using the following fe
 - **server-side**: Server-side state management to efficiently handle certain processes
 - **etc...**
 
-All these features and their APIs are available in [this](extensions/vega) chapter.
+All these features and their APIs are available in [this](/en/extensions/vega) chapter.

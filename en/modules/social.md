@@ -14,7 +14,7 @@ It includes several sub-systems:
 ## Configuration
 
 To use **Social** features, you must add this module to the application configuration.
-For more details, see the chapter dedicated to application [configuration](basic/configuration).
+For more details, see the chapter dedicated to application [configuration](/en/basic/configuration).
 
 The **Account** module is required to use this module.
 
