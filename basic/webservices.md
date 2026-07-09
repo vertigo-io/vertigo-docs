@@ -229,7 +229,7 @@ Le plugin `CorsAllowerWebServiceHandlerPlugin` permet de gérer les requêtes cr
 Les paramètres de configuration sont :
 
 - `originCORSFilter` (obligatoire) : filtre les origines autorisées
-- `methodCORSFilter` (optionnel) : filtre les méthodes HTTP autorisées, par défaut `GET/POST/DELETE/PUT/OPTIONS`
+- `methodCORSFilter` (optionnel) : filtre les méthodes HTTP autorisées, par défaut `GET, POST, DELETE, PUT, OPTIONS`
 
 La validation des URIs est stricte : seules les URI complètes sans path ni query string sont acceptées.
 
@@ -243,11 +243,12 @@ Vega supporte l'authentification OIDC via les interfaces et classes suivantes :
 - `OIDCAppLoginHandler` : marqueur pour un handler de connexion OIDC
 - `WebAuthenticationPlugin<T>` : plugin d'authentification web générique
 - `OIDCWebAuthenticationPlugin` : plugin d'authentification OIDC avec les paramètres :
-  - `scopes` : les scopes OIDC à demander
-  - `urlPrefix` : préfixe d'URL
-  - `urlHandlerPrefix` : préfixe d'URL pour les handlers
-  - `externalUrl` : URL externe de l'application
-  - `connectorName` : nom du connecteur OIDC
+   - `scopes` : les scopes OIDC à demander
+   - `urlPrefix` : préfixe d'URL
+   - `urlHandlerPrefix` : préfixe d'URL pour les handlers
+   - `externalUrl` : URL externe de l'application
+   - `connectorName` : nom du connecteur OIDC
+   - `loginHandlerName` : nom du handler de connexion (défaut: `default`)
 
 ## SwaggerApi
 
@@ -258,13 +259,13 @@ Il suffit d'ajouter la facade webService : `io.vertigo.vega.impl.webservice.cata
 
 L'objet `SwaggerApi` est représenté comme un `LinkedHashMap<String, Object>`.
 
-Règles de mappage des noms de paramètres dans le body JSON :
+Règles de construction des noms de définition Swagger :
 
-- Le caractère `$` dans les noms de champs du body sert de séparateur (split) pour créer des structures imbriquées
-- Le caractère `_` en début de nom de champ est effacé (collapse)
+- Le caractère `$` dans le nom de la définition du webservice (`webServiceDefinition.getName()`) sert de séparateur pour structurer les définitions imbriquées
+- Les séquences d'underscores multiples sont réduites à un seul `_` (ex: `__` → `_`)
 - Il n'y a **pas** de remplacement automatique de `$` par `_`
 
-En Vega V5 : l'attribut `isMultiSelectable` est ajouté sur les facettes du JSON Swagger.
+Le JSON des facettes `FacetedQueryResult` expose l'attribut `isMultiSelectable` sur chaque facette lorsque le sérialiseur V5 est actif (`FacetedQueryResultJsonSerializerV5`).
 
 ## LogExceptionsHandlerPlugin
 

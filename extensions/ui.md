@@ -380,14 +380,14 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `object`* : Nom de l'objet du context
   - `field`* : Nom du champ
   - `label` : Surcharge du label
-  - `format` : Format de la valeur de la date (par défaut `YYYY-MM-DD`)
-  - `date_attrs` : Listes des attributs à ajouter sur la date (tag `<q-date>`)
-  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)  
+- `format` : Format d'affichage de la date (par défaut `DD/MM/YYYY`). La valeur est toujours stockée et échangée en ISO `YYYY-MM-DD`.
+   - `date_attrs` : Listes des attributs à ajouter sur la date (tag `<q-date>`)
+   - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)
 - `vu:datetime` : Composant de selection de date/time
-  - `object`* : Nom de l'objet du context
-  - `field`* : Nom du champ
-  - `label` : Surcharge du label
-  - `format` : Format de la valeur de la date (par défaut `YYYY-MM-DDTHH:mm`)
+   - `object`* : Nom de l'objet du context
+   - `field`* : Nom du champ
+   - `label` : Surcharge du label
+   - `format` : Format d'affichage de la date/heure (par défaut `DD/MM/YYYY HH:mm`). La valeur est toujours stockée et échangée en ISO `YYYY-MM-DDTHH:mm`.
   - `date_attrs` : Listes des attributs à ajouter sur la date (tag `<q-date>`)
   - `time_attrs` : Listes des attributs à ajouter sur le time (tag `<q-time>`)
   - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)  
@@ -424,7 +424,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `url`* : Url du WebService d'upload
   - `key`* : Clé du contexte réceptionnant les fichiers
   - `multiple` : Indique si on autorise plusieurs fichiers
-  - `maxFileSize` : Taille maximum par fichier (ex: `"5MB"`)
+  - `maxFileSize` : Taille maximum par fichier en MB (ex: `5`)
   - `maxTotalSize` : Taille maximum totale de tous les fichiers
   - `maxFiles` : Nombre maximum de fichiers autorisés
   - `accept` : Filtre MIME des fichiers acceptés (ex: `"image/*,.pdf"`)

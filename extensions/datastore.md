@@ -96,15 +96,16 @@ Le `RedisConnector` remplace le connecteur Redis antérieur et supporte trois mo
 
 | Mode | Paramètres YAML | Description |
 |---|---|---|
-| Single | `host`, `port`, `database`, `password`, `ssl`, `trustStoreUrl`, `trustStorePassword`, `maxTotal`, `minIdle` | Connexion à un nœud Redis unique |
-| Cluster | `clusterNodes`, `password`, `ssl`, `maxTotal`, `minIdle` | Cluster Redis natif |
-| Sentinel | `mastername`, `sentinels`, `database`, `password`, `ssl`, `maxTotal`, `minIdle` | Via Sentinel (méthode `withJedisSentinel`) |
+| Single | `host`, `port`, `database`, `username`, `password`, `ssl`, `trustStoreUrl`, `trustStorePassword`, `maxTotal`, `minIdle` | Connexion à un nœud Redis unique |
+| Cluster | `clusterNodes`, `password`, `ssl`, `trustStoreUrl`, `trustStorePassword`, `maxTotal`, `minIdle` | Cluster Redis natif |
+| Sentinel | `mastername`, `sentinels`, `database`, `username`, `password`, `ssl`, `trustStoreUrl`, `trustStorePassword`, `maxTotal`, `minIdle` | Via Sentinel (méthode `withJedis`) |
 
 | Paramètre | Single | Cluster | Sentinel |
 |---|:---:|:---:|:---:|
 | `host` | ✅ | | |
 | `port` | ✅ | | |
 | `database` | ✅ | | ✅ |
+| `username` | ✅ | ✅ | ✅ |
 | `password` | ✅ | ✅ | ✅ |
 | `ssl` | ✅ | ✅ | ✅ |
 | `trustStoreUrl` | ✅ | ✅ | ✅ |
@@ -119,7 +120,7 @@ Le `RedisConnector` remplace le connecteur Redis antérieur et supporte trois mo
 
 Le `RedisSingleConnector` est **déprécié** (`@Deprecated`) et jettera une `UnsupportedOperationException` si utilisé avec un mode Sentinel.
 
-**Migration** : remplacer par `RedisConnector` avec le mode single (paramètres `host`/`port`) ou Sentinel (`withJedisSentinel`).
+**Migration** : remplacer par `RedisConnector` avec le mode single (paramètres `host`/`port`) ou Sentinel (paramètres `mastername`/`sentinels`).
 
 ## Database
 
@@ -228,10 +229,7 @@ modules:
   io.vertigo.services.redis.RedisFeatures:
     featuresConfig:
       - jedis:
-          clusterNodes:
-            - redis-node1:6379
-            - redis-node2:6379
-            - redis-node3:6379
+          clusterNodes: "redis-node1:6379;redis-node2:6379;redis-node3:6379"
           password:
           ssl: false
           maxTotal: 8
@@ -246,10 +244,7 @@ modules:
     featuresConfig:
       - jedis:
           mastername: mymaster
-          sentinels:
-            - sentinel1:26379
-            - sentinel2:26379
-            - sentinel3:26379
+          sentinels: "sentinel1:26379;sentinel2:26379;sentinel3:26379"
           database: 0
           password:
           ssl: false

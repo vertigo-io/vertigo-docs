@@ -153,7 +153,7 @@ Avec la migration vers ES9, un seul plugin REST est fonctionnel :
 | Plugin | Implémentation | Notes |
 |---|---|---|
 | `RestClientESSearchServicesPlugin` | ES9 REST API (`ElasticsearchClient` v9, injecte `RestElasticSearchConnector`) | Mode production, recommandé |
-| `ClientESSearchServicesPlugin` | Transport legacy | **Déprécié** — lève `ForbiddenOperationException` |
+| `ClientESSearchServicesPlugin` | Transport legacy | **Déprécié** — lève `UnsupportedOperationException` |
 
 Paramètres du plugin `RestClientESSearchServicesPlugin` :
 
@@ -451,7 +451,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 - **ListFilterBuilder** : pas de méthode statique `.build()`. Utiliser le pattern de builder instance : `withListFilterQuery()` → `withCriteria()` → `build()`.
 - **ESDocumentCodec** : `ESDocumentCodec` gère l'encodage/décodage des documents ElasticSearch. La sérialisation passe par base64 et éventuellement compression (à confirmer par source). Cela impacte la lisibilité directe des documents dans l'interface ES.
 - **ES9 — `_all` supprimé** : le champ `_all` n'existe plus dans ES9. Utiliser `copy_to` pour la recherche multicritères sur plusieurs champs. La map copyTo de `SearchIndexDefinition` (type `Map<DataField, List<DataField>>`) est le mécanisme Vertigo correspondant.
-- **ES9 — Client par défaut** : depuis la version 4.4.0, le client ES9 (`ElasticsearchClient` API v9) est le seul client fonctionnel. `ClientESSearchServicesPlugin` lève `ForbiddenOperationException`.
+- **ES9 — Client par défaut** : le client ES9 (`ElasticsearchClient` API v9) est le seul client fonctionnel. `ClientESSearchServicesPlugin` lève `UnsupportedOperationException`.
 - **ES9 — `indexNameIsPrefix` supprimé** : ce paramètre n'existe plus dans la configuration du plugin ES9.
 - **ES9 — `withESClient` interdit** : toute tentative d'accès direct au client sous-jacent lève `UnsupportedOperationException`.
 - **ES9 — `markToOptimize` forcemerge** : l'optimisation se limite au forcemerge des documents marqués pour suppression (removeByQuery).
@@ -472,7 +472,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 | `search` | `SearchManager` + `SearchManagerImpl` |
 | `search.elasticsearch.rest` | `RestClientESSearchServicesPlugin` (ES9 REST) ← recommandé |
 | `search.elasticsearch.restHL` | Alias déprécié vers `search.elasticsearch.rest` |
-| `search.elasticsearch.client` | **Déprécié** — lève `ForbiddenOperationException` |
+| `search.elasticsearch.client` | **Déprécié** — lève `UnsupportedOperationException` |
 | `collections.luceneIndex` | `LuceneIndexPlugin` |
 
 ### API fluide (Suppliers)
@@ -497,7 +497,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 |---|---|---|
 | `LuceneIndexPlugin` | Index Lucene en RAM pour le facettage in-mémoire | `collections.luceneIndex` |
 | `RestClientESSearchServicesPlugin` | Client REST ElasticSearch 9 | `search.elasticsearch.rest` |
-| `ClientESSearchServicesPlugin` | **Déprécié** — lève `ForbiddenOperationException` | `search.elasticsearch.client` |
+| `ClientESSearchServicesPlugin` | **Déprécié** — lève `UnsupportedOperationException` | `search.elasticsearch.client` |
 
 ### Configuration YAML
 ```yaml
