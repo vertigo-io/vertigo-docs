@@ -195,7 +195,6 @@ io.vertigo.datafactory.plugins.collections.lucene
 io.vertigo.datafactory.plugins.collections.lucene_6_6
 io.vertigo.datafactory.plugins.collections.lucene_8_11
 io.vertigo.datafactory.plugins.search.elasticsearch
-io.vertigo.datafactory.plugins.search.elasticsearch.client
 io.vertigo.datafactory.plugins.search.elasticsearch.rest
 io.vertigo.datafactory.plugins.search.elasticsearch_5_6
 io.vertigo.datafactory.plugins.search.elasticsearch_5_6.commonshttp
