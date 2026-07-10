@@ -211,6 +211,7 @@ Méthodes confirmées de `SearchQueryBuilder` :
 | `withGeoSearchQuery` | `(String)` | Ajoute un critère géolocalisé (distance, bbox, point) |
 | `withDateBoost` | `(DataField, int, int)` | Booste les documents récents via le champ temporel et les facteurs de decay |
 | `withFacetClustering` | `(FacetDefinition)` | Active le facet clustering sur une facette donnée |
+| `withUseHighlight` | `(boolean)` | Active les highlights (soulignements des segments de texte matchant la requête) |
 | `build` | `()` | Retourne le SearchQuery construit |
 
 La méthode `withGeoSearchQuery` prend une chaîne d'expression géographique, non un objet typé. La méthode `withDateBoost` prend un `DataField` pour le champ date et deux entiers pour les paramètres de boost et de période de decay.
@@ -354,6 +355,44 @@ FacetedQueryResult result =
 
 La méthode reconstruit l'index Lucene à chaque appel sur les données fournies, l'usage est adapté pour des listes de taille modérée déjà chargées en mémoire.
 
+### Facettes multi-valeur et IndexType
+
+Le module Collections supporte les facettes multi-valeur via la propriété smartType `DtProperty.INDEX_TYPE`. Un champ `Keyword` peut se décomposer automatiquement en plusieurs valeurs pour le faceting :
+
+| Valeur `INDEX_TYPE` | Comportement | Exemple |
+|---|---|---|
+| `sep_comma` | Split sur `,` | `"A,B,C"` → 3 facettes (A, B, C) |
+| `sep_pipe` | Split sur `\|` | `"A\|B\|C"` → 3 facettes |
+| `sep_punct` | Split sur ponctuation (`,\|;:-)`) | `"A, B; C"` → 3 facettes |
+| `text_fr` | Tokenizer Lucene français | `"les chats noirs"` → 2 facettes (chats, noirs) |
+| `text_en` | Tokenizer Lucene anglais | idem |
+
+On peut combiner avec `facetable` :
+
+```java
+// Dans la définition du SmartType Keyword
+@DtProperty(name = DtProperty.INDEX_TYPE, value = "sep_comma:facetable")
+```
+
+L'`IndexType` est un modèle parseant la string `INDEX_TYPE` en un objet `io.vertigo.datafactory.collections.model.IndexType` exposant :
+
+| Méthode | Type | Description |
+|---|---|---|
+| `indexAnalyzer()` | `Optional<String>` | Analyzer Lucene (fr, en, ...) |
+| `indexDataType()` | `String` | Type d'indexation (`text`, `keyword`, `date`, `long`, `double`, `boolean`) |
+| `indexStored()` | `boolean` | Valeur stockée (true par défaut) |
+| `indexSubKeyword()` | `boolean` | Sous-keyword (pour sortable + facetable) |
+| `indexSubKeywordNormalizer()` | `String` | Normalizer du sous-keyword (`sortable` par défaut) |
+| `indexFieldData()` | `boolean` | Champ field data (aggregations ES) |
+
+Syntaxe complète :
+
+```
+"analyzer{:dataType}{:stored|notStored}{:sortable|notSortable}{:facetable|notFacetable}{:fieldData|notFieldData}"
+```
+
+Exemple : `text_fr:keyword:stored:sortable:facetable`
+
 ---
 
 ## Comparaison : ElasticSearch vs Collections
@@ -457,6 +496,8 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 - **ES9 — `markToOptimize` forcemerge** : l'optimisation se limite au forcemerge des documents marqués pour suppression (removeByQuery).
 - **ES9 — `findIndexDefinitionByKeyConcept` supprimé** : seule `findFirstIndexDefinitionByKeyConcept` existe.
 - **`_innerWriteTo` obsolète** : ce mécanisme était lié au transport client supprimé. Ne plus l'utiliser avec le plugin ES9.
+- **ES empty filter → matchAll** : si une query DSL est vide, ElasticSearch retourne un `matchAll`. Comportement par défaut du plugin `RestClientESSearchServicesPlugin`.
+- **String range facets** : ES supporte les facettes range sur des champs `text` via une agrégation `named-filters`. Les buckets sont extraits par clé (keyed buckets). Ne pas utiliser `range` classique sur `text`.
 
 ## Pour les experts
 
@@ -549,6 +590,28 @@ modules:
 #### Serveur embarqué (tests)
 
 La feature `vertigo-elasticsearch-connector#embeddedServer` lance un Docker testcontainer avec ES 9.4.3 pour l'environnement de test.
+
+#### ES7 — LTS
+
+Le connecteur ES7 (`vertigo-elasticsearch_7_17-connector`) est disponible en **LTS** (Long Time Support) dans le repo `vertigo-libs-lts`. Il est utilisé par certains projets legacy (ex. vertigo-geo).
+
+Pour l'utiliser :
+
+```xml
+<repository>
+    <id>vertigo-lts</id>
+    <url>https://nexus.vertigo.io/content/repositories/vertigo-lts</url>
+</repository>
+```
+
+```xml
+<dependency>
+    <groupId>io.vertigo</groupId>
+    <artifactId>vertigo-elasticsearch_7_17-connector</artifactId>
+</dependency>
+```
+
+La feature ES7 est `vertigo-elasticsearch-connector#rest` (package `io.vertigo.connectors.elasticsearch_7_17`). Voir `migration.md` pour les détails.
 
 ### API SearchManager
 

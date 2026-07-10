@@ -249,6 +249,7 @@ Vega supporte l'authentification OIDC via les interfaces et classes suivantes :
    - `externalUrl` : URL externe de l'application
    - `connectorName` : nom du connecteur OIDC
    - `loginHandlerName` : nom du handler de connexion (défaut: `default`)
+    - `proxy` : URL d'un proxy HTTP à utiliser pour les requêtes OIDC
 
 ## SwaggerApi
 
@@ -265,7 +266,7 @@ Règles de construction des noms de définition Swagger :
 - Les séquences d'underscores multiples sont réduites à un seul `_` (ex: `__` → `_`)
 - Il n'y a **pas** de remplacement automatique de `$` par `_`
 
-Le JSON des facettes `FacetedQueryResult` expose l'attribut `isMultiSelectable` sur chaque facette lorsque le sérialiseur V5 est actif (`FacetedQueryResultJsonSerializerV5`).
+Le JSON des facettes `FacetedQueryResult` expose l'attribut `isMultiSelectable` sur chaque facette. `FacetedQueryResultJsonSerializerV5` est le sérialiseur **par défaut**.
 
 ## LogExceptionsHandlerPlugin
 
@@ -278,6 +279,24 @@ Le rate limiting permet de limiter le nombre d'appels autorisé sur une fenêtre
 L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est ajoutée par défaut à la liste des IP exclues.
 
 ## Pour les experts
+
+### Plugins de sécurité
+
+| Plugin | Feature | Stack Index | Description |
+|---|---|---|---|
+| `AccessTokenWebServiceHandlerPlugin` | `webservices.token` | 90 | Génération et vérification de tokens jetable pour actions sensibles |
+| `ApiKeyWebServiceHandlerPlugin` | `webservices.auth.apiKey` | 45 | Authentification par API key (header configurable). Paramètres : `apiKeyHeader`, `apiKeys` |
+
+### Services système
+
+| Service | Feature | Route | Description |
+|---|---|---|---|
+| `HealthcheckWebServices` | `webservices.healthcheck` | Auto-généré | Endpoint de supervision de la plateforme |
+| `CatalogWebServices` | `webservices.catalog` | Auto-généré | Catalogue des webservices (métadonnées, définitions) |
+
+### Proxy client
+
+La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClientAmplifierMethod` qui génère dynamiquement des proxies Java depuis une `WebServiceDefinition`. Le proxy utilise un `HttpRequestBuilder` interne pour construire les URL et `DefaultJsonSerializer` pour la sérialisation JSON.
 
 ### HandlerChain — Architecture interne
 

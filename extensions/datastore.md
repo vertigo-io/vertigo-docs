@@ -58,7 +58,7 @@ Le `FileStoreManager` gère le stockage de fichiers avec résolution MIME et sup
 
 | Plugin | Feature | Description |
 |---|---|---|
-| `TikaMimeTypeResolverPlugin` | `filestore.mimeType.tika` | Détection MIME via Apache Tika (plus précis, `tikaConfigResource` optionnel) |
+| `TikaMimeTypeResolverPlugin` | `filestore.mimeType.tika` | Détection MIME via Apache Tika (plus précis). Optionnel : paramètre `tikaConfigResource` pour config Tika personnalisée |
 | `SimpleMagicMimeTypeResolverPlugin` | `filestore.mimeType.simplemagic` | Détection MIME via signatures binaires (plus léger, `.toLowerCase()`) |
 
 Les tâches de count ajoutent le suffixe `ByCriteria` uniquement si `criteria ≠ alwaysTrue`.
@@ -251,3 +251,8 @@ modules:
           maxTotal: 8
           minIdle: 1
 ```
+
+## Vigilance
+
+- **KVStore multi-collections** : H2 et Speedb supportent les collections multiples. Chaque collection utilise un store dédié (`MVStore` pour H2, `SpeedbDB` séparé pour Speedb). Sur H2, le daemon de purge TTL s'exécute toutes les 30s. Sur Speedb, le cleanup se fait via `forceRemoveTooOldElements()` (à appeler manuellement si besoin).
+- **Tika config** : `TikaMimeTypeResolverPlugin` accepte un paramètre `tikaConfigResource` optionnel pour une config Tika personnalisée (fichier TikaConfig dans le classpath).
