@@ -6,8 +6,8 @@ The module relies on two axes:
 
 | Axis | Usage | Dependency |
 |---|---|---|
-| **ElasticSearch** | Automatic KeyConcept indexing via EventBus, 3 reindexing strategies, faceting + PEG DSL | `vertigo-elasticsearch-connector` (optional), ES 7.17.x |
-| **Collections** | Pure-Java faceting + Lucene in-RAM filtering on DtList | Lucene 8.11.3 (bundled) |
+| **ElasticSearch** | Automatic KeyConcept indexing via EventBus, 3 reindexing strategies, faceting + PEG DSL | `vertigo-elasticsearch-connector` (optional), ES9 |
+| **Collections** | Pure-Java faceting + Lucene in-RAM filtering on DtList | Lucene 9.12.3 (bundled) |
 
 ```
 KeyConcept / DtList (in-memory or persisted data)
@@ -38,7 +38,7 @@ KeyConcept / DtList (in-memory or persisted data)
     <artifactId>vertigo-datafactory</artifactId>
 </dependency>
 
-<!-- Optional: ElasticSearch 7.17.x client -->
+<!-- Optional: ElasticSearch 9 client -->
 <dependency>
     <groupId>io.vertigo</groupId>
     <artifactId>vertigo-elasticsearch-connector</artifactId>
@@ -88,10 +88,10 @@ The constructor takes exactly 5 parameters:
 | `name` | `String` | Index definition identifier |
 | `keyConceptDataDefinition` | `DataDefinition` | KeyConcept definition (e.g., DtTache) |
 | `indexDataDefinition` | `DataDefinition` | Indexing DTO definition (e.g., DtTacheIndex) |
-| `indexCopyFromFieldsMap` | `Map<DataField, List<DataField>>` | Source field to copyTo target mapping |
+| `indexCopyFromFieldsMap` | `Map<DataField, List<DataField>>` | Target → source list mapping (`toField → [fromField, ...]`) for `copy_to` |
 | `searchLoaderId` | `String` | Associated SearchLoader Component identifier |
 
-`indexCopyFromFieldsMap` associates each source `DataField` to a list of target fields, enabling copying multiple fields into a single aggregation field for multi-criteria search. For example, copying `label`, `category`, and `status` into a single `globalSearch` field.
+`indexCopyFromFieldsMap` associates each target `DataField` to a list of source fields, enabling copying multiple fields into a single aggregation field for multi-criteria search. For example, `globalSearch → [label, category, status]`.
 
 To define an index, create a subclass with the `Idx` prefix by convention:
 
@@ -147,12 +147,21 @@ Each method returns a `Future<Long>` indicating the number of indexed documents 
 
 ### ElasticSearch Plugins
 
-The module provides two implementations of `SearchServicesPlugin` contract:
+With the ES9 migration, only one REST plugin is functional:
 
 | Plugin | Implementation | Notes |
 |---|---|---|
-| `RestHLClientESSearchServicesPlugin` | RestHighLevelClient 7.17.x | Production mode, recommended |
-| `ClientESSearchServicesPlugin` | Transport legacy | Backward compatibility |
+| `RestClientESSearchServicesPlugin` | ES9 REST API (`ElasticsearchClient` v9, injects `RestElasticSearchConnector`) | Production mode, recommended |
+| `ClientESSearchServicesPlugin` | Transport legacy | **Deprecated** — throws `UnsupportedOperationException` |
+
+Parameters for `RestClientESSearchServicesPlugin`:
+
+| Parameter | Type | Required | Default |
+|---|---|---|---|
+| `envIndexPrefix` | String | Yes | — |
+| `rowsPerQuery` | int | Yes | — |
+| `config.file` | String | Yes | — |
+| `connectorName` | Optional\<String\> | No | `"main"` |
 
 Internal connector classes include `ESStatement`, `ESSearchRequestBuilder`, `ESDocumentCodec` (compressed base64 serialization), and `IndexType`.
 
@@ -160,7 +169,7 @@ Internal connector classes include `ESStatement`, `ESSearchRequestBuilder`, `ESD
 
 ## Query DSL
 
-The DSL engine uses a PEG parser to evaluate filter expressions. Seventeen rules compose the grammar (`Dsl*Rule`). Available operators:
+The DSL engine uses a PEG parser to evaluate filter expressions. Twelve rules compose the grammar (`Dsl*Rule`). Available operators:
 
 | Rule | Syntax | Example |
 |---|---|---|
@@ -357,7 +366,7 @@ The method rebuilds the Lucene index on each call against provided data; usage i
 | Facets | ES Aggregates | Pure-Java in-process counting |
 | Reindexing | Full / Modified / Delta via SearchManager | Index rebuilt on each call |
 | Auto-indexing | EventBus StoreEvent on KeyConcept | Manual, on provided DtList |
-| Dependency | `vertigo-elasticsearch-connector`, ES 7.17.x | Lucene 8.11.3 (bundled) |
+| Dependency | `vertigo-elasticsearch-connector`, ES9 | Lucene 9.12.3 (bundled) |
 | Typical usage | Catalog, application search, shared index | UI filters, data tables, reports |
 
 ---
@@ -374,7 +383,7 @@ The project first defines business data structures. `DtTache` represents the bus
 
 Create `IdxTache`, subclass of `SearchIndexDefinition`, linking `DtTache` (KeyConcept) to `DtTacheIndex` (indexing DTO). Constructor receives 5 parameters: index name, KeyConcept `DataDefinition`, indexing DTO `DataDefinition`, `Map<DataField, List<DataField>>` for copyTo fields, and SearchLoader identifier.
 
-The copyTo map copies fields `label`, `category`, and `status` into a single `globalSearch` field, enabling multi-criteria search on one aggregated field.
+The copyTo map (`toField → [fromFields]`) copies fields `label`, `category`, and `status` into a single `globalSearch` field, enabling multi-criteria search on one aggregated field.
 
 ### Step 3 — Loader Implementation
 
@@ -426,7 +435,7 @@ Lucene index is rebuilt on each call against the provided `DtList`, so this axis
 
 ## Notes
 
-- **SearchIndexDefinition constructor**: takes exactly 5 parameters: name, keyConceptDataDefinition (`DataDefinition`), indexDataDefinition (`DataDefinition`), indexCopyFromFieldsMap (`Map<DataField, List<DataField>>`), searchLoaderId. No fluent builder `SearchIndexDefinitionBuilder` exists. Do not confuse `DataDefinition` with `DtDefinition`; do not use `Map<String, String>` for the copyTo map.
+- **SearchIndexDefinition constructor**: takes exactly 5 parameters: name, keyConceptDataDefinition (`DataDefinition`), indexDataDefinition (`DataDefinition`), indexCopyFromFieldsMap (`Map<DataField, List<DataField>>` — direction `toField → [fromFields]`, not `fromField → [toFields]`), searchLoaderId. No fluent builder `SearchIndexDefinitionBuilder` exists. Do not confuse `DataDefinition` with `DtDefinition`; do not use `Map<String, String>` for the copyTo map.
 - **Automatic reindexing**: `SearchManagerImpl` listens to `StoreEvent` on EventBus to mark KeyConcepts as dirty, then queues a `ReindexTask` with 1-second delay to avoid multiple calls.
 - **Delta reindexing**: `getSqlQueryFilter()` in SearchLoader must return a SQL filter with a timestamp parameter. Deleted documents are detected by KeyConcept disappearance.
 - **Ranges in DSL**: `[min TO max]` includes bounds. Use `*` for open infinite bounds: `[0 TO *]`.
@@ -439,7 +448,16 @@ Lucene index is rebuilt on each call against the provided `DtList`, so this axis
 - **Range facet size**: Ranges are defined statically in `FacetDefinition`. A document outside all ranges appears in no range facet. Include a catch-all range at the end.
 - **SearchLoader loadData**: `loadData(SearchChunk<K>)` returns `List<SearchIndex<K, I>>`, not `void`. Do not use `SearchChunk<String>`.
 - **ListFilterBuilder**: no static `.build()` method. Use instance builder pattern: `withListFilterQuery()` → `withCriteria()` → `build()`.
-- **ESDocumentCodec**: handles ElasticSearch document encoding/decoding. Serialization goes through base64 and possibly compression. This impacts direct document readability in the ES interface.
+- **ESDocumentCodec**: `ESDocumentCodec` handles ElasticSearch document encoding/decoding. Serialization goes through base64 and possibly compression (confirmed by source). This impacts direct document readability in the ES interface.
+- **ES9 — `_all` removed**: the `_all` field no longer exists in ES9. Use `copy_to` for multi-field search. The copyTo map of `SearchIndexDefinition` (type `Map<DataField, List<DataField>>`) is the corresponding Vertigo mechanism.
+- **ES9 — Default client**: the ES9 client (`ElasticsearchClient` API v9) is the only functional client. `ClientESSearchServicesPlugin` throws `UnsupportedOperationException`.
+- **ES9 — `indexNameIsPrefix` removed**: this parameter no longer exists in ES9 plugin configuration.
+- **ES9 — `withESClient` forbidden**: any attempt to directly access the underlying client throws `UnsupportedOperationException`.
+- **ES9 — `markToOptimize` forcemerge**: optimization is limited to forcemerge of documents marked for deletion (removeByQuery).
+- **ES9 — `findIndexDefinitionByKeyConcept` removed**: only `findFirstIndexDefinitionByKeyConcept` exists.
+- **`_innerWriteTo` obsolete**: this mechanism was tied to the removed transport client. Do not use it with the ES9 plugin.
+- **ES empty filter → matchAll**: if a DSL query is empty, ElasticSearch returns a `matchAll`. Default behavior of `RestClientESSearchServicesPlugin`.
+- **String range facets**: ES supports range facets on `text` fields via `named-filters` aggregation. Buckets are extracted by key (keyed buckets). Do not use classic `range` on `text`.
 
 ## For Experts
 
@@ -453,8 +471,9 @@ Lucene index is rebuilt on each call against the provided `DtList`, so this axis
 | Flag | Components |
 |---|---|
 | `search` | `SearchManager` + `SearchManagerImpl` |
-| `search.elasticsearch.client` | `ClientESSearchServicesPlugin` (Transport legacy) |
-| `search.elasticsearch.restHL` | `RestHLClientESSearchServicesPlugin` (RestHighLevelClient 7.17.x) |
+| `search.elasticsearch.rest` | `RestClientESSearchServicesPlugin` (ES9 REST) ← recommended |
+| `search.elasticsearch.restHL` | Deprecated alias to `search.elasticsearch.rest` |
+| `search.elasticsearch.client` | **Deprecated** — throws `UnsupportedOperationException` |
 | `collections.luceneIndex` | `LuceneIndexPlugin` |
 
 ### Fluent API (Suppliers)
@@ -478,8 +497,8 @@ Lucene index is rebuilt on each call against the provided `DtList`, so this axis
 | Plugin | Role | Feature |
 |---|---|---|
 | `LuceneIndexPlugin` | In-RAM Lucene index for in-memory faceting | `collections.luceneIndex` |
-| `ClientESSearchServicesPlugin` | Transport legacy ElasticSearch client | `search.elasticsearch.client` |
-| `RestHLClientESSearchServicesPlugin` | REST High Level ElasticSearch client 7.17.x | `search.elasticsearch.restHL` |
+| `RestClientESSearchServicesPlugin` | ES9 REST client | `search.elasticsearch.rest` |
+| `ClientESSearchServicesPlugin` | **Deprecated** — throws `UnsupportedOperationException` | `search.elasticsearch.client` |
 
 ### YAML Configuration
 ```yaml
@@ -489,7 +508,81 @@ modules:
             - search:
             - collections.luceneIndex:
         featuresConfig:
-            - search.elasticsearch.restHL:
+            - search.elasticsearch.rest:
                   envIndexPrefix: "prod_"
+                  rowsPerQuery: 100
+                  config.file: "/opt/vertigo/es.yml"
                   connectorName: "main"
 ```
+
+### ElasticSearch Connector
+
+To connect an ES9 server, use the connector feature:
+
+```yaml
+modules:
+    io.vertigo.elasticsearchconnector.ElasticsearchConnectorFeatures:
+        features:
+            - vertigo-elasticsearch-connector#rest:
+                  name: "main"
+                  servers.names: "es1:9200,es2:9200"
+                  username: "elastic"
+                  password: "secret"
+                  ssl: true
+                  trustStoreUrl: "file:///opt/vertigo/conf/truststore.p12"
+                  trustStorePassword: "changeit"
+```
+
+#### ServerParameters
+
+| Parameter | Type | Required | Default |
+|---|---|---|---|
+| `name` | Optional\<String\> | No | `"main"` |
+| `servers.names` | String | Yes | — |
+| `username` | Optional\<String\> | No | — |
+| `password` | Optional\<String\> | No | — |
+| `apiKeyId` | Optional\<String\> | No | — |
+| `apiKeySecret` | Optional\<String\> | No | — |
+| `ssl` | boolean | No | `false` |
+| `trustStoreUrl` | Optional\<String\> | No | — |
+| `trustStorePassword` | Optional\<String\> | No | — |
+
+#### Embedded Server (tests)
+
+Feature `vertigo-elasticsearch-connector#embeddedServer` launches a Docker testcontainer with ES 9.4.3 for the test environment.
+
+#### ES7 — LTS
+
+The ES7 connector (`vertigo-elasticsearch_7_17-connector`) is available in **LTS** (Long Time Support) in the `vertigo-libs-lts` repo. It is used by some legacy projects (e.g., vertigo-geo).
+
+```xml
+<repository>
+    <id>vertigo-lts</id>
+    <url>https://nexus.vertigo.io/content/repositories/vertigo-lts</url>
+</repository>
+```
+
+```xml
+<dependency>
+    <groupId>io.vertigo</groupId>
+    <artifactId>vertigo-elasticsearch_7_17-connector</artifactId>
+</dependency>
+```
+
+The ES7 feature is `vertigo-elasticsearch-connector#rest` (package `io.vertigo.connectors.elasticsearch_7_17`). See `migration.md` for details.
+
+### SearchManager API
+
+In addition to reindexing and query methods, `SearchManager` exposes:
+
+| Method | Role |
+|---|---|
+| `findFirstIndexDefinitionByKeyConcept` | Finds the first index definition for a given KeyConcept |
+| `markAsDirty` | Marks a KeyConcept as modified to trigger incremental reindexing |
+| `getReindexAllProgress` | Returns the progress of the ongoing reindexing |
+| `putAll`, `put` | Manual document indexing |
+| `loadList` (×2) | Faceted query execution |
+| `count` | Count of matching documents |
+| `remove` (×2) | Document deletion |
+| `putMetaData`, `getMetaData` | Index metadata management |
+| `waitForRefresh` | Wait for ElasticSearch refresh to complete |

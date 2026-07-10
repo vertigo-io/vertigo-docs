@@ -8,7 +8,7 @@ Here we present more specific elements to help onboard to the Vertigo-ui module.
 
 ## Controller: SpringMVC
 
-SpringMVC documentation on [docs.spring.io](https://docs.spring.io/spring/docs/5.2.x/spring-framework-reference/web.html)
+SpringMVC documentation on [docs.spring.io](https://docs.spring.io/spring-framework/reference/web/webmvc.html)
 
 SpringMVC's main mechanism maps HTTP requests to Java methods. Two mechanisms coexist:
 
@@ -106,7 +106,7 @@ Before detailing each block, here are elements for orientation.
 
 ## Rendering Engine: VueJS
 
-VueJS documentation on [vuejs.org](https://vuejs.org/v2/guide/)
+VueJS documentation on [vuejs.org](https://vuejs.org/guide/)
 
 VueJS offers a WebComponent approach with a reactive UI mapped to a view model, following the Observer/Observable pattern.
 
@@ -115,14 +115,15 @@ VueJS offers a WebComponent approach with a reactive UI mapped to a view model, 
 - `v-if="..."`: Display condition on a DOM node. Condition can be a vueData variable or expression to evaluate. Element disappears from DOM but remains client-side; not suitable for security
 - `v-for="item in items"`: Element with `v-for` is duplicated per element. Loop variable can be used to change each iteration's rendering
 - `v-model`: Indicates vueData data bound to the component
-- `@click`: Specifies action on component's `click` event. Variant `@click.native` maps directly to HTML component's onClick
-- `v-cloak`: Tells Vue this DOM part should be hidden until interpreted. Prevents "flickering" during page display
+- `@click`: Specifies action on component's `click` event. The `@click.native` variant is no longer needed in Vue 3 (events are automatically forwarded)
+- `v-pre`: Tells Vue to skip compiling this DOM portion. Used automatically by `vu:utext` to protect against VueJS XSS injections
+- `v-once`: Renders the node and children once, ignoring subsequent reactivity changes
 
 ## Component Library: Quasar
 
 Quasar documentation on [quasar.dev](https://quasar.dev/vue-components/)
 
-!> Vertigo-ui 2.1.0 uses Quasar version 1.4.1.
+!> Vertigo-ui 4.4.0 uses Quasar **2.21.1** (Vue 3). The Quasar 1 → 2 migration involves API changes: `q-modal` became `q-dialog`, `q-uploader` was replaced by `v-file-upload-quasar`, and `q-page-sticky` was removed.
 
 Most common components:
 - `q-page`
@@ -130,9 +131,10 @@ Most common components:
 - `q-toolbar`
 - `q-btn`
 - `q-item`
-- `q-popover`
-- `q-page-sticky`
+- `q-dialog` (replaces Quasar 1 `q-modal`)
 - `q-icon`
+- `q-knob`
+- `q-slider`
 
 ## Templating Engine: Thymeleaf
 
@@ -140,7 +142,7 @@ Requires:
 ```HTML
 <html xmlns:th="http://www.thymeleaf.org">
 ```
-Thymeleaf documentation on [thymeleaf.org](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html)
+Thymeleaf documentation on [thymeleaf.org](https://www.thymeleaf.org/doc/thymeleaf-spring6) (version 3.1.5, compatible with Spring 6)
 
 - **inline** `__${...}__`: Preprocessor. Tells Thymeleaf to pre-process this portion. Used for expressions inside larger expressions.
 - **inline** `|...|`: Literal substitution. Writes a string containing parts to evaluate, simplifying writing and avoiding string concatenation.
@@ -225,7 +227,7 @@ Requires:
   - `withFab` **boolean**: Adds class `withFab` if needed
   - `actions_slot`: Slot for positioning block actions *(replaces icon)*
   - `header_attrs`: Attributes for block header (`<div>` tag)
-  - `content_attrs`: Attributes for block body (`<div class="q-card-main">`)
+  - `content_attrs`: Attributes for block body (`<div class="q-card-section">`)
   - `card_attrs`: Attributes for block parent (`<div class="q-card">`)
   - `content`: Tag body is preserved
 - `vu:grid`: Declares a grid layout
@@ -244,7 +246,7 @@ Requires:
   - `closeLabel`: Modal close label
   - `srcUrl`: Modal URL (optional, usually set by open script)
   - `iframe_attrs`: Attributes for iframe
-  - `modal_attrs`: Attributes for modal (`<q-modal>` tag)
+  - `modal_attrs`: Attributes for modal (`<q-dialog>` tag)
 
 Modal usage example on Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-mars/blob/develop/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html):
 ```HTML
@@ -292,6 +294,8 @@ Useful for precisely adding data to `vueData`, e.g., specific vue components.
 - `vu:include-data-protected`: Includes an object field. Client-side value is protected (not plaintext, not modifiable); real value stays server-side. Used for file identifiers, etc.
   - `object`: Context object name
   - `field`: Field name
+- `vu:utext`: Tag processor applying both `th:utext` **and** `v-pre` automatically. Displays dynamic HTML content from untrusted sources while protecting against VueJS XSS injection. The `v-pre` prevents VueJS from compiling the injected content.
+  - `content`: HTML content processed by the tag processor
 
 ### Vertigo-UI Components: inputs
 
@@ -358,14 +362,14 @@ Simplify screen writing; most handle `viewMode` for **Edit** or **ReadOnly** ren
   - `object`*: Context object name
   - `field`*: Field name
   - `label`: Label override
-  - `format`: Date value format (default `DD/MM/YYYY`)
+  - `format`: Date display format (default `DD/MM/YYYY`). Value is always stored and exchanged in ISO `YYYY-MM-DD`.
   - `date_attrs`: Attributes for date (`<q-date>`)
   - `input_attrs`: Attributes for input (`<q-input>`)
 - `vu:datetime`: Date/time selection
   - `object`*: Context object name
   - `field`*: Field name
   - `label`: Label override
-  - `format`: Date value format (default `DD/MM/YYYY HH:mm`)
+  - `format`: Date/time display format (default `DD/MM/YYYY HH:mm`). Value is always stored and exchanged in ISO `YYYY-MM-DDTHH:mm`.
   - `date_attrs`: Attributes for date (`<q-date>`)
   - `time_attrs`: Attributes for time (`<q-time>`)
   - `input_attrs`: Attributes for input (`<q-input>`)
@@ -402,7 +406,13 @@ Simplify screen writing; most handle `viewMode` for **Edit** or **ReadOnly** ren
   - `url`*: Upload WebService URL
   - `key`*: Context key receiving files
   - `multiple`: Allows multiple files
-  - `uploader_attrs`: Attributes for input (`<q-uploader>`)
+  - `maxFileSize`: Maximum file size in MB (e.g. `5`)
+  - `maxTotalSize`: Maximum total size of all files
+  - `maxFiles`: Maximum number of files allowed
+  - `accept`: MIME filter for accepted files (e.g. `"image/*,.pdf"`)
+  - `uploader_attrs`: Attributes for input (`v-file-upload-quasar`)
+- `fileupload-dropzone`: File drop zone for drag-and-drop
+  - `fileComponentId`*: Identifier linking the dropzone to the corresponding uploader component
 
 > To adapt rendering, components use specific mechanisms. Generally, a **Vertigo-UI: inputs** component is written as:
 ```XML
@@ -432,13 +442,13 @@ Simplify screen writing; most handle `viewMode` for **Edit** or **ReadOnly** ren
 
 ### Vertigo-UI Components: buttons
 - `vu:button-link`: Link-type button (`<q-btn type="a"`)
-  - label, icon, url, ariaLabel, disabled (**boolean**), other_attrs (on `<q-btn`)
+  - label, icon, url, title, disabled (**boolean**), other_attrs (on `<q-btn`)
 - `vu:button-link-confirm`: Link button with confirmation popin
-  - actions_slot, label, icon, url, ariaLabel, disabled, confirmMessage, labelOk (default Yes), labelCancel (default No), other_attrs
+  - actions_slot, label, icon, url, title, disabled, confirmMessage, labelOk (default Yes), labelCancel (default No), other_attrs
 - `vu:button-submit`: Submit button (`<q-btn type="submit"`)
-  - label, icon, action, ariaLabel, other_attrs
+  - label, icon, action, title, other_attrs
 - `vu:button-submit-confirm`: Submit button with confirmation popin
-  - actions_slot, label, icon, action*, ariaLabel, formId*, confirmMessage, labelOk (Yes), labelCancel (No), other_attrs
+  - actions_slot, label, icon, action*, title, formId*, confirmMessage, labelOk (Yes), labelCancel (No), other_attrs
 
 ## Vertigo-ui VueJS Components
 
@@ -461,13 +471,21 @@ Module vertigo-ui has no dedicated `XxxFeatures.java`. UI components are auto-in
 
 | Method | Description |
 |---|---|
+| `publishRef` | Adds a simple serializable object to context |
 | `publishDto` | Publishes form object (DtObject) to context |
+| `checkDtoErrors` | Checks object errors. Added to uiMessageStack if needed |
 | `readDto` | Reads and validates form object (throws `ExpiredViewContextException` on error) |
 | `publishDtList` | Publishes list (DtList) to context |
+| `readDtList` | Returns validated list. Throws exception on error |
 | `publishDtListModifiable` | Publishes modifiable list |
+| `checkDtListErrors` | Checks list errors. Added to uiMessageStack if needed |
+| `readDtListModifiable` | Returns validated modifiable list. Throws exception on error |
 | `publishMdl` | Publishes reference list (Master Data List) |
 | `publishFacetedQueryResult` | Publishes faceted search result |
 | `getUiObject` / `getUiList` | Retrieves data as received from UI |
+| `getUiListModifiable` | Retrieves modifiable list from UI context |
+| `getString` / `getLong` / `getInteger` / `getBoolean` | Retrieves typed primitives from context |
+| `getSelectedFacetValues` | Retrieves selected facet list from faceted search UI |
 | `ViewContextMap` | Typed map for context element access via `ViewContextKey` |
 | `ViewContextUpdateSecurity` | Controls context update security |
 
@@ -483,6 +501,7 @@ Module vertigo-ui has no dedicated `XxxFeatures.java`. UI components are auto-in
 | `VSpringMvcUiMessageStack` | UI message stack for error rendering |
 | `VRequestToViewNameTranslator` | Request-to-view-name translation |
 | `VertigoLocaleResolver` | User-based locale resolution |
+| `UiAuthorizationUtil` | Security check utility for rendering. Passed to templating engine as `authz` |
 
 #### Argument Resolvers
 
@@ -536,6 +555,7 @@ Module vertigo-ui has no dedicated `XxxFeatures.java`. UI components are auto-in
 | `vu:authz` | `AuthzAttributeTagProcessor` |
 | `vu:once` | `OnceAttributeTagProcessor` |
 | `vu:text` | `VuiTextTagProcessor` |
+| `vu:utext` | `UtextTagProcessor` |
 | Utilities | `FragmentUtil`, `ResourcePathFinder` |
 
 ### UI Data Wrappers
@@ -570,6 +590,7 @@ Module vertigo-ui has no dedicated `XxxFeatures.java`. UI components are auto-in
 | `JettyBoot` | Embedded Jetty server startup |
 | `JettyBootParams` | Jetty configuration parameters |
 | `JettyBootParamsBuilder` | Parameter builder |
+| `withSessionTimeoutMinutes` | Configures `setMaxInactiveInterval` on HTTP session (converts minutes to seconds) |
 | `KVSessionDataStoreFactory` | Jetty session store factory |
 | `KVSessionDataStore` | Jetty session storage via KVStore |
 
