@@ -7,7 +7,7 @@ Le module repose sur deux axes :
 | Axe | Usage | Dépendance |
 |---|---|---|
 | **ElasticSearch** | Indexation automatique des KeyConcepts via EventBus, reindexation 3 stratégies, facettage + DSL PEG | `vertigo-elasticsearch-connector` (optionnel), ES9 |
-| **Collections** | Facettage pur-Java + filtrage Lucene in-RAM sur DtList | Lucene 8.11.3 (bundlé) |
+| **Collections** | Facettage pur-Java + filtrage Lucene in-RAM sur DtList | Lucene 9.12.3 (bundlé) |
 
 ```
 KeyConcept / DtList (données en mémoire ou persistées)
@@ -211,7 +211,7 @@ Méthodes confirmées de `SearchQueryBuilder` :
 | `withGeoSearchQuery` | `(String)` | Ajoute un critère géolocalisé (distance, bbox, point) |
 | `withDateBoost` | `(DataField, int, int)` | Booste les documents récents via le champ temporel et les facteurs de decay |
 | `withFacetClustering` | `(FacetDefinition)` | Active le facet clustering sur une facette donnée |
-| `withUseHighlight` | `(boolean)` | Active les highlights (soulignements des segments de texte matchant la requête) |
+| `withHighlight` | `()` | Active les highlights (soulignements des segments de texte matchant la requête) |
 | `build` | `()` | Retourne le SearchQuery construit |
 
 La méthode `withGeoSearchQuery` prend une chaîne d'expression géographique, non un objet typé. La méthode `withDateBoost` prend un `DataField` pour le champ date et deux entiers pour les paramètres de boost et de période de decay.
@@ -365,7 +365,6 @@ Le module Collections supporte les facettes multi-valeur via la propriété smar
 | `sep_pipe` | Split sur `\|` | `"A\|B\|C"` → 3 facettes |
 | `sep_punct` | Split sur ponctuation (`,\|;:-)`) | `"A, B; C"` → 3 facettes |
 | `text_fr` | Tokenizer Lucene français | `"les chats noirs"` → 2 facettes (chats, noirs) |
-| `text_en` | Tokenizer Lucene anglais | idem |
 
 On peut combiner avec `facetable` :
 
@@ -378,12 +377,12 @@ L'`IndexType` est un modèle parseant la string `INDEX_TYPE` en un objet `io.ver
 
 | Méthode | Type | Description |
 |---|---|---|
-| `indexAnalyzer()` | `Optional<String>` | Analyzer Lucene (fr, en, ...) |
-| `indexDataType()` | `String` | Type d'indexation (`text`, `keyword`, `date`, `long`, `double`, `boolean`) |
-| `indexStored()` | `boolean` | Valeur stockée (true par défaut) |
-| `indexSubKeyword()` | `boolean` | Sous-keyword (pour sortable + facetable) |
-| `indexSubKeywordNormalizer()` | `String` | Normalizer du sous-keyword (`sortable` par défaut) |
-| `indexFieldData()` | `boolean` | Champ field data (aggregations ES) |
+| `getIndexAnalyzer()` | `Optional<String>` | Analyzer Lucene (fr, en, ...) |
+| `getIndexDataType()` | `String` | Type d'indexation (`text`, `keyword`, `date`, `long`, `double`, `boolean`) |
+| `isIndexStored()` | `boolean` | Valeur stockée (true par défaut) |
+| `isIndexSubKeyword()` | `boolean` | Sous-keyword (pour sortable + facetable) |
+| `getSortableNormalizer()` | `String` | Normalizer du sous-keyword (`sortable` par défaut) |
+| `isIndexFieldData()` | `boolean` | Champ field data (aggregations ES) |
 
 Syntaxe complète :
 

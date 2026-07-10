@@ -248,8 +248,7 @@ Vega supporte l'authentification OIDC via les interfaces et classes suivantes :
    - `urlHandlerPrefix` : préfixe d'URL pour les handlers
    - `externalUrl` : URL externe de l'application
    - `connectorName` : nom du connecteur OIDC
-   - `loginHandlerName` : nom du handler de connexion (défaut: `default`)
-    - `proxy` : URL d'un proxy HTTP à utiliser pour les requêtes OIDC
+- `loginHandlerName` : nom du handler de connexion (défaut: `default`)
 
 ## SwaggerApi
 
@@ -285,7 +284,7 @@ L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est ajoutée par défaut à la l
 | Plugin | Feature | Stack Index | Description |
 |---|---|---|---|
 | `AccessTokenWebServiceHandlerPlugin` | `webservices.token` | 90 | Génération et vérification de tokens jetable pour actions sensibles |
-| `ApiKeyWebServiceHandlerPlugin` | `webservices.auth.apiKey` | 45 | Authentification par API key (header configurable). Paramètres : `apiKeyHeader`, `apiKeys` |
+| `ApiKeyWebServiceHandlerPlugin` | `webservices.auth.apiKey` | 45 | Authentification par API key. Paramètres : `apiKey` (String), `headerName` (Optional<String>) |
 
 ### Services système
 
