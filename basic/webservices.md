@@ -134,7 +134,7 @@ L'annotation `@GET` permet de spécifier
 
 Il existe des annotations similaires pour les différents verb HTTP : `@POST`, `@PUT`, `@DELETE`, `@PATCH`
 
-> Le préfixe de route doit suivre le pattern `moduleApplicatif/EntiteMetier`. Ce nommage se retrouvant partout (URL, packages Java, répertoires des vues, déclaration du model), il faut le respecter.
+> Pour en savoir plus sur le routes et les verb vous pouvez vous référer à des bonnes pratiques que nous proposons [ici](https://github.com/vertigo-io/vertigo-core/wiki/routes).
 
 Par souci de simplicité et de concision il est possible d'ajouter un préfix à toutes les routes des méthodes d'une même classe en utilisant l'annotation `@PathPrefix` sur la classe.
 
