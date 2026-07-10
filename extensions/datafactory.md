@@ -6,8 +6,8 @@ Le module repose sur deux axes :
 
 | Axe | Usage | Dépendance |
 |---|---|---|
-| **ElasticSearch** | Indexation automatique des KeyConcepts via EventBus, reindexation 3 stratégies, facettage + DSL PEG | `vertigo-elasticsearch-connector` (optionnel), ES 7.17.x |
-| **Collections** | Facettage pur-Java + filtrage Lucene in-RAM sur DtList | Lucene 8.11.3 (bundlé) |
+| **ElasticSearch** | Indexation automatique des KeyConcepts via EventBus, reindexation 3 stratégies, facettage + DSL PEG | `vertigo-elasticsearch-connector` (optionnel), ES9 |
+| **Collections** | Facettage pur-Java + filtrage Lucene in-RAM sur DtList | Lucene 9.12.3 (bundlé) |
 
 ```
 KeyConcept / DtList (données en mémoire ou persistées)
@@ -38,7 +38,7 @@ KeyConcept / DtList (données en mémoire ou persistées)
     <artifactId>vertigo-datafactory</artifactId>
 </dependency>
 
-<!-- Optionnel : client ElasticSearch 7.17.x -->
+<!-- Optionnel : client ElasticSearch 9 -->
 <dependency>
     <groupId>io.vertigo</groupId>
     <artifactId>vertigo-elasticsearch-connector</artifactId>
@@ -49,7 +49,8 @@ Le composant `CollectionsManager` est toujours actif (`buildFeatures()`). Les au
 
 - `@ParamValue("envIndexPrefix")` — préfixe des noms d'index
 - `@ParamValue("rowsPerQuery")` — taille des lots de chargement
-- `@ParamValue("connectorName")` — nom du connecteur ElasticSearch
+- `@ParamValue("connectorName")` — nom du connecteur ElasticSearch (défaut : `"main"`)
+- `@ParamValue("config.file")` — chemin du fichier de configuration ES9
 
 ---
 
@@ -88,10 +89,10 @@ Le constructeur prend exactement 5 paramètres :
 | `name` | `String` | Identifiant de la définition d'index |
 | `keyConceptDataDefinition` | `DataDefinition` | Définition du KeyConcept métier (par exemple DtTache) |
 | `indexDataDefinition` | `DataDefinition` | Définition du DTO d'indexation (par exemple DtTacheIndex) |
-| `indexCopyFromFieldsMap` | `Map<DataField, List<DataField>>` | Mappage des champs source vers les champs copyTo cibles |
+| `indexCopyFromFieldsMap` | `Map<DataField, List<DataField>>` | Mappage cible → liste des champs source (`toField → [fromField, ...]`) pour `copy_to` |
 | `searchLoaderId` | `String` | Identifiant du Component SearchLoader associé |
 
-Le paramètre `indexCopyFromFieldsMap` associe chaque champ source (`DataField`) à une liste de champs cibles, permettant de copier plusieurs champs dans un seul champ d'agrégation pour la recherche multicritères. Par exemple, copier `libelle`, `categorie` et `statut` vers un unique champ `rechercheGlobale`.
+Le paramètre `indexCopyFromFieldsMap` associe chaque champ cible (`DataField`) à une liste de champs source, permettant de copier plusieurs champs dans un seul champ d'agrégation pour la recherche multicritères. Par exemple, `rechercheGlobale → [libelle, categorie, statut]`.
 
 Pour définir un index, on crée une sous-classe avec le préfixe `Idx` par convention :
 
@@ -147,12 +148,21 @@ Chaque méthode retourne un `Future<Long>` indiquant le nombre de documents inde
 
 ### Plugins ElasticSearch
 
-Le module fournit deux implémentations du contract `SearchServicesPlugin` :
+Avec la migration vers ES9, un seul plugin REST est fonctionnel :
 
 | Plugin | Implémentation | Notes |
 |---|---|---|
-| `RestHLClientESSearchServicesPlugin` | RestHighLevelClient 7.17.x | Mode production, recommandé |
-| `ClientESSearchServicesPlugin` | Transport legacy | Compatibilité ascendante |
+| `RestClientESSearchServicesPlugin` | ES9 REST API (`ElasticsearchClient` v9, injecte `RestElasticSearchConnector`) | Mode production, recommandé |
+| `ClientESSearchServicesPlugin` | Transport legacy | **Déprécié** — lève `UnsupportedOperationException` |
+
+Paramètres du plugin `RestClientESSearchServicesPlugin` :
+
+| Paramètre | Type | Obligatoire | Défaut |
+|---|---|---|---|
+| `envIndexPrefix` | String | Oui | — |
+| `rowsPerQuery` | int | Oui | — |
+| `config.file` | String | Oui | — |
+| `connectorName` | Optional\<String\> | Non | `"main"` |
 
 Les classes internes du connecteur incluent `ESStatement`, `ESSearchRequestBuilder`, `ESDocumentCodec` (sérialisation base64 compressée) et `IndexType`.
 
@@ -201,6 +211,7 @@ Méthodes confirmées de `SearchQueryBuilder` :
 | `withGeoSearchQuery` | `(String)` | Ajoute un critère géolocalisé (distance, bbox, point) |
 | `withDateBoost` | `(DataField, int, int)` | Booste les documents récents via le champ temporel et les facteurs de decay |
 | `withFacetClustering` | `(FacetDefinition)` | Active le facet clustering sur une facette donnée |
+| `withHighlight` | `()` | Active les highlights (soulignements des segments de texte matchant la requête) |
 | `build` | `()` | Retourne le SearchQuery construit |
 
 La méthode `withGeoSearchQuery` prend une chaîne d'expression géographique, non un objet typé. La méthode `withDateBoost` prend un `DataField` pour le champ date et deux entiers pour les paramètres de boost et de période de decay.
@@ -344,6 +355,43 @@ FacetedQueryResult result =
 
 La méthode reconstruit l'index Lucene à chaque appel sur les données fournies, l'usage est adapté pour des listes de taille modérée déjà chargées en mémoire.
 
+### Facettes multi-valeur et IndexType
+
+Le module Collections supporte les facettes multi-valeur via la propriété smartType `DtProperty.INDEX_TYPE`. Un champ `Keyword` peut se décomposer automatiquement en plusieurs valeurs pour le faceting :
+
+| Valeur `INDEX_TYPE` | Comportement | Exemple |
+|---|---|---|
+| `sep_comma` | Split sur `,` | `"A,B,C"` → 3 facettes (A, B, C) |
+| `sep_pipe` | Split sur `\|` | `"A\|B\|C"` → 3 facettes |
+| `sep_punct` | Split sur ponctuation (`,\|;:-)`) | `"A, B; C"` → 3 facettes |
+| `text_fr` | Tokenizer Lucene français | `"les chats noirs"` → 2 facettes (chats, noirs) |
+
+On peut combiner avec `facetable` :
+
+```java
+// Dans la définition du SmartType Keyword
+@DtProperty(name = DtProperty.INDEX_TYPE, value = "sep_comma:facetable")
+```
+
+L'`IndexType` est un modèle parseant la string `INDEX_TYPE` en un objet `io.vertigo.datafactory.collections.model.IndexType` exposant :
+
+| Méthode | Type | Description |
+|---|---|---|
+| `getIndexAnalyzer()` | `Optional<String>` | Analyzer Lucene (fr, en, ...) |
+| `getIndexDataType()` | `String` | Type d'indexation (`text`, `keyword`, `date`, `long`, `double`, `boolean`) |
+| `isIndexStored()` | `boolean` | Valeur stockée (true par défaut) |
+| `isIndexSubKeyword()` | `boolean` | Sous-keyword (pour sortable + facetable) |
+| `getSortableNormalizer()` | `String` | Normalizer du sous-keyword (`sortable` par défaut) |
+| `isIndexFieldData()` | `boolean` | Champ field data (aggregations ES) |
+
+Syntaxe complète :
+
+```
+"analyzer{:dataType}{:stored|notStored}{:sortable|notSortable}{:facetable|notFacetable}{:fieldData|notFieldData}"
+```
+
+Exemple : `text_fr:keyword:stored:sortable:facetable`
+
 ---
 
 ## Comparaison : ElasticSearch vs Collections
@@ -357,7 +405,7 @@ La méthode reconstruit l'index Lucene à chaque appel sur les données fournies
 | Facettes | Agrégats ES | Comptage pur-Java in-process |
 | Reindexation | Full / Modified / Delta via SearchManager | Index rebuilt à chaque appel |
 | Indexation auto | EventBus StoreEvent sur KeyConcept | Manuel, sur DtList fournie |
-| Dépendance | `vertigo-elasticsearch-connector`, ES 7.17.x | Lucene 8.11.3 (bundlé) |
+| Dépendance | `vertigo-elasticsearch-connector`, ES9 | Lucene 9.12.3 (bundlé) |
 | Usage typique | Catalogue, recherche applicative, index partagé | Filtres UI, tables de données, rapports |
 
 ---
@@ -374,7 +422,7 @@ Le projet définit d'abord les structures de données métier. `DtTache` représ
 
 On crée `IdxTache`, sous-classe de `SearchIndexDefinition`, qui lie `DtTache` (KeyConcept) à `DtTacheIndex` (DTO d'indexation). Le constructeur reçoit 5 paramètres : le nom de l'index, la `DataDefinition` du KeyConcept, la `DataDefinition` du DTO d'indexation, une `Map<DataField, List<DataField>>` pour les champs copyTo, et l'identifiant du SearchLoader.
 
-La map copyTo copie les champs `libelle`, `categorie` et `statut` vers un champ unique `rechercheGlobale`, permettant une recherche multicritères sur un seul champ agrégé.
+La map copyTo (`toField → [fromFields]`) copie les champs `libelle`, `categorie` et `statut` vers un champ unique `rechercheGlobale`, permettant une recherche multicritères sur un seul champ agrégé.
 
 ### Étape 3 — Implémentation du loader
 
@@ -426,7 +474,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 
 ## Vigilance
 
-- **Constructeur SearchIndexDefinition** : le constructeur prend exactement 5 paramètres : name, keyConceptDataDefinition (`DataDefinition`), indexDataDefinition (`DataDefinition`), indexCopyFromFieldsMap (`Map<DataField, List<DataField>>`), searchLoaderId. Aucun builder fluide de type `SearchIndexDefinitionBuilder` n'existe. Ne pas confondre `DataDefinition` avec `DtDefinition` ; ne pas utiliser `Map<String, String>` pour la map copyTo.
+- **Constructeur SearchIndexDefinition** : le constructeur prend exactement 5 paramètres : name, keyConceptDataDefinition (`DataDefinition`), indexDataDefinition (`DataDefinition`), indexCopyFromFieldsMap (`Map<DataField, List<DataField>>` — direction `toField → [fromFields]`, pas `fromField → [toFields]`), searchLoaderId. Aucun builder fluide de type `SearchIndexDefinitionBuilder` n'existe. Ne pas confondre `DataDefinition` avec `DtDefinition` ; ne pas utiliser `Map<String, String>` pour la map copyTo.
 - **Reindexation automatique** : `SearchManagerImpl` écoute les `StoreEvent` sur l'EventBus pour marquer les KeyConcepts comme dirty, puis file un `ReindexTask` avec un délai de 1 seconde pour éviter les appels multiples.
 - **Reindexation Delta** : la méthode `getSqlQueryFilter()` du SearchLoader doit retourner un filtre SQL avec un paramètre timestamp. Les documents supprimés sont détectés par disparition du KeyConcept.
 - **Ranges dans le DSL** : `[min TO max]` inclut les bornes. Utiliser `*` pour les bornes ouvertes infinies : `[0 TO *]`.
@@ -440,6 +488,15 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 - **LoadData du SearchLoader** : `loadData(SearchChunk<K>)` retourne `List<SearchIndex<K, I>>`, pas `void`. Ne pas utiliser `SearchChunk<String>`.
 - **ListFilterBuilder** : pas de méthode statique `.build()`. Utiliser le pattern de builder instance : `withListFilterQuery()` → `withCriteria()` → `build()`.
 - **ESDocumentCodec** : `ESDocumentCodec` gère l'encodage/décodage des documents ElasticSearch. La sérialisation passe par base64 et éventuellement compression (à confirmer par source). Cela impacte la lisibilité directe des documents dans l'interface ES.
+- **ES9 — `_all` supprimé** : le champ `_all` n'existe plus dans ES9. Utiliser `copy_to` pour la recherche multicritères sur plusieurs champs. La map copyTo de `SearchIndexDefinition` (type `Map<DataField, List<DataField>>`) est le mécanisme Vertigo correspondant.
+- **ES9 — Client par défaut** : le client ES9 (`ElasticsearchClient` API v9) est le seul client fonctionnel. `ClientESSearchServicesPlugin` lève `UnsupportedOperationException`.
+- **ES9 — `indexNameIsPrefix` supprimé** : ce paramètre n'existe plus dans la configuration du plugin ES9.
+- **ES9 — `withESClient` interdit** : toute tentative d'accès direct au client sous-jacent lève `UnsupportedOperationException`.
+- **ES9 — `markToOptimize` forcemerge** : l'optimisation se limite au forcemerge des documents marqués pour suppression (removeByQuery).
+- **ES9 — `findIndexDefinitionByKeyConcept` supprimé** : seule `findFirstIndexDefinitionByKeyConcept` existe.
+- **`_innerWriteTo` obsolète** : ce mécanisme était lié au transport client supprimé. Ne plus l'utiliser avec le plugin ES9.
+- **ES empty filter → matchAll** : si une query DSL est vide, ElasticSearch retourne un `matchAll`. Comportement par défaut du plugin `RestClientESSearchServicesPlugin`.
+- **String range facets** : ES supporte les facettes range sur des champs `text` via une agrégation `named-filters`. Les buckets sont extraits par clé (keyed buckets). Ne pas utiliser `range` classique sur `text`.
 
 ## Pour les experts
 
@@ -453,8 +510,9 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 | Flag | Composants |
 |---|---|
 | `search` | `SearchManager` + `SearchManagerImpl` |
-| `search.elasticsearch.client` | `ClientESSearchServicesPlugin` (Transport legacy) |
-| `search.elasticsearch.restHL` | `RestHLClientESSearchServicesPlugin` (RestHighLevelClient 7.17.x) |
+| `search.elasticsearch.rest` | `RestClientESSearchServicesPlugin` (ES9 REST) ← recommandé |
+| `search.elasticsearch.restHL` | Alias déprécié vers `search.elasticsearch.rest` |
+| `search.elasticsearch.client` | **Déprécié** — lève `UnsupportedOperationException` |
 | `collections.luceneIndex` | `LuceneIndexPlugin` |
 
 ### API fluide (Suppliers)
@@ -478,8 +536,8 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 | Plugin | Rôle | Feature |
 |---|---|---|
 | `LuceneIndexPlugin` | Index Lucene en RAM pour le facettage in-mémoire | `collections.luceneIndex` |
-| `ClientESSearchServicesPlugin` | Client Transport legacy ElasticSearch | `search.elasticsearch.client` |
-| `RestHLClientESSearchServicesPlugin` | Client REST High Level ElasticSearch 7.17.x | `search.elasticsearch.restHL` |
+| `RestClientESSearchServicesPlugin` | Client REST ElasticSearch 9 | `search.elasticsearch.rest` |
+| `ClientESSearchServicesPlugin` | **Déprécié** — lève `UnsupportedOperationException` | `search.elasticsearch.client` |
 
 ### Configuration YAML
 ```yaml
@@ -489,7 +547,83 @@ modules:
             - search:
             - collections.luceneIndex:
         featuresConfig:
-            - search.elasticsearch.restHL:
+            - search.elasticsearch.rest:
                   envIndexPrefix: "prod_"
+                  rowsPerQuery: 100
+                  config.file: "/opt/vertigo/es.yml"
                   connectorName: "main"
 ```
+
+### Connecteur ElasticSearch
+
+Pour connecter un serveur ES9, utiliser la feature du connecteur :
+
+```yaml
+modules:
+    io.vertigo.elasticsearchconnector.ElasticsearchConnectorFeatures:
+        features:
+            - vertigo-elasticsearch-connector#rest:
+                  name: "main"
+                  servers.names: "es1:9200,es2:9200"
+                  username: "elastic"
+                  password: "secret"
+                  ssl: true
+                  trustStoreUrl: "file:///opt/vertigo/conf/truststore.p12"
+                  trustStorePassword: "changeit"
+```
+
+#### ServerParameters
+
+| Paramètre | Type | Obligatoire | Défaut |
+|---|---|---|---|
+| `name` | Optional\<String\> | Non | `"main"` |
+| `servers.names` | String | Oui | — |
+| `username` | Optional\<String\> | Non | — |
+| `password` | Optional\<String\> | Non | — |
+| `apiKeyId` | Optional\<String\> | Non | — |
+| `apiKeySecret` | Optional\<String\> | Non | — |
+| `ssl` | boolean | Non | `false` |
+| `trustStoreUrl` | Optional\<String\> | Non | — |
+| `trustStorePassword` | Optional\<String\> | Non | — |
+
+#### Serveur embarqué (tests)
+
+La feature `vertigo-elasticsearch-connector#embeddedServer` lance un Docker testcontainer avec ES 9.4.3 pour l'environnement de test.
+
+#### ES7 — LTS
+
+Le connecteur ES7 (`vertigo-elasticsearch_7_17-connector`) est disponible en **LTS** (Long Time Support) dans le repo `vertigo-libs-lts`. Il est utilisé par certains projets legacy (ex. vertigo-geo).
+
+Pour l'utiliser :
+
+```xml
+<repository>
+    <id>vertigo-lts</id>
+    <url>https://nexus.vertigo.io/content/repositories/vertigo-lts</url>
+</repository>
+```
+
+```xml
+<dependency>
+    <groupId>io.vertigo</groupId>
+    <artifactId>vertigo-elasticsearch_7_17-connector</artifactId>
+</dependency>
+```
+
+La feature ES7 est `vertigo-elasticsearch-connector#rest` (package `io.vertigo.connectors.elasticsearch_7_17`). Voir `migration.md` pour les détails.
+
+### API SearchManager
+
+En plus des méthodes de reindexation et de requête, `SearchManager` expose :
+
+| Méthode | Rôle |
+|---|---|
+| `findFirstIndexDefinitionByKeyConcept` | Recherche la première définition d'index pour un KeyConcept donné |
+| `markAsDirty` | Marque un KeyConcept comme modifié pour déclencher une reindexation incrémentale |
+| `getReindexAllProgress` | Retourne la progression de la reindexation en cours |
+| `putAll`, `put` | Indexation manuelle de documents |
+| `loadList` (×2) | Exécution de requête facettée |
+| `count` | Comptage des documents correspondants |
+| `remove` (×2) | Suppression de documents |
+| `putMetaData`, `getMetaData` | Gestion des métadonnées d'index |
+| `waitForRefresh` | Attend que le refresh ElasticSearch soit effectué |

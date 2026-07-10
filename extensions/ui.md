@@ -8,7 +8,7 @@ Nous présentons ici, les éléments plus spécifiques qui aident à la prise en
 
 ## Controller : SpringMVC
 
-La documentation de SpringMVC sur [docs.spring.io](https://docs.spring.io/spring/docs/5.2.x/spring-framework-reference/web.html)
+La documentation de SpringMVC sur [docs.spring.io](https://docs.spring.io/spring-framework/reference/web/webmvc.html)
 
 Le fonctionnement principal de SpringMVC est de permettre de mapper simplement des requêtes HTTP vers des méthodes Java.
 Pour cela deux mécanismes cohabitent : 
@@ -108,34 +108,36 @@ Avant de rentrer dans le détail de chacune de ces briques, voici quelques élé
 
 ## Moteur de rendu : VueJS
 
-La documentation de VueJS sur [vuejs.org](https://vuejs.org/v2/guide/)
+La documentation de VueJS sur [vuejs.org](https://vuejs.org/guide/)
 
-VueJS propose une approche WebComponent avec une IHM réactive mappée sur un model de vue, selon le pattern Observer/Observable. 
+VueJS 3 propose une approche WebComponent avec une IHM réactive mappée sur un model de vue, selon le pattern Observer/Observable. 
 
-- **inline** `{{abc}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de `abc` dans le DOM. La valeur est *réactive* et encodé en HTML
-- **prefix** `:` : Ce préfixe indique que VueJS doit interpréter l'attribut qui suit. Cela permet de faire du VueJS sur des attributs HTML standards ou d'un webComponent(comme src, value ou icon de quasar)
+- **inline** `{{abc}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de `abc` dans le DOM. La valeur est *réactive* et encodée en HTML
+- **prefix** `:` : Ce préfixe indique que VueJS doit interpréter l'attribut qui suit. Cela permet de faire du VueJS sur des attributs HTML standards ou d'un webComponent (comme src, value ou icon de quasar)
 - `v-if="..."` : Donne la condition d'affichage sur un noeud du DOM. La condition peut être une variable du vueData ou une expression à évaluer. Attention l'élément disparaît du DOM, mais est présent côté client, ne convient pas à la mise en place de la sécurité.
 - `v-for="item in items"` : L'élément sur lequel est posé le `v-for` est dupliqué pour chaque élément. La variable de boucle peut-être utilisé pour changer le rendu de chaque boucle
 - `v-model` : Indique la donnée du vueData bindé sur le composant
-- `@click` : Précise une action a réaliser sur l'évenement `click` du composant. Il existe une variante `@click.native` pour mapper directement le onClick du composant HTML
-- `v-cloak` : Indique à Vue que cette partie du DOM doit être cachée jusqu'à ce qu'elle soit interprétée. Permet d'éviter des "scintillements" lors de l'affichage de la page
+- `@click` : Précise une action à réaliser sur l'événement `click` du composant. La variante `@click.native` n'est plus nécessaire avec Vue 3 (les événements sont automatiquement forwardés)
+- `v-pre` : Indique à Vue de sauter le compilage de cette portion de DOM. Utilisé automatiquement par `vu:utext` pour protéger contre les injections XSS
+- `v-once` : Rend le noeud et ses enfants en une seule passe, les sauts de réactivité ultérieurs sont ignorés
 
 ## Bibliothèque de composant : Quasar
 
 La documentation de Quasar sur [quasar.dev](https://quasar.dev/vue-components/)
 
-!> Vertigo-ui 2.1.0 utilise la version 1.4.1 de Quasar.
+!> Vertigo-ui 4.4.0 utilise Quasar **2.21.1** (Vue 3). La migration Quasar 1 → 2 implique des changements d'API : `q-modal` est devenu `q-dialog`, `q-uploader` est remplacé par `v-file-upload-quasar`, et `q-page-sticky` a été supprimé.
 
-Les composants les plus courants sont : 
+Les composants les plus courants sont :
 
 - `q-page`
 - `q-layout`
 - `q-toolbar`
 - `q-btn`
 - `q-item`
-- `q-popover`
-- `q-page-sticky`
+- `q-dialog` (remplace `q-modal` de Quasar 1)
 - `q-icon`
+- `q-knob`
+- `q-slider`
 
 ## Moteur de templating : Thymeleaf
 
@@ -143,7 +145,7 @@ Nécessite :
 ```HTML
 <html xmlns:th="http://www.thymeleaf.org">
 ```
-La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html)
+La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/thymeleaf-spring6) (version 3.1.5, compatible Spring 6)
 
 - **inline** `__${...}__` : Préprocesseur. Indique à Thymeleaf que cette portion doit être prétraitée. C'est utilisé pour des expressions à l'intérieur d'une autre expression plus globale.
 - **inline** `|...|` : Literal substitution. Permet d'écrire une chaîne contenant des parties à évaluer, afin de simplifier l'écriture et éviter des concaténations de chaînes.
@@ -213,11 +215,11 @@ Nécessite :
 ### Composants Vertigo-UI : layout
 - `vu:page` : Composant obligatoire encadrant la zone sur laquelle VueJS est actif.
   - `content` : Le body du tag est conservé
-  - `vuiDevMode` : active le mode developpeur pour les composants VertigoUi (il faut un serveur nodeJs qui pousse le js buildé `npm serve`..)
-  - `vuiSsr` : Active le mode Server Side Rendering (il faut un serveur nodeJs qui effectue le rendering de la page)
 - `vu:head` : Pose le tag head et les méta du head html
   - `title`* : Titre de la page
   - `content` : Le body du tag est conservé
+  - `vuiDevMode` : active le mode développeur pour les composants VertigoUi (il faut un serveur nodeJs qui pousse le js buildé `npm serve`..)
+  - `vuiSsr` : Active le mode Server Side Rendering (il faut un serveur nodeJs qui effectue le rendering de la page)
 - `vu:head-meta` : Composant obligatoire posant les éléments **méta** du head (script js, css, ...)
   - `vuejsDevMode` : passe VueJs en mode dev *(nous avons noté des bugs sur VueJs dans quelques cas qui n'apparaissent qu'en devMode)* 
 - `vu:form` : Pose un formulaire et référence le context de page associé
@@ -230,7 +232,7 @@ Nécessite :
   - `withFab` **boolean** : Ajoute la class `withFab` si nécessaire
   - `actions_slot` : Slot pour positionner des actions sur le block *(remplace l'icon)*
   - `header_attrs` : Listes des attributs à ajouter sur le header du block (tag `<div>`)
-  - `content_attrs` : Listes des attributs à ajouter sur le corps du block (tag `<div class="q-card-main">`)
+  - `content_attrs` : Listes des attributs à ajouter sur le corps du block (tag `<div class="q-card-section">`)
   - `card_attrs` : Listes des attributs à ajouter sur le parent du block (tag `<div class="q-card">`)
   - `content` : Le body du tag est conservé
 - `vu:grid` : Déclare une mise en page de grille
@@ -249,9 +251,11 @@ Nécessite :
   - `closeLabel` : Libellé de la fermeture de la modale
   - `srcUrl` : Url de la modale (optionnel, habituellement passé par le script d'ouverture)  
   - `iframe_attrs` : Listes des attributs à ajouter sur l'iframe
-  - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-modal>`)
-  
-Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.com/vertigo-io/vertigo-mars/blob/develop/src/main/webapp/WEB-INF/views/maintenance/ticket/ticketDetail.html) :
+  - `modal_attrs` : Listes des attributs à ajouter sur la modale (tag `<q-dialog>`)
+
+!> `componentStates` est réinitialisé à chaque requête (`new ComponentStates()` dans `createContext`/`preInitContext`). Les états des composants ne persistent plus entre requêtes : `opened = false` dans un callback AJAX fonctionne car tout reste côté client.
+
+Exemple d'utilisation d'une modale :
 ```HTML
   <q-btn round icon="edit" label="View detail" th:@click="|openModal('workOrderEditModal', '@{/maintenance/workorder/}' + props.row.woId , {'successCallback' : 'onWorkOrderSuccess' })|"></q-btn>
 
@@ -260,7 +264,7 @@ Exemple d'utilisation d'une modale sur Mars [ticketDetail.html](https://github.c
   <script type="text/javascript">
     function onWorkOrderSuccess() {
       componentStates.workOrderEditModal.opened = false;
-      VUi.methods.httpPostAjax("[[@{/maintenance/ticket/_reloadWorkOrders}]]", {});
+      VUiPage.httpPostAjax("[[@{/maintenance/ticket/_reloadWorkOrders}]]", {});
     }
   </script>
 ```
@@ -299,6 +303,8 @@ Ils restent utile pour ajouter précisément des données dans le `vueData`, pou
 - `vu:include-data-protected` : Inclus le champ d'un objet. La valeur posée côté client est protégée (non en clair et non modifiable), la valeur réelle reste coté serveur. Ce système est utilisé pour les identifiants de fichier par exemple.
   - `object` : Nom de l'objet du context
   - `field` : Nom du champ
+- `vu:utext` : Tag.processor appliquant `th:utext` **et** `v-pre` automatiquement. Permet d'afficher du HTML dynamique au contenu non-trusté en protégeant contre les injections XSS VueJS. Le `v-pre` empêche VueJS de compiler le contenu injecté.
+  - `content` : Contenu HTML traité par le tag processor
 <!-- - `vu:vue-data` : Pose les données de vue pour VueJS. **Ne doit pas être utilisé directement**, il est posé par `vu:page` -->
 
 
@@ -369,19 +375,19 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `labelField` : Nom du champ de la list utilisée comme label
   - `layout` : Mise en forme du radio : `horizontal` ou `vertical`
   - `label_attrs` : Listes des attributs à ajouter sur le label (tag `<q-field>`)
-  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-select>`) 
+  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-radio>`) 
 - `vu:date` : Composant de selection de date
   - `object`* : Nom de l'objet du context
   - `field`* : Nom du champ
   - `label` : Surcharge du label
-  - `format` : Format de la valeur de la date (par défaut `DD/MM/YYYY`)
-  - `date_attrs` : Listes des attributs à ajouter sur la date (tag `<q-date>`)
-  - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)  
+- `format` : Format d'affichage de la date (par défaut `DD/MM/YYYY`). La valeur est toujours stockée et échangée en ISO `YYYY-MM-DD`.
+   - `date_attrs` : Listes des attributs à ajouter sur la date (tag `<q-date>`)
+   - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)
 - `vu:datetime` : Composant de selection de date/time
-  - `object`* : Nom de l'objet du context
-  - `field`* : Nom du champ
-  - `label` : Surcharge du label
-  - `format` : Format de la valeur de la date (par défaut `DD/MM/YYYY HH:mm`)
+   - `object`* : Nom de l'objet du context
+   - `field`* : Nom du champ
+   - `label` : Surcharge du label
+   - `format` : Format d'affichage de la date/heure (par défaut `DD/MM/YYYY HH:mm`). La valeur est toujours stockée et échangée en ISO `YYYY-MM-DDTHH:mm`.
   - `date_attrs` : Listes des attributs à ajouter sur la date (tag `<q-date>`)
   - `time_attrs` : Listes des attributs à ajouter sur le time (tag `<q-time>`)
   - `input_attrs` : Listes des attributs à ajouter sur le input (tag `<q-input>`)  
@@ -418,7 +424,13 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `url`* : Url du WebService d'upload
   - `key`* : Clé du contexte réceptionnant les fichiers
   - `multiple` : Indique si on autorise plusieurs fichiers
-  - `uploader_attrs` : Listes des attributs à ajouter sur le input (tag `<q-uploader>`) 
+  - `maxFileSize` : Taille maximum par fichier en MB (ex: `5`)
+  - `maxTotalSize` : Taille maximum totale de tous les fichiers
+  - `maxFiles` : Nombre maximum de fichiers autorisés
+  - `accept` : Filtre MIME des fichiers acceptés (ex: `"image/*,.pdf"`)
+  - `uploader_attrs` : Listes des attributs à ajouter sur le composant upload (tag `v-file-upload-quasar`)
+- `fileupload-dropzone` : Zone de dépôt de fichiers par glisser-déposer
+  - `fileComponentId`* : Identifiant obligatoire liant la dropzone au composant uploader correspondant 
 
 > Pour adapter leur rendu ces composants utilisent des mécanismes particuliers.
 > Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi : 
@@ -476,41 +488,41 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
 
 ### Composants Vertigo-UI : buttons
 - `vu:button-link` : Pose un bouton de type lien (tag `<q-btn type="a"`)
-  - label : libellé du bouton
-  - icon : icon du bouton
-  - url : url du lien
-  - ariaLabel : libellé aria pour l'accessibilité
-  - disabled : **boolean** si le bouton est désactivé
-  - other_attrs : tous autres attribut. Posés sur le `<q-btn`  
+   - label : libellé du bouton
+   - icon : icon du bouton
+   - url : url du lien
+   - title : libellé pour l'accessibilité
+   - disabled : **boolean** si le bouton est désactivé
+   - other_attrs : tous autres attribut. Posés sur le `<q-btn`
 - `vu:button-link-confirm` : Pose un bouton de type lien avec une popin de confirmation (tag `<q-btn type="a"`)
-  - actions_slot : slot des boutons d'annulation et de confirmation
-  - label : libellé du bouton
-  - icon : icon du bouton
-  - url : url du lien
-  - ariaLabel : libellé aria pour l'accessibilité
-  - disabled : **boolean** si le bouton est désactivé
-  - confirmMessage : Message de confirmation
-  - labelOk : libellé du bouton OK (par défaut Oui)
-  - labelCancel : libellé du bouton annuler (par défaut Non)
-  - other_attrs : tous autres attribut. Posés sur le `<q-btn` (pas sur le bouton interne de confirmation)
+   - actions_slot : slot des boutons d'annulation et de confirmation
+   - label : libellé du bouton
+   - icon : icon du bouton
+   - url : url du lien
+   - title : libellé pour l'accessibilité
+   - disabled : **boolean** si le bouton est désactivé
+   - confirmMessage : Message de confirmation
+   - labelOk : libellé du bouton OK (par défaut Oui)
+   - labelCancel : libellé du bouton annuler (par défaut Non)
+   - other_attrs : tous autres attribut. Posés sur le `<q-btn` (pas sur le bouton interne de confirmation)
 - `vu:button-submit` : Pose un bouton de type submit (tag `<q-btn type="submit"`)
-  - label : libellé du bouton
-  - icon : icon du bouton
-  - action : nom de l'action associé
-  - ariaLabel : libellé aria pour l'accessibilité
-  - other_attrs : tous autres attribut. Posés sur le `<q-btn`
+   - label : libellé du bouton
+   - icon : icon du bouton
+   - action : nom de l'action associé
+   - title : libellé pour l'accessibilité
+   - other_attrs : tous autres attribut. Posés sur le `<q-btn`
 
 - `vu:button-submit-confirm` : Pose un bouton de type submit (tag `<q-btn type="submit"`)
-  - actions_slot : slot des boutons d'annulation et de confirmation
-  - label : libellé du bouton
-  - icon : icon du bouton
-  - action* : nom de l'action associé
-  - ariaLabel : libellé aria pour l'accessibilité
-  - formId* : identifiant du form (nécessaire car la popin est hors du form)
-  - confirmMessage : Message de confirmation
-  - labelOk : libellé du bouton OK (par défaut Oui)
-  - labelCancel : libellé du bouton annuler (par défaut Non)
-  - other_attrs : tous autres attribut. Posés sur le `<q-btn` (pas sur le bouton interne de confirmation)
+   - actions_slot : slot des boutons d'annulation et de confirmation
+   - label : libellé du bouton
+   - icon : icon du bouton
+   - action* : nom de l'action associé
+   - title : libellé pour l'accessibilité
+   - formId* : identifiant du form (nécessaire car la popin est hors du form)
+   - confirmMessage : Message de confirmation
+   - labelOk : libellé du bouton OK (par défaut Oui)
+   - labelCancel : libellé du bouton annuler (par défaut Non)
+   - other_attrs : tous autres attribut. Posés sur le `<q-btn` (pas sur le bouton interne de confirmation)
 
 
 ## Composants VueJS Vertigo-ui
@@ -643,6 +655,7 @@ Le module vertigo-ui ne dispose pas de `XxxFeatures.java` dédié. Les composant
 | `JettyBoot` | Démarrage du serveur Jetty embarqué |
 | `JettyBootParams` | Paramètres de configuration de Jetty |
 | `JettyBootParamsBuilder` | Construction des paramètres |
+| `withSessionTimeoutMinutes` | Configure `setMaxInactiveInterval` sur la session HTTP (convertit minutes → secondes) |
 | `KVSessionDataStoreFactory` | Fabricant de store de sessions Jetty |
 | `KVSessionDataStore` | Stockage des sessions Jetty via KVStore |
 

@@ -31,7 +31,7 @@ Module **DataStore** provides multi-backend storage abstraction organized around
 
 ### Metrics
 
-`EntityMetricsProvider` exposes access statistics (time, hits, misses) per entity.
+`EntityMetricsProvider` exposes the `entityCount` metric (access counter) per entity.
 
 ## FileStore
 
@@ -134,9 +134,121 @@ modules:
     features:
       - entitystore:
       - cache:
+      - filestore:
+      - kvStore:
     featuresConfig:
       - entitystore.sql:
       - cache.redis:
+      - filestore.filesystem:
+      - kvStore.h2:
+      - kvStore.speedb:
+```
+
+Redis connector configuration (single mode):
+
+```yaml
+modules:
+  io.vertigo.services.redis.RedisFeatures:
+    featuresConfig:
+      - jedis:
           host: localhost
           port: 6379
+          database: 0
+          password:
+          ssl: false
+          maxTotal: 8
+          minIdle: 1
 ```
+
+Redis connector configuration (cluster mode):
+
+```yaml
+modules:
+  io.vertigo.services.redis.RedisFeatures:
+    featuresConfig:
+      - jedis:
+          clusterNodes: "redis-node1:6379;redis-node2:6379;redis-node3:6379"
+          password:
+          ssl: false
+          maxTotal: 8
+          minIdle: 1
+```
+
+Redis connector configuration (Sentinel mode):
+
+```yaml
+modules:
+  io.vertigo.services.redis.RedisFeatures:
+    featuresConfig:
+      - jedis:
+          mastername: mymaster
+          sentinels: "sentinel1:26379;sentinel2:26379;sentinel3:26379"
+          database: 0
+          password:
+          ssl: false
+          maxTotal: 8
+          minIdle: 1
+```
+
+## RedisConnector
+
+`RedisConnector` replaces the previous Redis connector and supports three connection modes via the `jedis` feature.
+
+### Connection Modes
+
+| Mode | YAML Parameters | Description |
+|---|---|---|
+| Single | `host`, `port`, `database`, `username`, `password`, `ssl`, `trustStoreUrl`, `trustStorePassword`, `maxTotal`, `minIdle` | Single Redis node connection |
+| Cluster | `clusterNodes`, `password`, `ssl`, `trustStoreUrl`, `trustStorePassword`, `maxTotal`, `minIdle` | Native Redis cluster |
+| Sentinel | `mastername`, `sentinels`, `database`, `username`, `password`, `ssl`, `trustStoreUrl`, `trustStorePassword`, `maxTotal`, `minIdle` | Via Sentinel (method `withJedis`) |
+
+| Parameter | Single | Cluster | Sentinel |
+|---|:---:|:---:|:---:|
+| `host` | ✅ | | |
+| `port` | ✅ | | |
+| `database` | ✅ | | ✅ |
+| `username` | ✅ | ✅ | ✅ |
+| `password` | ✅ | ✅ | ✅ |
+| `ssl` | ✅ | ✅ | ✅ |
+| `trustStoreUrl` | ✅ | ✅ | ✅ |
+| `trustStorePassword` | ✅ | ✅ | ✅ |
+| `maxTotal` | ✅ | ✅ | ✅ |
+| `minIdle` | ✅ | ✅ | ✅ |
+| `clusterNodes` | | ✅ | |
+| `mastername` | | | ✅ |
+| `sentinels` | | | ✅ |
+
+### RedisSingleConnector (deprecated)
+
+`RedisSingleConnector` is **deprecated** (`@Deprecated`) and will throw an `UnsupportedOperationException` if used in Sentinel mode.
+
+**Migration**: replace with `RedisConnector` using single mode (`host`/`port` parameters) or Sentinel mode (`mastername`/`sentinels` parameters).
+
+## Database
+
+### LiquibaseMigrationPlugin
+
+Executes Liquibase schema migrations at module startup.
+
+| Parameter | Description |
+|---|---|
+| `masterFile` | Path to `changelog-master.xml` file |
+| `connectionName` | JDBI connection name to use |
+| `contexts` | Liquibase contexts to activate |
+
+### InfluxDB
+
+InfluxDB connector for time-series metric storage.
+
+| Parameter | Description |
+|---|---|
+| `host` | InfluxDB server URL |
+| `token` | Authentication token |
+| `org` | InfluxDB organization |
+
+Empty filters are ignored (fix). Multiple measures in union use `toFloat()`/`toString()` with default values `0.0`/`""`.
+
+## Vigilance
+
+- **KVStore multi-collections**: H2 and Speedb support multiple collections. Each collection uses a dedicated store (`MVStore` for H2, separate `SpeedbDB` for Speedb). On H2, the TTL purge daemon runs every 30s. On Speedb, cleanup is done via `forceRemoveTooOldElements()` (call manually if needed).
+- **Tika config**: `TikaMimeTypeResolverPlugin` accepts an optional `tikaConfigResource` parameter for custom Tika configuration (TikaConfig file in classpath).

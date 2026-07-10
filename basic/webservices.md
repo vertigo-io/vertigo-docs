@@ -4,7 +4,7 @@ Le module Vega de Vertigo permet la création simplifiée de WebServices REST do
 
 Ce module est également adapté à la création d'API REST consommées par les Single Page Applications.
 
-Le format d'échange JSON a été privilégié pour sa popularité, mais également pour sa capacité à être facilement consommable par une myriade de technologies. L'objectif visé par Vega étant l'ouverture de l'application au monde, autant utiliser la lingua franca de l'échange de données pour l'ouvrir au plus grand nombre.
+Le format d'échange JSON a été privilégié pour sa popularité, mais également pour sa capacité à être facilement consommable par de nombreuses technologies. L'objectif visé par Vega étant l'ouverture de l'application au monde, autant utiliser le format d'échange le plus largement adopté pour l'ouvrir au plus grand nombre.
 
 ## Configuration
 
@@ -52,6 +52,13 @@ D'autre part voici le filtre à ajouter dans la servlet dans ce cas de figure :
 ```
 
 !> Ici nous avons choisi d'utiliser un préfix pour l'ensemble des routes de webservices `/api`. C'est une pratique que nous encourageons car elle permet d'éviter des conflits de nommage.
+
+#### AbstractFilter
+
+Tout filtre dérivant d'`AbstractFilter` supporte deux paramètres de filtrage par URL :
+
+- `url-include-pattern` : restreint le filtre aux URLs correspondant au pattern
+- `url-exclude-pattern` : exclut les URLs correspondant au pattern
 
 ### Cas du serveur web embarqué
 
@@ -215,20 +222,157 @@ public ContactView updateContactView(
 
 > Ici on vérifie que utilisateur connecté possède autorisation d'écriture sur l'entité ContactView. Ce contrôle de sécurité dépend des à la fois des attributs de l'utilisateur et du Contact. Il s'agit donc d'une contrôle de sécurité très fin.
 
+## CORS (Cross-Origin Resource Sharing)
+
+Le plugin `CorsAllowerWebServiceHandlerPlugin` permet de gérer les requêtes cross-origin. Il s'active via la fonctionnalité `webservices.cors`.
+
+Les paramètres de configuration sont :
+
+- `originCORSFilter` (obligatoire) : filtre les origines autorisées
+- `methodCORSFilter` (optionnel) : filtre les méthodes HTTP autorisées, par défaut `GET, POST, DELETE, PUT, OPTIONS`
+
+La validation des URIs est stricte : seules les URI complètes sans path ni query string sont acceptées.
+
+Les paramètres `url-include-pattern` et `url-exclude-pattern` permettent de restreindre le plugin aux URLs correspondantes.
+
+## OIDC (OpenID Connect)
+
+Vega supporte l'authentification OIDC via les interfaces et classes suivantes :
+
+- `AppLoginHandler<T>` : interface de gestion de connexion applicative
+- `OIDCAppLoginHandler` : marqueur pour un handler de connexion OIDC
+- `WebAuthenticationPlugin<T>` : plugin d'authentification web générique
+- `OIDCWebAuthenticationPlugin` : plugin d'authentification OIDC avec les paramètres :
+   - `scopes` : les scopes OIDC à demander
+   - `urlPrefix` : préfixe d'URL
+   - `urlHandlerPrefix` : préfixe d'URL pour les handlers
+   - `externalUrl` : URL externe de l'application
+- `connectorName` : nom du connecteur OIDC
+
 ## SwaggerApi
 
-L'api ainsi crée avec ce module est exposée au format standard Swagger. Vertigo inclus la mise à disposition de l'Api via l'UI standard de Swagger.
+L'api ainsi crée avec ce module est exposée au format standard Swagger **2.0**. Vertigo inclus la mise à disposition de l'Api via l'UI standard de Swagger.
 Il suffit d'ajouter la facade webService : `io.vertigo.vega.impl.webservice.catalog.SwaggerWebServices`
 
 ![](./images/swaggerUi.png)
 
-## Pour aller plus loin
+L'objet `SwaggerApi` est représenté comme un `LinkedHashMap<String, Object>`.
 
-Il est possible d'enrichir le comportement d'un Webservice à l'aide de Vega en utilisant les fonctionnalités offertes suivantes :
+Règles de construction des noms de définition Swagger :
 
-- **rate-limiting** : Limitation du nombre d'appel autorisé sur une fenêtre de temps glissante
-- **tokens** : generation et consommation de tokens pour sécuriser des opérations critiques
-- **server-side** : conservation d'un état côté serveur pour gérer efficacement certains traitements
-- **etc...**
+- Le caractère `$` dans le nom de la définition du webservice (`webServiceDefinition.getName()`) sert de séparateur pour structurer les définitions imbriquées
+- Les séquences d'underscores multiples sont réduites à un seul `_` (ex: `__` → `_`)
+- Il n'y a **pas** de remplacement automatique de `$` par `_`
 
-L'ensemble de ces fonctionnalités et leurs API sont disponibles dans [ce](/extensions/vega) chapitre
+Le JSON des facettes `FacetedQueryResult` expose l'attribut `isMultiSelectable` sur chaque facette. `FacetedQueryResultJsonSerializerV5` est le sérialiseur **par défaut**.
+
+## LogExceptionsHandlerPlugin
+
+Le plugin `LogExceptionsHandlerPlugin` est activé par défaut, sans paramètre de configuration. Il est toujours actif et génère un log d'erreur (status, verbe, path, path params) pour toute réponse HTTP avec un code entre 500 et 599.
+
+## Rate Limiting
+
+Le rate limiting permet de limiter le nombre d'appels autorisé sur une fenêtre de temps glissante.
+
+L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est ajoutée par défaut à la liste des IP exclues.
+
+## Pour les experts
+
+### Plugins de sécurité
+
+| Plugin | Feature | Stack Index | Description |
+|---|---|---|---|
+| `AccessTokenWebServiceHandlerPlugin` | `webservices.token` | 90 | Génération et vérification de tokens jetable pour actions sensibles |
+| `ApiKeyWebServiceHandlerPlugin` | `webservices.auth.apiKey` | 45 | Authentification par API key. Paramètres : `apiKey` (String), `headerName` (Optional<String>) |
+
+### Services système
+
+| Service | Feature | Route | Description |
+|---|---|---|---|
+| `HealthcheckWebServices` | `webservices.healthcheck` | Auto-généré | Endpoint de supervision de la plateforme |
+| `CatalogWebServices` | `webservices.catalog` | Auto-généré | Catalogue des webservices (métadonnées, définitions) |
+
+### Proxy client
+
+La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClientAmplifierMethod` qui génère dynamiquement des proxies Java depuis une `WebServiceDefinition`. Le proxy utilise un `HttpRequestBuilder` interne pour construire les URL et `DefaultJsonSerializer` pour la sérialisation JSON.
+
+### HandlerChain — Architecture interne
+
+Vega traite chaque requête HTTP via une chaîne de plugins (`WebServiceHandlerPlugin`) triés par `getStackIndex()`. La `HandlerChain` itère sur les handlers actifs et appelle `accept(WebServiceDefinition)` pour déterminer si un handler s'applique à ce webservice. Le premier qui accepte exécute `handle()` et passe au suivant via `chain.handle()`. Si le dernier handler ne produit pas de body, une `IllegalStateException` est levée.
+
+Le nombre maximum de handlers dans une chaîne est 50 (détection de boucle infinie via `MAX_NB_HANDLERS`).
+
+#### Ordre des handlers
+
+| Index | Handler | Activé par |
+|---|---|---|
+| 5 | `LogExceptionsHandlerPlugin` | Toujours actif |
+| 10 | `ExceptionWebServiceHandlerPlugin` | Toujours actif |
+| 20 | `CorsAllowerWebServiceHandlerPlugin` | `webservices.cors` |
+| 30 | `AnalyticsWebServiceHandlerPlugin` | Toujours actif |
+| 40 | `JsonConverterWebServiceHandlerPlugin` | Toujours actif |
+| 45 | `ApiKeyWebServiceHandlerPlugin` | `webservices.auth.apiKey` |
+| 50 | `SessionInvalidateWebServiceHandlerPlugin` | `webservices.security` |
+| 60 | `SessionWebServiceHandlerPlugin` | `webservices.security` |
+| 70 | `SecurityWebServiceHandlerPlugin` | `webservices.security` |
+| 80 | `ServerSideStateWebServiceHandlerPlugin` | `webservices.token` |
+| 90 | `AccessTokenWebServiceHandlerPlugin` | `webservices.token` |
+| 100 | `RateLimitingWebServiceHandlerPlugin` | `webservices.rateLimiting` |
+| 110 | `ValidatorWebServiceHandlerPlugin` | Toujours actif |
+| **120** | `RestfulServiceWebServiceHandlerPlugin` | Toujours actif ← **toujours dernier** |
+
+Un handler personnalisé doit avoir un `getStackIndex()` entre 0 et 119. Le dernier (`RestfulServiceWebServiceHandlerPlugin`, index 120) est celui qui exécute la méthode Java cible et retourne le body.
+
+### Servlet Filters vs HandlerChain
+
+Les Servlet Filters s'exécutent **avant** la HandlerChain et opèrent au niveau Servlet Spec (pas Vega). Ils ne filtrent pas par `WebServiceDefinition` mais par URL pattern (`url-include-pattern` / `url-exclude-pattern` via `AbstractFilter`).
+
+| Filter | Rôle |
+|---|---|
+| `SetCharsetEncodingFilter` | Force charset UTF-8 sur les requêtes |
+| `CompressionFilter` | Compresse la réponse si `Accept-Encoding: gzip/deflate` |
+| `CacheControlFilter` | Pose les headers `Cache-Control` (private, max-age, no-cache) |
+| `SecurityFilter` | Ajoute les headers sécurité HTTP (X-Frame-Options, X-XSS-Protection) |
+| `ContentSecurityPolicyFilter` | Gère les headers CSP |
+| `HeaderControlFilter` | Contrôle des headers d'entrée/sortie |
+| `AuthorizationWebFilter` | Vérification `@Secured` au niveau Servlet |
+| `RateLimitingFilter` | Rate limiting au niveau Servlet (separate de handler) |
+| `AnalyticsFilter` | Collecte métriques au niveau Servlet |
+| `DelegateAuthenticationFilterHandler` | Délégation de l'authentification vers un provider externe |
+
+### Cycle de vie
+
+1. **DefinitionSpace** : `AnnotationsWebServiceScannerPlugin` scanne les composants implémentant `WebServices`, extrait les méthodes annotées (`@GET`, `@POST`, ...) et génère les `WebServiceDefinition`
+2. **ComponentSpace** : `WebServiceManager` assemble les `WebServiceDefinition` et trie les `WebServiceHandlerPlugin` par `getStackIndex()`
+3. **Runtime** : Requête HTTP → Servlet Filter chain → HandlerChain → méthode Java cible → JSON response
+
+### Authentication Plugins
+
+| Plugin | Feature | Description |
+|---|---|---|
+| `LocalWebAuthenticationPlugin` | `authentication.local` | Authentification locale via formulaire |
+| `OIDCWebAuthenticationPlugin` | `authentication.oidc` | OpenID Connect |
+| `SAML2WebAuthenticationPlugin` | `authentication.saml2` | SAML 2.0 |
+| `AzureAdWebAuthenticationPlugin` | `authentication.aad` | Azure Active Directory |
+
+### RateLimiting
+
+Le `RateLimitingWebServiceHandlerPlugin` implémente le rate limiting via une fenêtre glissante. Le backend de stockage est configurable :
+
+| Backend | Feature | Description |
+|---|---|---|
+| Mémoire locale | `rateLimiting.mem` | Stockage local, non persisté, non partagé |
+| Redis | `rateLimiting.redis` | Stockage partagé via Redis, compatible cluster |
+
+L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est exclue par défaut de toute limitation.
+
+### WebServiceClient (Proxy)
+
+La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClientAmplifierMethod` qui génère dynamiquement des proxies Java à partir d'une `WebServiceDefinition`. Le proxy utilise un `HttpRequestBuilder` interne pour construire les requêtes HTTP (méthode, URL, headers, body JSON).
+
+### Debug
+
+- Activer le logging du `WebServiceManager` pour tracer le chargement des webservices et l'assemblage de la HandlerChain
+- Le `LogExceptionsHandlerPlugin` log automatiquement toutes les réponses 5xx (status, verbe, path, path params)
+- Le `AnalyticsWebServiceHandlerPlugin` expose les métriques de performance (temps d'exécution par webservice)
+- Pour déboguer l'ordre des handlers, vérifier que chaque `accept()` retourne `true` uniquement pour les webservices ciblés
