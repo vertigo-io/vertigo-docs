@@ -247,8 +247,7 @@ Vega supporte l'authentification OIDC via les interfaces et classes suivantes :
    - `urlPrefix` : préfixe d'URL
    - `urlHandlerPrefix` : préfixe d'URL pour les handlers
    - `externalUrl` : URL externe de l'application
-   - `connectorName` : nom du connecteur OIDC
-- `loginHandlerName` : nom du handler de connexion (défaut: `default`)
+- `connectorName` : nom du connecteur OIDC
 
 ## SwaggerApi
 
@@ -269,7 +268,7 @@ Le JSON des facettes `FacetedQueryResult` expose l'attribut `isMultiSelectable` 
 
 ## LogExceptionsHandlerPlugin
 
-Le plugin `LogExceptionsHandlerPlugin` est activé par défaut, sans paramètre de configuration. Il est toujours actif et génère un log d'erreur pour toute réponse HTTP avec un code entre 500 et 599.
+Le plugin `LogExceptionsHandlerPlugin` est activé par défaut, sans paramètre de configuration. Il est toujours actif et génère un log d'erreur (status, verbe, path, path params) pour toute réponse HTTP avec un code entre 500 et 599.
 
 ## Rate Limiting
 
@@ -374,6 +373,6 @@ La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClien
 ### Debug
 
 - Activer le logging du `WebServiceManager` pour tracer le chargement des webservices et l'assemblage de la HandlerChain
-- Le `LogExceptionsHandlerPlugin` log automatiquement toutes les réponses 5xx avec la stack trace complète
+- Le `LogExceptionsHandlerPlugin` log automatiquement toutes les réponses 5xx (status, verbe, path, path params)
 - Le `AnalyticsWebServiceHandlerPlugin` expose les métriques de performance (temps d'exécution par webservice)
 - Pour déboguer l'ordre des handlers, vérifier que chaque `accept()` retourne `true` uniquement pour les webservices ciblés

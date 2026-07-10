@@ -89,10 +89,10 @@ Le constructeur prend exactement 5 paramètres :
 | `name` | `String` | Identifiant de la définition d'index |
 | `keyConceptDataDefinition` | `DataDefinition` | Définition du KeyConcept métier (par exemple DtTache) |
 | `indexDataDefinition` | `DataDefinition` | Définition du DTO d'indexation (par exemple DtTacheIndex) |
-| `indexCopyFromFieldsMap` | `Map<DataField, List<DataField>>` | Mappage des champs source vers les champs copyTo cibles |
+| `indexCopyFromFieldsMap` | `Map<DataField, List<DataField>>` | Mappage cible → liste des champs source (`toField → [fromField, ...]`) pour `copy_to` |
 | `searchLoaderId` | `String` | Identifiant du Component SearchLoader associé |
 
-Le paramètre `indexCopyFromFieldsMap` associe chaque champ source (`DataField`) à une liste de champs cibles, permettant de copier plusieurs champs dans un seul champ d'agrégation pour la recherche multicritères. Par exemple, copier `libelle`, `categorie` et `statut` vers un unique champ `rechercheGlobale`.
+Le paramètre `indexCopyFromFieldsMap` associe chaque champ cible (`DataField`) à une liste de champs source, permettant de copier plusieurs champs dans un seul champ d'agrégation pour la recherche multicritères. Par exemple, `rechercheGlobale → [libelle, categorie, statut]`.
 
 Pour définir un index, on crée une sous-classe avec le préfixe `Idx` par convention :
 
@@ -405,7 +405,7 @@ Exemple : `text_fr:keyword:stored:sortable:facetable`
 | Facettes | Agrégats ES | Comptage pur-Java in-process |
 | Reindexation | Full / Modified / Delta via SearchManager | Index rebuilt à chaque appel |
 | Indexation auto | EventBus StoreEvent sur KeyConcept | Manuel, sur DtList fournie |
-| Dépendance | `vertigo-elasticsearch-connector`, ES9 | Lucene 8.11.3 (bundlé) |
+| Dépendance | `vertigo-elasticsearch-connector`, ES9 | Lucene 9.12.3 (bundlé) |
 | Usage typique | Catalogue, recherche applicative, index partagé | Filtres UI, tables de données, rapports |
 
 ---
@@ -422,7 +422,7 @@ Le projet définit d'abord les structures de données métier. `DtTache` représ
 
 On crée `IdxTache`, sous-classe de `SearchIndexDefinition`, qui lie `DtTache` (KeyConcept) à `DtTacheIndex` (DTO d'indexation). Le constructeur reçoit 5 paramètres : le nom de l'index, la `DataDefinition` du KeyConcept, la `DataDefinition` du DTO d'indexation, une `Map<DataField, List<DataField>>` pour les champs copyTo, et l'identifiant du SearchLoader.
 
-La map copyTo copie les champs `libelle`, `categorie` et `statut` vers un champ unique `rechercheGlobale`, permettant une recherche multicritères sur un seul champ agrégé.
+La map copyTo (`toField → [fromFields]`) copie les champs `libelle`, `categorie` et `statut` vers un champ unique `rechercheGlobale`, permettant une recherche multicritères sur un seul champ agrégé.
 
 ### Étape 3 — Implémentation du loader
 
@@ -474,7 +474,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 
 ## Vigilance
 
-- **Constructeur SearchIndexDefinition** : le constructeur prend exactement 5 paramètres : name, keyConceptDataDefinition (`DataDefinition`), indexDataDefinition (`DataDefinition`), indexCopyFromFieldsMap (`Map<DataField, List<DataField>>`), searchLoaderId. Aucun builder fluide de type `SearchIndexDefinitionBuilder` n'existe. Ne pas confondre `DataDefinition` avec `DtDefinition` ; ne pas utiliser `Map<String, String>` pour la map copyTo.
+- **Constructeur SearchIndexDefinition** : le constructeur prend exactement 5 paramètres : name, keyConceptDataDefinition (`DataDefinition`), indexDataDefinition (`DataDefinition`), indexCopyFromFieldsMap (`Map<DataField, List<DataField>>` — direction `toField → [fromFields]`, pas `fromField → [toFields]`), searchLoaderId. Aucun builder fluide de type `SearchIndexDefinitionBuilder` n'existe. Ne pas confondre `DataDefinition` avec `DtDefinition` ; ne pas utiliser `Map<String, String>` pour la map copyTo.
 - **Reindexation automatique** : `SearchManagerImpl` écoute les `StoreEvent` sur l'EventBus pour marquer les KeyConcepts comme dirty, puis file un `ReindexTask` avec un délai de 1 seconde pour éviter les appels multiples.
 - **Reindexation Delta** : la méthode `getSqlQueryFilter()` du SearchLoader doit retourner un filtre SQL avec un paramètre timestamp. Les documents supprimés sont détectés par disparition du KeyConcept.
 - **Ranges dans le DSL** : `[min TO max]` inclut les bornes. Utiliser `*` pour les bornes ouvertes infinies : `[0 TO *]`.

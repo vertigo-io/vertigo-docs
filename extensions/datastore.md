@@ -31,7 +31,7 @@ Les `MasterData` et `StaticMasterData` sont chargés via `AbstractMasterDataDefi
 
 ### Métriques
 
-L'`EntityMetricsProvider` expose les statistiques d'accès (temps, hits, misses) pour chaque entité.
+L'`EntityMetricsProvider` expose la métrique `entityCount` (compteur d'accès) pour chaque entité.
 
 ## FileStore
 
