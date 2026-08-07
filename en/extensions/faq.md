@@ -678,3 +678,13 @@ WHERE equ.EQUIPMENT_ID in (#equipmentIds.rownum#);
 Facet is automatic.
 ElasticSearch splits tag column values by `|`. Uppercase and spaces preserved.
 Automatically populates facet with values.
+
+## [Orchestra] An Orchestra activity goes to ABORTED even though the code did not fail
+**Symptom**: The activity ends with `status: "ok"` in the workspace, but its state in the database is `ABORTED`. Error message: `DbProcessExecutorPlugin - Error in activity state, activity execution N is already terminated`.
+
+**Cause**: A long-running daemon (>60s) blocks the shared daemon thread pool (2 threads default). The orchestra daemon heartbeat is no longer updated, and another node considers this node dead.
+
+**Solutions**:
+1. Find your long-running daemons (>60s) via the analytics dashboard (`/dashboard`)
+2. If necessary, increase `threadPoolSize` in `boot.params` of `configuration.yaml` (minimum 4 recommended)
+3. Move very long-running tasks out of the daemon pool (execute in a dedicated thread)

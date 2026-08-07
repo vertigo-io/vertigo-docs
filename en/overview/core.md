@@ -48,6 +48,17 @@ When the application node stops, all components are shut down in reverse order o
 Additionally, Vertigo-Core provides a dedicated execution environment for daemons (recurring technical tasks) through the DaemonManager. To register a new daemon, simply create a `DaemonDefinition`.
 A simplified approach is to add the `@DaemonScheduled` annotation to a public method of a component registered in the ComponentSpace.
 
+> **⚠️ Daemon thread pool:**
+> - All daemons share a **single thread pool** (default 2 threads)
+> - Pool size is configurable via `boot.params.threadPoolSize` in `configuration.yaml`:
+>   ```yaml
+>   boot:
+>     params:
+>       threadPoolSize: 4
+>   ```
+> - Daemons should be **optimized and simple**: short, recurring tasks. A daemon that runs too long can block other daemons (heartbeats, analytics...).
+> - If long-running daemons are unavoidable, increase `threadPoolSize` (4-6 recommended if daemons >10s) or run very long tasks (>60s) in a dedicated thread.
+
 ## Monitor
 
 Once an application has started, it is important to monitor its activity and performance.

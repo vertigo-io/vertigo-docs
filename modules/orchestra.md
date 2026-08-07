@@ -174,6 +174,10 @@ Ces informations sont modifiables avec l'API (updateProcessDefinitionProperties)
 | `ProcessReportPlugin` | `DbProcessReportPlugin` | `orchestra.database` |
 | `ProcessLoggerPlugin` | `DbProcessLoggerPlugin` | `orchestra.database` |
 
+### Daemon Orchestra
+
+**Note** : Le daemon `DmnODbProcessExecutorDaemon` (`daemonPeriodSeconds`, défaut 30s) met à jour le heartbeat des nœuds orchestra. Un autre daemon long (>60s) s'exécutant simultanément dans le pool partagé peut empêcher ce heartbeat et provoquer une détection de nœud mort. Vérifiez la durée d'exécution de vos daemons via le dashboard analytics.
+
 ### Scheduler Internals
 
 | Classe | Rôle |

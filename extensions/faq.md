@@ -771,6 +771,16 @@ Il va automatiquement peupler la facette avec les valeurs.
 
 // 26/11
 
+## [Orchestra] Une activité Orchestra passe en ABORTED alors que le code n'a pas échoué
+**Symptôme** : L'activité se termine avec `status: "ok"` dans le workspace, mais son état en base est `ABORTED`. Message : `DbProcessExecutorPlugin - Error in activity state, activity execution N is already terminated`.
+
+**Cause** : Un daemon long (>60s) bloque le pool de threads daemon partagé (2 threads par défaut). Le heartbeat du daemon orchestra n'est plus mis à jour, et un autre nœud considère le nœud comme mort.
+
+**Solutions** :
+1. Rechercher vos daemons longs (>60s) via le dashboard analytics (`/dashboard`)
+2. Si nécessaire, augmenter `threadPoolSize` dans `boot.params` de `configuration.yaml` (4 recommandé minimum)
+3. Sortir les traitements très longs du pool daemon (exécuter dans un thread dédié)
+
 
 
 
