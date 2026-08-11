@@ -1,11 +1,23 @@
 # from 4.4.x to 5.0.0
 
-* **[Core] Upgrade to JDK25**. Update your `pom.xml` source/target and IDE settings.
+* **[All] Upgrade to JDK 25.** Update your `pom.xml` source/target and IDE settings.
+* **[All] Dependency injection switched from `javax.inject` to `jakarta.inject`.** Replace all `javax.inject.Inject` imports by `jakarta.inject.Inject` in your code.
+* **[All] Web stack upgraded : Jetty 11 -> 12, Javalin 6 -> 7, Spring 6 -> 7.** Update your own spring modules versions accordingly (spring-test, spring-security...). Jetty websocket maven artifact is renamed `websocket-jetty-server` -> `jetty-websocket-jetty-server`.
+* **[Connectors] ElasticSearch 7 support dropped** : `vertigo-elasticsearch_7_17-connector` module is removed, only the ES 9 connector remains (stay on vertigo 4.x LTS if you need ES 7).
+* **[Connectors] `vertigo-twitter-connector` and `vertigo-ifttt-connector` are removed.**
+* [Connectors] New module `vertigo-connector-commons` (shared SSL helper `ConnectorSslUtil`), pulled automatically by connectors using SSL.
+* **[DataModel] Blackboard (BB) moved from vertigo-vortex to vertigo-datamodel** : package `io.vertigo.vortex.bb` -> `io.vertigo.datamodel.bb`, the `vertigo-vortex` module no longer exists.
+* **[Commons] `PegResult` is now a record** : rename accessors `getIndex()` -> `index()` and `getValue()` -> `value()` if you use the Peg parser API.
+* **[Ui] Embedded Jetty : `extraClasspath` parameter renamed to `addonPaths`** (`JettyBootParams` builder).
+* **[Ui] Multipart configuration is now part of `JettyBootParams`** (`multiPartTempPath`, `maxPartSizeMb`, `maxRequestSize`, `maxPartSizeInMemoryKb`) : remove any multipart handler you registered at server start.
+* **[Ui][Wysiwyg] TipTap upgraded v2 -> v3** : custom wysiwyg extensions must be migrated to the TipTap v3 API.
 * **[Vega] ContentSecurityPolicyFilter ${..} are now resolved by the paramManager. Old syntax must be updated :**
   - `${cspFrameAncestor}` => `${CSP_FRAME_ANCESTOR}`
   - `${cspParam1}` => `${CSP_PARAM1}`
   - `${cspParam2}` => `${CSP_PARAM2}`
   - `${cspParam3}` => `${CSP_PARAM3}`
+* [All] Internal logging now uses LOG4J api directly (SLF4J dropped from vertigo-libs).
+* [All] Tests now run with JUnit 6 (`junit-jupiter` aggregator).
 
 # from 4.3.2 to 4.4.0
 
