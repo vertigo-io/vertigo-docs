@@ -1,6 +1,13 @@
 # from 4.4.x to 5.0.0
 
 * **[All] Upgrade to JDK 25.** Update your `pom.xml` source/target and IDE settings.
+* **[App] ElasticSearch 9 : update your pom and yaml config** (validated on vertigo-mars) :
+  - pom : remove ES 7 deps (`org.elasticsearch:elasticsearch`, `elasticsearch-rest-high-level-client`, `x-pack-transport`, `org.codelibs.elasticsearch.module:*`), add `co.elastic.clients:elasticsearch-java` (+ `org.testcontainers:elasticsearch` in test scope for the embedded server) ; lucene artifact renamed `lucene-analyzers-common` -> `lucene-analysis-common`
+  - yaml : connector feature `restHL` -> `rest` ; datafactory feature `search.elasticsearch.restHL` -> `search.elasticsearch.rest`
+  - index settings file : convert `elasticsearch.yml` to **json** (`config.file: search/elasticsearch.json`), same structure
+  - `embeddedServer` now uses testcontainers : requires a reachable docker daemon (`docker.host` param or `DOCKER_HOST` env) ; alternatively run an external ES 9 and use the `rest` feature
+  - note : `elasticsearch-java` requires `io.opentelemetry:opentelemetry-api` at **runtime** scope (packaged automatically in war/uber-jar builds ; add it explicitly for handcrafted classpaths)
+* **[App] Spring 7 needs jackson 2.22+** : if your pom pins `jackson-databind` (e.g. 2.18.x), bump it to 2.22.0 or Spring MVC fails at startup (`NoClassDefFoundError: com.fasterxml.jackson.annotation.JsonSerializeAs`).
 * **[All] Dependency injection switched from `javax.inject` to `jakarta.inject`.** Replace all `javax.inject.Inject` imports by `jakarta.inject.Inject` in your code.
 * **[All] Web stack upgraded : Jetty 11 -> 12, Javalin 6 -> 7, Spring 6 -> 7.** Update your own spring modules versions accordingly (spring-test, spring-security...). Jetty websocket maven artifact is renamed `websocket-jetty-server` -> `jetty-websocket-jetty-server`.
 * **[Connectors] ElasticSearch 7 support dropped** : `vertigo-elasticsearch_7_17-connector` module is removed, only the ES 9 connector remains (stay on vertigo 4.x LTS if you need ES 7).
