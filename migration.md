@@ -10,6 +10,7 @@
 * **[App] jackson versions are now managed by the `vertigo-ui` pom import** (jackson-bom 2.22.0, required by Spring 7) : **remove any explicit jackson version** from your pom. If you don't import the `vertigo-ui` pom in your dependencyManagement, pin jackson 2.22+ yourself or Spring MVC fails at startup (`NoClassDefFoundError: com.fasterxml.jackson.annotation.JsonSerializeAs`).
 * **[All] Dependency injection switched from `javax.inject` to `jakarta.inject`.** Replace all `javax.inject.Inject` imports by `jakarta.inject.Inject` in your code.
 * **[All] Web stack upgraded : Jetty 11 -> 12, Javalin 6 -> 7, Spring 6 -> 7.** Update your own spring modules versions accordingly (spring-test, spring-security...). Jetty websocket maven artifact is renamed `websocket-jetty-server` -> `jetty-websocket-jetty-server`.
+* **[App] Embedded Jetty + JSP (ex: web.xml error pages) : replace the `org.eclipse.jetty:apache-jsp` dependency by `org.eclipse.jetty.ee10:jetty-ee10-apache-jsp`** (artifact moved with jetty 12). Without it JSP support silently disappears and every server error shows up as a bare 404 instead of your error page.
 * **[Connectors] ElasticSearch 7 support dropped** : `vertigo-elasticsearch_7_17-connector` module is removed, only the ES 9 connector remains (stay on vertigo 4.x LTS if you need ES 7).
 * **[Connectors] `vertigo-twitter-connector` and `vertigo-ifttt-connector` are removed.**
 * [Connectors] New module `vertigo-connector-commons` (shared SSL helper `ConnectorSslUtil`), pulled automatically by connectors using SSL.
