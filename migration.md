@@ -7,7 +7,7 @@
   - index settings file : convert `elasticsearch.yml` to **json** (`config.file: search/elasticsearch.json`), same structure
   - `embeddedServer` now uses testcontainers : requires a reachable docker daemon (`docker.host` param or `DOCKER_HOST` env) ; alternatively run an external ES 9 and use the `rest` feature
   - note : `elasticsearch-java` requires `io.opentelemetry:opentelemetry-api` at **runtime** scope (packaged automatically in war/uber-jar builds ; add it explicitly for handcrafted classpaths)
-* **[App] Spring 7 needs jackson 2.22+** : if your pom pins `jackson-databind` (e.g. 2.18.x), bump it to 2.22.0 or Spring MVC fails at startup (`NoClassDefFoundError: com.fasterxml.jackson.annotation.JsonSerializeAs`).
+* **[App] jackson versions are now managed by the `vertigo-ui` pom import** (jackson-bom 2.22.0, required by Spring 7) : **remove any explicit jackson version** from your pom. If you don't import the `vertigo-ui` pom in your dependencyManagement, pin jackson 2.22+ yourself or Spring MVC fails at startup (`NoClassDefFoundError: com.fasterxml.jackson.annotation.JsonSerializeAs`).
 * **[All] Dependency injection switched from `javax.inject` to `jakarta.inject`.** Replace all `javax.inject.Inject` imports by `jakarta.inject.Inject` in your code.
 * **[All] Web stack upgraded : Jetty 11 -> 12, Javalin 6 -> 7, Spring 6 -> 7.** Update your own spring modules versions accordingly (spring-test, spring-security...). Jetty websocket maven artifact is renamed `websocket-jetty-server` -> `jetty-websocket-jetty-server`.
 * **[Connectors] ElasticSearch 7 support dropped** : `vertigo-elasticsearch_7_17-connector` module is removed, only the ES 9 connector remains (stay on vertigo 4.x LTS if you need ES 7).
