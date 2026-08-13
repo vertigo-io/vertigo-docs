@@ -21,8 +21,8 @@ A l'issu de cette création votre fichier __pom.xml__ doit ressembler à ça :
 	<packaging>jar</packaging>
 	
 	<properties>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 	
 	<dependencies>
@@ -105,8 +105,12 @@ public class HelloWorld {
 		try (AutoCloseableNode app = new AutoCloseableNode(nodeConfig)) { // start the app
 			System.in.read(); // wait for connection (this is not real world code...)
 		}
+	}
 
+}
 ```
+
+> Les imports sont omis pour la lisibilité (`IOException`, `NodeConfig`, `JavalinFeatures`, `DataModelFeatures`, `VegaFeatures`, `ModuleConfig`, `AutoCloseableNode`, `Param`).
 
 Il ne reste plus qu'à exécuter cette classe par le biais de votre choix, le plus simple étant de le faire via un IDE (dans Eclipse : Clic-droit sur la classe > Run As > Java Application )
 

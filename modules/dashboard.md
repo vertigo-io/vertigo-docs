@@ -91,8 +91,9 @@ Activer le dashboard via `DashboardFeatures.withAnalytics(appName)` dans la conf
 
 ```yaml
 io.vertigo.dashboard.DashboardFeatures:
-    withAnalytics:
-        - gestion-projet
+    features:
+        - analytics:
+              appName: "gestion-projet"
 ```
 
 L'appel `withAnalytics(appName)` active le DataProvider et les web services associés. Il n'existe pas de paramètre pour modifier le préfixe `/dashboard/` des routes, ni de configuration `featuresConfig` pour l'interface web.
@@ -103,8 +104,11 @@ L'appel `withAnalytics(appName)` active le DataProvider et les web services asso
 
 Dans une application de Gestion de Projet :
 
-```java
-DashboardFeatures.withAnalytics("gestion-projet");
+```yaml
+io.vertigo.dashboard.DashboardFeatures:
+    features:
+        - analytics:
+              appName: "gestion-projet"
 ```
 
 ### Accès REST

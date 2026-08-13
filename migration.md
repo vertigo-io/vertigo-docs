@@ -1,11 +1,31 @@
 # from 4.4.x to 5.0.0
 
-* **[Core] Upgrade to JDK25**. Update your `pom.xml` source/target and IDE settings.
+* **[All] Upgrade to JDK 25.** Update your `pom.xml` source/target and IDE settings.
+* **[App] ElasticSearch 9 : update your pom and yaml config** (validated on vertigo-mars) :
+  - pom : remove ES 7 deps (`org.elasticsearch:elasticsearch`, `elasticsearch-rest-high-level-client`, `x-pack-transport`, `org.codelibs.elasticsearch.module:*`), add `co.elastic.clients:elasticsearch-java` (+ `org.testcontainers:elasticsearch` in test scope for the embedded server) ; lucene artifact renamed `lucene-analyzers-common` -> `lucene-analysis-common`
+  - yaml : connector feature `restHL` -> `rest` ; datafactory feature `search.elasticsearch.restHL` -> `search.elasticsearch.rest`
+  - index settings file : convert `elasticsearch.yml` to **json** (`config.file: search/elasticsearch.json`), same structure
+  - `embeddedServer` now uses testcontainers : requires a reachable docker daemon (`docker.host` param or `DOCKER_HOST` env) ; alternatively run an external ES 9 and use the `rest` feature
+  - note : `elasticsearch-java` requires `io.opentelemetry:opentelemetry-api` at **runtime** scope (packaged automatically in war/uber-jar builds ; add it explicitly for handcrafted classpaths)
+* **[App] jackson versions are now managed by the `vertigo-ui` pom import** (jackson-bom 2.22.0, required by Spring 7) : **remove any explicit jackson version** from your pom. If you don't import the `vertigo-ui` pom in your dependencyManagement, pin jackson 2.22+ yourself or Spring MVC fails at startup (`NoClassDefFoundError: com.fasterxml.jackson.annotation.JsonSerializeAs`).
+* **[All] Dependency injection switched from `javax.inject` to `jakarta.inject`.** Replace all `javax.inject.Inject` imports by `jakarta.inject.Inject` in your code.
+* **[All] Web stack upgraded : Jetty 11 -> 12, Javalin 6 -> 7, Spring 6 -> 7.** Update your own spring modules versions accordingly (spring-test, spring-security...). Jetty websocket maven artifact is renamed `websocket-jetty-server` -> `jetty-websocket-jetty-server`.
+* **[App] Embedded Jetty + JSP (ex: web.xml error pages) : replace the `org.eclipse.jetty:apache-jsp` dependency by `org.eclipse.jetty.ee10:jetty-ee10-apache-jsp`** (artifact moved with jetty 12). Without it JSP support silently disappears and every server error shows up as a bare 404 instead of your error page.
+* **[Connectors] ElasticSearch 7 support dropped** : `vertigo-elasticsearch_7_17-connector` module is removed, only the ES 9 connector remains (stay on vertigo 4.x LTS if you need ES 7).
+* **[Connectors] `vertigo-twitter-connector` and `vertigo-ifttt-connector` are removed.**
+* [Connectors] New module `vertigo-connector-commons` (shared SSL helper `ConnectorSslUtil`), pulled automatically by connectors using SSL.
+* **[DataModel] Blackboard (BB) moved from vertigo-vortex to vertigo-datamodel** : package `io.vertigo.vortex.bb` -> `io.vertigo.datamodel.bb`, the `vertigo-vortex` module no longer exists.
+* **[Commons] `PegResult` is now a record** : rename accessors `getIndex()` -> `index()` and `getValue()` -> `value()` if you use the Peg parser API.
+* **[Ui] Embedded Jetty : `extraClasspath` parameter renamed to `addonPaths`** (`JettyBootParams` builder).
+* **[Ui] Multipart configuration is now part of `JettyBootParams`** (`multiPartTempPath`, `maxPartSizeMb`, `maxRequestSize`, `maxPartSizeInMemoryKb`) : remove any multipart handler you registered at server start.
+* **[Ui][Wysiwyg] TipTap upgraded v2 -> v3** : custom wysiwyg extensions must be migrated to the TipTap v3 API.
 * **[Vega] ContentSecurityPolicyFilter ${..} are now resolved by the paramManager. Old syntax must be updated :**
   - `${cspFrameAncestor}` => `${CSP_FRAME_ANCESTOR}`
   - `${cspParam1}` => `${CSP_PARAM1}`
   - `${cspParam2}` => `${CSP_PARAM2}`
   - `${cspParam3}` => `${CSP_PARAM3}`
+* [All] Internal logging now uses LOG4J api directly (SLF4J dropped from vertigo-libs).
+* [All] Tests now run with JUnit 6 (`junit-jupiter` aggregator).
 
 # from 4.3.2 to 4.4.0
 
@@ -15,7 +35,7 @@
   - `markToOptimize` only applies to deletes (removeByQuery)
 * **[DataFactory] Remove deprecated `searchManager.findIndexDefinitionByKeyConcept`** — you must use `findFirstIndexDefinitionByKeyConcept` instead
 * **[Ui] Reset componentStates each request.** If you relied on component states persisting across multiple requests within the same context, you must manage them explicitly.
-* **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. If you use Sentinel, switch to the `withJedisSentineled` connector.
+* **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. Switch to `RedisConnector` (`RedisFeatures.withJedis(...)`), which auto-detects Single/Sentinel/Cluster mode.
 * [Ui] Remove specific css rules from vertigo-ui.css affecting projects that uses quasar components and dsfr css (more detail, see https://github.com/vertigo-io/vertigo-libs/commit/1e4d857028171a81c02f26bd1b280fe6c9b383f0)
 * **[Ui][DSFR] `dsfr.icons4quasar.js` updated for DSFR 1.14.4**. 21 icon names changed (RemixIcon → DSFR native SVG). If you have a custom icon mapping extending the default, check the [diff](https://github.com/vertigo-io/vertigo-libs/commit/131aa8d536) for updated names. 41 icons remain unchanged.
 
