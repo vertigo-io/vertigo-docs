@@ -30,7 +30,7 @@
 # from 4.3.2 to 4.4.0
 
 * **[DataFactory] Upgrade Search plugin to ElasticSearch v9** (ES7/ES8 plugins available in vertigo-lts-libs)
-  - `EmbeddedServer` removed — use testcontainer for tests
+  - `EmbeddedServer` removed — use testcontainer for tests (see `withEmbeddedServer`, requires a reachable docker via `DOCKER_HOST`)
   - `_all` field removed from index mapping
   - `markToOptimize` only applies to deletes (removeByQuery)
 * **[DataFactory] Remove deprecated `searchManager.findIndexDefinitionByKeyConcept`** — you must use `findFirstIndexDefinitionByKeyConcept` instead
