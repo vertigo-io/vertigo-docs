@@ -29,13 +29,12 @@
 
 # from 4.3.2 to 4.4.0
 
-**If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#es7-lts-migration) below.
-
 * **[DataFactory] Upgrade Search plugin to ElasticSearch v9** (ES7/ES8 plugins available in vertigo-lts-libs)
   - `EmbeddedServer` removed — use testcontainer for tests (see `withEmbeddedServer`, requires a reachable docker via `DOCKER_HOST`)
   - `_all` field removed from index mapping
   - `markToOptimize` only applies to deletes (removeByQuery)
 * **[DataFactory] Remove deprecated `searchManager.findIndexDefinitionByKeyConcept`** — you must use `findFirstIndexDefinitionByKeyConcept` instead
+* **[DataFactory]If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#es7-lts-migration) below.
 * **[Ui] Reset componentStates each request.** If you relied on component states persisting across multiple requests within the same context, you must manage them explicitly.
 * **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. Switch to `RedisConnector` (`RedisFeatures.withJedis(...)`), which auto-detects Single/Sentinel/Cluster mode.
 * [Ui] Remove specific css rules from vertigo-ui.css affecting projects that uses quasar components and dsfr css (more detail, see https://github.com/vertigo-io/vertigo-libs/commit/1e4d857028171a81c02f26bd1b280fe6c9b383f0)
