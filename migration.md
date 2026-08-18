@@ -29,6 +29,8 @@
 
 # from 4.3.2 to 4.4.0
 
+**If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#es7-lts-migration) below.
+
 * **[DataFactory] Upgrade Search plugin to ElasticSearch v9** (ES7/ES8 plugins available in vertigo-lts-libs)
   - `EmbeddedServer` removed — use testcontainer for tests (see `withEmbeddedServer`, requires a reachable docker via `DOCKER_HOST`)
   - `_all` field removed from index mapping
@@ -38,6 +40,88 @@
 * **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. Switch to `RedisConnector` (`RedisFeatures.withJedis(...)`), which auto-detects Single/Sentinel/Cluster mode.
 * [Ui] Remove specific css rules from vertigo-ui.css affecting projects that uses quasar components and dsfr css (more detail, see https://github.com/vertigo-io/vertigo-libs/commit/1e4d857028171a81c02f26bd1b280fe6c9b383f0)
 * **[Ui][DSFR] `dsfr.icons4quasar.js` updated for DSFR 1.14.4**. 21 icon names changed (RemixIcon → DSFR native SVG). If you have a custom icon mapping extending the default, check the [diff](https://github.com/vertigo-io/vertigo-libs/commit/131aa8d536) for updated names. 41 icons remain unchanged.
+
+### [DataFactory] ES7 LTS Migration
+
+For projects that need to stay on ElasticSearch 7_17 rather than migrating to ES9, Vertigo provides LTS connectors and plugins in the [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs) module.
+
+Replace `vertigo-elasticsearch-connector` with `vertigo-datafactory-plugin-elasticsearch_7_17`:
+
+<!-- Remove -->
+<dependency>
+    <groupId>io.vertigo</groupId>
+    <artifactId>vertigo-elasticsearch-connector</artifactId>
+    <version>${vertigo.version}</version>
+</dependency>
+
+<!-- Add -->
+<dependency>
+    <groupId>io.vertigo</groupId>
+    <artifactId>vertigo-datafactory-plugin-elasticsearch_7_17</artifactId>
+    <version>${vertigo.version}</version>
+</dependency>
+
+**YAML Configuration**
+
+Update your application's YAML configuration:
+
+```yaml
+modules:
+  io.vertigo.connectors.elasticsearch_7_17.ElasticSearchFeatures:
+    __flags__: ["searchES"]
+    features:
+      - restHL:
+          servers.names: ${ES_SERVERS_NAMES}
+          ssl: ${ES_SSL}
+          username: ${ES_USERNAME}
+          password: ${ES_PASSWORD}
+          apiKeyId: ${ES_API_KEY_ID}
+          apiKeySecret: ${ES_API_KEY_SECRET}
+          trustStoreUrl: ${KEYSTORE_URL}
+          trustStorePassword: ${KEYSTORE_PASSWORD}
+
+  io.vertigo.datafactory.DataFactoryFeatures:
+    features:
+      - search:
+          __flags__: ["searchES"]
+    featuresConfig:
+      - collections.luceneIndex:
+      - io.vertigo.datafactory.plugins.search.elasticsearch_7_17.rest.RestHLClientESSearchServicesPlugin:
+          envIndexPrefix: ${APP_ENV_NAME}
+          rowsPerQuery: 300
+          config.file: search/elasticsearch.yml
+```
+
+**Important Notes**
+
+1. **ElasticSearch Version:** The LTS connector is compatible with ElasticSearch 7.17.x only.
+2. **Maven Repository:** Add the ElasticSearch release repository to your `pom.xml`:
+
+```xml
+<repository>
+    <id>elasticsearch-releases</id>
+    <url>https://artifacts.elastic.co/maven</url>
+    <releases>
+        <enabled>true</enabled>
+    </releases>
+    <snapshots>
+        <enabled>false</enabled>
+    </snapshots>
+</repository>
+```
+
+3. **Features:** The `restHL` feature uses `RestHighLevelClient` which is now in the LTS connector.
+4. **Migration Path:** If you need to migrate to ES9 later, you'll need to:
+   - Replace `vertigo-datafactory-plugin-elasticsearch_7_17` with `vertigo-elasticsearch-connector`
+   - Update YAML configuration to use ES9 client
+   - Update index settings from YAML to JSON format
+
+**Testing**
+
+For testing with ES7 LTS, you have two options:
+
+1. Use an external ES7 server with the `restHL` feature.
+2. Use the embedded server for development/testing (only available in LTS version).
 
 # from 4.3.1 to 4.3.2
 
