@@ -39,6 +39,7 @@
 * **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. Switch to `RedisConnector` (`RedisFeatures.withJedis(...)`), which auto-detects Single/Sentinel/Cluster mode.
 * [Ui] Remove specific css rules from vertigo-ui.css affecting projects that uses quasar components and dsfr css (more detail, see https://github.com/vertigo-io/vertigo-libs/commit/1e4d857028171a81c02f26bd1b280fe6c9b383f0)
 * **[Ui][DSFR] `dsfr.icons4quasar.js` updated for DSFR 1.14.4**. 21 icon names changed (RemixIcon → DSFR native SVG). If you have a custom icon mapping extending the default, check the [diff](https://github.com/vertigo-io/vertigo-libs/commit/131aa8d536) for updated names. 41 icons remain unchanged.
+* **[Planning] PlanningFeature no longer declared aspect TraceAspect** : must be declared in projet, in a module before Planning
 
 ### [DataFactory] ES7 LTS Migration
 
