@@ -110,8 +110,30 @@ modules:
 </repository>
 ```
 
-3. **Features:** The `restHL` feature uses `RestHighLevelClient` which is now in the LTS connector.
-4. **Migration Path:** If you need to migrate to ES9 later, you'll need to:
+3. **Lucene Version Conflict (required fix):** The `vertigo-ui` / `vertigo-datafactory` BOMs pin Lucene 9.12.3 (for the `collections.luceneIndex` plugin), which overrides the Lucene 8.11.3 required by ES 7.17. This causes `NoSuchFieldError` on `LuceneVersion.LUCENE_7_0_0` at startup. You **must** pin Lucene 8.11.3 in your `pom.xml` `<dependencyManagement>`:
+
+```xml
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-core</artifactId>
+    <version>8.11.3</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-analysis-common</artifactId>
+    <version>8.11.3</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-queryparser</artifactId>
+    <version>8.11.3</version>
+</dependency>
+```
+
+Direct entries in your project's `dependencyManagement` take precedence over imported BOMs.
+
+4. **Features:** The `restHL` feature uses `RestHighLevelClient` which is now in the LTS connector.
+5. **Migration Path:** If you need to migrate to ES9 later, you'll need to:
    - Replace `vertigo-datafactory-plugin-elasticsearch_7_17` with `vertigo-elasticsearch-connector`
    - Update YAML configuration to use ES9 client
    - Update index settings from YAML to JSON format
