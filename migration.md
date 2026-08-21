@@ -27,6 +27,12 @@
 * [All] Internal logging now uses LOG4J api directly (SLF4J dropped from vertigo-libs).
 * [All] Tests now run with JUnit 6 (`junit-jupiter` aggregator).
 
+# from 4.4.0 to 4.4.1
+
+* **[Commons] `TraceAspect` is now auto-registered by `CommonsFeatures`.** The core `@Trace` annotation works out of the box in applications using `vertigo-commons` : no need to declare the aspect in a module anymore.
+  - **Remove any `addAspect(TraceAspect.class)` declaration** from your modules : a duplicate registration aborts the boot (`aspect ... already registered with the same class`).
+  - Note : `@Trace` components must be in modules declared **after** `vertigo-commons` in your NodeConfig (an aspect only applies to the modules declared after the one registering it).
+
 # from 4.3.2 to 4.4.0
 
 * **[DataFactory] Upgrade Search plugin to ElasticSearch v9** (ES7/ES8 plugins available in vertigo-lts-libs)
