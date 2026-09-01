@@ -149,6 +149,10 @@ Not suitable for preserving across an entire user navigation.
 - `name` to manage multiple *endpoints*; specify connection name in `@WebServiceProxyAnnotation`
 - `connectTimeoutSecond` to define timeout
 - `proxy` and `proxyPort` for proxy management
+- `trustStoreUrl` and `trustStorePassword` for a server truststore
+- `keyStoreUrl`, `keyStorePassword`, `keyStoreKeyAlias`, and `keyStoreForceAlias` for mTLS client authentication (`keyStoreKeyAlias` and `keyStorePassword` are mandatory when `keyStoreUrl` is set)
+- `tlsProtocols` and `tlsCipherSuites` to restrict TLS negotiation (`;` as separator)
+- TLSv1.2 minimum enforced; TLS 1.3 available
 
 ## API
 

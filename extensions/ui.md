@@ -125,7 +125,7 @@ VueJS 3 propose une approche WebComponent avec une IHM réactive mappée sur un 
 
 La documentation de Quasar sur [quasar.dev](https://quasar.dev/vue-components/)
 
-!> Vertigo-ui 4.4.0 utilise Quasar **2.21.1** (Vue 3). La migration Quasar 1 → 2 implique des changements d'API : `q-modal` est devenu `q-dialog`, `q-uploader` est remplacé par `v-file-upload-quasar`, et `q-page-sticky` a été supprimé.
+!> Vertigo-ui 4.4.1 utilise Quasar **2.21.1** (Vue 3). La migration Quasar 1 → 2 implique des changements d'API : `q-modal` est devenu `q-dialog`, `q-uploader` est remplacé par `v-file-upload-quasar`, et `q-page-sticky` a été supprimé.
 
 Les composants les plus courants sont :
 

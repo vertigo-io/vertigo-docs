@@ -332,7 +332,7 @@ Thresholds used during validity checks are configurable via `AgendaFeatures - se
 
 ```yaml
 io.vertigo.planning.PlanningFeatures:
-    # Always active: TraceAspect, ModelDefinitionProvider
+    # Always active: ModelDefinitionProvider. @Trace: handled by TraceAspect, auto-registered by vertigo-commons
 io.vertigo.planning.agenda.AgendaFeatures:
     featuresConfig:
         - services.config:

@@ -332,7 +332,7 @@ Les seuils utilisés lors des contrôles de validité sont paramétrables via `A
 
 ```yaml
 io.vertigo.planning.PlanningFeatures:
-    # Toujours actif : TraceAspect, ModelDefinitionProvider
+    # Toujours actif : ModelDefinitionProvider. @Trace : géré par TraceAspect, auto-register par vertigo-commons
 io.vertigo.planning.agenda.AgendaFeatures:
     featuresConfig:
         - services.config:

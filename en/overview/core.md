@@ -58,6 +58,7 @@ A simplified approach is to add the `@DaemonScheduled` annotation to a public me
 >   ```
 > - Daemons should be **optimized and simple**: short, recurring tasks. A daemon that runs too long can block other daemons (heartbeats, analytics...).
 > - If long-running daemons are unavoidable, increase `threadPoolSize` (4-6 recommended if daemons >10s) or run very long tasks (>60s) in a dedicated thread.
+> - The daemon pool exposes a `poolUtilization` healthcheck and warning logs if a daemon exceeds its period or if tasks remain queued.
 
 ## Monitor
 

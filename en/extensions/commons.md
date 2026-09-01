@@ -6,7 +6,7 @@ The module follows the modularity principle and implements the Strategy design p
 
 Components are orthogonal and are typically consumed by higher-level modules. Activation is done via YAML features or the Java API. For more details, refer to the [configuration](/en/basic/configuration) chapter.
 
-Five components start automatically: CodecManager, EventBusManager, AppManager, VTransactionManager, and VTransactionAspect. Others require a feature declaration.
+Four components start automatically: CodecManager, EventBusManager, AppManager, and VTransactionManager. The aspects `VTransactionAspect` and `TraceAspect` are also registered automatically. Other components require a feature declaration.
 
 ---
 
@@ -301,6 +301,7 @@ Feature `script.janino` requires parent feature `script`. Feature `app.dbRegistr
 ## Notes
 
 - **`@Transactional` without aspect**: The annotation alone has no effect. `VTransactionAspect` must be active (which is the default). Do not remove it from configuration.
+- **`TraceAspect` auto-registration**: `CommonsFeatures` registers `TraceAspect` automatically. Do not declare `addAspect(TraceAspect.class)`: duplicate registration aborts boot. `@Trace` components must be in modules declared after `vertigo-commons`.
 - **PegLogger disabled by default**: PEG debugging is disabled (`DISABLED = true`). Enabling it in production has a significant performance cost.
 - **Application Commands ≠ system commands**: `@Command` declares business operations, not shell executions. `CommandManager` launches no OS processes.
 - **Transactional resource priority**: On commit, TOP resources are committed before NORMAL resources. On rollback, the order is reversed.
@@ -327,7 +328,7 @@ Feature `script.janino` requires parent feature `script`. Feature `app.dbRegistr
 
 | Flag | Params | Added Components |
 |---|---|---|
-| *(buildFeatures) | — | `CodecManager`, `EventBusManager`, `AppManager`, `VTransactionManager`, `VTransactionAspect` |
+| *(buildFeatures) | — | `CodecManager`, `EventBusManager`, `AppManager`, `VTransactionManager`, `VTransactionAspect`, `TraceAspect` |
 | `script` | — | `ScriptManager`, `ScriptManagerImpl` |
 | `script.janino` | — | `JaninoExpressionEvaluatorPlugin` |
 | `command` | — | `CommandManager`, `CommandManagerImpl` |

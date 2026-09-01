@@ -58,6 +58,7 @@ Une manière simplifiée consiste à ajouter l'annotation `@DaemonScheduled` sur
 >   ```
 > - Les daemons doivent être **optimisés et simples** : une tâche courte et récurrente. Un daemon dont l'exécution est trop longue peut bloquer les autres daemons (heartbeats, analytics...).
 > - Si des daemons longs sont inévitables, pensez à augmenter `threadPoolSize` (4-6 recommandé si daemons >10s) ou à exécuter les traitements très longs (>60s) dans un thread dédié.
+> - Le pool daemon expose un healthcheck `poolUtilization` et des logs d'alerte si un daemon dépasse sa période ou si des tâches restent en file d'attente.
 
 ## Monitor
 

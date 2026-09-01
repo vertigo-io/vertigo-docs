@@ -149,6 +149,10 @@ Mais pas pour être conservé tout le temps d'une navigation utilisateur.
 - `name` pour gérer plusieurs *endpoint*, il faut alors préciser le nom de la connexion dans l'annotation `@WebServiceProxyAnnotation`
 - `connectTimeoutSecond` pour définir le timeout
 - `proxy` et `proxyPort` pour gérer les proxy
+- `trustStoreUrl` et `trustStorePassword` pour un truststore serveur
+- `keyStoreUrl`, `keyStorePassword`, `keyStoreKeyAlias` et `keyStoreForceAlias` pour l'authentification client mTLS (`keyStoreKeyAlias` et `keyStorePassword` sont obligatoires si `keyStoreUrl` est défini)
+- `tlsProtocols` et `tlsCipherSuites` pour restreindre la négociation TLS (`;` comme séparateur)
+- TLSv1.2 minimum imposé ; TLS 1.3 disponible
 
 ## API
 

@@ -176,7 +176,7 @@ Ces informations sont modifiables avec l'API (updateProcessDefinitionProperties)
 
 ### Daemon Orchestra
 
-**Note** : Le daemon `DmnODbProcessExecutorDaemon` (`daemonPeriodSeconds`, défaut 30s) met à jour le heartbeat des nœuds orchestra. Un autre daemon long (>60s) s'exécutant simultanément dans le pool partagé peut empêcher ce heartbeat et provoquer une détection de nœud mort. Vérifiez la durée d'exécution de vos daemons via le dashboard analytics.
+**Note** : Le daemon `DmnODbProcessExecutorDaemon` (`daemonPeriodSeconds`, défaut 30s) met à jour le heartbeat des nœuds orchestra. Un autre daemon long (>60s) s'exécutant simultanément dans le pool partagé peut empêcher ce heartbeat et provoquer une détection de nœud mort. Vérifiez la durée d'exécution de vos daemons via le dashboard analytics. Les logs Orchestra précisent le node id, l'activityExecution id et l'état ; le healthcheck `poolUtilization` du pool daemon aide aussi au diagnostic.
 
 ### Scheduler Internals
 
