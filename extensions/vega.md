@@ -149,6 +149,10 @@ Mais pas pour être conservé tout le temps d'une navigation utilisateur.
 - `name` pour gérer plusieurs *endpoint*, il faut alors préciser le nom de la connexion dans l'annotation `@WebServiceProxyAnnotation`
 - `connectTimeoutSecond` pour définir le timeout
 - `proxy` et `proxyPort` pour gérer les proxy
+- `trustStoreUrl` et `trustStorePassword` pour un truststore serveur
+- `keyStoreUrl`, `keyStorePassword`, `keyStoreKeyAlias` et `keyStoreForceAlias` pour l'authentification client mTLS (`keyStoreKeyAlias` et `keyStorePassword` sont obligatoires si `keyStoreUrl` est défini)
+- `tlsProtocols` et `tlsCipherSuites` pour restreindre la négociation TLS (`;` comme séparateur)
+- TLSv1.2 minimum imposé ; TLS 1.3 disponible
 
 ## API
 
@@ -434,18 +438,15 @@ public String updateContacts(final DtListDelta<Contact> contactsDelta) {
 
 ?> Il existe un équivalent `UiListDelta` qui permet de récupérer des UiObjects (c'est-à-dire avant formatage et validation)
 
-### Annotation **AutoSortAndPagination**
+### Tri et pagination des listes : `DtListState`
 
-L'annotation `AutoSortAndPagination` est le moyen le plus simple pour publier un service en ajoutant le support de la pagination et du tri.
-En partant d'un service métier qui retourne une DtList complète, il suffit d'ajouter un WebService avec cette annotation qui retourne directement le résultat du service.
+Pour ajouter le support de la pagination et du tri à un WebService, ajoutez un paramètre `@QueryParam("") DtListState dtListState` et transmettez-le à votre couche service/DAO (par exemple pour trier ou paginer dans la couche service ou directement dans la base de données).
 
 Exemple :
 ```java
-@AutoSortAndPagination
 @GET("/contacts")
-public DtList<Contact> searchContacts(final ContactCriteria contactCriteria) {
-	//call specific search service, and return all datas (think to add a cpu/memory/user friendly limit like 250)
-	return contactService.search(contactCriteria);
+public DtList<Contact> searchContacts(final ContactCriteria contactCriteria, @QueryParam("") final DtListState dtListState) {
+	return contactService.search(contactCriteria, dtListState);
 }
 ```
 
@@ -463,11 +464,7 @@ Lorsque l'IHM trie ou change de page, il doit retourner :
 * _query_ : `listServerToken` : token de la liste (issu des précédents appels)
 * n'importe quelles autres données nécessaires, comme n'importe quel service
 
-Notez que vous pouvez faire la même chose dans vos WebServices sans l'annotation (par exemple pour trier ou paginer dans la couche service ou dans la base de données).
-Pour avoir la même API, vous avez à ajouter un paramètre `@QueryParam(".") DtListState dtListState`.
-
 DtListState est une représentation de l'état d'une sous-liste, avec les champs `top`, `skip`, `sortFieldName`, `sortDesc` et `listServerToken`.
-Sans annotation, utiliser `@QueryParam("") DtListState dtListState` pour le même résultat.
 
 Le `RateLimitingManager` utilise un `RateLimitingStorePlugin` :
 - `RateLimitingMemStorePlugin` *(feature `rateLimiting.mem`)* — Stockage mémoire local
@@ -485,12 +482,6 @@ Le `WebAuthenticationManager` gère l'authentification web avec 4 plugins :
 | `AzureAdWebAuthenticationPlugin` | `authentication.aad` | Microsoft Azure Active Directory |
 
 Chaque plugin expose un `AppLoginHandler` pour rediriger vers le fournisseur d'identité et traiter la réponse.
-
-### Annotation AutoSortAndPagination
-
-L'annotation `@AutoSortAndPagination` ajoute automatiquement la pagination et le tri. Vega conserve une copie de la liste avec un `listServerToken`, retourne une portion paginée dans le body et le `x-total-count` dans les headers.
-
-Sans annotation, utiliser `@QueryParam("") DtListState dtListState` pour le même résultat.
 
 ### SessionLess
 
@@ -529,7 +520,7 @@ L'annotation `@SessionLess` indique de ne pas créer de session HTTP *(pour les 
 - `Validate` : Validation `DtObjectValidator` spécifique *(HTTP 422 si erreur)*
 - `ExcludedFields` / `IncludedFields` : Contrôle les champs entrants *(VSecurityException si violation)*
 - `ServerSideRead` : Recharge la copie serveur et fusionne les modifications
-- `AutoSortAndPagination` : Pagination et tri automatique
+- `@QueryParam("") DtListState` : Pagination et tri automatique
 
 ## Références
 

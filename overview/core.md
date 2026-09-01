@@ -48,6 +48,18 @@ Lors de l'arret du noeud de l'application, l'ensemble des composants sont arret�
 D'autre part Vertigo-Core fournit un environnement d'execution dédié aux démons (Daemons en anglais), au sens tache récurrente technique, par le biais du DaemonManager. Pour enregistrer un nouveau démon il suffit de créer la une `DaemonDefinition`.
 Une manière simplifiée consiste à ajouter l'annotation `@DaemonScheduled` sur une méthode publique d'un composant enregistré dans le ComponentSpace.
 
+> **⚠️ Pool de threads daemon :**
+> - Tous les daemons partagent un **pool unique** de threads (par défaut 2 threads)
+> - La taille du pool est configurable via `boot.params.threadPoolSize` dans `configuration.yaml` :
+>   ```yaml
+>   boot:
+>     params:
+>       threadPoolSize: 4
+>   ```
+> - Les daemons doivent être **optimisés et simples** : une tâche courte et récurrente. Un daemon dont l'exécution est trop longue peut bloquer les autres daemons (heartbeats, analytics...).
+> - Si des daemons longs sont inévitables, pensez à augmenter `threadPoolSize` (4-6 recommandé si daemons >10s) ou à exécuter les traitements très longs (>60s) dans un thread dédié.
+> - Le pool daemon expose un healthcheck `poolUtilization` et des logs d'alerte si un daemon dépasse sa période ou si des tâches restent en file d'attente.
+
 ## Monitor
 
 Une fois une application démarée il important de suivre son activité et ses performances.

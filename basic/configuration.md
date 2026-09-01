@@ -18,7 +18,11 @@ Afin de créer une application Vertigo, il est nécessaire de créer un objet `N
 ```java
 final NodeConfig nodeConfig = NodeConfig.builder()
 	.addModule(new CommonsFeatures().build())
-	.addModule(new VegaFeatures().withEmbeddedServer(8080).build())
+	.addModule(new JavalinFeatures().withEmbeddedServer(Param.of("port", "8080")).build())
+	.addModule(new VegaFeatures()
+		.withWebServices()
+		.withJavalinWebServerPlugin()
+		.build())
 	//-----Declaration of a module named 'Hello' which contains a webservice component.
 	.addModule(ModuleConfig.builder("Hello")
 		.addComponent(HelloWebServices.class)

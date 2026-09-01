@@ -174,6 +174,10 @@ This information can be modified via the API (updateProcessDefinitionProperties)
 | `ProcessReportPlugin` | `DbProcessReportPlugin` | `orchestra.database` |
 | `ProcessLoggerPlugin` | `DbProcessLoggerPlugin` | `orchestra.database` |
 
+### Orchestra Daemon
+
+**Note**: The `DmnODbProcessExecutorDaemon` daemon (`daemonPeriodSeconds`, default 30s) updates orchestra node heartbeats. Another long-running daemon (>60s) executing simultaneously in the shared pool can prevent this heartbeat and trigger a dead node detection. Check your daemon execution duration via the analytics dashboard. Orchestra logs include node id, activityExecution id, and state; the daemon pool `poolUtilization` healthcheck also helps with diagnosis.
+
 ### Scheduler Internals
 
 | Class | Role |

@@ -1,6 +1,6 @@
 # FAQ
 
-Nous présentons ici, les éléments questions les courantes.
+Nous présentons ici les questions les plus courantes.
 N'hésitez pas à nous contacter à support@vertigo.io ou sur notre discord 
 
 ## [DataStore] Mon projet stocke des pièces jointes, quel type de stockage choisir ?
@@ -23,8 +23,8 @@ Il est possible de faire plusieurs niveaux de layout mais ça n'aide pas la lisi
 En principe, un layout général, un layout pour les pages de recherche, d'accueil ou autre, un layout pour les pages de détail
 
 ## [Studio] Quel outil de modélisation de données utiliser ?
-Vertigo studio est nativement compatible avec PowerDesigner et Entreprise Architect.
-PowerDesigner est préconisé car plus complete, Entreprise Architect passe par le XMI
+Vertigo studio est nativement compatible avec PowerDesigner et Enterprise Architect.
+PowerDesigner est préconisé car plus complète, Enterprise Architect passe par le XMI
 La dernière version de Vertigo, propose un rendu html de la modélisation (via mermaid-js). Il est alors possible de se passer d’outils couteux.
 
 ## [Ui] Où sont les classes css du genre : `col-md-3 col-xs-12 q-jumbotron bg-white`
@@ -56,6 +56,8 @@ Ce tag permet d'inclure la donnée du context serveur dans le vueData client.
 Normalement le composant d'affichage s'occupe du include-data et il n'y a rien à faire.
 Dans certains cas, il n'y a pas de composant d'affichage (ni vu:textfield, ni vu:column, ...) mais on en a besoin coté client (pour construire un lien par exemple), il faut alors l'inclure manuellement.
 
+Piège fréquent : publier la donnée (`publishDto`, `publishMdl`, ...) ne suffit pas, une expression `{{...}}` ou un binding purement client (`:color`, `openModal(...)`, construction d'un lien) affichera « undefined » si aucun composant `vu:` ne rend effectivement ce champ. Il faut alors l'inclure explicitement avec `<vu:include-data .../>`. Piège invisible en test HTTP/curl : le symptôme n'apparaît que dans un vrai navigateur.
+
 ## [Ui] J'ai un `<vu:select>` dans mon formulaire, il permet d'afficher le libellé et non l'id, comment reproduire le comportement dans une liste avec le `<vu:column>` ?
 Dans de nombreux cas, l'objet sous-jacent à une liste est un objet spécifique d'IHM, il est alors possible d'ajouter un champ dans la liste, et adapter le select SQL pour récupérer le libellé directement.
 Dans le cas d'une liste de référence (sinon attention aux performances), cela peut être fait automatiquement en définissant le contenu de la colonne :
@@ -77,7 +79,7 @@ Cela active un binding de la selection dans `componentStates.${componentId}.sele
 Pour émettre la selection coté serveur, il faut ajouter du code spécifique.
 Il faut que le développeur l'utilise pour l'envoyer au serveur sous la forme qu'il souhaite.
 
-Coté UI, on peut afficher certain bouton lorsqu'il y a des éléments sélectionnés avec un `v-if="componentStates.reservationsTable.selected.length > 0"`
+Coté UI, on peut afficher certain bouton lorsqu'il y a des éléments sélectionnés avec un `v-if="componentStates.equipmentsTable.selected.length > 0"`
 
 Voici un exemple, où nous envoyons la liste des ids dans un appel Ajax (pour supprimer ces éléments)
 ```Javascript
@@ -109,7 +111,7 @@ public ViewContext deleteEquipments(final ViewContext viewContext,
    @ViewAttribute("deleteEquipmentMessage") final DeleteEquipmentMessage deleteEquipmentMessage,
    @ViewAttribute("deletedEquipmentIds") final Long[] equipmentIds,
    final UiMessageStack uiMessageStack) {
-   final var equUids = Stream.of(reservationIds).map(equId -> UID.of(Equipment.class, equId)).toList();
+   final var equUids = Stream.of(equipmentIds).map(equId -> UID.of(Equipment.class, equId)).toList();
    equipmentServices.deleteEquipments(equUids, deleteEquipmentMessage, uiMessageStack);
    return viewContext;
 }
@@ -347,7 +349,7 @@ public VFile loadFile(@PathVariable("protectedUrl") final String protectedUrl) t
 
 @PostMapping("/upload")
 public FileInfoURI uploadFile(@QueryParam("file") final VFile vFile) {
-   final String fullPath = fileService.loadMyFile(fullPath);
+   final String fullPath = fileService.saveMyFile(vFile);
    final String protectedPath = ProtectedValueUtil.generateProtectedValue(fullPath);
    return new FileInfoURI(new FileInfoDefinition("FiDummy", "none"), protectedPath);
 }
@@ -626,14 +628,14 @@ VUiPage.$watch('vueData.critereDossier', () => reload('dossier'), { deep: true }
 ```
 
 ## [Database] Comment accéder facilement à la base de données de mon environnement ?
-Tout d'abord, attention aux aspects de sécurité, dans un principe de défence en profondeur, il est normal et souhaitable que votre base de données soit pas accéssible en direct.
+Tout d'abord, attention aux aspects de sécurité, dans un principe de défense en profondeur, il est normal et souhaitable que votre base de données soit pas accéssible en direct.
 Cependant lors des phases de mise aux point, et en fonction du contexte de votre projet cela peut être utile.
 Je partage ici, une solution parmi d'autres et qui a déjà été réalisées.
 
 Dans votre configuration.yaml, vous pouvez ajouter un manager pour lancer une console H2 (base de données de test, mais qui inclus un client Jdbc)
 Exemple : 
 ```yaml
-  #on ajoute une feature dans le module de support du projet. On conditionne sur le mode de dev, pour le retirer des envs avec des données senssibles
+  #on ajoute une feature dans le module de support du projet. On conditionne sur le mode de dev, pour le retirer des envs avec des données sensibles
   io.vertigo.mars.support.SupportFeatures: 
     features:
       - h2Console:
@@ -769,11 +771,32 @@ La facette est ensuite automatique.
 ElasticSearch va 'découper' la valeur de la colonne tags suivant les |. Les majuscules et les espaces seront conservés.
 Il va automatiquement peupler la facette avec les valeurs.
 
-// 26/11
+
+## [DataStore] Mon entité d'authentification (credential) doit-elle être une liste de référence ?
+Non. Ne déclarez jamais l'entité de credential dans un `MasterDataDefinitionProvider` : cela casse l'authentification (le login échoue silencieusement, réponse vide ou 404).
+Gardez cette entité en dehors des données de référence.
+
+## [Orchestra] Une activité Orchestra passe en ABORTED alors que le code n'a pas échoué
+**Symptôme** : L'activité se termine avec `status: "ok"` dans le workspace, mais son état en base est `ABORTED`. Message : `DbProcessExecutorPlugin - Error in activity state, activity execution N is already terminated`.
+
+**Cause** : Un daemon long (>60s) bloque le pool de threads daemon partagé (2 threads par défaut). Le heartbeat du daemon orchestra n'est plus mis à jour, et un autre nœud considère le nœud comme mort.
+
+**Solutions** :
+1. Rechercher vos daemons longs (>60s) via le dashboard analytics (`/dashboard`, healthcheck `poolUtilization`)
+2. Si nécessaire, augmenter `threadPoolSize` dans `boot.params` de `configuration.yaml` (4 recommandé minimum)
+3. Sortir les traitements très longs du pool daemon (exécuter dans un thread dédié)
 
 
+## [Config] Liquibase : erreur de checksum au démarrage après une régénération
+Liquibase mémorise le **md5sum** de chaque `changeSet` déjà appliqué et le compare à chaque démarrage.
+Ne référencez donc jamais un fichier régénérable (sortie de génération studio, `javagen/sqlgen/…`) : dès qu'il évolue, toute base déjà migrée refuse de démarrer (*checksum mismatch*).
+Copiez le script de création dans un dossier **figé** et versionné (par exemple `src/main/resources/sql/`), et ne modifiez plus un `changeSet` déjà livré (créez-en un nouveau à la place).
 
 
+## [Config] Certaines features doivent-elles être activées même si je ne les utilise pas directement ?
+Oui, dès qu'un composant que vous utilisez injecte un manager de façon non optionnelle.
+Par exemple, le contrôleur générique d'autocomplete (`io.vertigo.ui.controllers.ListAutocompleteController`) injecte le `CollectionsManager` : la feature `dataFactory` (nue, sans plugin d'index) est donc requise dès qu'un `vu:autocomplete` est présent, sans pour autant tirer Lucene ou Elasticsearch.
+De même, le stockage des *Account* par le *StoreManager* (`account.store.store`) injecte un `FileStoreManager` non optionnel : la feature `filestore` (nue) est nécessaire même sans gestion de fichiers.
 
 
 

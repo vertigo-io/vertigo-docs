@@ -6,7 +6,7 @@ Le module respecte le principe de modularité et met en oeuvre le design pattern
 
 Les composants sont orthogonaux et sont généralement consommés par des modules de plus haut niveau. L'activation se fait par features YAML ou par l'API Java. Pour plus de détails, vous pouvez vous rapporter au chapitre dédié à la [configuration](/basic/configuration) de l'application.
 
-Cinq composants sont démarrés automatiquement : CodecManager, EventBusManager, AppManager, VTransactionManager et VTransactionAspect. Les autres nécessitent une déclaration de feature.
+Quatre composants sont démarrés automatiquement : CodecManager, EventBusManager, AppManager et VTransactionManager. Les aspects `VTransactionAspect` et `TraceAspect` sont également enregistrés automatiquement. Les autres composants nécessitent une déclaration de feature.
 
 ---
 
@@ -301,6 +301,7 @@ La feature `script.janino` nécessite la feature parente `script`. La feature `a
 ## Vigilance
 
 - **`@Transactional` sans aspect** : L'annotation seule n'a aucun effet. Le composant `VTransactionAspect` doit être actif (ce qui est le cas par défaut). Ne pas le supprimer de la configuration.
+- **`TraceAspect` auto-register** : `CommonsFeatures` enregistre `TraceAspect` automatiquement. Ne pas déclarer `addAspect(TraceAspect.class)` : une duplication fait échouer le boot. Les composants `@Trace` doivent être dans des modules déclarés après `vertigo-commons`.
 - **PegLogger désactivé par défaut** : Le debugging PEG est désactivé (`DISABLED = true`). L'activer en production a un coût de performance significatif.
 - **Commands applicatives ≠ commandes système** : `@Command` déclare des opérations métier, pas des exécutions shell. Le `CommandManager` ne lance aucun processus OS.
 - **Priorité des ressources transactionnelles** : Lors du commit, les ressources TOP sont validées avant les ressources NORMAL. Lors du rollback, l'ordre est inversé.
@@ -327,7 +328,7 @@ La feature `script.janino` nécessite la feature parente `script`. La feature `a
 
 | Flag | Params | Composants ajoutés |
 |---|---|---|
-| *(buildFeatures) | — | `CodecManager`, `EventBusManager`, `AppManager`, `VTransactionManager`, `VTransactionAspect` |
+| *(buildFeatures) | — | `CodecManager`, `EventBusManager`, `AppManager`, `VTransactionManager`, `VTransactionAspect`, `TraceAspect` |
 | `script` | — | `ScriptManager`, `ScriptManagerImpl` |
 | `script.janino` | — | `JaninoExpressionEvaluatorPlugin` |
 | `command` | — | `CommandManager`, `CommandManagerImpl` |

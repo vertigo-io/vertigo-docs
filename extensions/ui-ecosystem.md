@@ -135,9 +135,9 @@ Chaque bibliothèque utilise Vite pour compiler ses composants :
 
 | Bibliothèque | Commande | Sortie |
 |--------------|----------|--------|
-| vertigo-ui-vuejs | `npm run build-lib` | `dist/vertigo-ui.*\` → `vertigo-ui/static/js/` |
-| vertigo-ui-dsfr | `npm run build-lib` | `dist/*.*\` → `vertigo-ui/static/3rdParty/dsfr/` |
-| vertigo-ui-wysiwyg | `npm run build-lib` | `dist/*.*\` → `vertigo-ui/static/js/wysiwyg/` |
+| vertigo-ui-vuejs | `npm run build-lib` | `dist/vertigo-ui.*` → `vertigo-ui/static/js/` |
+| vertigo-ui-dsfr | `npm run build-lib` | `dist/*.*` → `vertigo-ui/static/3rdParty/dsfr/` |
+| vertigo-ui-wysiwyg | `npm run build-lib` | `dist/*.*` → `vertigo-ui/static/js/wysiwyg/` |
 
 ### Dépendances externes par bibliothèque
 

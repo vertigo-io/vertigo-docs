@@ -123,7 +123,7 @@ VueJS offers a WebComponent approach with a reactive UI mapped to a view model, 
 
 Quasar documentation on [quasar.dev](https://quasar.dev/vue-components/)
 
-!> Vertigo-ui 4.4.0 uses Quasar **2.21.1** (Vue 3). The Quasar 1 → 2 migration involves API changes: `q-modal` became `q-dialog`, `q-uploader` was replaced by `v-file-upload-quasar`, and `q-page-sticky` was removed.
+!> Vertigo-ui 4.4.1 uses Quasar **2.21.1** (Vue 3). The Quasar 1 → 2 migration involves API changes: `q-modal` became `q-dialog`, `q-uploader` was replaced by `v-file-upload-quasar`, and `q-page-sticky` was removed.
 
 Most common components:
 - `q-page`

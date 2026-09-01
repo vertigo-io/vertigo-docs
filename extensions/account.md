@@ -53,11 +53,11 @@ modules:
 #### Account
 - **account.store.store** : Stockage des *Account* par le *StoreManager*
   - userIdentityEntity : Nom de l'entité portant les *Account*
-  - groupIdentityEntity : Nom de l'entité portant les groupes d'*Account* (doit avoir une FK vers *Account*)
+  - groupIdentityEntity : Nom de l'entité portant les groupes d'*Account* (doit être reliée à `userIdentityEntity` par une association simple ou N-N ; cette association est recherchée au boot et son absence empêche le démarrage)
   - userAuthField : Nom du champ relié à l'authentification *(authToken)*
   - photoFileInfo *(optional)* : Nom du *FileInfo* utilisé pour le stockage des photos
   - userToAccountMapping : Mapping des champs de l'entité vers *Account*
-  - groupToGroupAccountMapping : Mapping des champs de l'entité Groupe vers *GroupeAccount*
+  - groupToGroupAccountMapping : Mapping des champs de l'entité Groupe vers *AccountGroup*
 - **account.store.text** : Stockage des *Account* par un fichier text
   - accountFilePath : Chemin du fichier des *Account* 
   - accountFilePattern : RegExp de lecture du fichier (avec des capturesGroup [nommés](https://stackoverflow.com/a/415635/2273508) : id, displayName, email, authToken, photoUrl)

@@ -20,7 +20,7 @@ Voici un exemple d'utilisation de la méthode de sélection par clé primaire :
 ```java
 @Override
 public Movie getMovieById(final Long movId) {
-	Assertion.checkNotNull(movId);
+	Assertion.check().isNotNull(movId);
 	// ---
 	return movieDAO.get(movId);
 }

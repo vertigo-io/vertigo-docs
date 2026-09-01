@@ -209,11 +209,11 @@ notificationManager.send(notification, accountUIDs);
 
 ```yaml
 modules:
-   io.vertigo.social.SocialFeatures:
-       features:
-           - notifications:
-           - comments:
-           - handles:
+    io.vertigo.social.SocialFeatures:
+        features:
+            - notifications:
+            - comments:
+            - handles:
             - mail:
             - sms:
             - webapi:

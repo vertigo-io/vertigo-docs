@@ -54,7 +54,7 @@ Ainsi, pour configurer le projet *MyProject* avec vertigo-ui, il suffit de crée
 ```java
 @ComponentScan({
 		//place here your controller packages for spring component scanning  })
-public class MarsVSpringWebConfig extends VSpringWebConfig {
+public class MyProjectVSpringWebConfig extends VSpringWebConfig {
 	// nothing basic config is enough
 	
 }
@@ -112,9 +112,6 @@ public class PersonDetailController extends AbstractVSpringMvcController {
 	@PostMapping("/_create")
 	public String doCreate(@ViewAttribute("person") final Person person) {
 		personServices.createPerson(person);
-		if (personPictureFile.isPresent()) {
-			personServices.savePersonPicture(person.getPersonId(), personPictureFile.get());
-		}
 		return "redirect:/person/" + person.getPersonId();
 	}
 

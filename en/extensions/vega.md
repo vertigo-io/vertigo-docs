@@ -149,6 +149,10 @@ Not suitable for preserving across an entire user navigation.
 - `name` to manage multiple *endpoints*; specify connection name in `@WebServiceProxyAnnotation`
 - `connectTimeoutSecond` to define timeout
 - `proxy` and `proxyPort` for proxy management
+- `trustStoreUrl` and `trustStorePassword` for a server truststore
+- `keyStoreUrl`, `keyStorePassword`, `keyStoreKeyAlias`, and `keyStoreForceAlias` for mTLS client authentication (`keyStoreKeyAlias` and `keyStorePassword` are mandatory when `keyStoreUrl` is set)
+- `tlsProtocols` and `tlsCipherSuites` to restrict TLS negotiation (`;` as separator)
+- TLSv1.2 minimum enforced; TLS 1.3 available
 
 ## API
 
@@ -360,17 +364,15 @@ public String updateContacts(final DtListDelta<Contact> contactsDelta) {
 
 ?> Equivalent `UiListDelta` retrieves UiObjects (before formatting and validation)
 
-### Annotation **AutoSortAndPagination**
+### List sorting and pagination: `DtListState`
 
-`AutoSortAndPagination` is the simplest way to publish a service with pagination and sorting support.
-Starting from a business service returning a full DtList, add a WebService with this annotation returning the service result directly.
+To add pagination and sorting support to a WebService, add a `@QueryParam("") DtListState dtListState` parameter and pass it down to your service/DAO layer (e.g. to sort or paginate in the service layer or directly in the database).
 
 Example:
 ```java
-@AutoSortAndPagination
 @GET("/contacts")
-public DtList<Contact> searchContacts(final ContactCriteria contactCriteria) {
-	return contactService.search(contactCriteria);
+public DtList<Contact> searchContacts(final ContactCriteria contactCriteria, @QueryParam("") final DtListState dtListState) {
+	return contactService.search(contactCriteria, dtListState);
 }
 ```
 
@@ -388,11 +390,7 @@ When the UI sorts or changes page, return:
 * _query_: `listServerToken`: list token (from previous calls)
 * Any other necessary data, like any service
 
-Note: you can do the same in WebServices without the annotation (e.g., sort or paginate in the service layer or database).
-Same API: add parameter `@QueryParam(".") DtListState dtListState`.
-
 DtListState represents a sub-list state with fields `top`, `skip`, `sortFieldName`, `sortDesc`, `listServerToken`.
-Without annotation, use `@QueryParam("") DtListState dtListState` for the same result.
 
 `RateLimitingManager` uses a `RateLimitingStorePlugin`:
 - `RateLimitingMemStorePlugin` *(feature `rateLimiting.mem`)* — Local memory storage
@@ -448,7 +446,7 @@ Each plugin exposes an `AppLoginHandler` to redirect to the identity provider an
 - `Validate`: Specific `DtObjectValidator` validation *(HTTP 422 on error)*
 - `ExcludedFields` / `IncludedFields`: Controls incoming fields *(VSecurityException on violation)*
 - `ServerSideRead`: Reloads server copy and merges changes
-- `AutoSortAndPagination`: Automatic pagination and sorting
+- `@QueryParam("") DtListState`: Automatic pagination and sorting
 
 ## References
 

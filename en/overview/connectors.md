@@ -81,7 +81,7 @@ The __connectors__ included in Vertigo are:
 
 ## vertigo-httpclient-connector
 
-> Access to the standard Java HTTP client [java.net.http.HttpClient](https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html) with proxy, truststore, and cookie support
+> Access to the standard Java HTTP client [java.net.http.HttpClient](https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html) with proxy, truststore, cookie, mTLS, and TLS restriction support
 
 ## vertigo-jsch-connector
 

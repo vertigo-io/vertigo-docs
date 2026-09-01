@@ -1,23 +1,164 @@
 # from 4.4.x to 5.0.0
 
-* **[Core] Upgrade to JDK25**. Update your `pom.xml` source/target and IDE settings.
+* **[All] Upgrade to JDK 25.** Update your `pom.xml` source/target and IDE settings.
+* **[App] ElasticSearch 9 : update your pom and yaml config** (validated on vertigo-mars) :
+  - pom : remove ES 7 deps (`org.elasticsearch:elasticsearch`, `elasticsearch-rest-high-level-client`, `x-pack-transport`, `org.codelibs.elasticsearch.module:*`), add `co.elastic.clients:elasticsearch-java` (+ `org.testcontainers:elasticsearch` in test scope for the embedded server) ; lucene artifact renamed `lucene-analyzers-common` -> `lucene-analysis-common`
+  - yaml : connector feature `restHL` -> `rest` ; datafactory feature `search.elasticsearch.restHL` -> `search.elasticsearch.rest`
+  - index settings file : convert `elasticsearch.yml` to **json** (`config.file: search/elasticsearch.json`), same structure
+  - `embeddedServer` now uses testcontainers : requires a reachable docker daemon (`docker.host` param or `DOCKER_HOST` env) ; alternatively run an external ES 9 and use the `rest` feature
+  - note : `elasticsearch-java` requires `io.opentelemetry:opentelemetry-api` at **runtime** scope (packaged automatically in war/uber-jar builds ; add it explicitly for handcrafted classpaths)
+* **[App] jackson versions are now managed by the `vertigo-ui` pom import** (jackson-bom 2.22.0, required by Spring 7) : **remove any explicit jackson version** from your pom. If you don't import the `vertigo-ui` pom in your dependencyManagement, pin jackson 2.22+ yourself or Spring MVC fails at startup (`NoClassDefFoundError: com.fasterxml.jackson.annotation.JsonSerializeAs`).
+* **[All] Dependency injection switched from `javax.inject` to `jakarta.inject`.** Replace all `javax.inject.Inject` imports by `jakarta.inject.Inject` in your code.
+* **[All] Web stack upgraded : Jetty 11 -> 12, Javalin 6 -> 7, Spring 6 -> 7.** Update your own spring modules versions accordingly (spring-test, spring-security...). Jetty websocket maven artifact is renamed `websocket-jetty-server` -> `jetty-websocket-jetty-server`.
+* **[App] Embedded Jetty + JSP (ex: web.xml error pages) : replace the `org.eclipse.jetty:apache-jsp` dependency by `org.eclipse.jetty.ee10:jetty-ee10-apache-jsp`** (artifact moved with jetty 12). Without it JSP support silently disappears and every server error shows up as a bare 404 instead of your error page.
+* **[Connectors] ElasticSearch 7 support dropped** : `vertigo-elasticsearch_7_17-connector` module is removed, only the ES 9 connector remains (stay on vertigo 4.x LTS if you need ES 7).
+* **[Connectors] `vertigo-twitter-connector` and `vertigo-ifttt-connector` are removed.**
+* [Connectors] New module `vertigo-connector-commons` (shared SSL helper `ConnectorSslUtil`), pulled automatically by connectors using SSL.
+* **[DataModel] Blackboard (BB) moved from vertigo-vortex to vertigo-datamodel** : package `io.vertigo.vortex.bb` -> `io.vertigo.datamodel.bb`, the `vertigo-vortex` module no longer exists.
+* **[Commons] `PegResult` is now a record** : rename accessors `getIndex()` -> `index()` and `getValue()` -> `value()` if you use the Peg parser API.
+* **[Ui] Embedded Jetty : `extraClasspath` parameter renamed to `addonPaths`** (`JettyBootParams` builder).
+* **[Ui] Multipart configuration is now part of `JettyBootParams`** (`multiPartTempPath`, `maxPartSizeMb`, `maxRequestSize`, `maxPartSizeInMemoryKb`) : remove any multipart handler you registered at server start.
+* **[Ui][Wysiwyg] TipTap upgraded v2 -> v3** : custom wysiwyg extensions must be migrated to the TipTap v3 API.
 * **[Vega] ContentSecurityPolicyFilter ${..} are now resolved by the paramManager. Old syntax must be updated :**
   - `${cspFrameAncestor}` => `${CSP_FRAME_ANCESTOR}`
   - `${cspParam1}` => `${CSP_PARAM1}`
   - `${cspParam2}` => `${CSP_PARAM2}`
   - `${cspParam3}` => `${CSP_PARAM3}`
+* [All] Internal logging now uses LOG4J api directly (SLF4J dropped from vertigo-libs).
+* [All] Tests now run with JUnit 6 (`junit-jupiter` aggregator).
+
+# from 4.4.0 to 4.4.1
+
+* **[Commons] `TraceAspect` is now auto-registered by `CommonsFeatures`.** The core `@Trace` annotation works out of the box in applications using `vertigo-commons` : no need to declare the aspect in a module anymore.
+  - **Remove any `addAspect(TraceAspect.class)` declaration** from your modules : a duplicate registration aborts the boot (`aspect ... already registered with the same class`).
+  - Note : `@Trace` components must be in modules declared **after** `vertigo-commons` in your NodeConfig (an aspect only applies to the modules declared after the one registering it).
+* **[HttpClient] TLSv1.2 is now enforced as the minimum TLS version.** TLS 1.3 is now available. Legacy endpoints requiring TLSv1.0/1.1 are no longer supported by the connector.
 
 # from 4.3.2 to 4.4.0
 
 * **[DataFactory] Upgrade Search plugin to ElasticSearch v9** (ES7/ES8 plugins available in vertigo-lts-libs)
-  - `EmbeddedServer` removed — use testcontainer for tests
+  - `EmbeddedServer` removed — use testcontainer for tests (see `withEmbeddedServer`, requires a reachable docker via `DOCKER_HOST`)
   - `_all` field removed from index mapping
   - `markToOptimize` only applies to deletes (removeByQuery)
 * **[DataFactory] Remove deprecated `searchManager.findIndexDefinitionByKeyConcept`** — you must use `findFirstIndexDefinitionByKeyConcept` instead
+* **[DataFactory]If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#es7-lts-migration) below.
 * **[Ui] Reset componentStates each request.** If you relied on component states persisting across multiple requests within the same context, you must manage them explicitly.
-* **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. If you use Sentinel, switch to the `withJedisSentineled` connector.
+* **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. Switch to `RedisConnector` (`RedisFeatures.withJedis(...)`), which auto-detects Single/Sentinel/Cluster mode.
+* **[Ui] `vu:message` text colors are now driven by css variables** — `messages.html` no longer hardcodes `text-white` / `text-black`, it uses `text-<level>-inverted` classes based on `--v-negative-invert`, `--v-warning-invert`, `--v-info-invert` and `--v-positive-invert` ([commit](https://github.com/vertigo-io/vertigo-libs/commit/8da1fea78)). **The default values change the rendering of the info and success messages, whose text was black and is now white** (error was already white, warning already black). To keep the previous rendering, redefine the variables in a css of your own, loaded after `vertigo-ui.css` :
+```css
+:root {
+  --v-info-invert: rgba(0, 0, 0, 0.9);
+  --v-positive-invert: rgba(0, 0, 0, 0.9);
+}
+```
+  Note : the DSFR variant (`vu:dsfr-message`) is not impacted, its colors follow the DSFR design system and are not configurable.
 * [Ui] Remove specific css rules from vertigo-ui.css affecting projects that uses quasar components and dsfr css (more detail, see https://github.com/vertigo-io/vertigo-libs/commit/1e4d857028171a81c02f26bd1b280fe6c9b383f0)
 * **[Ui][DSFR] `dsfr.icons4quasar.js` updated for DSFR 1.14.4**. 21 icon names changed (RemixIcon → DSFR native SVG). If you have a custom icon mapping extending the default, check the [diff](https://github.com/vertigo-io/vertigo-libs/commit/131aa8d536) for updated names. 41 icons remain unchanged.
+* **[Planning] PlanningFeature no longer declared aspect TraceAspect** : must be declared in projet, in a module before Planning
+
+### [DataFactory] ES7 LTS Migration
+
+For projects that need to stay on ElasticSearch 7_17 rather than migrating to ES9, Vertigo provides LTS connectors and plugins in the [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs) module.
+
+Replace `vertigo-elasticsearch-connector` with `vertigo-datafactory-plugin-elasticsearch_7_17`:
+
+<!-- Remove -->
+<dependency>
+    <groupId>io.vertigo</groupId>
+    <artifactId>vertigo-elasticsearch-connector</artifactId>
+    <version>${vertigo.version}</version>
+</dependency>
+
+<!-- Add -->
+<dependency>
+    <groupId>io.vertigo</groupId>
+    <artifactId>vertigo-datafactory-plugin-elasticsearch_7_17</artifactId>
+    <version>${vertigo.version}</version>
+</dependency>
+
+**YAML Configuration**
+
+Update your application's YAML configuration:
+
+```yaml
+modules:
+  io.vertigo.connectors.elasticsearch_7_17.ElasticSearchFeatures:
+    __flags__: ["searchES"]
+    features:
+      - restHL:
+          servers.names: ${ES_SERVERS_NAMES}
+          ssl: ${ES_SSL}
+          username: ${ES_USERNAME}
+          password: ${ES_PASSWORD}
+          apiKeyId: ${ES_API_KEY_ID}
+          apiKeySecret: ${ES_API_KEY_SECRET}
+          trustStoreUrl: ${KEYSTORE_URL}
+          trustStorePassword: ${KEYSTORE_PASSWORD}
+
+  io.vertigo.datafactory.DataFactoryFeatures:
+    features:
+      - search:
+          __flags__: ["searchES"]
+    featuresConfig:
+      - collections.luceneIndex:
+      - io.vertigo.datafactory.plugins.search.elasticsearch_7_17.rest.RestHLClientESSearchServicesPlugin:
+          envIndexPrefix: ${APP_ENV_NAME}
+          rowsPerQuery: 300
+          config.file: search/elasticsearch.yml
+```
+
+**Important Notes**
+
+1. **ElasticSearch Version:** The LTS connector is compatible with ElasticSearch 7.17.x only.
+2. **Maven Repository:** Add the ElasticSearch release repository to your `pom.xml`:
+
+```xml
+<repository>
+    <id>elasticsearch-releases</id>
+    <url>https://artifacts.elastic.co/maven</url>
+    <releases>
+        <enabled>true</enabled>
+    </releases>
+    <snapshots>
+        <enabled>false</enabled>
+    </snapshots>
+</repository>
+```
+
+3. **Lucene Version Conflict (required fix):** The `vertigo-ui` / `vertigo-datafactory` BOMs pin Lucene 9.12.3 (for the `collections.luceneIndex` plugin), which overrides the Lucene 8.11.3 required by ES 7.17. This causes `NoSuchFieldError` on `LuceneVersion.LUCENE_7_0_0` at startup. You **must** pin Lucene 8.11.3 in your `pom.xml` `<dependencyManagement>`:
+
+```xml
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-core</artifactId>
+    <version>8.11.3</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-analysis-common</artifactId>
+    <version>8.11.3</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-queryparser</artifactId>
+    <version>8.11.3</version>
+</dependency>
+```
+
+Direct entries in your project's `dependencyManagement` take precedence over imported BOMs.
+
+4. **Features:** The `restHL` feature uses `RestHighLevelClient` which is now in the LTS connector.
+5. **Migration Path:** If you need to migrate to ES9 later, you'll need to:
+   - Replace `vertigo-datafactory-plugin-elasticsearch_7_17` with `vertigo-elasticsearch-connector`
+   - Update YAML configuration to use ES9 client
+   - Update index settings from YAML to JSON format
+
+**Testing**
+
+For testing with ES7 LTS, you have two options:
+
+1. Use an external ES7 server with the `restHL` feature.
+2. Use the embedded server for development/testing (only available in LTS version).
 
 # from 4.3.1 to 4.3.2
 
