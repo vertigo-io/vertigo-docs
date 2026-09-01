@@ -32,6 +32,7 @@
 * **[Commons] `TraceAspect` is now auto-registered by `CommonsFeatures`.** The core `@Trace` annotation works out of the box in applications using `vertigo-commons` : no need to declare the aspect in a module anymore.
   - **Remove any `addAspect(TraceAspect.class)` declaration** from your modules : a duplicate registration aborts the boot (`aspect ... already registered with the same class`).
   - Note : `@Trace` components must be in modules declared **after** `vertigo-commons` in your NodeConfig (an aspect only applies to the modules declared after the one registering it).
+* **[HttpClient] TLSv1.2 is now enforced as the minimum TLS version.** TLS 1.3 is now available. Legacy endpoints requiring TLSv1.0/1.1 are no longer supported by the connector.
 
 # from 4.3.2 to 4.4.0
 
