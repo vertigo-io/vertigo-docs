@@ -7,7 +7,7 @@ Ce module propose des fonctionnalités de gestion des utilisateurs réparties su
 - **Authentication** : Gestion de l'authentification
 - **Authorization** : Gestion des autorisations
 - **Identity Provider** : Connexion avec des fournisseurs d'identité
- 
+
 
 ## Configuration
 
@@ -125,7 +125,7 @@ Vertigo propose quatre types de source d'authentification :
     - port : Port du serveur LDAP
     - readerLogin *(optional)* : Compte de lecture du serveur LDAP
     - readerPassword *(optional)* : Mot de passe du compte de lecture (obligatoire si `readerLogin` est présent)
-  
+
 - **authentication.mock** : Pour les tests, authentification toujours réussie
 
 
@@ -136,7 +136,7 @@ L'usage de ce module est assez simple :
 - On crée un Token portant ces informations
 - On délègue l'authentification à l'`authenticationManager`
 - Si l'authentification est bonne, on récupère l'entité de l'utilisateur et on fait les traitements spécifiques (association dans la session, récupération des droits, etc...)
- 
+
 Globalement le login est réalisé ainsi dans le service métier :
 
 ```java
@@ -332,32 +332,32 @@ Pour l'appliquer sur des requêtes générales du DAO
 return dossierDAO.getLastCreatedDossiersByProjectId(projectId,
 				AuthorizationUtil.authorizationCriteria(Dossier.class, SecuredEntities.DossierOperations.read));
 ```
- ```
+```
 create Task TkGetLastCreatedDossiersByProjectId {  
-    className : "io.vertigo.basics.task.TaskEngineSelect"
-    request : "
-            select 
-            	dos.*
+   className : "io.vertigo.basics.task.TaskEngineSelect"
+   request : "
+           select 
+           	dos.*
 			from (<%=securedDossier.asSqlFrom(\"dossier\", ctx)%>) dos
 			where dos.project_id = #projectId#
 			order by dos.creation_date desc
 			limit 50
-             "
-    in 	projectId        {domain : DoId         	cardinality: "1"}
-    in  securedDossier   {domain : DoAuthorizationCriteria    cardinality: "1"}
-    out dossiers         {domain : DoDtDossier	cardinality: "*"}
+            "
+   in 	projectId        {domain : DoId         	cardinality: "1"}
+   in  securedDossier   {domain : DoAuthorizationCriteria    cardinality: "1"}
+   out dossiers         {domain : DoDtDossier	cardinality: "*"}
 }
 ```
 > Note : Il est efficace de passer le filtre de sécurité sous la forme d'un from. Cela permet de limiter rapidement le périmètre de données avant de faire des jointures plus complexes.
- 
+
 Pour l'appliquer à une recherche par un moteur de recherche :
 ```Java
  final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Dossier.class, SecuredEntities.DossierOperations.read));
 	final SearchQuery searchQuery = dossierIndexSearchClient.createSearchQueryBuilderDossier(criteria, selectedFacetValues)
 				.withSecurityFilter(securityListFilter)
 				.build();
- ```
- 
+```
+
 #### AuthorizationUtil
 
 Cet utilitaire propose des méthodes statiques facilement utilisables pour vérifier les autorisations de l'utilisateur dans les services métiers.
@@ -376,7 +376,7 @@ Mais si l'utilisateur n'a pas les autorisations suffisantes, une exception est l
 - **assertOperationsWithLoad(UID, OperationName, message*(optionnel)*)** : Charge l'entité depuis son UID, vérifie que l'utilisateur peut réaliser l'opération sur cette entité, et **retourne l'entité chargée**
 - **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optionnel)*)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entité** portée par cet accesseur (FK), l'accesseur sera chargé si besoin
 - **assertOperationsAndReturn(Supplier\<Entity\>, OperationName, message*(optionnel)*)** : Charge l'entité via le `Supplier` fourni, vérifie que l'utilisateur peut réaliser l'opération sur cette entité, et **retourne l'entité**
- 
+
  Exemple :
 ```Java
   // check d'opération sur une entity
@@ -385,7 +385,7 @@ Mais si l'utilisateur n'a pas les autorisations suffisantes, une exception est l
   // utilitaires pour les FK
   AuthorizationUtil.assertOperationsWithLoadIfNeeded(tache.dossier(), SecuredEntities.DossierOperations.readTaches);
 ```
-	
+
 #### UiAuthorizationUtil
 
 Pour le rendu des pages, un utilitaire permet de valider que l'utilisateur possède des autorisations globales, ou les autorisations pour une opération sur une entité.
@@ -394,12 +394,12 @@ Habituellement, les contrôles sont faits en Thymeleaf avec un `th:if`
 Exemple :
 ```HTML
  th:if="${authz.hasAuthorization('AdmDossier','ViewDossier')}"
- ```
+```
 
 API :
 - **hasAuthorization(AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre
 - **hasOperation(UiObject, OperationName)** : Vérifie que l'utilisateur peut réaliser l'opération sur l'**entité** avec son contexte de sécurité actif
- 
+
 !> La désactivation d'un bouton n'est pas suffisante pour assurer un niveau de sécurité minimum. Le contrôle des autorisations doit surtout être réalisé côté serveur
 
 #### Vue SPA
@@ -439,7 +439,7 @@ Pour le stack SSR (rendu Thymeleaf) : voir [UI](/extensions/ui) (`vu:authz` / `t
 - **@SecuredOperation** (`nom d'opération`) : Permet de sécuriser une `SecuredEntity` passée en paramètre en vérifiant que l'utilisateur est autorisé à réaliser cette opération sur l'entité
 
 > Dans ces annotations, il n'est pas nécessaire d'utiliser le préfixe `Atz` pour le nom des authorisations
- 
+
 > `@SecuredOperation` nécessite l'annotation `@Secured`, portée par la **méthode ou par la classe** (l'aspect retombe sur la classe déclarante)
 
 !> Attention : les annotations sont vérifiées par AOP, ce mode de contrôle est donc **non réentrant**
@@ -447,7 +447,7 @@ Pour le stack SSR (rendu Thymeleaf) : voir [UI](/extensions/ui) (`vu:authz` / `t
 !> Attention : le `@SecuredOperation` nécessite l'entité, ce qui signifie qu'elle doit déjà être chargée (avant le contrôle de sécurité)
 
 
- 
+
 ### Chargement
 
 Les autorisations sont chargées via un DefinitionProvider dans la Feature du module applicatif.<br/>

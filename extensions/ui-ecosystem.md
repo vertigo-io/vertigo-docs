@@ -83,7 +83,7 @@ Vue.use(VueDsfr)
 Vue.use(DSFR)
 ```
 
-Dans une application Vertigo, le thème DSFR est activé en utilisant les composants `<dsfr-*-html>` dans les templates Thymeleaf ou les composants Vue dans les pages Vue. Les projets **adesi**, **fgv-webapp** et **nova** utilisent cette intégration.
+Dans une application Vertigo, le thème DSFR est activé en utilisant les composants `<dsfr-*-html>` dans les templates Thymeleaf ou les composants Vue dans les pages Vue.
 
 ## Bibliothèque `vertigo-ui-wysiwyg` — Éditeur de texte enrichi
 

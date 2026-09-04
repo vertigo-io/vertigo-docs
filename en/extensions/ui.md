@@ -10,11 +10,11 @@ We present here the more specific elements that help you get started with the ve
 
 SpringMVC documentation on [docs.spring.io](https://docs.spring.io/spring-framework/reference/web/webmvc.html)
 
-The main behavior of SpringMVC is to allow HTTP requests to be mapped simply to Java methods.
+The main behavior of SpringMVC is to simply map HTTP requests to Java methods.
 For this, two mechanisms coexist:
 
 - by Java annotations to describe the behavior and the mapping set up
-- by configuration in the Spring configuration of specific automatic resolvers performing the conversion of incoming or outgoing data transparently (`ReturnValueHandler` and `ArgumentResolver`)
+- by the Spring configuration of specific automatic resolvers performing the conversion of incoming or outgoing data transparently (`ReturnValueHandler` and `ArgumentResolver`)
 
 To streamline the developments, Vertigo-UI uses and complements these two default SpringMVC mechanisms with specific annotations and specific resolvers.
 
@@ -41,7 +41,7 @@ Below are the annotations that are used most often:
 
 - `ViewContext`: Object representing the context of the page. Blank on a GET, it is meant to be populated, retrieved and updated on a POST. It is used to perform the action.
 - `DtListState`: Object representing the display state of a page: sort and pagination.
-- `UiMessageStack`: Object containing the stack of messages of the action: formatting and display errors (constraint and non-null validation), it can be passed to the service and filled with global, per object or per field error, warning, info or success messages
+- `UiMessageStack`: Object containing the stack of messages of the action: formatting and display errors (constraint and non-null validation), it can be passed to the service and filled with global messages or per-object/per-field error, warning, info or success messages
 - `FileInfoURI`: Allows receiving a file uri. Requires naming the parameter with `@QueryParam`. File URIs are protected in the page (transformed), on the return to the server we do the inverse translation.
 - `VFile`: Allows receiving a file. Requires naming the parameter with `@QueryParam`. The file is temporary and must be persisted if needed in a service.
 - `Optional<OtherType>`: Allows supporting optional parameters.
@@ -155,7 +155,7 @@ Thymeleaf documentation on [thymeleaf.org](https://www.thymeleaf.org/doc/thymele
 - **inline** `__${...}__`: Preprocessor. Indicates to Thymeleaf that this portion must be pre-processed. This is used for expressions inside another more global expression.
 - **inline** `|...|`: Literal substitution. Allows writing a string containing parts to evaluate, to simplify writing it and avoid string concatenations.
 - **inline html** `[[...]]`: Literal substitution. Allows writing a string containing dynamic text directly in the html (`[(...)]` for the equivalent of `th:utext`). It requires a `th:inline` in one of the parent tags of the content.
-- **prefix** `th:`: This prefix indicates that Thymeleaf must interpret the following attribute. This allows Thymeleaf to interpret standard HTML attributes. On the tags, this corresponds to the namespace of the Thymeleaf-specific tags.
+- **prefix** `th:`: This prefix indicates that Thymeleaf must interpret the following attribute. This lets Thymeleaf handle standard HTML attributes. On the tags, this corresponds to the namespace of the Thymeleaf-specific tags.
 - `abc?:bcd`: Often used to simplify the writing, equivalent of `abc != null ? abc : bcd`
 - `${...}`: Evaluates a variable expression. Ex: `${name}` or `${user.name}`
 - `@{...}`: Rebuilds the url of a link.
@@ -237,7 +237,7 @@ Requires:
   - `useDsfr`: **boolean** (default `false`): loads the DSFR theme (`vertigo-dsfr.css` + `dsfr.umd.js`)
   - `useWysiwyg`: **boolean**: loads the assets of the Vertigo-Wysiwyg editor (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js`; not loaded if not specified
   - `additional_defer_libs_slot`: Slot to inject additional (deferred) scripts, placed after Quasar and before the Vertigo-UI UMD
-- `vu:head-meta`: Mandatory component setting the **meta** elements of the head (js script, css, ...)
+- `vu:head-meta`: Mandatory component setting the **meta** elements of the head (JS scripts, CSS, ...)
   - `vueJsVersion`: Version of the loaded VueJS (default `3.5.39`)
   - `axiosVersion`: Version of the loaded Axios JS library (default `1.18.1`)
   - `vuejsDevMode`: **boolean** (default `false`): switches VueJS to dev mode — loads the non-minified builds (`vue.global.js` instead of `vue.global.prod.js`, and `quasar.umd.js` instead of `quasar.umd.prod.js`) *(we have noted bugs on VueJS in a few cases that only appear in devMode)*
@@ -252,7 +252,7 @@ Requires:
   - `useDsfr`: **boolean** (default `false`): loads the DSFR theme (`vertigo-dsfr.css` + `dsfr.umd.js`)
   - `useWysiwyg`: **boolean**: loads the assets of the Vertigo-Wysiwyg editor (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js`; not loaded if not specified
   - `additional_defer_libs_slot`: Slot to inject additional (deferred) scripts, placed after Quasar and before the Vertigo-UI UMD
-   <!-- source : head.html:1-89 — params exhaustifs extraits du fragment -->
+  <!-- source : head.html:1-89 — params exhaustifs extraits du fragment -->
 - `vu:form`: Sets a form and references the associated page context
   - `content`: The body of the tag is kept
   - `other_attrs`: List of attributes to add on the form (tag `<form>`)
@@ -331,7 +331,7 @@ They remain useful to precisely add data in the `vueData`, for specific vue comp
   - `list`: List of the mapping to apply
   - `listKey`: Key field of the mapping list
   - `listDisplay`: Label field of the mapping list
-- `vu:include-data-protected`: Includes the field of an object. The value set on the client side is protected (not in clear and not modifiable), the real value stays on the server side. This system is used for file identifiers for example.
+- `vu:include-data-protected`: Includes the field of an object. The value set on the client side is protected (not in plaintext and not modifiable), the real value stays on the server side. This system is used for file identifiers for example.
   - `object`: Name of the object of the context
   - `field`: Name of the field
 - `vu:utext`: Tag.processor applying `th:utext` **and** `v-pre` automatically. Allows displaying dynamic HTML with untrusted content while protecting against VueJS XSS injections. The `v-pre` prevents VueJS from compiling the injected content.

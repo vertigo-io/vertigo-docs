@@ -187,9 +187,11 @@ La carte `healthchecksByFeature` produit un `Map<String, List<HealthCheck>>` acc
 | `DashboardRouter` | Routes HTTP + FreeMarker, préfixe `/dashboard/` en dur |
 | `AbstractDashboardModuleControler` | Template Method pour les contrôleurs de sous-module |
 | `CommonsDashboardControler` | Sous-module vertigo-commons (Daemons, EventBus, Caches) |
-| `DynamoDashboardControler` | Sous-module vertigo-dynamo (Entities, SmartTypes, Tasks) |
+| `DynamoDashboardControler` | Sous-module vertigo-datastore (Entities, SmartTypes, Tasks) |
 | `VegaDashboardControler` | Sous-module vertigo-vega (Locations webservices) |
 | `VUiDashboardControler` | Sous-module vertigo-ui (Locations pages) |
+
+<!-- source : vertigo-libs/vertigo-datastore/pom.xml:L10 — module nommé vertigo-datastore (ex-vertigo-dynamo) ; vertigo-modules/vertigo-dashboard/src/main/java/io/vertigo/dashboard/ui/dynamo/DynamoDashboardControler.java:L39 — classe DynamoDashboardControler inchangée ; vertigo-modules/vertigo-dashboard/src/main/resources/io/vertigo/dashboard/ui/templates/vertigo-dynamo.ftl — template vertigo-dynamo.ftl inchangé -->
 
 ### Features (@Feature)
 | Flag | Composants |

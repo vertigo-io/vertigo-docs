@@ -7,8 +7,8 @@ The module offers user management features spread across three orthogonal axes:
 - **Authentication**: Authentication management
 - **Authorization**: Authorization management
 - **Identity Provider**: Connection with identity providers
-  
- 
+
+
 ## Configuration
 
 To use the features of **Account**, this module must be added to the application configuration.
@@ -125,7 +125,7 @@ Vertigo offers four types of authentication source:
     - port: Port of the LDAP server
     - readerLogin *(optional)*: Read account of the LDAP server
     - readerPassword *(optional)*: Password of the read account (mandatory if `readerLogin` is present)
-  
+
 - **authentication.mock**: For tests, authentication always succeeds
 
 
@@ -136,7 +136,7 @@ Using this module is quite simple:
 - Create a Token carrying this information
 - Delegate the authentication to the `authenticationManager`
 - If the authentication is successful, retrieve the user's entity and perform the specific processing (association in the session, retrieval of rights, etc...)
-  
+
 Overall, the login is done like this in the business service:
 
 ```java
@@ -349,15 +349,15 @@ create Task TkGetLastCreatedDossiersByProjectId {
 }
 ```
 > Note: It is efficient to pass the security filter as a FROM clause. This allows quickly limiting the data scope before performing more complex joins.
-  
+
 To apply it to a search by a search engine:
 ```Java
  final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Dossier.class, SecuredEntities.DossierOperations.read));
 	final SearchQuery searchQuery = dossierIndexSearchClient.createSearchQueryBuilderDossier(criteria, selectedFacetValues)
 				.withSecurityFilter(securityListFilter)
 				.build();
- ```
-  
+```
+
 #### AuthorizationUtil
 
 This utility offers static methods easily usable to check the authorizations of the user in the business services.
@@ -376,7 +376,7 @@ But if the user does not have sufficient authorizations, an exception is thrown,
 - **assertOperationsWithLoad(UID, OperationName, message*(optional)*)**: Loads the entity from its UID, checks that the user can perform the operation on this entity, and **returns the loaded entity**
 - **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optional)*)**: Checks that the user can perform the operation on the **entity** carried by this accessor (FK), the accessor will be loaded if needed
 - **assertOperationsAndReturn(Supplier\<Entity\>, OperationName, message*(optional)*)**: Loads the entity via the provided `Supplier`, checks that the user can perform the operation on this entity, and **returns the entity**
-  
+
 Example:
 ```Java
   // check d'opération sur une entity
@@ -385,7 +385,7 @@ Example:
   // utilitaires pour les FK
   AuthorizationUtil.assertOperationsWithLoadIfNeeded(tache.dossier(), SecuredEntities.DossierOperations.readTaches);
 ```
-	
+
 #### UiAuthorizationUtil
 
 For the rendering of the pages, a utility allows validating that the user has global authorizations, or the authorizations for an operation on an entity.
@@ -399,7 +399,7 @@ Example:
 API:
 - **hasAuthorization(AuthorizationName...)**: Checks that the user has one of the authorizations passed as parameter
 - **hasOperation(UiObject, OperationName)**: Checks that the user can perform the operation on the **entity** with their active security context
-  
+
 !> Disabling a button is not sufficient to ensure a minimum security level. The control of authorizations must above all be performed on the server side
 
 #### Vue SPA
@@ -439,7 +439,7 @@ For the SSR stack (Thymeleaf rendering): see [UI](/en/extensions/ui) (`vu:authz`
 - **@SecuredOperation** (`operation name`): Allows securing a `SecuredEntity` passed as parameter by checking that the user is authorized to perform this operation on the entity
 
 > In these annotations, it is not necessary to use the `Atz` prefix for the name of the authorizations
-  
+
 > `@SecuredOperation` requires the `@Secured` annotation, carried by the **method or by the class** (the aspect falls back on the declaring class)
 
 !> Caution: the annotations are checked by AOP, this control mode is therefore **non-reentrant**
@@ -447,7 +447,7 @@ For the SSR stack (Thymeleaf rendering): see [UI](/en/extensions/ui) (`vu:authz`
 !> Caution: `@SecuredOperation` requires the entity, which means it must already be loaded (before the security check)
 
 
-  
+
 ### Loading
 
 The authorizations are loaded via a DefinitionProvider in the Feature of the application module.<br/>
