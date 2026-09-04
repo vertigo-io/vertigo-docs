@@ -127,7 +127,7 @@ public class HelloWebServices implements WebServices {
 
 La méthode `hello` ne prend aucun argument et retourne une chaîne de caractères. Il s'agit donc d'un exemple minimal en guise de démonstration.
 
-L'annotation `@GET` permet de spécifier 
+L'annotation `@GET` permet de spécifier
 
  -  la route qui sera utilisée : ici */hello*
   -  le verbe HTTP qui sera utilisé : ici *GET*
@@ -150,10 +150,10 @@ Concernant les paramètres d'entrée et de sortie ils peuvent être de différen
 
 - Des objets
 
-- Des collections d'objets 
+- Des collections d'objets
 
 
-Concernant les paramètres d'entrée il est possible de les récupérer depuis : 
+Concernant les paramètres d'entrée il est possible de les récupérer depuis :
 
 - l'URL : via l'annotation `@PathParam`
 - les paramètres d'URL : via l'annotation `@QueryParam`

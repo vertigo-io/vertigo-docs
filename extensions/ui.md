@@ -11,7 +11,7 @@ Nous présentons ici les éléments plus spécifiques qui aident à la prise en 
 La documentation de SpringMVC sur [docs.spring.io](https://docs.spring.io/spring-framework/reference/web/webmvc.html)
 
 Le fonctionnement principal de SpringMVC est de permettre de mapper simplement des requêtes HTTP vers des méthodes Java.
-Pour cela deux mécanismes cohabitent : 
+Pour cela deux mécanismes cohabitent :
 
 - par annotations Java pour décrire le comportement et le mapping mis en place
 - par paramétrage dans la configuration Spring de resolvers automatiques spécifiques réalisant la conversion des données entrantes ou sortantes de manière transparente (`ReturnValueHandler` et `ArgumentResolver`)
@@ -28,7 +28,7 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
 - `@GetMapping("myUrl")` : Déclare l'url en GET. Elle représente le point d'entrée sur le controller. Par convention la méthode est nommée `initContext`, prend l'objet [ViewContext](#viewcontext) et les paramètres d'entrée nécessaires (bindé avec @PathVariable ou @RequestParam par exemple)
 - `@PostMapping("/_myAction")` : Déclare l'url en POST. Elle représente le point d'action sur le controller. Par convention l'url est préfixée par `_` et la méthode par `do`. La méthode prend les données attendues annotées avec `@ViewAttribute("nomDuParam")`.
 - `@DeleteMapping("_myAction")` : Déclare l'url en DELETE.
-- `@PathVariable("paramName")` : Mappe une variable avec une portion de l'url du service. Ex: `https://localhost:8080/base/12/mainPicture`, méthode du controller annotée : `@GetMapping("{baseId}/mainPicture")`, le paramètre de la méthode est annoté : `@PathVariable("baseId") final Long baseId` 
+- `@PathVariable("paramName")` : Mappe une variable avec une portion de l'url du service. Ex: `https://localhost:8080/base/12/mainPicture`, méthode du controller annotée : `@GetMapping("{baseId}/mainPicture")`, le paramètre de la méthode est annoté : `@PathVariable("baseId") final Long baseId`
 - `@RequestParam("paramName")` : Mappe une variable avec un paramètre de la request. Ex: `https://localhost:8080/base/myUrl?baseId=12`, méthode du controller annotée : `@GetMapping("myUrl")`, le paramètre de la méthode est annoté : `@RequestParam("baseId") final Long baseId`. Ce cas est finalement rarement mis en place, car on préfère une approche *REST-like* où les identifiants sont dans le path de l'url, ou bien on passe des objets complets (mappés par @ViewAttribute).
 
 ### Annotations Vertigo-UI
@@ -41,7 +41,7 @@ Ci-dessous les annotations que l'on utilise le plus souvent :
 
 - `ViewContext` : Objet représentant le contexte de la page. Vierge sur un GET, il a vocation à être peuplé, récupéré et mis à jour sur un POST. Il est utilisé pour réaliser l'action.
 - `DtListState` : Objet représentant l'état d'affichage d'une page : tri et pagination.
-- `UiMessageStack` : Objet contenant la pile des messages de l'action : erreurs de format et de surface (validation des contraintes et du caractère non null), il peut être passé au service et complété avec des messages d'erreur, de warning, d'info ou de succès globaux, par objet ou par champ 
+- `UiMessageStack` : Objet contenant la pile des messages de l'action : erreurs de format et de surface (validation des contraintes et du caractère non null), il peut être passé au service et complété avec des messages d'erreur, de warning, d'info ou de succès globaux, par objet ou par champ
 - `FileInfoURI` : Permet de recevoir une uri de fichier. Nécessite de nommer le paramètre avec `@QueryParam`. Les URI de fichiers sont protégées dans la page (transformées), lors du retour sur le serveur on fait la traduction inverse.
 - `VFile` : Permet de recevoir un fichier. Nécessite de nommer le paramètre avec `@QueryParam`. Le fichier est temporaire et doit être persisté si besoin dans un service.
 - `Optional<AutreType>` : Permet de supporter les paramètres optionnels.
@@ -82,7 +82,7 @@ API du **ViewContext**
 - `checkDtListErrors` : Vérifie les erreurs de la liste. Celles-ci sont ajoutées à l'uiMessageStack si nécessaire
 - `readDtListModifiable` : Retourne la liste des objets métier validés. Lance une exception si erreur.
 - `publishMdl` : Ajoute au contexte une liste de référence (MDL : Master Data List), en précisant l'entité et le code de la liste.
-- `publishFacetedQueryResult` : Ajoute au contexte le résultat d'une recherche avec facette. 
+- `publishFacetedQueryResult` : Ajoute au contexte le résultat d'une recherche avec facette.
 - `getUiObject` : Récupère du contexte l'objet venant de l'IHM, tel que reçu sur le serveur. À réserver à quelques cas : utilisé pour faire des contrôles non bloquants par exemple.
 - `getUiList` : Récupère du contexte la liste venant de l'IHM, telle que reçue sur le serveur. À réserver à quelques cas.
 - `getUiListModifiable` : Récupère du contexte la liste modifiable venant de l'IHM
@@ -111,7 +111,7 @@ Avant de rentrer dans le détail de chacune de ces briques, voici quelques élé
 
 La documentation de VueJS sur [vuejs.org](https://vuejs.org/guide/)
 
-VueJS 3 propose une approche WebComponent avec une IHM réactive mappée sur un modèle de vue, selon le pattern Observer/Observable. 
+VueJS 3 propose une approche WebComponent avec une IHM réactive mappée sur un modèle de vue, selon le pattern Observer/Observable.
 
 - **inline** `{{abc}}` : L'utilisation des *moustaches* permet d'ajouter directement la valeur de `abc` dans le DOM. La valeur est *réactive* et encodée en HTML
 - **prefix** `:` : Ce préfixe indique que VueJS doit interpréter l'attribut qui suit. Cela permet de faire du VueJS sur des attributs HTML standards ou d'un webComponent (comme src, value ou icon de quasar)
@@ -142,11 +142,11 @@ Les composants les plus courants sont :
 - `q-knob`
 - `q-slider`
 
-> **Thèmes** : le thème d'un layout se choisit au niveau de `vu:head` / `vu:head-meta` : `useDsfr` (défaut `false`) charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`), et `onlyDsfrStyle` (défaut `false`) masque tous les CSS 3rd-party non-DSFR (y compris le CSS Quasar). Le thème DSFR est complété par une famille de composants `vu:dsfr-*` (boutons, collections, inputs, layout, table), documentée dans la page [Écosystème UI](/extensions/ui-ecosystem).
+> **Thèmes** : le thème d'un layout se choisit avec `useDsfr` (défaut `false`, disponible sur `vu:head` et `vu:head-meta`), qui charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`). Le paramètre `onlyDsfrStyle` (défaut `false`) est exclusif à `vu:head-meta` : il masque tous les CSS 3rd-party non-DSFR (y compris le CSS Quasar) — passé sur `vu:head`, il est sans effet. Le thème DSFR est complété par une famille de composants `vu:dsfr-*` (boutons, collections, inputs, layout, table), documentée dans la page [Écosystème UI](/extensions/ui-ecosystem).
 
 ## Moteur de templating : Thymeleaf
 
-Nécessite : 
+Nécessite :
 ```HTML
 <html xmlns:th="http://www.thymeleaf.org">
 ```
@@ -162,13 +162,13 @@ La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/
 - `#{...}` : Référence une ressource i18n.
 - `~{abc::bcd}` : Sélectionne un fragment. La syntaxe est `~{ path/to/the/template.html :: fragmentSelector}`. Le sélecteur est soit le nom d'un fragment, soit un sélecteur javascript standard (`#id`, `.class`, ...)
 - `th:if` : Donne la condition d'affichage sur un tag (et son body). Le filtre est effectué côté serveur et convient pour la sécurité.
-- `th:with="var1=${...}, var2=${...}"` : Déclare des variables locales. La portée est le contenu du tag, même hors du fichier : lorsqu'on inclut d'autres fragments la variable reste accessible. 
+- `th:with="var1=${...}, var2=${...}"` : Déclare des variables locales. La portée est le contenu du tag, même hors du fichier : lorsqu'on inclut d'autres fragments la variable reste accessible.
 - `th:attr="var1=${...}, var2=${...}"` : Déclare des variables globales. À utiliser avec attention.
-- `th:text` : Évalue le contenu de l'attribut et l'ajoute dans le body du tag. 
+- `th:text` : Évalue le contenu de l'attribut et l'ajoute dans le body du tag.
 - `th:each="abc : bcd"` : Permet de créer une boucle sur le tag qui le porte. Boucle sur `bcd`, élément courant dans la variable `abc`.
 - `th:include="abc::bcd"` : Composant de base du templating Thymeleaf. Le body du tag du template est recopié dans le tag portant l'attribut, le tag du template est perdu. La syntaxe est la même que pour le sélecteur de fragment `~{abc::bcd}`.
 - `th:replace="abc::bcd"` : Composant du templating Thymeleaf. Le tag portant l'attribut est remplacé par celui du template. La syntaxe est la même que pour le sélecteur de fragment `~{abc::bcd}`.
-- `th:remove="*mode*"` : Retire des tags du DOM, en fonction du mode. Les modes les plus courants sont : 
+- `th:remove="*mode*"` : Retire des tags du DOM, en fonction du mode. Les modes les plus courants sont :
   - `all` retire le tag et ses enfants
   - `tag` retire le tag et conserve ses enfants
 - `th:fragment="fragName"` : Composant de base du templating Thymeleaf. Utilisé pour nommer un template réutilisable.
@@ -178,14 +178,14 @@ La documentation de Thymeleaf sur [thymeleaf.org](https://www.thymeleaf.org/doc/
 
 La documentation de Thymeleaf Layout sur [thymeleaf-layout-dialect](https://ultraq.github.io/thymeleaf-layout-dialect/)
 
-Nécessite : 
+Nécessite :
 ```HTML
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 ```
 
 - `<head>` :  Les attributs du `<head>` sont automatiquement fusionnés entre la page et son layout. Certains sont surchargés (comme `<title>`), d'autres concaténés (comme les `<script>`).
-- `layout:decorate` : Ajouté sur le tag `<html>` du contenu, il permet de préciser quel layout ce contenu utilise (il le *décore*). 
-- `layout:fragment` : Ajouté sur les tags internes du contenu, il permet d'indiquer dans quel fragment du layout est posé ce contenu spécifique. 
+- `layout:decorate` : Ajouté sur le tag `<html>` du contenu, il permet de préciser quel layout ce contenu utilise (il le *décore*).
+- `layout:fragment` : Ajouté sur les tags internes du contenu, il permet d'indiquer dans quel fragment du layout est posé ce contenu spécifique.
 
 > Les layouts peuvent hériter d'autres layouts.
 
@@ -206,7 +206,7 @@ Vertigo-UI n'a pas vocation à encapsuler ainsi tous les composants d'ihm, la st
 - le composant nécessite des interactions particulières avec le contexte. Par exemple pour sélectionner les données à intégrer dans vueData, et parfois pour les encoder de manière spécifique.
 - le composant propose une API plus ergonomique, plus adaptée ou moins verbeuse pour le développeur
 
-Nécessite : 
+Nécessite :
 ```HTML
 <html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
 ```
@@ -224,10 +224,35 @@ Nécessite :
 - `vu:head` : Pose le tag head et les méta du head html
   - `title`* : Titre de la page
   - `content` : Le body du tag est conservé
-  - `vuiDevMode` : active le mode développeur pour les composants Vertigo-UI (il faut un serveur de dev Vite — `npm run dev`, port 3000 — qui distribue les modules source transformés à la volée)
-  - `vuiSsr` : Active le mode Server Side Rendering (le serveur Node.js est optionnel ; à défaut, la pré-compilation du template est assurée par le moteur Nashorn embarqué — `vue-template-compiler` browser.js)
+  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.39`)
+  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.18.1`)
+  - `vuejsDevMode` : **boolean** (défaut `false`) : passe VueJS en mode dev — charge les builds non minifiés (`vue.global.js` au lieu de `vue.global.prod.js`, et `quasar.umd.js` au lieu de `quasar.umd.prod.js`) *(nous avons noté des bugs sur VueJS dans quelques cas qui n'apparaissent qu'en devMode)*
+  - `vuiDevMode` : **boolean** (défaut `false`) : active le mode développeur pour les composants Vertigo-UI (il faut un serveur de dev Vite — `npm run dev`, port 3000 — qui distribue les modules source transformés à la volée)
+  - `vuiSsr` : **boolean** (défaut `false`) : Active le mode Server Side Rendering (le serveur Node.js est optionnel ; à défaut, la pré-compilation du template est assurée par le moteur Nashorn embarqué — `vue-template-compiler` browser.js) — charge `vertigo-ui-mpa-ssr.js` au lieu de `vertigo-ui-mpa.js`
+  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.4.1`)
+  - `useQuasar` : **boolean** (défaut `true`) : charge Quasar (CSS, script UMD, locale)
+  - `quasarVersion` : Version du Quasar chargé (défaut `2.21.1`)
+  - `robotoVersion` : Version de la police Roboto chargée (défaut `51` ; la valeur `null` ne charge pas Roboto)
+  - `fontAwesomeVersion` : Version de Font Awesome chargée (défaut `6.7.2` ; la valeur `null` ne charge pas Font Awesome)
+  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`)
+  - `useWysiwyg` : **boolean** : charge les assets de l'éditeur Vertigo-Wysiwyg (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js` ; non chargé si non précisé
+  - `additional_defer_libs_slot` : Slot pour injecter des scripts supplémentaires (deferred), posés après Quasar et avant l'UMD Vertigo-UI
 - `vu:head-meta` : Composant obligatoire posant les éléments **méta** du head (script js, css, ...)
-  - `vuejsDevMode` : passe VueJS en mode dev *(nous avons noté des bugs sur VueJS dans quelques cas qui n'apparaissent qu'en devMode)* 
+  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.39`)
+  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.18.1`)
+  - `vuejsDevMode` : **boolean** (défaut `false`) : passe VueJS en mode dev — charge les builds non minifiés (`vue.global.js` au lieu de `vue.global.prod.js`, et `quasar.umd.js` au lieu de `quasar.umd.prod.js`) *(nous avons noté des bugs sur VueJS dans quelques cas qui n'apparaissent qu'en devMode)*
+  - `vuiDevMode` : **boolean** (défaut `false`) : active le mode développeur pour les composants Vertigo-UI (il faut un serveur de dev Vite — `npm run dev`, port 3000 — qui distribue les modules source transformés à la volée)
+  - `vuiSsr` : **boolean** (défaut `false`) : Active le mode Server Side Rendering — charge `vertigo-ui-mpa-ssr.js` au lieu de `vertigo-ui-mpa.js`
+  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.4.1`)
+  - `useQuasar` : **boolean** (défaut `true`) : charge Quasar (CSS, script UMD, locale)
+  - `quasarVersion` : Version du Quasar chargé (défaut `2.21.1`)
+  - `onlyDsfrStyle` : **boolean** (défaut `false`) : masque tous les CSS 3rd-party non-DSFR (Roboto, Material Icons, Font Awesome, Ionicons, Material Design Icons, Animate.css) ainsi que le CSS Quasar (les scripts JS Quasar restent chargés)
+  - `robotoVersion` : Version de la police Roboto chargée (défaut `51` ; la valeur `null` ne charge pas Roboto) — non chargé si `onlyDsfrStyle`
+  - `fontAwesomeVersion` : Version de Font Awesome chargée (défaut `6.7.2` ; la valeur `null` ne charge pas Font Awesome) — non chargé si `onlyDsfrStyle`
+  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`)
+  - `useWysiwyg` : **boolean** : charge les assets de l'éditeur Vertigo-Wysiwyg (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js` ; non chargé si non précisé
+  - `additional_defer_libs_slot` : Slot pour injecter des scripts supplémentaires (deferred), posés après Quasar et avant l'UMD Vertigo-UI
+  <!-- source : head.html:1-89 — params exhaustifs extraits du fragment -->
 - `vu:form` : Pose un formulaire et référence le contexte de page associé
   - `content` : Le body du tag est conservé
   - `other_attrs` : Liste des attributs à ajouter sur le formulaire (tag `<form>`)
@@ -251,7 +276,7 @@ Nécessite :
   - `div_attrs` : Liste des attributs à ajouter sur le corps de la cellule (tag `<div>`)
   - `content` : Le body du tag est conservé  
 - `vu:messages` : Composant ajoutant la liste des messages globaux issus d'un traitement qui ont été ajoutés dans le contexte (**uiMessageStack** avec Errors, Warnings, Info et Success)  
-- `vu:modal` : Pose le conteneur de modal, pouvant être utilisé ensuite dans l'écran. 
+- `vu:modal` : Pose le conteneur de modal, pouvant être utilisé ensuite dans l'écran.
   - `componentId` : Nom du composant, utilisé pour cibler la modale en Js
   - `title` : Titre de la modale
   - `closeLabel` : Libellé de la fermeture de la modale
@@ -287,12 +312,12 @@ Exemple d'utilisation d'une modale :
 
 ### Composants Vertigo-UI : utils
 
-Ces composants sont des composants techniques. 
-Les composants `include-data-*` ont tous le même rôle : ils indiquent au serveur de transférer une donnée du contexte serveur (`CTX`) dans le contexte Vue (objet `vueData`). 
+Ces composants sont des composants techniques.
+Les composants `include-data-*` ont tous le même rôle : ils indiquent au serveur de transférer une donnée du contexte serveur (`CTX`) dans le contexte Vue (objet `vueData`).
 Cette stratégie permet d'assurer que seules les données utiles sont poussées côté client. La plupart du temps ils ne sont pas utilisés directement, car ils sont posés par les composants `inputs` qui en ont besoin.
-Ils restent utiles pour ajouter précisément des données dans le `vueData`, pour des composants vue spécifiques par exemple. 
+Ils restent utiles pour ajouter précisément des données dans le `vueData`, pour des composants vue spécifiques par exemple.
 
-- `vu:include-data` : Inclut le champ d'un objet 
+- `vu:include-data` : Inclut le champ d'un objet
   - `object` : Nom de l'objet du contexte
   - `field` : Nom du champ
   - `modifiable` : Indique que le champ est modifiable côté client et peut être renvoyé au serveur
@@ -300,12 +325,12 @@ Ils restent utiles pour ajouter précisément des données dans le `vueData`, po
 - `vu:include-data-primitive` : Inclut une donnée primitive du contexte
   - `key` : Clé de la donnée
   - `modifiable` : Indique que le champ est modifiable côté client et peut être renvoyé au serveur
-- `vu:include-data-map` : Inclut le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple) 
+- `vu:include-data-map` : Inclut le champ d'un objet et applique une dénormalisation sur sa valeur (traduit un id en libellé par exemple)
   - `object` : Nom de l'objet du contexte
   - `field` : Nom du champ
   - `list` : Liste du mapping à appliquer
   - `listKey` : Champ clé de la liste du mapping
-  - `listDisplay` : Champ libellé de la liste du mapping 
+  - `listDisplay` : Champ libellé de la liste du mapping
 - `vu:include-data-protected` : Inclut le champ d'un objet. La valeur posée côté client est protégée (non en clair et non modifiable), la valeur réelle reste côté serveur. Ce système est utilisé pour les identifiants de fichier par exemple.
   - `object` : Nom de l'objet du contexte
   - `field` : Nom du champ
@@ -320,7 +345,7 @@ Ces composants sont les composants principaux de construction des formulaires de
 Pour simplifier l'écriture des écrans, la plupart gèrent le `viewMode` afin de proposer un rendu dépendant du mode **Edit** ou du mode **ReadOnly**.
 Les composants en **Edit** gèrent également nativement les messages d'erreurs issus des contrôles de validation.
 
-- `vu:label` : Composant label 
+- `vu:label` : Composant label
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
   - `label` : Surcharge du label
@@ -347,7 +372,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `labelField` : Nom du champ de la liste utilisée comme label
   - `componentId` : id du composant VueJS
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
-  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-select>`) 
+  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-select>`)
 - `vu:checkbox` : Composant case à cocher
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
@@ -362,7 +387,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `valueField` : Nom du champ de la liste utilisée comme valeur, à affecter dans l'objet
   - `labelField` : Nom du champ de la liste utilisée comme label
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
-  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-select>`) 
+  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-select>`)
 - `vu:select-multiple` : Composant de sélection multiple par une combobox
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
@@ -371,7 +396,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `valueField` : Nom du champ de la liste utilisée comme valeur, à affecter dans l'objet
   - `labelField` : Nom du champ de la liste utilisée comme label
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
-  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-select>`) 
+  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-select>`)
 - `vu:radio` : Composant de sélection par une liste de boutons radio
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
@@ -381,7 +406,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `labelField` : Nom du champ de la liste utilisée comme label
   - `layout` : Mise en forme du radio : `horizontal` ou `vertical`
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
-  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-radio>`) 
+  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-radio>`)
 - `vu:date` : Composant de sélection de date
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
@@ -396,7 +421,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `format` : Format d'affichage de la date/heure (par défaut `DD/MM/YYYY HH:mm`). La valeur est toujours stockée et échangée en ISO `YYYY-MM-DDTHH:mm`.
   - `date_attrs` : Liste des attributs à ajouter sur la date (tag `<q-date>`)
   - `time_attrs` : Liste des attributs à ajouter sur l'heure (tag `<q-time>`)
-  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-input>`)  
+  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-input>`)
 - `vu:knob` : Composant graphique de modification de valeur numérique
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
@@ -405,7 +430,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `max` : Valeur maximum
   - `step` : Pas des modifications de la valeur
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
-  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-knob>`) 
+  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-knob>`)
 - `vu:slider` : Composant graphique de modification de valeur numérique
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
@@ -414,7 +439,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `max` : Valeur maximum
   - `step` : Pas des modifications de la valeur
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
-  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-slider>`) 
+  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-slider>`)
 - `vu:chips-autocomplete` : Composant d'ajout d'une liste de tags par auto-complétion
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
@@ -425,7 +450,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `componentId` : id du composant VueJS
   - `staticData` : Indique si les données sont statiques (ou issues d'un WebService `@{/autocomplete/_searchFullText}`)
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
-  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-select>`) 
+  - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-select>`)
 - `vu:fileupload` : Composant d'ajout de fichier (contrairement aux autres composants de saisie, l'id du fichier n'est pas stocké dans un objet métier)
   - `url`* : Url du WebService d'upload
   - `key`* : Clé du contexte réceptionnant les fichiers
@@ -436,10 +461,10 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `accept` : Filtre MIME des fichiers acceptés (ex: `"image/*,.pdf"`)
   - `uploader_attrs` : Liste des attributs à ajouter sur le composant upload (tag `v-file-upload-quasar`)
 - `vu:fileupload-dropzone` : Zone de dépôt de fichiers par glisser-déposer
-  - `fileComponentId`* : Identifiant obligatoire liant la zone de dépôt au composant d'upload correspondant 
+  - `fileComponentId`* : Identifiant obligatoire liant la zone de dépôt au composant d'upload correspondant
 
 > Pour adapter leur rendu ces composants utilisent des mécanismes particuliers.
-> Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi : 
+> Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi :
 
 ```XML
 <th:block th:fragment="label-edit(object,field, label, other_attrs)" vu:alias="label" vu:selector="${viewMode=='edit'}" >
@@ -458,7 +483,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
 
 
 ### Composants Vertigo-UI : collections
-- `vu:cards` : Génère une liste de card. Lors du rendu d'une card, vous pouvez utiliser l'attribut VueJS `item` pour récupérer l'objet courant. 
+- `vu:cards` : Génère une liste de card. Lors du rendu d'une card, vous pouvez utiliser l'attribut VueJS `item` pour récupérer l'objet courant.
 - `vu:collection`
 - `vu:field-read`
 - `vu:list`
@@ -467,7 +492,7 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
 
 
 ### Composants Vertigo-UI : tables
-- `vu:table` : Génère un tableau. Lors du rendu d'une ligne, vous pouvez utiliser l'attribut VueJS `props.row` pour récupérer l'objet courant. 
+- `vu:table` : Génère un tableau. Lors du rendu d'une ligne, vous pouvez utiliser l'attribut VueJS `props.row` pour récupérer l'objet courant.
   - list
   - componentId
   - selectable

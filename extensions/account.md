@@ -1,7 +1,7 @@
 # Account
 
-Le module **Account** de Vertigo permet la gestion simplifiée des comptes utilisateurs. 
-Ce module permet avant tout la mise à disposition des autres modules de la notion transverse de compte utilisateur. Ceci permet à Vertigo de proposer des extensions comme **"notifications"** ou **"commentaires"**. 
+Le module **Account** de Vertigo permet la gestion simplifiée des comptes utilisateurs.
+Ce module permet avant tout la mise à disposition des autres modules de la notion transverse de compte utilisateur. Ceci permet à Vertigo de proposer des extensions comme **"notifications"** ou **"commentaires"**.
 
 Ce module propose des fonctionnalités de gestion des utilisateurs réparties sur trois axes orthogonaux :
 - **Authentication** : Gestion de l'authentification
@@ -42,13 +42,13 @@ modules:
 
 ### Features disponibles :
 - **security** : Active le module, et le premier niveau de sécurité (authentifié ou non)
-  - userSessionClassName : Nom de la classe de la session applicative 
+  - userSessionClassName : Nom de la classe de la session applicative
 - **account** : Active les fonctionnalités autour de la notion de compte utilisateur
 - **authentication** : Active les fonctionnalités d'authentification
 - **authorization** : Active les fonctionnalités liées aux autorisations
 - **identityProvider** : Active les fonctionnalités de fournisseur d'identité
 
-### Paramètres des Features 
+### Paramètres des Features
 
 #### Account
 - **account.store.store** : Stockage des *Account* par le *StoreManager*
@@ -59,9 +59,9 @@ modules:
   - userToAccountMapping : Mapping des champs de l'entité vers *Account*
   - groupToGroupAccountMapping : Mapping des champs de l'entité Groupe vers *AccountGroup*
 - **account.store.text** : Stockage des *Account* par un fichier texte
-  - accountFilePath : Chemin du fichier des *Account* 
+  - accountFilePath : Chemin du fichier des *Account*
   - accountFilePattern : RegExp de lecture du fichier (avec des **groupes de capture** [nommés](https://stackoverflow.com/a/415635/2273508) : id, displayName, email, authToken, photoUrl)
-  - groupFilePath : Chemin du fichier des *AccountGroup* 
+  - groupFilePath : Chemin du fichier des *AccountGroup*
   - groupFilePattern :  RegExp de lecture du fichier (avec des **groupes de capture** [nommés](https://stackoverflow.com/a/415635/2273508) : id, displayName, accountIds)
 - **account.store.loader** : Stockage des *Account* délégué à un loader spécifique *(implements [AccountLoader](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-account/src/main/java/io/vertigo/account/plugins/account/store/loader/AccountLoader.java))*
   - accountLoaderName : Nom du composant `AccountLoader` à utiliser pour charger les comptes
@@ -71,7 +71,7 @@ modules:
   - connectorName *(optional, par défaut "main")* : Nom du `RedisConnector` à utiliser (le plugin sélectionne le connector par son nom parmi les `RedisConnector` injectés)
 
 #### Authorization
-?> Pas de configuration particulière. Le comportement de ce composant est porté par le fichier de configuration des règles des [Autorisations](#autorisations). 
+?> Pas de configuration particulière. Le comportement de ce composant est porté par le fichier de configuration des règles des [Autorisations](#autorisations).
 
 
 ## Authentification
@@ -80,10 +80,10 @@ modules:
 
 L'authentification dans une application métier est basée sur le rapprochement d'un moyen d'Authentification avec une source d'authentification.
 
-- **AuthenticationToken** représente le moyen d'authentification. 
+- **AuthenticationToken** représente le moyen d'authentification.
 - Les **AuthenticationPlugin** représentent les sources d'authentification autorisées par le développeur.
 
-### Configuration 
+### Configuration
 
 Vertigo propose, de base, deux types de moyens d'authentification :
 - **UsernameAuthenticationToken** : Une seule information texte représentant le *Login* de l'utilisateur
@@ -110,7 +110,7 @@ Vertigo propose quatre types de source d'authentification :
 
 - **authentication.store** : Permet l'authentification basée sur le *StoreManager*
   - userCredentialEntity : Nom de l'entité portant l'authentification
-  - userLoginField : Nom du champ 
+  - userLoginField : Nom du champ
   - userPasswordField : Nom du champ password
   - userTokenIdField : Nom du champ *authToken* (champ utilisé pour le lien vers *Account*)
 
@@ -135,9 +135,9 @@ L'usage de ce module est assez simple :
 - On récupère les informations depuis le controller
 - On crée un Token portant ces informations
 - On délègue l'authentification à l'`authenticationManager`
-- Si l'authentification est bonne, on récupère l'entité de l'utilisateur et on fait les traitements spécifiques (association dans la session, récupération des droits, etc...) 
+- Si l'authentification est bonne, on récupère l'entité de l'utilisateur et on fait les traitements spécifiques (association dans la session, récupération des droits, etc...)
  
-Globalement le login est réalisé ainsi dans le service métier : 
+Globalement le login est réalisé ainsi dans le service métier :
 
 ```java
 public void login(final String login, final String password) {
@@ -163,40 +163,40 @@ Dans une application métier, on considère en général que tous les utilisateu
 
 D'un point de vue technique, le mécanisme permet de sécuriser des éléments fins de l'application (que l'on nomme *Ressource*) : des pages, des services, des données ou autres.
 Il peut aussi s'agir de quelque chose de plus abstrait comme un caractère **confidentiel** transverse à l'application.<br/>
-Mais pour rester compréhensible, le développeur va paramétrer le mécanisme de sécurité pour englober ces *Ressources* dans des *Authorizations* qui correspondent à des fonctionnalités proposées par l'application 
+Mais pour rester compréhensible, le développeur va paramétrer le mécanisme de sécurité pour englober ces *Ressources* dans des *Authorizations* qui correspondent à des fonctionnalités proposées par l'application
 (*Consulter les dossiers*, *Déposer un dossier*, *Valider les dossiers*, ...)
 
 Le mécanisme de sécurité de Vertigo est assez *bas-niveau*. Vertigo ne connaît que la notion d'**Authorization** : soit globale, soit portée par une entité (les `SecuredEntity`).
 
 Il est laissé à l'application la charge de rationaliser le modèle, par exemple il est préconisé que l'application gère la sécurité à un niveau plus macro avec une notion de *Profil* et de *Périmètre*.
-La liste des *Profils* associés à un utilisateur est spécifique à l'application et reste à sa charge. 
+La liste des *Profils* associés à un utilisateur est spécifique à l'application et reste à sa charge.
 Un *Profil* étant une liste d'**Authorizations** rattachée à un **Périmètre** applicatif.
 
 **Note**<br/>
-La bonne pratique dans ce domaine est que si l'utilisateur a plusieurs **Profils**, il ne devra en avoir qu'un seul actif à la fois (il pourra en changer pendant sa session), 
+La bonne pratique dans ce domaine est que si l'utilisateur a plusieurs **Profils**, il ne devra en avoir qu'un seul actif à la fois (il pourra en changer pendant sa session),
 ceci afin d'éviter des collisions (intersections) de règles de sécurité difficiles à comprendre, à implémenter de manière performante et à tester.<br/>
 Dans un système où la gestion des utilisateurs est centralisée, le **Profil** utilisateur peut être géré par le système centralisé (il fournit le **Profil** par utilisateur par appli).
 
 ### Notion de *contexte de sécurité*
 
-Le modèle présenté ci-dessus permet déjà de gérer de nombreux cas. Mais plus les clients sont gros et plus ils ont une organisation forte qui pèse sur la sécurité de l'application. 
+Le modèle présenté ci-dessus permet déjà de gérer de nombreux cas. Mais plus les clients sont gros et plus ils ont une organisation forte qui pèse sur la sécurité de l'application.
 Il apparaît alors que la sécurité doit être relative à un contexte. Ce contexte peut être géographique, organisationnel, lié à un état, à une date ou autre, voire tout ça en même temps. <br/>
 Ce *contexte de sécurité* est appelé **Périmètre** de sécurité.
 
 Le mécanisme de Vertigo permet d’assurer et de mettre en place ce type de sécurité de manière générique dans les projets.
 Au sens Vertigo, le *contexte de sécurité* est une notion :
 
-- dans laquelle s'inscrivent les utilisateurs et les `SecuredEntities` 
+- dans laquelle s'inscrivent les utilisateurs et les `SecuredEntities`
 - qui est composée d'axes (géographique, organisationnel, ...)
 - dont chaque axe peut être hiérarchique (ex: continent, pays, régions, communes, villes)
 
 Pour rester compatible avec le mécanisme prévu par Vertigo, l'application doit respecter quelques règles :
 
 - L'utilisateur n'a qu'un et un seul contexte actif à la fois
-- Le contexte de l'utilisateur est transverse à ses droits 
-- La hiérarchie du contexte est sans exception et correctement orientée (un parent accède à tous ses enfants, petits-enfants ...) 
+- Le contexte de l'utilisateur est transverse à ses droits
+- La hiérarchie du contexte est sans exception et correctement orientée (un parent accède à tous ses enfants, petits-enfants ...)
 
-!>Les exceptions devront être gérées spécifiquement par l'application.
+!> Les exceptions devront être gérées spécifiquement par l'application.
 
 
 ### Types d'autorisation
@@ -221,7 +221,7 @@ Deux types d'autorisations sont proposés :
     - label : Libellé de l'opération
     - grants *(optional)* : Liste d'opérations données par cette opération (ie : l'utilisateur ayant cette opération, possède aussi celles du grants)
     - overrides *(optional)* : Liste d'opérations surchargées par cette opération (ie : pour l'utilisateur ayant cette opération, la règle de cette opération surcharge celles des autres overrides)
-    - rules : Liste de règles de sécurité. 
+    - rules : Liste de règles de sécurité.
       - Syntaxe proche du SQL ( myField *opérateur* value (and|or)? )*
       - Les différentes règles de la liste sont considérées en **OU**
       - **${myParam}** pour placer une propriété du contexte utilisateur (propriété de périmètre dans la session de l'utilisateur)
@@ -361,7 +361,7 @@ Pour l'appliquer à une recherche par un moteur de recherche :
 #### AuthorizationUtil
 
 Cet utilitaire propose des méthodes statiques facilement utilisables pour vérifier les autorisations de l'utilisateur dans les services métiers.
-Il est préférable de faire les contrôles le plus tôt possible dans le traitement pour des questions de performances. 
+Il est préférable de faire les contrôles le plus tôt possible dans le traitement pour des questions de performances.
 Mais si l'utilisateur n'a pas les autorisations suffisantes, une exception est lancée ce qui rollbackera la transaction et affichera une erreur à l'utilisateur.
 
 - **assertAuthorizations(message*(optionnel)*, AuthorizationName...)** : Vérifie que l'utilisateur a l'une des autorisations passées en paramètre et lance une exception sinon
@@ -463,7 +463,7 @@ Les autorisations sont chargées via un DefinitionProvider dans la Feature du mo
 ### Exemple pour les règles de sécurité : ENUM et TREE
 
 **ENUM** : Exemple de cas d’usage pour un dossier.<br/>
-États possibles : 
+États possibles :
 - (ENC) En cours de saisie
 - (SOU) Soumis
 - (ACC) Accepté
@@ -474,7 +474,7 @@ Les autorisations sont chargées via un DefinitionProvider dans la Feature du mo
 
 
 **TREE** : Exemple de cas d’usage pour un dossier.<br/>
-Arbre géographique : 
+Arbre géographique :
 - (NAT) National
 - (DEP) Département
 - (COM) Commune
