@@ -20,7 +20,7 @@ modules:
   io.vertigo.account.AccountFeatures:
     features:
       - security:
-          userSessionClassName: io.gestionprojet.commons.GestionProjetUserSession
+          userSessionClassName: io.mars.support.MarsUserSession
       - account:
       - authentication:
       - authorization:
@@ -40,26 +40,20 @@ La configuration de la sécurité est ensuite ajoutée au manifest du module app
 Exemple :
 
 ```java
-public class GestionProjetFeatures extends DefaultUiModuleFeatures<GestionProjetFeatures> {
+public class BasemanagementFeatures extends DefaultUiModuleFeatures<BasemanagementFeatures> {
 
-  public GestionProjetFeatures() {
-    super("gestionprojet");
+  public BasemanagementFeatures() {
+    super("basemanagement");
   }
 
-  @Override
-  protected void buildFeatures() {
-    super.buildFeatures();
+  @Feature("auth")
+  public BasemanagementFeatures withAuth(final Param... params) {
     getModuleConfigBuilder()
-        [...]
         .addDefinitionProvider(DefinitionProviderConfig.builder(JsonSecurityDefinitionProvider.class)
-                .addDefinitionResource("security", "io/gestionprojet/gestionprojet-authorizations.json")
+                .addDefinitionResource("security", "io/mars/basemanagement/base-auth-config.json")
                 .build())
-        [...]
-  }
-
-  @Override
-  protected String getPackageRoot() {
-    return this.getClass().getPackage().getName();
+        .addDefinitionProvider(MarsRoleDefinitionProvider.class);
+    return this;
   }
 }
 ```
@@ -118,12 +112,15 @@ Deux types d'autorisations sont proposés :
     - fields *(Type:TREE)* : Liste des champs ordonnés (et à plat) de l'arborescence
   - operations : Liste des opérations possibles sur l'entité
     - name : Code de l'opération
+    - label : Libellé de l'opération
+    - grants : Liste des opérations accordées en cascade (récursif)
+    - overrides : Liste des opérations overridées par cette opération
     - rules : Liste de règles de sécurité.
       - Syntaxe proche du SQL ( myField *opérateur* value (and|or)? )*
         - Opérateurs de comparaison : `=`, `!=`, `<`, `>`, `<=`, `>=`
         - Opérateurs booléens : `AND` / `and` / `&&` et `OR` / `or` / `||`
         - Groupement par parenthèses `( ... )`, profondeur de nesting maximale : 3
-        - Mot-clé `true` : règle toujours vraie (cf. règle `read` de l'exemple ci-dessous)
+        - Mot-clé `true` : règle toujours vraie (cf. règle `admin` de l'exemple ci-dessous)
         - Pour le détail des classes du DSL : [la documentation du module Account](/extensions/account) (section *Pour les experts* > *DSL de règles*)
       - Les différentes règles de la liste sont considérées en **OU**
       - **${myParam}** pour placer une propriété du contexte utilisateur (propriété de périmètre dans la session de l'utilisateur)
@@ -137,39 +134,37 @@ Deux types d'autorisations sont proposés :
 
 ## Exemple
 
-Voici un fichier type de configuration de la sécurité
+Extrait du fichier de configuration de sécurité de l'application de démonstration Mars
 
 ```json
 {
   "globalAuthorizations": [{
-    "name": "SecuredUser",
-    "label": "security.authorization.user.secured"
+    "name": "ViewBases",
+    "label": "View bases list"
   }, {
-    "name": "UnsecuredUser",
-    "label": "security.authorization.user.unsecured"
+    "name": "AdmMasterData",
+    "label": "Administer master data"
   }],
   "securedEntities": [{
-    "entity": "Contact",
-    "securityFields" : ["honorificCode", "name"],
+    "entity": "Base",
+    "securityFields": ["baseId", "assetsValue"],
     "securityDimensions": [],
-    "operations": [  {
-      "__comment": "Test de lecture : Tout le monde a le droit de lire",
-      "name": "read", "label" : "Lecture",
-      "rules": [ "true" ]
+    "operations": [{
+      "__comment": "Visibilité pour les membres",
+      "name": "read", "label": "Read",
+      "rules": ["baseId<=${baseId}"]
     }, {
-      "__comment": "Test d'écriture : Droit limité, l'utilisateur est autorisé à modifier les contacts d'un même titre honorifique et un contact particulier par son nom",
-      "name": "write", "label" : "Ecriture",
+      "__comment": "Visibilité pour les managers",
+      "name": "readConf", "overrides": ["read"], "label": "Lecture des bases sur un seuil de confidentialité",
+      "rules": ["baseId<=${baseId}", "assetsValue<=${assetsValue}"]
+    }, {
+      "name": "write", "label": "Edition information base",
       "grants": ["read"],
-      "rules": [
-        "honorificCode=${honorificCode} OR name=${name}"
-      ]
+      "rules": ["baseId<=${baseId}"]
     }, {
-      "__comment": "Test de suppression : Droit limité, l'utilisateur est autorisé à supprimer un contact particulier par son nom",
-      "name": "delete", "label" : "Suppression",
-      "grants": ["read", "write"],
-      "rules": [
-        "name=${name}"
-      ]
+      "name": "admin", "label": "Administration des bases",
+      "grants": ["readAll", "writeAll", "addEquiAdm"],
+      "rules": ["true"]
     }]
   }]
 }

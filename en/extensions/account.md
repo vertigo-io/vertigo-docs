@@ -23,7 +23,7 @@ modules:
   io.vertigo.account.AccountFeatures:
     features:
       - security:
-          userSessionClassName: io.gestionprojet.commons.GestionProjetUserSession
+          userSessionClassName: io.mars.support.MarsUserSession
       - account:
       - authentication:
       - authorization:
@@ -36,7 +36,7 @@ modules:
           userToAccountMapping: 'id:personId, displayName:lastName, email:email, authToken:email, photo: picturefileId'
           groupToGroupAccountMapping: 'id:groupId, displayName:name'
       - authentication.text:
-          filePath: /initdata/userAccounts.txt
+          filePath: /io/mars/datasets/neutral/userAccounts.txt
 ```
 
 
@@ -271,9 +271,9 @@ After a successful authentication, it is the application that grants the user's 
 The mechanism is intentionally low-level: Vertigo provides the building blocks, the policy (profiles, scopes) is left to the application, see [Security](/en/basic/securite) for the Profile/Scope concept.
 
 Mechanics:
-- **obtainUserAuthorizations()**: obtains the authorization support of the current user (`UserAuthorizations`), stored as an attribute of the `UserSession` — this is the entry point of the grant
-- **Grant a global authorization**: `userAuthorizations.addAuthorization(authorization)` — the `Authorization` is the definition loaded from the security configuration; the names are prefixed with `Atz` (e.g., `AtzAdmProject`)
-- **Grant an operation on an entity**: `userAuthorizations.addAuthorization(authorization)` with a name of the form `Atz<Entity>$<operation>` (e.g., `AtzProject$read`) — the `grants` of the operation are granted in cascade (recursive, with a loop guard)
+- **obtainUserAuthorizations()**: obtains the authorization support of the current user (`UserAuthorizations`), stored as an attribute of the `UserSession` — this is the entry point for granting rights
+- **Grant a global authorization**: `userAuthorizations.addAuthorization(authorization)` — the `Authorization` is the definition loaded from the security configuration; the names are prefixed with `Atz` (e.g., `AtzAdmMasterData`)
+- **Grant an operation on an entity**: `userAuthorizations.addAuthorization(authorization)` with a name of the form `Atz<Entity>$<operation>` (e.g., `AtzBase$read`) — the `grants` of the operation are granted in cascade (recursive, with a loop guard)
 - **Grant a role**: `userAuthorizations.addRole(role)` — adds the role **and** all its authorizations in cascade (the roles are declared in code, not in JSON: constructor `Role(name, description, authorizations)`)
 - **Grant the scope keys**: `userAuthorizations.withSecurityKeys("key", value)`:
   - simple key: `withSecurityKeys("utiId", "A-123")`
@@ -283,18 +283,18 @@ Mechanics:
   - **`null` value**: the blank key and the **entire** `null` value are rejected by an Assertion; the `null` elements of a TREE array are, on the other hand, allowed (cf. "partial path")
 
 ```java
-// Dans le service métier, après l'authentification réussie :
-final DefinitionSpace definitionSpace = Node.getNode().getDefinitionSpace();
-authorizationManager.obtainUserAuthorizations()
-    // droits globaux + opération sur entité (noms préfixés Atz)
-    .addAuthorization(definitionSpace.resolve("AtzAdmProject", Authorization.class))
-    .addAuthorization(definitionSpace.resolve("AtzProject$read", Authorization.class))
-    // périmètre : clé simple + clé TREE (chemin dans la hiérarchie)
-    .withSecurityKeys("utiId", "A-123")
-    .withSecurityKeys("orga", new String[] { "D01", "D01-B12" })
-    // 2e valeur sur la même clé (combinée en OR) : chemin partiel en ID numériques,
-    // position null = racine du sous-arbre (la règle pivote sur le dernier niveau non null)
-    .withSecurityKeys("orga", new Long[] { 1L, 2L, null });
+// In the business service, after successful authentication (Mars: profile change):
+final var userAuthorizations = authorizationManager.obtainUserAuthorizations()
+    .clearRoles()
+    .clearSecurityKeys()
+    .addRole(definitionSpace.resolve("R" + roleId, Role.class))
+    .withSecurityKeys("baseId", baseId)
+    .withSecurityKeys("personId", personId);
+// Conditional key depending on the scope (real in Mars):
+userAuthorizations.withSecurityKeys("assetsValue", assetsValue);
+// Generic example (outside Mars): TREE key (hierarchical dimension) — partial path,
+// null position = root of the subtree:
+// userAuthorizations.withSecurityKeys("orga", new String[] { "D01", "D01-B12" });
 ```
 
 Life cycle:
@@ -322,38 +322,38 @@ The Vertigo Criteria is a cross-cutting element representing a filter, which can
 
 To apply it on general DAO queries
 ```Java
- final Criteria<Dossier> securityFilter = authorizationManager.getCriteriaSecurity(Dossier.class, SecuredEntities.DossierOperations.read);
-	return dossierDAO.findAll(securityFilter, dtListState);
+ final Criteria<Equipment> securityFilter = authorizationManager.getCriteriaSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read);
+	return equipmentDAO.findAll(securityFilter, dtListState);
 ```
 
  To apply it on specific DAO tasks.
  It is necessary to pass an AuthorizationCriteria via the IN parameters of the Task. It is then possible to translate it into SQL directly in the SQL query.
 ```Java
-return dossierDAO.getLastCreatedDossiersByProjectId(projectId,
-				AuthorizationUtil.authorizationCriteria(Dossier.class, SecuredEntities.DossierOperations.read));
+return equipmentDAO.getLastPurchasedEquipmentsByBaseId(baseId,
+				AuthorizationUtil.authorizationCriteria(Equipment.class, SecuredEntities.EquipmentOperations.read));
 ```
- ```
-create Task TkGetLastCreatedDossiersByProjectId {  
+```
+create Task TkGetLastPurchasedEquipmentsByBaseId {  
     className : "io.vertigo.basics.task.TaskEngineSelect"
     request : "
             select 
-            	dos.*
-			from (<%=securedDossier.asSqlFrom(\"dossier\", ctx)%>) dos
-			where dos.project_id = #projectId#
-			order by dos.creation_date desc
+            	equ.*
+			from (<%=securedEquipment.asSqlFrom(\"equipment\", ctx)%>) equ
+			where equ.base_id = #baseId#
+			order by equ.purchase_date desc
 			limit 50
              "
-    in 	projectId        {domain : DoId         	cardinality: "1"}
-    in  securedDossier   {domain : DoAuthorizationCriteria    cardinality: "1"}
-    out dossiers         {domain : DoDtDossier	cardinality: "*"}
+    in 	baseId           {domain : DoId         	cardinality: "1"}
+    in  securedEquipment {domain : DoAuthorizationCriteria    cardinality: "1"}
+    out equipments       {domain : DoDtEquipment	cardinality: "*"}
 }
 ```
 > Note: It is efficient to pass the security filter as a FROM clause. This allows quickly limiting the data scope before performing more complex joins.
 
 To apply it to a search by a search engine:
 ```Java
- final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Dossier.class, SecuredEntities.DossierOperations.read));
-	final SearchQuery searchQuery = dossierIndexSearchClient.createSearchQueryBuilderDossier(criteria, selectedFacetValues)
+ final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read));
+	final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
 				.withSecurityFilter(securityListFilter)
 				.build();
 ```
@@ -380,10 +380,10 @@ But if the user does not have sufficient authorizations, an exception is thrown,
 Example:
 ```Java
   // check d'opération sur une entity
- AuthorizationUtil.assertOperations(projectDAO.get(projectId), SecuredEntities.ProjectOperations.read);
+ AuthorizationUtil.assertOperations(baseDAO.get(baseId), SecuredEntities.BaseOperations.read);
 
   // utilitaires pour les FK
-  AuthorizationUtil.assertOperationsWithLoadIfNeeded(tache.dossier(), SecuredEntities.DossierOperations.readTaches);
+  AuthorizationUtil.assertOperationsWithLoadIfNeeded(ticket.equipment(), SecuredEntities.EquipmentOperations.readTickets);
 ```
 
 #### UiAuthorizationUtil
@@ -393,8 +393,8 @@ This allows disabling the display of a button or a link in the UI.
 Usually, the checks are done in Thymeleaf with a `th:if`
 Example:
 ```HTML
- th:if="${authz.hasAuthorization('AdmDossier','ViewDossier')}"
- ```
+ th:if="${authz.hasAuthorization('ViewBases')}"
+```
 
 API:
 - **hasAuthorization(AuthorizationName...)**: Checks that the user has one of the authorizations passed as parameter
@@ -455,7 +455,7 @@ The authorizations are loaded via a DefinitionProvider in the Feature of the app
 *Example:*
 ```java 
   .addDefinitionProvider(DefinitionProviderConfig.builder(JsonSecurityDefinitionProvider.class)
-    .addDefinitionResource("security", "io/gestionprojet/gestionprojet-authorizations.json")
+    .addDefinitionResource("security", "io/mars/basemanagement/base-auth-config.json")
     .build())
 ```
 

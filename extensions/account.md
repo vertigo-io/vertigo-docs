@@ -23,7 +23,7 @@ modules:
   io.vertigo.account.AccountFeatures:
     features:
       - security:
-          userSessionClassName: io.gestionprojet.commons.GestionProjetUserSession
+          userSessionClassName: io.mars.support.MarsUserSession
       - account:
       - authentication:
       - authorization:
@@ -36,7 +36,7 @@ modules:
           userToAccountMapping: 'id:personId, displayName:lastName, email:email, authToken:email, photo: picturefileId'
           groupToGroupAccountMapping: 'id:groupId, displayName:name'
       - authentication.text:
-          filePath: /initdata/userAccounts.txt
+          filePath: /io/mars/datasets/neutral/userAccounts.txt
 ```
 
 
@@ -272,8 +272,8 @@ Le mécanisme est volontairement bas-niveau : Vertigo fournit les briques, la po
 
 Mécanique :
 - **obtainUserAuthorizations()** : obtient le support d'autorisation de l'utilisateur courant (`UserAuthorizations`), stocké en attribut de la `UserSession` — c'est le point d'entrée de l'attribution
-- **Attribuer une autorisation globale** : `userAuthorizations.addAuthorization(authorization)` — l'`Authorization` est la définition chargée depuis la configuration de sécurité ; les noms sont préfixés `Atz` (ex : `AtzAdmProject`)
-- **Attribuer une opération sur une entité** : `userAuthorizations.addAuthorization(authorization)` avec un nom de forme `Atz<Entité>$<opération>` (ex : `AtzProject$read`) — les `grants` de l'opération sont accordés en cascade (récursif, avec garde anti-boucle)
+- **Attribuer une autorisation globale** : `userAuthorizations.addAuthorization(authorization)` — l'`Authorization` est la définition chargée depuis la configuration de sécurité ; les noms sont préfixés `Atz` (ex : `AtzAdmMasterData`)
+- **Attribuer une opération sur une entité** : `userAuthorizations.addAuthorization(authorization)` avec un nom de forme `Atz<Entité>$<opération>` (ex : `AtzBase$read`) — les `grants` de l'opération sont accordés en cascade (récursif, avec garde anti-boucle)
 - **Attribuer un rôle** : `userAuthorizations.addRole(role)` — ajoute le rôle **et** toutes ses autorisations en cascade (les rôles se déclarent en code, pas en JSON : constructeur `Role(name, description, authorizations)`)
 - **Attribuer les clés de périmètre** : `userAuthorizations.withSecurityKeys("cle", valeur)` :
   - clé simple : `withSecurityKeys("utiId", "A-123")`
@@ -283,18 +283,18 @@ Mécanique :
   - **valeur `null`** : la clé blank et la valeur **entière** `null` sont rejetées par une Assertion ; les éléments `null` d'un tableau TREE sont en revanche autorisés (cf. « chemin partiel »)
 
 ```java
-// Dans le service métier, après l'authentification réussie :
-final DefinitionSpace definitionSpace = Node.getNode().getDefinitionSpace();
-authorizationManager.obtainUserAuthorizations()
-    // droits globaux + opération sur entité (noms préfixés Atz)
-    .addAuthorization(definitionSpace.resolve("AtzAdmProject", Authorization.class))
-    .addAuthorization(definitionSpace.resolve("AtzProject$read", Authorization.class))
-    // périmètre : clé simple + clé TREE (chemin dans la hiérarchie)
-    .withSecurityKeys("utiId", "A-123")
-    .withSecurityKeys("orga", new String[] { "D01", "D01-B12" })
-    // 2e valeur sur la même clé (combinée en OR) : chemin partiel en ID numériques,
-    // position null = racine du sous-arbre (la règle pivote sur le dernier niveau non null)
-    .withSecurityKeys("orga", new Long[] { 1L, 2L, null });
+// Dans le service métier, après l'authentification réussie (Mars : changement de profil) :
+final var userAuthorizations = authorizationManager.obtainUserAuthorizations()
+    .clearRoles()
+    .clearSecurityKeys()
+    .addRole(definitionSpace.resolve("R" + roleId, Role.class))
+    .withSecurityKeys("baseId", baseId)
+    .withSecurityKeys("personId", personId);
+// clé conditionnelle selon le périmètre (réel dans Mars) :
+userAuthorizations.withSecurityKeys("assetsValue", assetsValue);
+// Exemple générique (hors Mars) : clé TREE (dimension hiérarchique) — chemin partiel,
+// position null = racine du sous-arbre :
+// userAuthorizations.withSecurityKeys("orga", new String[] { "D01", "D01-B12" });
 ```
 
 Cycle de vie :
@@ -322,38 +322,38 @@ Le Criteria Vertigo est un élément transverse représentant un filtre, qui peu
 
 Pour l'appliquer sur des requêtes générales du DAO
 ```Java
- final Criteria<Dossier> securityFilter = authorizationManager.getCriteriaSecurity(Dossier.class, SecuredEntities.DossierOperations.read);
-	return dossierDAO.findAll(securityFilter, dtListState);
+ final Criteria<Equipment> securityFilter = authorizationManager.getCriteriaSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read);
+	return equipmentDAO.findAll(securityFilter, dtListState);
 ```
 
  Pour l'appliquer sur des tasks spécifiques du DAO.
  Il faut passer un AuthorizationCriteria par les paramètres IN de la Task. Il est alors possible de le traduire en SQL directement dans la requête SQL.
 ```Java
-return dossierDAO.getLastCreatedDossiersByProjectId(projectId,
-				AuthorizationUtil.authorizationCriteria(Dossier.class, SecuredEntities.DossierOperations.read));
+return equipmentDAO.getLastPurchasedEquipmentsByBaseId(baseId,
+				AuthorizationUtil.authorizationCriteria(Equipment.class, SecuredEntities.EquipmentOperations.read));
 ```
 ```
-create Task TkGetLastCreatedDossiersByProjectId {  
-   className : "io.vertigo.basics.task.TaskEngineSelect"
-   request : "
-           select 
-           	dos.*
-			from (<%=securedDossier.asSqlFrom(\"dossier\", ctx)%>) dos
-			where dos.project_id = #projectId#
-			order by dos.creation_date desc
+create Task TkGetLastPurchasedEquipmentsByBaseId {  
+    className : "io.vertigo.basics.task.TaskEngineSelect"
+    request : "
+            select 
+            	equ.*
+			from (<%=securedEquipment.asSqlFrom(\"equipment\", ctx)%>) equ
+			where equ.base_id = #baseId#
+			order by equ.purchase_date desc
 			limit 50
-            "
-   in 	projectId        {domain : DoId         	cardinality: "1"}
-   in  securedDossier   {domain : DoAuthorizationCriteria    cardinality: "1"}
-   out dossiers         {domain : DoDtDossier	cardinality: "*"}
+             "
+    in 	baseId           {domain : DoId         	cardinality: "1"}
+    in  securedEquipment {domain : DoAuthorizationCriteria    cardinality: "1"}
+    out equipments       {domain : DoDtEquipment	cardinality: "*"}
 }
 ```
 > Note : Il est efficace de passer le filtre de sécurité sous la forme d'un from. Cela permet de limiter rapidement le périmètre de données avant de faire des jointures plus complexes.
 
 Pour l'appliquer à une recherche par un moteur de recherche :
 ```Java
- final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Dossier.class, SecuredEntities.DossierOperations.read));
-	final SearchQuery searchQuery = dossierIndexSearchClient.createSearchQueryBuilderDossier(criteria, selectedFacetValues)
+ final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read));
+	final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
 				.withSecurityFilter(securityListFilter)
 				.build();
 ```
@@ -380,10 +380,10 @@ Mais si l'utilisateur n'a pas les autorisations suffisantes, une exception est l
  Exemple :
 ```Java
   // check d'opération sur une entity
- AuthorizationUtil.assertOperations(projectDAO.get(projectId), SecuredEntities.ProjectOperations.read);
+ AuthorizationUtil.assertOperations(baseDAO.get(baseId), SecuredEntities.BaseOperations.read);
 
   // utilitaires pour les FK
-  AuthorizationUtil.assertOperationsWithLoadIfNeeded(tache.dossier(), SecuredEntities.DossierOperations.readTaches);
+  AuthorizationUtil.assertOperationsWithLoadIfNeeded(ticket.equipment(), SecuredEntities.EquipmentOperations.readTickets);
 ```
 
 #### UiAuthorizationUtil
@@ -393,7 +393,7 @@ Cela permet de désactiver l'affichage d'un bouton ou d'un lien dans l'UI.
 Habituellement, les contrôles sont faits en Thymeleaf avec un `th:if`
 Exemple :
 ```HTML
- th:if="${authz.hasAuthorization('AdmDossier','ViewDossier')}"
+ th:if="${authz.hasAuthorization('ViewBases')}"
 ```
 
 API :
@@ -455,7 +455,7 @@ Les autorisations sont chargées via un DefinitionProvider dans la Feature du mo
 *Exemple :*
 ```java 
   .addDefinitionProvider(DefinitionProviderConfig.builder(JsonSecurityDefinitionProvider.class)
-    .addDefinitionResource("security", "io/gestionprojet/gestionprojet-authorizations.json")
+    .addDefinitionResource("security", "io/mars/basemanagement/base-auth-config.json")
     .build())
 ```
 

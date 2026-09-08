@@ -735,14 +735,14 @@ The vertigo-ui module has no dedicated `XxxFeatures.java`. UI components are act
 `DefaultUiModuleFeatures` is an abstract class: it is the base class that the applicative module extends to activate the UI components. The activation of the UI does not go through any YAML key: cf. the "Managers & Configuration" section above (first section of the "For Experts" part) for the mechanism (`DefaultUiModuleFeatures`, `addUi()`, `super.buildFeatures()` warning).
 
 ```java
-package io.gestionprojet;
+package io.mars.basemanagement;
 
 import io.vertigo.ui.impl.springmvc.config.DefaultUiModuleFeatures;
 
-public class GestionProjetFeatures extends DefaultUiModuleFeatures<GestionProjetFeatures> {
+public class BasemanagementFeatures extends DefaultUiModuleFeatures<BasemanagementFeatures> {
 
-    public GestionProjetFeatures() {
-        super("gestionprojet");
+    public BasemanagementFeatures() {
+        super("basemanagement");
     }
 }
 ```
@@ -751,5 +751,7 @@ The applicative module is then simply declared in the YAML configuration (no `ui
 
 ```yaml
 modules:
-  io.gestionprojet.GestionProjetFeatures:
+  io.mars.basemanagement.BasemanagementFeatures:
+    features:
+      - auth:
 ```

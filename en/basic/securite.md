@@ -20,7 +20,7 @@ modules:
   io.vertigo.account.AccountFeatures:
     features:
       - security:
-          userSessionClassName: io.gestionprojet.commons.GestionProjetUserSession
+          userSessionClassName: io.mars.support.MarsUserSession
       - account:
       - authentication:
       - authorization:
@@ -40,26 +40,20 @@ The security configuration is then added to the application module's manifest. <
 Example:
 
 ```java
-public class GestionProjetFeatures extends DefaultUiModuleFeatures<GestionProjetFeatures> {
+public class BasemanagementFeatures extends DefaultUiModuleFeatures<BasemanagementFeatures> {
 
-  public GestionProjetFeatures() {
-    super("gestionprojet");
+  public BasemanagementFeatures() {
+    super("basemanagement");
   }
 
-  @Override
-  protected void buildFeatures() {
-    super.buildFeatures();
+  @Feature("auth")
+  public BasemanagementFeatures withAuth(final Param... params) {
     getModuleConfigBuilder()
-        [...]
         .addDefinitionProvider(DefinitionProviderConfig.builder(JsonSecurityDefinitionProvider.class)
-                .addDefinitionResource("security", "io/gestionprojet/gestionprojet-authorizations.json")
+                .addDefinitionResource("security", "io/mars/basemanagement/base-auth-config.json")
                 .build())
-        [...]
-  }
-
-  @Override
-  protected String getPackageRoot() {
-    return this.getClass().getPackage().getName();
+        .addDefinitionProvider(MarsRoleDefinitionProvider.class);
+    return this;
   }
 }
 ```
@@ -118,12 +112,15 @@ Two types of authorizations are offered:
     - fields *(Type:TREE)*: List of ordered (and flat) fields of the tree
   - operations: List of possible operations on the entity
     - name: Operation code
+    - label: Label of the operation
+    - grants: List of operations granted in cascade (recursive)
+    - overrides: List of operations overridden by this operation
     - rules: List of security rules.
       - SQL-like syntax (myField *operator* value (and|or)?)
         - Comparison operators: `=`, `!=`, `<`, `>`, `<=`, `>=`
         - Boolean operators: `AND` / `and` / `&&` and `OR` / `or` / `||`
         - Grouping by parentheses `( ... )`, maximum nesting depth: 3
-        - `true` keyword: rule always true (see the `read` rule in the example below)
+        - `true` keyword: rule always true (cf. `admin` rule in the example below)
         - For details on the DSL classes: [the Account module documentation](/en/extensions/account) (section *For Experts* > *Security Rules DSL*)
       - The different rules in the list are considered in **OR**
       - **${myParam}** to place a property of the user context (scope property in the user's session)
@@ -137,39 +134,37 @@ Two types of authorizations are offered:
 
 ## Example
 
-Here is a typical security configuration file:
+Excerpt from the security configuration file of the Mars demo application
 
 ```json
 {
   "globalAuthorizations": [{
-    "name": "SecuredUser",
-    "label": "security.authorization.user.secured"
+    "name": "ViewBases",
+    "label": "View bases list"
   }, {
-    "name": "UnsecuredUser",
-    "label": "security.authorization.user.unsecured"
+    "name": "AdmMasterData",
+    "label": "Administer master data"
   }],
   "securedEntities": [{
-    "entity": "Contact",
-    "securityFields" : ["honorificCode", "name"],
+    "entity": "Base",
+    "securityFields": ["baseId", "assetsValue"],
     "securityDimensions": [],
-    "operations": [  {
-      "__comment": "Test de lecture : Tout le monde a le droit de lire",
-      "name": "read", "label" : "Lecture",
-      "rules": [ "true" ]
+    "operations": [{
+      "__comment": "Visibilité pour les membres",
+      "name": "read", "label": "Read",
+      "rules": ["baseId<=${baseId}"]
     }, {
-      "__comment": "Test d'écriture : Droit limité, l'utilisateur est autorisé à modifier les contacts d'un même titre honorifique et un contact particulier par son nom",
-      "name": "write", "label" : "Ecriture",
+      "__comment": "Visibilité pour les managers",
+      "name": "readConf", "overrides": ["read"], "label": "Lecture des bases sur un seuil de confidentialité",
+      "rules": ["baseId<=${baseId}", "assetsValue<=${assetsValue}"]
+    }, {
+      "name": "write", "label": "Edition information base",
       "grants": ["read"],
-      "rules": [
-        "honorificCode=${honorificCode} OR name=${name}"
-      ]
+      "rules": ["baseId<=${baseId}"]
     }, {
-      "__comment": "Test de suppression : Droit limité, l'utilisateur est autorisé à supprimer un contact particulier par son nom",
-      "name": "delete", "label" : "Suppression",
-      "grants": ["read", "write"],
-      "rules": [
-        "name=${name}"
-      ]
+      "name": "admin", "label": "Administration des bases",
+      "grants": ["readAll", "writeAll", "addEquiAdm"],
+      "rules": ["true"]
     }]
   }]
 }
