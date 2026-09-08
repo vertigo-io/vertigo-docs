@@ -11,16 +11,16 @@ Le format d'échange JSON a été privilégié pour sa popularité, mais égalem
 Afin d'utiliser les fonctionnalités de Vega il convient d'ajouter à la configuration de l'application ce module.
 Pour plus de détails vous pouvez vous rapporter au chapitre dédié à la [configuration](/basic/configuration) de l'application.
 
-Vega propose deux méthodes de fonctionnements :
+Vega propose deux méthodes de fonctionnement :
 
-- sous forme de filtre de servlet, dans le cas où l'application fonctionne dans un conteneur de servlet, par exemple (Tomcat)
-- sous forme d'un serveur web interne (Jetty) dans le cas d'un Jar exécutable
+- sous forme de filtre de servlet, dans le cas où l'application fonctionne dans un conteneur de servlet (par exemple Tomcat)
+- sous forme d'un serveur web embarqué (Jetty) dans le cas d'un Jar exécutable
 
 
 
 ### Cas du filtre de servlet
 
-Voici une configuration Yaml typique d'une application utilisant le module Vega et le connecteur vers Javalin
+Voici une configuration YAML typique d'une application utilisant le module Vega et le connecteur vers Javalin
 
 ```yaml
 modules:
@@ -38,7 +38,7 @@ modules:
         - webservices.swagger:
 ```
 
-D'autre part voici le filtre à ajouter dans la servlet dans ce cas de figure :
+D'autre part voici le filtre à ajouter dans la configuration du conteneur (web.xml) dans ce cas de figure :
 
 ```xml
 <filter>
@@ -51,7 +51,7 @@ D'autre part voici le filtre à ajouter dans la servlet dans ce cas de figure :
 </filter-mapping>
 ```
 
-!> Ici nous avons choisi d'utiliser un préfix pour l'ensemble des routes de webservices `/api`. C'est une pratique que nous encourageons car elle permet d'éviter des conflits de nommage.
+!> Ici nous avons choisi d'utiliser un préfixe pour l'ensemble des routes de webservices `/api`. C'est une pratique que nous encourageons car elle permet d'éviter des conflits de nommage.
 
 #### AbstractFilter
 
@@ -62,7 +62,7 @@ Tout filtre dérivant d'`AbstractFilter` supporte deux paramètres de filtrage p
 
 ### Cas du serveur web embarqué
 
-Voici une configuration Yaml typique d'une application utilisant le module Vega avec le mode serveur embarqué
+Voici une configuration YAML typique d'une application utilisant le module Vega avec le mode serveur embarqué
 
 ```yaml
 modules:
@@ -83,7 +83,7 @@ modules:
 
 
 
-> Pour connaitre l'intégralité des fonctionnalités disponibles se rapporter au chapitre dédié à [Vega](/extensions/vega)
+> Pour connaître l'intégralité des fonctionnalités disponibles se rapporter au chapitre dédié à [Vega](/extensions/vega)
 
 ## Création d'un WebService
 
@@ -91,15 +91,15 @@ Un webservice est un moyen de mettre à disposition des données ou un service m
 
 Vega permet d'exposer sur le web une méthode Java et de définir le comportement de ce 'endpoint' via des annotations.
 
-> Dans vertigo nous privilégions la création de composants de type 'WebServices' qui regroupe dans une même classe les webservices offerts sur un même domaine métier ou fonctionnel.
+> Dans Vertigo nous privilégions la création de composants de type 'WebServices' qui regroupent dans une même classe les webservices offerts sur un même domaine métier ou fonctionnel.
 
 Dans Vertigo, tout objet qui propose des services est un composant. Un webservice n'échappe pas à la règle, c'est donc un composant, mais avec ses spécificités.  
 
 Ainsi, avant toute chose, la lecture du [chapitre](/basic/composants) dédié au composant est utile.
 
-Un webservices est un composant qui doit implémenter l'interface `io.vertigo.vega.webservice.WebServices`
+Un webservice est un composant qui doit implémenter l'interface `io.vertigo.vega.webservice.WebServices`
 
-Ce marqueur en plus de permettre au développeur de différencier les composants selon leurs fonctionnalités et leurs usages, il permet au module Vega d'identifier les composants dont les méthodes doivent être analysées pour être converties en WebServices.
+Ce marqueur en plus de permettre au développeur de différencier les composants selon leurs fonctionnalités et leurs usages, permet au module Vega d'identifier les composants dont les méthodes doivent être analysées pour être converties en WebServices.
 
 Pour créer un webservice commençons par créer le composant qui accueillera les méthodes à publier :
 
@@ -127,18 +127,18 @@ public class HelloWebServices implements WebServices {
 
 La méthode `hello` ne prend aucun argument et retourne une chaîne de caractères. Il s'agit donc d'un exemple minimal en guise de démonstration.
 
-L'annotation `@GET` permet de spécifier 
+L'annotation `@GET` permet de spécifier
 
  -  la route qui sera utilisée : ici */hello*
- -  le VERB HTTP qui sera utilisé : ici *GET*
+  -  le verbe HTTP qui sera utilisé : ici *GET*
 
-Il existe des annotations similaires pour les différents verb HTTP : `@POST`, `@PUT`, `@DELETE`, `@PATCH`
+Il existe des annotations similaires pour les différents verbes HTTP : `@POST`, `@PUT`, `@DELETE`, `@PATCH`
 
-> Pour en savoir plus sur le routes et les verb vous pouvez vous référer à des bonnes pratiques que nous proposons [ici](https://github.com/vertigo-io/vertigo-core/wiki/routes).
+> Pour en savoir plus sur les routes et les verbes vous pouvez vous référer à des bonnes pratiques que nous proposons [ici](https://github.com/vertigo-io/vertigo-core/wiki/routes).
 
-Par souci de simplicité et de concision il est possible d'ajouter un préfix à toutes les routes des méthodes d'une même classe en utilisant l'annotation `@PathPrefix` sur la classe.
+Par souci de simplicité et de concision il est possible d'ajouter un préfixe à toutes les routes des méthodes d'une même classe en utilisant l'annotation `@PathPrefix` sur la classe.
 
-!> Ici l'annotation `@AnonymousAccessAllowed` permet l'accès du webservices sans authentification. Ce comportement n'est pas à utiliser en production.
+!> Ici l'annotation `@AnonymousAccessAllowed` permet l'accès du webservice sans authentification. Des endpoints publics légitimes (services exposés au grand public, accès par token) peuvent l'utiliser volontairement : l'employer alors **avec prudence**, en restant conscient de l'exposition du webservice.
 
 ## Utilisation de paramètres
 
@@ -150,19 +150,19 @@ Concernant les paramètres d'entrée et de sortie ils peuvent être de différen
 
 - Des objets
 
-- Des collections d'objets 
+- Des collections d'objets
 
 
-Concernant les paramètres d'entrée il est possible de les récupérer depuis : 
+Concernant les paramètres d'entrée il est possible de les récupérer depuis :
 
-- l'url : via l'annotation `@PathParam`
-- les paramètres d'url : via l'annotation `@QueryParam`
+- l'URL : via l'annotation `@PathParam`
+- les paramètres d'URL : via l'annotation `@QueryParam`
 - le corps de la requête (au format JSON) : via l'annotation `@InnerBodyParam`
 - un header : via l'annotation `@HeaderParam`
 
-Concernant les paramètres de retour ces derniers seront automatiquement sérialisés (convertit) en format JSON.
+Concernant les paramètres de retour ces derniers seront automatiquement sérialisés (convertis) en format JSON.
 
-Ainsi il est possible d'écrire par exemple d'écrire les webservices suivant :
+Ainsi il est possible d'écrire par exemple les webservices suivants :
 
 ```java
 @PUT("/movies/{id}")
@@ -192,17 +192,17 @@ Il est absolument indispensable de sécuriser les appels de webservices.
 
 Afin de répondre à cet enjeu de sécurité de nombreux mécanismes sont disponibles dans Vega.
 
-Par défaut l'ensemble des WebServices sont accessibles uniquement à utilisateur authentifié. Il s'agit du premier niveau de sécurisation. Evidemment celui-ci est **nécessaire** mais **non suffisant**.
+Par défaut l'ensemble des WebServices est accessible uniquement à un utilisateur authentifié. Il s'agit du premier niveau de sécurisation. Évidemment celui-ci est **nécessaire** mais **non suffisant**.
 
 Pour aller plus loin il est possible d'utiliser les fonctionnalités issues du module Vertigo-Account qui propose un modèle de sécurité qu'il est possible d'appliquer aux WebServices.
 
 Il est ainsi possible de vérifier lors d'un appel de WebService :
 
-- Que l'utilisateur authentifié possède un droit parmi les droits nécessaire pour être autorisé à l'appeler
+- Que l'utilisateur authentifié possède un droit parmi les droits nécessaires pour être autorisé à l'appeler
 - Que les entités (objets métiers au sens Vertigo) sont manipulables par l'utilisateur authentifié
 
 ```java
-@Secured("CONTACT$READ")
+@Secured("Contact$read")
 @GET("/{conId}")
 public Contact read(@PathParam("conId") final long conId) {
 	final Contact contact = contactDao.get(conId);
@@ -210,17 +210,38 @@ public Contact read(@PathParam("conId") final long conId) {
 }
 ```
 
-> Ici on vérifie que utilisateur connecté possède le droit CONTACT$READ donc la capacité à lire des contacts
+> Ici on vérifie que l'utilisateur connecté possède le droit **Contact$read** donc la capacité à lire des contacts
+
+> L'annotation `@Secured` applique automatiquement le préfixe `Atz` au droit vérifié : le nom réellement contrôlé est donc `AtzContact$read`. La valeur indiquée est le nom d'autorisation d'opération `EntitéCamelCase$operation`, l'opération étant telle que déclarée dans la configuration de sécurité (typiquement en minuscule : `read`, `write`, `delete`...).
+> <!-- source : AuthorizationAspect.java:L57-78, Authorization.java:L98 -->
 
 ```java
 @PUT("/contactView")
 public ContactView updateContactView(
-    @SecuredOperation("WRITE") final ContactView contactView) {
+    @SecuredOperation("write") final ContactView contactView) {
 		return contactView;
 }
 ```
 
-> Ici on vérifie que utilisateur connecté possède autorisation d'écriture sur l'entité ContactView. Ce contrôle de sécurité dépend des à la fois des attributs de l'utilisateur et du Contact. Il s'agit donc d'une contrôle de sécurité très fin.
+> Ici on vérifie que l'utilisateur connecté possède l'autorisation d'écriture sur l'entité ContactView : le nom de l'opération est `write`, tel que déclaré dans la configuration de sécurité. Ce contrôle de sécurité dépend à la fois des attributs de l'utilisateur et du Contact. Il s'agit donc d'un contrôle de sécurité très fin.
+
+> L'annotation `@SecuredOperation` porte le nom de l'opération **sans préfixe** : il s'agit d'un `OperationName` et non d'un nom d'autorisation `Atz...`. Le paramètre annoté doit être une entité (Entity).
+> <!-- source : AuthorizationAspect.java:L66-78 -->
+
+### `@SessionLess`
+
+L'annotation `@SessionLess` (`io.vertigo.vega.webservice.stereotype.SessionLess`) s'applique à une **méthode** de webservice et ne porte aucun membre.
+<!-- source : SessionLess.java:L32-35 -->
+
+Son effet : **aucune session HTTP n'est créée ni liée** pour ce webservice. La session Vertigo est tout de même créée pour la sécurité, mais sans liaison au `HttpSession` ; si une `HttpSession` existe déjà, elle est réutilisée. Elle est conçue pour les services anonymes ou à faible consommation de ressources.
+<!-- source : SessionLess.java:L27-30 -->
+
+Concrètement, le scanner pose `needSession = false` sur le webservice et, à l'exécution, le handler de session `SessionWebServiceHandlerPlugin` (stack index 60) ne s'applique plus à ce webservice.
+<!-- source : AnnotationsWebServiceScannerUtil.java:L141-142 -->
+<!-- source : SessionWebServiceHandlerPlugin.java:L64 -->
+
+> `@SessionLess` est **incompatible avec `@ServerSideSave`** : l'assertion « Session mandatory for serverSideState » est levée.
+> <!-- source : WebServiceDefinition.java:L121-122 -->
 
 ## CORS (Cross-Origin Resource Sharing)
 
@@ -232,8 +253,6 @@ Les paramètres de configuration sont :
 - `methodCORSFilter` (optionnel) : filtre les méthodes HTTP autorisées, par défaut `GET, POST, DELETE, PUT, OPTIONS`
 
 La validation des URIs est stricte : seules les URI complètes sans path ni query string sont acceptées.
-
-Les paramètres `url-include-pattern` et `url-exclude-pattern` permettent de restreindre le plugin aux URLs correspondantes.
 
 ## OIDC (OpenID Connect)
 
@@ -247,12 +266,43 @@ Vega supporte l'authentification OIDC via les interfaces et classes suivantes :
    - `urlPrefix` : préfixe d'URL
    - `urlHandlerPrefix` : préfixe d'URL pour les handlers
    - `externalUrl` : URL externe de l'application
-- `connectorName` : nom du connecteur OIDC
+   - `connectorName` : nom du connecteur OIDC
+
+### Brancher le handler de login applicatif (feature `authentication`)
+
+En 4.4, le `SecurityFilter` injecte un `Optional<WebAuthenticationManager>` : si la feature `authentication` est active, la chaîne de sécurité (page de login, connexion, déconnexion) est pilotée par ce composant ; sinon le comportement classique s'applique, **401** si l'utilisateur n'est pas authentifié. L'ancien mécanisme — un init-param web.xml `delegate-authentication-handler-component` lu par le filtre `LegacySecurityFilter` de la 3.x — a disparu avec ce filtre dès 4.0 (suppression au commit `65db5ab049`, contenu dans le tag `vertigo-4.0.0`) ; l'interface `DelegateAuthenticationFilterHandler`, devenue obsolète et sans usage, subsiste en tant que trace dans le code. Le remplacement est la feature `authentication` + `appLoginHandler`.
+<!-- source : SecurityFilter.java:L59-60, L96-121 -->
+
+La feature `authentication` (méthode `withWebAuthentication(Param...)`) active le composant `WebAuthenticationManager` (implémentation `WebAuthenticationManagerImpl`) et expose le paramètre :
+<!-- source : VegaFeatures.java:L194-199 -->
+
+- `appLoginHandler` (String) : nom du composant applicatif à résoudre en `AppLoginHandler` via `Node.getNode().getComponentSpace().resolve(appLoginHandler, AppLoginHandler.class)`
+<!-- source : WebAuthenticationManagerImpl.java:L63, L172, L183 -->
+
+`AppLoginHandler<T>` est une **interface générique** :
+<!-- source : AppLoginHandler.java:L28-62 -->
+
+- `String doLogin(HttpServletRequest, Map<String, Object> claims, T rawResult, Optional<String> requestedUrl)` : à implémenter — retourne la page de redirection après un login réussi
+- `default Optional<String> doLogout(HttpServletRequest)` : page de redirection après déconnexion (vide par défaut)
+- `default void loginFailed(HttpServletRequest, HttpServletResponse)` : appelé en cas d'échec du login — renvoie par défaut **403**
+
+C'est ce composant qui pilote la page de login applicative : les connexions OIDC, SAML et locale passent par lui.
+
+Exemple de configuration :
+
+```yaml
+modules:
+  io.vertigo.vega.VegaFeatures:
+    features:
+        - webservices:
+        - authentication:
+            appLoginHandler: monComposantLogin
+```
 
 ## SwaggerApi
 
-L'api ainsi crée avec ce module est exposée au format standard Swagger **2.0**. Vertigo inclus la mise à disposition de l'Api via l'UI standard de Swagger.
-Il suffit d'ajouter la facade webService : `io.vertigo.vega.impl.webservice.catalog.SwaggerWebServices`
+L'API ainsi créée avec ce module est exposée au format standard Swagger **2.0**. Vertigo inclut la mise à disposition de l'API via l'UI standard de Swagger.
+Il suffit d'ajouter la façade webservice : `io.vertigo.vega.impl.webservice.catalog.SwaggerWebServices`
 
 ![](./images/swaggerUi.png)
 
@@ -261,7 +311,7 @@ L'objet `SwaggerApi` est représenté comme un `LinkedHashMap<String, Object>`.
 Règles de construction des noms de définition Swagger :
 
 - Le caractère `$` dans le nom de la définition du webservice (`webServiceDefinition.getName()`) sert de séparateur pour structurer les définitions imbriquées
-- Les séquences d'underscores multiples sont réduites à un seul `_` (ex: `__` → `_`)
+- Les séquences de tirets bas multiples sont réduites à un seul `_` (ex: `__` → `_`)
 - Il n'y a **pas** de remplacement automatique de `$` par `_`
 
 Le JSON des facettes `FacetedQueryResult` expose l'attribut `isMultiSelectable` sur chaque facette. `FacetedQueryResultJsonSerializerV5` est le sérialiseur **par défaut**.
@@ -272,9 +322,42 @@ Le plugin `LogExceptionsHandlerPlugin` est activé par défaut, sans paramètre 
 
 ## Rate Limiting
 
-Le rate limiting permet de limiter le nombre d'appels autorisé sur une fenêtre de temps glissante.
+Le rate limiting permet de limiter le nombre d'appels autorisés sur une fenêtre de temps glissante.
 
-L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est ajoutée par défaut à la liste des IP exclues.
+Les adresses localhost (`127.0.0.1`, `[0:0:0:0:0:0:0:1]`) figurent dans l'ensemble `USER_EXCLUDED_IPS` : elles sont ignorées lorsqu'elles sont lues dans les headers (`X-Forwarded-For` / en-tête custom) — protection contre le spoofing. Il ne s'agit **pas** d'une exemption du rate limiting.
+<!-- source : RateLimitingManagerImpl.java:L66 — USER_EXCLUDED_IPS, utilisé uniquement dans obtainUserIpFromHeader -->
+
+Deux features distinctes sont disponibles :
+
+- `webservices.rateLimiting` : active le handler `RateLimitingWebServiceHandlerPlugin` (stack index 100, compteur en mémoire) avec les paramètres `windowSeconds` (défaut `300`) et `limitValue` (défaut `150`)
+- `rateLimiting` : active le composant `RateLimitingManager` (implémentation `RateLimitingManagerImpl`) avec les paramètres du tableau ci-dessous
+<!-- source : RateLimitingWebServiceHandlerPlugin.java:L53, L55-56, L83-95 -->
+<!-- source : VegaFeatures.java:L89-94 -->
+
+### Paramètres de la feature `rateLimiting`
+
+| Paramètre | Type | Défaut |
+|---|---|---|
+| `windowSeconds` | `Optional<Integer>` | `300` |
+| `maxRequests` | `Optional<Long>` | `150` |
+| `maxDayRequests` | `Optional<Long>` | — (doit être ≥ `maxRequests`) |
+| `errorCode` | `Optional<Integer>` | `429` |
+| `overRateLimitMode` | `Optional<String>` | `reject` (valeurs : `nothing` / `logOnly` / `reject` / `banish`) |
+| `insertHeaders` | `Optional<Boolean>` | `true` (pose les headers `X-Rate-Limit-Limit` / `X-Rate-Limit-Remaining` / `X-Rate-Limit-Reset`) |
+| `useForwardedFor` | `Optional<Boolean>` | `false` |
+| `useHeaderUserIp` | `Optional<String>` | — (nom d'un en-tête custom, type `True-Client-Ip`) |
+| `useUserIp` | `Optional<Boolean>` | `true` (sinon `sessionId`, sinon `anonymous`) |
+| `logEveryXRequests` | `Optional<Integer>` | `100` |
+| `banishSeconds` | `Optional<Long>` | `1800` |
+| `banishRepeaterMult` | `Optional<Double>` | `2` |
+| `maxBanishSeconds` | `Optional<Long>` | `604800` |
+| `banishMessage` | `Optional<String>` | calculé (« N requests/min… ») |
+| `whiteListUsers` | `Optional<String>` | — (IPs séparées par `,` ou `;`, max 100 000) |
+
+<!-- source : RateLimitingManagerImpl.java:L130-184 -->
+
+Le backend de stockage de la feature `rateLimiting` est fourni par l'une des features stores associées : `rateLimiting.redis` (Redis, compatible cluster) ou `rateLimiting.mem` (mémoire locale) — cf. section *RateLimiting* de la partie *Pour les experts*.
+<!-- source : VegaFeatures.java:L96-108 -->
 
 ## Pour les experts
 
@@ -282,8 +365,8 @@ L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est ajoutée par défaut à la l
 
 | Plugin | Feature | Stack Index | Description |
 |---|---|---|---|
-| `AccessTokenWebServiceHandlerPlugin` | `webservices.token` | 90 | Génération et vérification de tokens jetable pour actions sensibles |
-| `ApiKeyWebServiceHandlerPlugin` | `webservices.auth.apiKey` | 45 | Authentification par API key. Paramètres : `apiKey` (String), `headerName` (Optional<String>) |
+| `AccessTokenWebServiceHandlerPlugin` | `webservices.token` | 90 | Génération et vérification de tokens jetables pour actions sensibles |
+| `ApiKeyWebServiceHandlerPlugin` | `webservices.auth.apiKey` | 45 | Authentification par clé API. Paramètres : `apiKey` (String), `headerName` (Optional<String>) |
 
 ### Services système
 
@@ -292,9 +375,9 @@ L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est ajoutée par défaut à la l
 | `HealthcheckWebServices` | `webservices.healthcheck` | Auto-généré | Endpoint de supervision de la plateforme |
 | `CatalogWebServices` | `webservices.catalog` | Auto-généré | Catalogue des webservices (métadonnées, définitions) |
 
-### Proxy client
+### WebServiceClient (Proxy)
 
-La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClientAmplifierMethod` qui génère dynamiquement des proxies Java depuis une `WebServiceDefinition`. Le proxy utilise un `HttpRequestBuilder` interne pour construire les URL et `DefaultJsonSerializer` pour la sérialisation JSON.
+La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClientAmplifierMethod` qui génère dynamiquement des proxies Java à partir d'une `WebServiceDefinition`. Le proxy utilise un `HttpRequestBuilder` interne pour construire les requêtes HTTP (méthode, URL, headers, body JSON) et un `JsonEngine` (implémentation par défaut `GoogleJsonEngine`/Gson, injectée) pour la lecture/écriture JSON.
 
 ### HandlerChain — Architecture interne
 
@@ -329,22 +412,44 @@ Les Servlet Filters s'exécutent **avant** la HandlerChain et opèrent au niveau
 
 | Filter | Rôle |
 |---|---|
-| `SetCharsetEncodingFilter` | Force charset UTF-8 sur les requêtes |
-| `CompressionFilter` | Compresse la réponse si `Accept-Encoding: gzip/deflate` |
+| `SetCharsetEncodingFilter` | Force le charset de la **requête** (`request.setCharacterEncoding`), défini par l'init-param obligatoire `charset` |
+| `CompressionFilter` | Compresse la réponse en **gzip** (selon `Accept-Encoding`), selon le seuil `compressionThreshold` et l'user-agent |
 | `CacheControlFilter` | Pose les headers `Cache-Control` (private, max-age, no-cache) |
-| `SecurityFilter` | Ajoute les headers sécurité HTTP (X-Frame-Options, X-XSS-Protection) |
+| `SecurityFilter` | Filtre de session/authentification : lie la `UserSession` de l'application en attribut de la session J2EE (`io.vertigo.Session`), renvoie **401** si l'utilisateur n'est pas authentifié ; init-param `url-no-authentification` (URLs exemptées d'authentification). Ne pose **aucun** header HTTP |
 | `ContentSecurityPolicyFilter` | Gère les headers CSP |
 | `HeaderControlFilter` | Contrôle des headers d'entrée/sortie |
-| `AuthorizationWebFilter` | Vérification `@Secured` au niveau Servlet |
-| `RateLimitingFilter` | Rate limiting au niveau Servlet (separate de handler) |
+| `AuthorizationWebFilter` | Filtre de routes par autorisation : chaque init-param est **nommé** d'après le(s) nom(s) d'autorisation préfixé(s) `Atz` (séparés par `;` = OR) et sa **valeur** est le(s) pattern(s) d'URL ; init-params réservés : `errorCode` (Integer, défaut 403), `url-include-pattern` / `url-exclude-pattern` ; ne lit pas `@Secured` |
+| `RateLimitingFilter` | Rate limiting au niveau Servlet (séparé du handler) |
 | `AnalyticsFilter` | Collecte métriques au niveau Servlet |
-| `DelegateAuthenticationFilterHandler` | Délégation de l'authentification vers un provider externe |
+
+> **Détail — `AuthorizationWebFilter`** : la déclaration du filtre repose sur la sémantique **nom / valeur** des init-params — le **nom** d'un init-param est un nom d'autorisation, sa **valeur** est un pattern d'URL :
+> <!-- source : AuthorizationWebFilter.java:L56-165 -->
+>
+> - **Nom** : le nom — ou les noms séparés par `;` (**OR**) — de l'autorisation contrôlée, **obligatoirement préfixé `Atz`** (une assertion est levée si le préfixe est absent)
+> - **Valeur** : le pattern — ou les patterns séparés par `;` (**OR**) — d'URL contrôlé(s) ; conversion : `.` échappée, `*` en fin de pattern → `.*`, `*` en milieu de pattern → `[^/]*`
+> - Init-params **réservés** : `errorCode` (Integer, défaut **403**), `url-include-pattern` / `url-exclude-pattern` (hérités de `AbstractFilter`)
+> <!-- source : AuthorizationWebFilter.java:L87-97 -->
+> <!-- source : AbstractFilter.java:L84-94 -->
+>
+> Le filtre lit la `UserSession` de la session HTTP (attribut `io.vertigo.Session`) puis les `UserAuthorizations` (attribut `vertigo.account.authorizations`) ; en l'absence de session ou de droits, il émet `sendError(errorCode)` + `VSecurityException`. Ce filtre ne lit **pas** l'annotation `@Secured`.
+
+Exemple de déclaration (noms d'autorisation et URLs fictifs) :
+
+```xml
+<init-param>
+	<param-name>AtzVoirSwagger</param-name>
+	<param-value>/api/swagger*;/api/catalog*</param-value>
+</init-param>
+```
+
+> Le paramètre `devMode.authzLogOnly` **n'est pas un init-param** du filtre : c'est un paramètre du `ParamManager` (résolu dans le component space) qui, en mode de développement, fait logguer les refus d'autorisation au lieu de renvoyer l'erreur HTTP.
+> <!-- source : AuthorizationWebFilter.java:L58, L158-164 -->
 
 ### Cycle de vie
 
 1. **DefinitionSpace** : `AnnotationsWebServiceScannerPlugin` scanne les composants implémentant `WebServices`, extrait les méthodes annotées (`@GET`, `@POST`, ...) et génère les `WebServiceDefinition`
 2. **ComponentSpace** : `WebServiceManager` assemble les `WebServiceDefinition` et trie les `WebServiceHandlerPlugin` par `getStackIndex()`
-3. **Runtime** : Requête HTTP → Servlet Filter chain → HandlerChain → méthode Java cible → JSON response
+3. **Runtime** : Requête HTTP → Servlet Filter chain → HandlerChain → méthode Java cible → réponse JSON
 
 ### Authentication Plugins
 
@@ -364,15 +469,12 @@ Le `RateLimitingWebServiceHandlerPlugin` implémente le rate limiting via une fe
 | Mémoire locale | `rateLimiting.mem` | Stockage local, non persisté, non partagé |
 | Redis | `rateLimiting.redis` | Stockage partagé via Redis, compatible cluster |
 
-L'adresse IPv6 du localhost `[0:0:0:0:0:0:0:1]` est exclue par défaut de toute limitation.
-
-### WebServiceClient (Proxy)
-
-La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClientAmplifierMethod` qui génère dynamiquement des proxies Java à partir d'une `WebServiceDefinition`. Le proxy utilise un `HttpRequestBuilder` interne pour construire les requêtes HTTP (méthode, URL, headers, body JSON).
+Les adresses localhost (`127.0.0.1`, `[0:0:0:0:0:0:0:1]`) sont ignorées comme **source d'IP utilisateur issue des headers** (`X-Forwarded-For` / en-tête custom) — protection contre le spoofing ; elles ne sont **pas** exemptées du rate limiting.
+<!-- source : RateLimitingManagerImpl.java:L66 — USER_EXCLUDED_IPS, utilisé uniquement dans obtainUserIpFromHeader -->
 
 ### Debug
 
 - Activer le logging du `WebServiceManager` pour tracer le chargement des webservices et l'assemblage de la HandlerChain
-- Le `LogExceptionsHandlerPlugin` log automatiquement toutes les réponses 5xx (status, verbe, path, path params)
+- Le `LogExceptionsHandlerPlugin` logge automatiquement toutes les réponses 5xx (status, verbe, path, path params)
 - Le `AnalyticsWebServiceHandlerPlugin` expose les métriques de performance (temps d'exécution par webservice)
 - Pour déboguer l'ordre des handlers, vérifier que chaque `accept()` retourne `true` uniquement pour les webservices ciblés

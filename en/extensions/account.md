@@ -1,19 +1,21 @@
 # Account
 
-Vertigo's **Account** module simplifies user account management.
-It primarily other modules with the cross-cutting concept of user account. This enables Vertigo extensions like **"notifications"** or **"comments"**.
+The Vertigo **Account** module provides simplified management of user accounts.
+Above all, this module makes the cross-cutting notion of user account available to the other modules. This enables Vertigo to offer extensions such as **"notifications"** or **"comments"**.
 
-The module offers user management features across three orthogonal axes:
+The module offers user management features spread across three orthogonal axes:
 - **Authentication**: Authentication management
 - **Authorization**: Authorization management
 - **Identity Provider**: Connection with identity providers
 
+
 ## Configuration
 
-To use **Account** features, add this module to the application configuration.
-For more details, refer to the [configuration](/en/basic/configuration) chapter.
+To use the features of **Account**, this module must be added to the application configuration.
+For more details, refer to the chapter dedicated to application [configuration](/en/basic/configuration).
 
-Typical configuration for an application using the Account module:
+
+Here is a typical configuration for an application using the Account module.
 
 ```yaml
 
@@ -21,7 +23,7 @@ modules:
   io.vertigo.account.AccountFeatures:
     features:
       - security:
-          userSessionClassName: io.mars.commons.MarsUserSession
+          userSessionClassName: io.mars.support.MarsUserSession
       - account:
       - authentication:
       - authorization:
@@ -34,96 +36,108 @@ modules:
           userToAccountMapping: 'id:personId, displayName:lastName, email:email, authToken:email, photo: picturefileId'
           groupToGroupAccountMapping: 'id:groupId, displayName:name'
       - authentication.text:
-          filePath: /initdata/userAccounts.txt
+          filePath: /io/mars/datasets/neutral/userAccounts.txt
 ```
 
-### Available Features:
-- **security**: Activates the module and the first security level (authenticated or not)
-  - userSessionClassName: App session class name
-- **account**: Activates user account features
-- **authentication**: Activates authentication features
-- **authorization**: Activates authorization features
-- **identityProvider**: Activates identity provider features
+
+### Available Features
+- **security**: Activates the module, and the first security level (authenticated or not)
+  - userSessionClassName: Name of the application session class
+- **account**: Activates the features around the user account notion
+- **authentication**: Activates the authentication features
+- **authorization**: Activates the authorization features
+- **identityProvider**: Activates the identity provider features
 
 ### Feature Parameters
 
 #### Account
-- **account.store.store**: *Account* storage via *StoreManager*
-  - userIdentityEntity: Entity name holding *Accounts*
-  - groupIdentityEntity: Entity name holding *Account* groups (must have FK to *Account*)
-  - userAuthField: Field linked to authentication *(authToken)*
-  - photoFileInfo *(optional)*: *FileInfo* name for photo storage
-  - userToAccountMapping: Entity field mapping to *Account*
-  - groupToGroupAccountMapping: Group entity field mapping to *GroupAccount*
-- **account.store.text**: *Account* storage via text file
-  - accountFilePath: *Account* file path
-  - accountFilePattern: Regex for reading the file (with [named](https://stackoverflow.com/a/415635/2273508) capture groups: id, displayName, email, authToken, photoUrl)
-  - groupFilePath: *AccountGroup* file path
-  - groupFilePattern: Regex for reading the file (with [named](https://stackoverflow.com/a/415635/2273508) capture groups: id, displayName, accountIds)
-- **account.store.loader**: *Account* storage delegated to a specific loader *(implements [AccountLoader](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-account/src/main/java/io/vertigo/account/plugins/account/store/loader/AccountLoader.java))*
-- **account.cache.memory**: Activates memory cache (**Warning**: no automatic purge)
-- **account.cache.redis**: Activates Redis cache via *RedisConnector* (**Warning**: no automatic purge)
+- **account.store.store**: Storage of *Accounts* by the *StoreManager*
+  - userIdentityEntity: Name of the entity carrying the *Accounts*
+  - groupIdentityEntity: Name of the entity carrying the *Account* groups (must be linked to `userIdentityEntity` by a simple or N-N association; this association is looked up at boot and its absence prevents startup)
+  - userAuthField: Name of the field linked to authentication *(authToken)*
+  - photoFileInfo *(optional)*: Name of the *FileInfo* used for photo storage
+  - userToAccountMapping: Mapping of the entity fields to *Account*
+  - groupToGroupAccountMapping: Mapping of the Group entity fields to *AccountGroup*
+- **account.store.text**: Storage of *Accounts* in a text file
+  - accountFilePath: Path of the *Accounts* file
+  - accountFilePattern: RegExp for reading the file (with **capture groups** [named](https://stackoverflow.com/a/415635/2273508): id, displayName, email, authToken, photoUrl)
+  - groupFilePath: Path of the *AccountGroup* file
+  - groupFilePattern: RegExp for reading the file (with **capture groups** [named](https://stackoverflow.com/a/415635/2273508): id, displayName, accountIds)
+- **account.store.loader**: Storage of *Accounts* delegated to a specific loader *(implements [AccountLoader](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-account/src/main/java/io/vertigo/account/plugins/account/store/loader/AccountLoader.java))*
+  - accountLoaderName: Name of the `AccountLoader` component to use to load the accounts
+  - groupLoaderName *(optional)*: Name of the [GroupLoader](https://github.com/vertigo-io/vertigo-libs/blob/master/vertigo-account/src/main/java/io/vertigo/account/plugins/account/store/loader/GroupLoader.java) component to use for the groups; **without a `GroupLoader`, any group operation throws `UnsupportedOperationException`**
+- **account.cache.memory**: Activates the memory cache (**Warning**: no automatic purge)
+- **account.cache.redis**: Activates the Redis cache via the *RedisConnector* (**Warning**: no automatic purge)
+  - connectorName *(optional, default "main")*: Name of the `RedisConnector` to use (the plugin selects the connector by name among the injected `RedisConnector`s)
 
 #### Authorization
-?> No specific configuration. Component behavior is driven by the [Authorizations](#authorizations) rules configuration file.
+?> No specific configuration. The behavior of this component is driven by the rules configuration file of [Authorizations](#authorizations).
+
 
 ## Authentication
 
 ### Principle
 
-Authentication in a business application is based on matching an Authentication method with an authentication source.
+Authentication in a business application is based on matching a means of authentication with an authentication source.
 
-- **AuthenticationToken** represents the authentication method.
-- **AuthenticationPlugin**s represent authentication sources authorized by the developer.
+- **AuthenticationToken** represents the means of authentication.
+- The **AuthenticationPlugin**s represent the authentication sources authorized by the developer.
 
 ### Configuration
 
-Vertigo provides two default authentication methods:
-- **UsernameAuthenticationToken**: Single text field representing the user *Login*
-- **UsernamePasswordAuthenticationToken**: Two text fields, *Login* / *Password*
+By default, Vertigo offers two types of means of authentication:
+- **UsernameAuthenticationToken**: A single piece of text information representing the user's *Login*
+- **UsernamePasswordAuthenticationToken**: Two pieces of text information, of type *Login* / *Password*
 
-Vertigo provides four authentication source types:
+Vertigo offers four types of authentication source:
 - **LdapAuthenticationPlugin**: Login/Password authentication against an LDAP.
-  - On success, returns the Login.
+  - If authenticated, returns the Login.
 - **StoreAuthenticationPlugin**: Login/Password or Login-only authentication against the database.
-  - On success, can return another column from the table (e.g., for a security token)
-  - Password must be salted and hashed by Vertigo's `PasswordHelper` (i.e., PBKDF2)
+  - If authenticated, can return another column of the table (for a security token, for example)
+  - The Password must be salted and hashed by the Vertigo `PasswordHelper` (i.e., PBKDF2)
 - **TextAuthenticationPlugin**: Login/Password or Login-only authentication from a text file.
-  - On success, returns the account key
-  - Password must be salted and hashed by Vertigo's `PasswordHelper` (i.e., PBKDF2)
-- **MockAuthenticationPlugin**: Login/Password or Login authentication, for tests (all accounts authorized).
+  - If authenticated, returns the account key
+  - The Password must be salted and hashed by the Vertigo `PasswordHelper` (i.e., PBKDF2)
+- **MockAuthenticationPlugin**: Login/Password or Login authentication, used for tests (all accounts authorized).
 
-**Feature Configuration (Yaml)**
+
+**Configuration of the *Feature* (YAML)**
 
 - **authentication.text**: Enables text file-based authentication
-  - filePath: File path. (File format: accountKey    login    password    //comments)
+  - filePath: Path of the file. (File format: accountKey    login    password    //comments )
 
 ?> Password hashing uses the [PBKDF2WithHmacSHA256](https://en.wikipedia.org/wiki/PBKDF2) algorithm
 
 - **authentication.store**: Enables *StoreManager*-based authentication
-  - userCredentialEntity: Entity name holding authentication
-  - userLoginField: Field name
-  - userPasswordField: Password field name
-  - userTokenIdField: *authToken* field name (field used for *Account* link)
+  - userCredentialEntity: Name of the entity carrying the authentication
+  - userLoginField: Name of the field
+  - userPasswordField: Name of the password field
+  - userTokenIdField: Name of the *authToken* field (field used for the link to *Account*)
 
 ?> Password hashing uses the [PBKDF2WithHmacSHA256](https://en.wikipedia.org/wiki/PBKDF2) algorithm
 
-- **authentication.ldap**: Enables LDAP-delegated authentication
-  - userLoginTemplate: User DN template (contains {0} to merge login)
-  - ldapServerHost: LDAP server name
-  - ldapServerPort: LDAP server port
+- **authentication.ldap**: Enables Login/Password authentication against an LDAP
+  - userLoginTemplate: User DN template (must contain {0} to merge the login)
+  - connectorName *(optional, default "main")*: Name of the `LdapConnector` to use (the plugin selects the connector by name among the injected `LdapConnector`s)
+  - The connection to the LDAP server is handled by the **connector** `LdapConnector` (module *vertigo-ldap-connector*):
+    - name *(optional, default "main")*: Name of the connector
+    - host: Host of the LDAP server
+    - port: Port of the LDAP server
+    - readerLogin *(optional)*: Read account of the LDAP server
+    - readerPassword *(optional)*: Password of the read account (mandatory if `readerLogin` is present)
 
-- **authentication.mock**: For tests, always succeeds
+- **authentication.mock**: For tests, authentication always succeeds
+
 
 ### Usage
 
-Module usage is straightforward:
-- Retrieve information from the controller
-- Create a Token carrying these information
-- Delegate authentication to `authenticationManager`
-- If authentication succeeds, retrieve the user entity and perform specific processing (session association, rights retrieval, etc.)
+Using this module is quite simple:
+- Retrieve the information from the controller
+- Create a Token carrying this information
+- Delegate the authentication to the `authenticationManager`
+- If the authentication is successful, retrieve the user's entity and perform the specific processing (association in the session, retrieval of rights, etc...)
 
-Login is typically done in the business service:
+Overall, the login is done like this in the business service:
 
 ```java
 public void login(final String login, final String password) {
@@ -134,129 +148,197 @@ public void login(final String login, final String password) {
   final Account account = loggedAccount.get();
   final Person person = personServices.getPerson(Long.valueOf(account.getId()));
   getUserSession().setLoggedPerson(person);
-
-  //Load Profile and authorizations
+  
+  // Profil actif : les authorisations de ce profil sont ensuite accordées à la session
+  // (obtainUserAuthorizations + addAuthorization) — cf. section « Accorder les droits à l'utilisateur »
   getUserSession().setCurrentProfile("Administrator");
 }
 ```
 
-## Authorization
+## Authorizations
 
 ### Principles
 
-In a business application, typically not all users have access to everything. Vertigo provides a security mechanism to protect application elements that require it.
+In a business application, it is generally assumed that not all users will have access to everything. Vertigo offers a security mechanism that allows protecting the elements of the application that need it.
 
-Technically, the mechanism secures fine-grained application elements (called *Resources*): pages, services, data, etc.
-It can also abstract something like a **confidential** characteristic cross-cutting the application.<br/>
-But for understandability, the developer configures the security mechanism to group *Resources* into *Authorizations* corresponding to application features
-(*View files*, *Submit a file*, *Validate files*, ...)
+From a technical standpoint, the mechanism allows securing fine-grained elements of the application (called *Resource*): pages, services, data, or anything else.
+It can also be something more abstract, such as a **confidential** attribute cross-cutting the application.<br/>
+But to remain understandable, the developer configures the security mechanism to group these *Resources* into *Authorizations* that correspond to features offered by the application
+(*Consult the dossiers*, *Submit a dossier*, *Validate the dossiers*, ...)
 
-Vertigo's security mechanism is *low-level*. Vertigo only knows the concept of **Authorization**: either global or carried by an entity (`SecuredEntity`).
+The Vertigo security mechanism is quite *low-level*. Vertigo only knows the notion of **Authorization**: either global, or carried by an entity (the `SecuredEntity`s).
 
-It is up to the application to rationalize the model. For example, the application is advised to manage security at a higher level with *Profile* and *Perimeter* concepts.
-The list of *Profiles* associated with a user is application-specific.
-A *Profile* is a list of **Authorizations** attached to an application **Perimeter**.
+It is left to the application to rationalize the model; for example, it is recommended that the application manages security at a more macro level, with a notion of *Profile* and of *Scope*.
+The list of *Profiles* associated with a user is specific to the application and remains its responsibility.
+A *Profile* is a list of **Authorizations** attached to an applicative **Scope**.
 
 **Note**<br/>
-Best practice: if a user has multiple **Profiles**, only one should be active at a time (switchable during session),
-to avoid security rule collisions that are hard to understand, implement performantly, and test.<br/>
-In systems with centralized user management, user **Profile** can be managed by the centralized system (it provides the **Profile** per user per app).
+The best practice in this area is that if a user has several **Profiles**, only one should be active at a time (the user can switch during their session),
+in order to avoid collisions (intersections) of security rules that are difficult to understand, to implement in a performant way, and to test.<br/>
+In a system where user management is centralized, the user **Profile** can be managed by the centralized system (it provides the **Profile** per user per application).
 
-### Security *context* concept
+### Notion of *security context*
 
-The above model already handles many cases. But larger clients have stronger organizational structures impacting application security.
-Security must then be relative to a context. This context can be geographic, organizational, state-based, date-based, etc.<br/>
-This *security context* is called a **Perimeter**.
+The model presented above already allows handling many cases. But the larger the clients, the stronger their organization, and the more their organization weighs on the application's security.
+It then appears that security must be relative to a context. This context can be geographic, organizational, tied to a state, to a date, or something else, or even all of this at the same time. <br/>
+This *security context* is called the security **Scope**.
 
-Vertigo's mechanism enables this type of security generically in projects.
-In Vertigo terms, *security context* is a concept:
+The Vertigo mechanism makes it possible to ensure and to set up this type of security generically in projects.
+In Vertigo terms, the *security context* is a notion:
 
-- in which users and `SecuredEntities` are registered
-- composed of axes (geographic, organizational, ...)
-- each axis potentially hierarchical (e.g., continent, country, regions, departments, cities)
+- in which users and the `SecuredEntities` are enrolled
+- which is composed of axes (geographic, organizational, ...)
+- each axis of which can be hierarchical (e.g., continent, country, regions, municipalities, cities)
 
-To remain compatible with Vertigo's mechanism, applications must follow some rules:
+To remain compatible with the mechanism provided by Vertigo, the application must respect a few rules:
 
-- User has exactly one active context at a time
-- User context is cross-cutting to their rights
-- Context hierarchy has no exceptions and is properly oriented (parent accesses all children, grandchildren...)
+- The user has one and only one active context at a time
+- The user's context is cross-cutting with respect to their rights
+- The hierarchy of the context has no exceptions and is correctly oriented (a parent accesses all its children, grandchildren ...)
 
-!>Exceptions must be handled specifically by the application.
+!> Exceptions must be handled specifically by the application.
 
-### Authorization types
 
-Two authorization types are available:
-- **Global Authorizations**: Global authorizations for protecting application functions (screens, buttons, processes, ...)
-  - name: Authorization code
-  - label: Authorization label
+### Authorization Types
 
-- **Secured Entity Operations**: Authorizations for operations on a secured entity
-  - entity: Protected entity name
-  - securityFields: Fields participating in security constraints (i.e., filter criteria)
-  - securityDimensions: Security dimensions (pseudo security fields derived from entity fields)
-    - name: Dimension name
-    - type: Dimension type (ENUM: for ordered enumeration, TREE: for hierarchical structure)
-    - values *(Type:ENUM)*: Ordered list of possible values
-    - fields *(Type:TREE)*: Ordered (flat) tree field list
-  - operations: Possible operations on the entity
-    - __comment: Place a comment in configuration
-    - name: Operation code
-    - label: Operation label
-    - grants *(optional)*: Operations granted by this operation (i.e., a user with this operation also has grant operations)
-    - overrides *(optional)*: Operations overridden by this operation (i.e., for a user with this operation, its rule overrides others)
-    - rules: Security rule list.
-      - SQL-like syntax: ( myField *operator* value (and|or)? )*
-      - List rules are **OR**ed together
-      - **${myParam}** for a user context property (perimeter property in user session)
-      - Simple notation for **TREE** axes: GEO <= ${geo} : Selects `SecuredEntities` *below or equal* in the user's geographic perimeter (e.g., all departments or in a department manager's department)
-      - Simple notation for **ENUM** axes: etaCd>=PUB AND etaCd<ARC (e.g., all `SecuredEntities` with state *greater or equal* to 'PUB'*lished* and *strictly less* than 'ARC'*hived*)
+Two types of authorizations are offered:
+- **Global Authorizations**: Global authorizations used to protect functions of the application (screens, buttons, processes, ...)
+  - name: Code of the authorization
+  - label: Label of the authorization
 
-> Each **Secured Entity Operation** is associated with a generated authorization. This allows checking if a user has, as a preliminary, the right to perform an operation on an entity before examining the user's security context.
-> Used notably for UI element display management.<br/>
-> **Example:** Retrieving possible operations on an entity to determine menus to display
+- **Secured Entity Operations**: Authorizations for an operation on a secured entity
+  - entity: Name of the protected entity
+  - securityFields: List of the fields participating in the security constraints (i.e., filter criteria)
+  - securityDimensions: List of security dimensions (pseudo-security fields derived from other fields of the entity)
+    - name: Name of the dimension
+    - type: Type of the dimension (SIMPLE: simple field, ENUM: for an ordered enumeration, TREE: for a hierarchical structure)
+    - *(Type:SIMPLE)*: Simple field — no ordered values, no hierarchy
+    - values *(Type:ENUM)*: Ordered list of the possible values (2 minimum, 0 `fields`)
+    - fields *(Type:TREE)*: List of the ordered (and flat) fields of the tree (1 minimum, 0 `values`; the order of the fields is the order of the hierarchy)
+  - operations: List of the possible operations on the entity
+    - __comment: Allows placing a comment in the configuration
+    - name: Code of the operation
+    - label: Label of the operation
+    - grants *(optional)*: List of operations granted by this operation (i.e., a user having this operation also has those of the grants)
+    - overrides *(optional)*: List of operations overridden by this operation (i.e., for a user having this operation, the rule of this operation overrides those of the other overrides)
+    - rules: List of security rules.
+      - Syntax close to SQL ( myField *operator* value (and|or)? )*
+      - The various rules of the list are considered as **OR**
+      - **${myParam}** to place a property of the user context (scope property in the user session)
+      - Simple notation for the **TREE** axes: GEO <= ${geo} : Selects the `SecuredEntities` *below or equal to* in the geographic scope of the user (e.g., all the municipalities or within the department of a department manager)
+      - Simple notation for the **ENUM** axes: etaCd>=PUB AND etaCd<ARC (e.g., all the `SecuredEntities` whose state is *greater than or equal to* `PUB` (published) and *strictly lower than* `ARC` (archived))
+
+> Each **Secured Entity Operation** is associated with a generated authorization. It is thus possible to check whether a user has, "a priori", the right to perform an operation on an entity, even before looking at the user's security context.
+> This is used, in particular, to manage the displayed UI elements.<br/>
+> **Example:** Retrieval of the possible operations on an entity to determine the menus to offer
+
+In addition to the two types of authorization, the security model defines a 3rd element: the `Role`.
+
+- **Role**: Named group of authorizations (prefix `R`)
+  - name: Name of the role
+  - description: Description of the role
+  - authorizations: List of the authorizations contained in the role
+
+The `Role` is a **building block** provided by Vertigo (compatibility inheritance from the ASC module): it is **not** declared in the JSON security configuration (which only contains `globalAuthorizations` and `securedEntities`), the roles are declared in code.
+
+Usage via `UserAuthorizations`:
+- **addRole(Role)**: Adds the role and all its authorizations in cascade
+- **hasRole**: Checks that the user has the role
+- **getRoles**: Returns the roles of the user
+- **clearRoles**: Removes the roles of the user (also removes their authorizations)
 
 ### Usage
 
-Vertigo's security model allows a single model definition for use across multiple technologies, each with their own syntax and use cases.
+The strength of the Vertigo security model is to allow a single definition of the model for use in multiple technologies, each having its own syntax and its own use cases.
 
 #### API
 
-`AuthorizationManager` API covers most use cases:
+The API offered by the AuthorizationManager allows handling most of the use cases encountered.
 
-- **hasAuthorization(AuthorizationName...)**: Verifies the user has one of the passed authorizations
-- **isAuthorized(Entity, OperationName)**: Verifies the user can perform the operation on the **entity** with active security context
-- **getCriteriaSecurity(Class<Entity>, OperationName)**: Generates a [Criteria] valid for the logged user, entity type, and operation. Criteria enables many usages, see details below.
-- **getSearchSecurity(Class<Entity>, OperationName)**: Generates security filter in ElasticSearch syntax for the logged user, entity type, and operation.
-- **getAuthorizedOperations(Entity)**: Operations possible by the logged user on the passed entity (used by UI layer to adapt possible actions)
+- **obtainUserAuthorizations()**: Returns the authorization support of the current user (`UserAuthorizations`) — entry point for granting rights
+- **hasAuthorization(AuthorizationName...)**: Checks that the user has one of the authorizations passed as parameter
+- **isAuthorized(Entity, OperationName)**: Checks that the user can perform the operation on the **entity** with their active security context
+- **getCriteriaSecurity(Class<Entity>, OperationName)**: Generates a [Criteria](#criteria) valid for the connected user, an entity type and an operation. The Criteria allows many uses, see details below.
+- **getSearchSecurity(Class<Entity>, OperationName)**: Generates the security filter in Elasticsearch syntax applicable for the connected user, an entity type and an operation.
+- **getPriorAuthorizations()**: Returns the "a priori" authorizations of the current user, without data context (`Set<String>`) — used by the UI layer to display/disable buttons
+- **getAuthorizedOperations(Entity)**: List of the operations possible for the connected user on the entity passed as parameter (used by the UI layer to adapt the possible actions)
+
+!> Without an active user session, the checks return neutral values (no exception is thrown): `hasAuthorization` and `isAuthorized` return `false`, `getCriteriaSecurity` returns an always-false criteria, `getSearchSecurity` returns the empty string, `getPriorAuthorizations` and `getAuthorizedOperations` return an empty set. Only `obtainUserAuthorizations()` throws an `IllegalArgumentException`.
+
+#### Granting Rights to the User
+
+After a successful authentication, it is the application that grants the user's rights to their session: the authorizations (global and operations on entities) and the scope keys (`securityKeys`) that parameterize the security rules.
+The mechanism is intentionally low-level: Vertigo provides the building blocks, the policy (profiles, scopes) is left to the application, see [Security](/en/basic/securite) for the Profile/Scope concept.
+
+Mechanics:
+- **obtainUserAuthorizations()**: obtains the authorization support of the current user (`UserAuthorizations`), stored as an attribute of the `UserSession` — this is the entry point for granting rights
+- **Grant a global authorization**: `userAuthorizations.addAuthorization(authorization)` — the `Authorization` is the definition loaded from the security configuration; the names are prefixed with `Atz` (e.g., `AtzAdmMasterData`)
+- **Grant an operation on an entity**: `userAuthorizations.addAuthorization(authorization)` with a name of the form `Atz<Entity>$<operation>` (e.g., `AtzBase$read`) — the `grants` of the operation are granted in cascade (recursive, with a loop guard)
+- **Grant a role**: `userAuthorizations.addRole(role)` — adds the role **and** all its authorizations in cascade (the roles are declared in code, not in JSON: constructor `Role(name, description, authorizations)`)
+- **Grant the scope keys**: `userAuthorizations.withSecurityKeys("key", value)`:
+  - simple key: `withSecurityKeys("utiId", "A-123")`
+  - **TREE** key (hierarchical dimension): an array representing the path in the hierarchy — `Serializable` values (String codes or numeric IDs, e.g., `Long`) — e.g., `withSecurityKeys("orga", new String[] { "D01", "D01-B12" })`
+  - **partial path** (TREE): the elements of the array can be `null` — a `null` position marks the root of the subtree, the rule pivots on the last non-null level of the path, e.g., `withSecurityKeys("orga", new Long[] { 1L, 2L, null })`
+  - **multi-values**: repeated calls on the same key (the values are combined with OR)
+  - **`null` value**: the blank key and the **entire** `null` value are rejected by an Assertion; the `null` elements of a TREE array are, on the other hand, allowed (cf. "partial path")
+
+```java
+// In the business service, after successful authentication (Mars: profile change):
+final var userAuthorizations = authorizationManager.obtainUserAuthorizations()
+    .clearRoles()
+    .clearSecurityKeys()
+    .addRole(definitionSpace.resolve("R" + roleId, Role.class))
+    .withSecurityKeys("baseId", baseId)
+    .withSecurityKeys("personId", personId);
+// Conditional key depending on the scope (real in Mars):
+userAuthorizations.withSecurityKeys("assetsValue", assetsValue);
+// Generic example (outside Mars): TREE key (hierarchical dimension) — partial path,
+// null position = root of the subtree:
+// userAuthorizations.withSecurityKeys("orga", new String[] { "D01", "D01-B12" });
+```
+
+Life cycle:
+- **Profile change**: before applying the rights of the new profile, call `userAuthorizations.clearRoles()` (also clears the authorizations) then `userAuthorizations.clearSecurityKeys()`, and reapply the rights of the chosen profile
+  ```java
+  // Changement de profil en cours de session :
+  final UserAuthorizations userAuthorizations = authorizationManager.obtainUserAuthorizations();
+  userAuthorizations.clearRoles();        // efface aussi les authorizations accordées
+  userAuthorizations.clearSecurityKeys(); // efface les clés de périmètre
+  // puis re-appliquer les droits du nouveau profil : addAuthorization(...) + withSecurityKeys(...) (comme ci-dessus)
+  ```
+- **Logout**: `clearRoles()` + `clearSecurityKeys()` (or a new user session)
+- **Without session**: `obtainUserAuthorizations()` throws an `IllegalArgumentException` (see the "without active session" box of the API block above)
+
+!> The rights are stored in the session: they are volatile (lost at the end of the session) and must be re-granted at each login / profile change.
 
 #### Criteria
 
-Vertigo Criteria is a cross-cutting element representing a filter, translatable into multiple languages.
+The Vertigo Criteria is a cross-cutting element representing a filter, which can then be translated into multiple languages.
 
-> Can be used directly in DAO.findAll
+> It can be used directly in DAO.findAll
 
-- **toPredicate**: Conversion to Java Predicate (for streams or localized test)
-- **toSQL**: Conversion to WHERE clause for SQL queries (prefer DAO usage)
+- **toPredicate**: Conversion to a Java predicate (for streams, or a localized test)
+- **Conversion to SQL**: via `AuthorizationCriteria` (`asSqlWhere(alias, taskContext)` / `asSqlFrom(sqlEntityName, taskContext)`) — cf. the SQL task example below in the section
 
-Applying to general DAO queries:
+To apply it on general DAO queries
 ```Java
  final Criteria<Equipment> securityFilter = authorizationManager.getCriteriaSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read);
- return equipmentDAO.findAll(securityFilter, dtListState);
+	return equipmentDAO.findAll(securityFilter, dtListState);
 ```
 
-Applying to specific DAO tasks:
-Pass an AuthorizationCriteria via the Task IN parameters. It can then be translated to SQL directly in the SQL query.
+ To apply it on specific DAO tasks.
+ It is necessary to pass an AuthorizationCriteria via the IN parameters of the Task. It is then possible to translate it into SQL directly in the SQL query.
 ```Java
 return equipmentDAO.getLastPurchasedEquipmentsByBaseId(baseId,
-			AuthorizationUtil.authorizationCriteria(Equipment.class, SecuredEntities.EquipmentOperations.read));
+				AuthorizationUtil.authorizationCriteria(Equipment.class, SecuredEntities.EquipmentOperations.read));
 ```
 ```
-create Task TkGetLastPurchasedEquipmentsByBaseId {
+create Task TkGetLastPurchasedEquipmentsByBaseId {  
     className : "io.vertigo.basics.task.TaskEngineSelect"
     request : "
-            select
+            select 
             	equ.*
-			from (<%=securedEquipment.asSqlFrom("equipment", ctx)%>) equ
+			from (<%=securedEquipment.asSqlFrom(\"equipment\", ctx)%>) equ
 			where equ.base_id = #baseId#
 			order by equ.purchase_date desc
 			limit 50
@@ -266,95 +348,132 @@ create Task TkGetLastPurchasedEquipmentsByBaseId {
     out equipments       {domain : DoDtEquipment	cardinality: "*"}
 }
 ```
-> Note: Passing the security filter as a from clause is efficient. It limits the data scope quickly before complex joins.
+> Note: It is efficient to pass the security filter as a FROM clause. This allows quickly limiting the data scope before performing more complex joins.
 
-Applying to search engine queries:
+To apply it to a search by a search engine:
 ```Java
  final ListFilter securityListFilter = ListFilter.of(authorizationManager.getSearchSecurity(Equipment.class, SecuredEntities.EquipmentOperations.read));
 	final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
-			.withSecurityFilter(securityListFilter)
-			.build();
- ```
+				.withSecurityFilter(securityListFilter)
+				.build();
+```
 
 #### AuthorizationUtil
 
-This utility offers static methods easily usable for verifying user authorizations in business services.
-It is better to perform checks as early as possible in processing for performance.
-If the user lacks sufficient authorizations, an exception is thrown, rolling back the transaction and displaying an error.
+This utility offers static methods easily usable to check the authorizations of the user in the business services.
+It is preferable to perform the checks as early as possible in the processing for performance reasons.
+But if the user does not have sufficient authorizations, an exception is thrown, which will roll back the transaction and display an error to the user.
 
-- **assertAuthorizations(message*(optional)*, AuthorizationName...)**: Verifies the user has one of the passed authorizations and throws if not
-- **assertOperations(Entity, OperationName, message*(optional)*)**: Verifies the user can perform the operation on the **entity** with active security context
-- **assertOperationsOnOriginalEntity(Entity, OperationName, message*(optional)*)**: Like **assertOperations** but reloads the original object first for security control BEFORE applying user modifications
-- **assertOr(BooleanSupplier...)**: Assembles multiple checks with OR
-- **hasAuthorization(AuthorizationName...)**: Returns `BooleanSupplier` verifying the user has one of the passed authorizations
-- **authorizationCriteria(Class\<Entity\>, OperationName)**: Builds criteria representing security filter for an operation type on an entity
-- **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optional)*)**: Verifies the user can perform the operation on the **entity** carried by this accessor (FK); accessor will be loaded if needed
+- **assertAuthorizations(message*(optional)*, AuthorizationName...)**: Checks that the user has one of the authorizations passed as parameter and throws an exception otherwise
+- **assertOperations(Entity, OperationName, message*(optional)*)**: Checks that the user can perform the operation on the **entity** with their active security context
+- **assertOperationsOnOriginalEntity(Entity, OperationName, message*(optional)*)**: Like **assertOperations** but first reloads the original object (locked read `FOR UPDATE` if the entity has an id) to perform the security check BEFORE applying the user's modifications; **returns the reloaded original entity**: the caller must use this reloaded entity, not the stale instance
+- **assertOr(BooleanSupplier...)**: Allows assembling several checks with OR
+- **hasAuthorization(AuthorizationName...)**: Returns a `BooleanSupplier` checking that the user has one of the authorizations passed as parameter
+- **isAuthorized(Entity, OperationName)**: Returns a `BooleanSupplier` checking that the user can perform the operation on the **entity** with their active security context (exception-free version, symmetric of `hasAuthorization`)
+- **authorizationCriteria(Class\<Entity\>, OperationName)**: Builds a Criteria representing the security filter for an operation type on an entity
+- **getCriteriaSecurity(Class\<Entity\>, OperationName)**: Static version of the `AuthorizationManager` API: returns the security `Criteria` for the current user, an entity type and an operation
+- **getSearchSecurity(Class\<Entity\>, OperationName)**: Static version of the `AuthorizationManager` API: returns the security filter (Elasticsearch syntax) for the current user, an entity type and an operation
+- **assertOperationsWithLoad(UID, OperationName, message*(optional)*)**: Loads the entity from its UID, checks that the user can perform the operation on this entity, and **returns the loaded entity**
+- **assertOperationsWithLoadIfNeeded(StoreVAccessor, OperationName, message*(optional)*)**: Checks that the user can perform the operation on the **entity** carried by this accessor (FK), the accessor will be loaded if needed
+- **assertOperationsAndReturn(Supplier\<Entity\>, OperationName, message*(optional)*)**: Loads the entity via the provided `Supplier`, checks that the user can perform the operation on this entity, and **returns the entity**
 
 Example:
 ```Java
-  // operation check on an entity
+  // check d'opération sur une entity
  AuthorizationUtil.assertOperations(baseDAO.get(baseId), SecuredEntities.BaseOperations.read);
 
-  // FK utilities
+  // utilitaires pour les FK
   AuthorizationUtil.assertOperationsWithLoadIfNeeded(ticket.equipment(), SecuredEntities.EquipmentOperations.readTickets);
 ```
 
 #### UiAuthorizationUtil
 
-For page rendering, a utility validates that the user has global authorizations or authorizations for operations on an entity.
-This disables button or link display in the UI.
-Typically, checks are done in Thymeleaf with `th:if`:
+For the rendering of the pages, a utility allows validating that the user has global authorizations, or the authorizations for an operation on an entity.
+This allows disabling the display of a button or a link in the UI.
+Usually, the checks are done in Thymeleaf with a `th:if`
+Example:
 ```HTML
- th:if="${authz.hasAuthorization('AdmUser','ViewAcademy')}"
- ```
+ th:if="${authz.hasAuthorization('ViewBases')}"
+```
 
 API:
-- **hasAuthorization(AuthorizationName...)**: Verifies the user has one of the passed authorizations
-- **hasOperation(UiObject, OperationName)**: Verifies the user can perform the operation on the **entity** with active security context
+- **hasAuthorization(AuthorizationName...)**: Checks that the user has one of the authorizations passed as parameter
+- **hasOperation(UiObject, OperationName)**: Checks that the user can perform the operation on the **entity** with their active security context
 
-!> Disabling a button is not sufficient for minimum security. Authorization checks must primarily be performed server-side.
+!> Disabling a button is not sufficient to ensure a minimum security level. The control of authorizations must above all be performed on the server side
+
+#### Vue SPA
+
+For a **pure Vue application (SPA)** without Thymeleaf server-side rendering: Vertigo provides no client-side authorization mechanism (the *vertigo-ui-vuejs* project contains no authorization mechanism).
+
+Recommended pattern: expose the user's rights via a dedicated WebService:
+- **authorizationManager.getPriorAuthorizations()**: the "a priori" authorizations of the user, without data context (`Set<String>`)
+- **authorizationManager.getAuthorizedOperations(entity)**: the authorized operations on a given entity (`Set<String>`)
+
+```java
+public class UserSecurityWebServices implements WebServices {
+
+	@Inject
+	private AuthorizationManager authorizationManager;
+
+	// Autorisations "à priori" de l'utilisateur connecté (sans contexte de données) :
+	// la SPA n'utilise cette liste que pour l'affichage (menus, boutons)
+	@GET("/current-user/authorizations")
+	public Set<String> getPriorAuthorizations() {
+		return authorizationManager.getPriorAuthorizations();
+	}
+}
+```
+
+The evaluation of these lists on the client side serves **display only** (buttons, menus, tabs): the server-side control remains mandatory and authoritative (the WebServices themselves must check the rights — see `AuthorizationUtil` above).
+
+For the SSR stack (Thymeleaf rendering): see [UI](/en/extensions/ui) (`vu:authz` / `th:if`), and [Security](/en/basic/securite) for the scope concept.
 
 #### Aspect
 
-!> Although convenient, aspect-based security control is not recommended due to its non-systematic nature (non-reentrancy). Reserved for experienced developers.
+!> Although convenient, aspect-based security control is not recommended, because of the non-systematic nature of this technique (non-reentrancy). To be reserved for experienced developers.
 
-**Vertigo Authorization** proposes two annotations for AOP-based security control:
+**Vertigo Authorization** offers two annotations allowing the implementation of security checks via AOP.
 
-- **@Secured** (`{list of authorization names}`): Secures a single *method* or an entire *class* by verifying the user has one of the authorizations
-- **@SecuredOperation** (`operation name`): Secures a `SecuredEntity` passed as parameter by verifying the user is authorized for this operation on the entity
+- **@Secured** (`{list of authorization names}`): Allows securing a single *method* or an entire *class* by checking that the user has one of the authorizations
+- **@SecuredOperation** (`operation name`): Allows securing a `SecuredEntity` passed as parameter by checking that the user is authorized to perform this operation on the entity
 
-> In these annotations, the `Atz` prefix is not required for authorization names
+> In these annotations, it is not necessary to use the `Atz` prefix for the name of the authorizations
 
-> `@SecuredOperation` requires the method to also be annotated with `@Secured`
+> `@SecuredOperation` requires the `@Secured` annotation, carried by the **method or by the class** (the aspect falls back on the declaring class)
 
-!> Caution: annotations are checked by AOP, so this control mode is **non-reentrant**
+!> Caution: the annotations are checked by AOP, this control mode is therefore **non-reentrant**
 
-!> Note: `@SecuredOperation` requires the entity, meaning it must already be loaded (before the security check)
+!> Caution: `@SecuredOperation` requires the entity, which means it must already be loaded (before the security check)
+
+
 
 ### Loading
 
-Authorizations are loaded via a DefinitionProvider in the application module Feature.<br/>
+The authorizations are loaded via a DefinitionProvider in the Feature of the application module.<br/>
 
 *Example:*
-```java
+```java 
   .addDefinitionProvider(DefinitionProviderConfig.builder(JsonSecurityDefinitionProvider.class)
-    .addDefinitionResource("security", "mars-auth-config.json")
+    .addDefinitionResource("security", "io/mars/basemanagement/base-auth-config.json")
     .build())
 ```
 
-### Security Rules Examples: ENUM and TREE
 
-**ENUM**: Use case example for a file.<br/>
+### Example for Security Rules: ENUM and TREE
+
+**ENUM**: Use case example for a dossier.<br/>
 Possible states:
-- (DRAFT) In progress
-- (SUBM) Submitted
-- (ACCP) Accepted
-- (REFD) Rejected
-- (ARCH) Archived
+- (ENC) In progress
+- (SOU) Submitted
+- (ACC) Accepted
+- (REF) Rejected
+- (ARC) Archived
 
 ![](./images/security-enum.png)
 
-**TREE**: Use case example for a file.<br/>
+
+**TREE**: Use case example for a dossier.<br/>
 Geographic tree:
 - (NAT) National
 - (DEP) Department
@@ -362,41 +481,45 @@ Geographic tree:
 
 ![](./images/security-tree.png)
 
+
 ## Identity Providers
 
 ### Principle
 
-Vertigo provides a high-level manager to simplify synchronizing application user accounts with an external identity source (**IdP** or **Id**entity **P**rovider).
-The API retrieves users in the format of Entity managed locally:
-  - user by user from their authentication token (retrieved by `AuthenticationManager`)
-  - just the photo of a user
-  - the complete list of users
+Vertigo offers a high-level manager to simplify the synchronization of the application's user accounts with an external identity source (**IdP** or **Id**entity **P**rovider).
+Typically, the API offered allows retrieving the users in the format of the entity managed locally.
+  - either user by user from their authentication Token (retrieved by the `AuthenticationManager`)
+  - either the photo alone of a user
+  - either by the complete list of the users
 
 ### Configuration
 
-Vertigo provides three default identity source types:
+By default, Vertigo offers three types of identity sources:
 
-**IdentityProvider Feature Configuration (Yaml)**
+**Configuration of the IdentityProvider *Feature* (YAML)**
 
-- **identityProvider.store**: *Identity* provisioning from *StoreManager*
-  - userIdentityEntity: Entity name holding *Identities*
-  - userAuthField: Field linked to authentication *(authToken)*
-  - photoIdField *(optional)*: FileInfo ID for photo storage
-  - photoFileInfo *(optional)*: *FileInfo* name for photo storage
-- **identityProvider.ldap**: *Identity* provisioning from LDAP
-  - ldapServerHost: LDAP server name
-  - ldapServerPort: LDAP server port (default: 389)
-  - ldapAccountBaseDn: Account DN search base
-  - ldapReaderLogin: LDAP reader login
-  - ldapReaderPassword: LDAP reader password
-  - ldapUserAuthAttribute: LDAP attribute for finding a user by *authToken*
-  - userIdentityEntity: Entity name holding the identity (i.e., the User in application terms)
-  - ldapUserAttributeMapping: LDAP field mapping to identity entity
-- **identityProvider.text**: *Identity* provisioning from text file
-  - identityFilePath: *Identity* file path
-  - identityFilePattern: Regex for reading the file (with [named](https://stackoverflow.com/a/415635/2273508) capture groups)
-  - userAuthField: Field linked to authentication *(authToken)*
-  - userIdentityEntity: Entity name holding the identity (i.e., the User in application terms)
+- **identityProvider.store**: Provisioning of *Identities* from the *StoreManager*
+  - userIdentityEntity: Name of the entity carrying the *Identities*
+  - userAuthField: Name of the field linked to authentication *(authToken)*
+  - photoIdField *(optional)*: Id of the FileInfo storing the photo
+  - photoFileInfo *(optional)*: Name of the *FileInfo* used for photo storage
+- **identityProvider.ldap**: Provisioning of *Identities* from an LDAP
+  - ldapAccountBaseDn: Search base of the DNs of Accounts
+  - ldapUserAuthAttribute: LDAP attribute used to find a user by their *authToken*
+  - userIdentityEntity: Name of the entity carrying the identity (i.e., of the User in application terms)
+  - ldapUserAttributeMapping: Mapping of the LDAP fields to the identity entity
+  - connectorName *(optional, default "main")*: Name of the `LdapConnector` to use (the plugin selects the connector by name among the injected `LdapConnector`s)
+  - The connection to the LDAP server is handled by the **connector** `LdapConnector` (module *vertigo-ldap-connector*):
+    - name *(optional, default "main")*: Name of the connector
+    - host: Host of the LDAP server
+    - port: Port of the LDAP server
+    - readerLogin *(optional)*: Read account of the LDAP server
+    - readerPassword *(optional)*: Password of the read account (mandatory if `readerLogin` is present)
+- **identityProvider.text**: Provisioning of *Identities* from a text file
+  - identityFilePath: Path of the *Identities* file
+  - identityFilePattern: RegExp for reading the file (with **capture groups** [named](https://stackoverflow.com/a/415635/2273508))
+  - userAuthField: Name of the field linked to authentication *(authToken)*
+  - userIdentityEntity: Name of the entity carrying the identity (i.e., of the User in application terms)
 
 ## For Experts
 
@@ -404,11 +527,11 @@ Vertigo provides three default identity source types:
 
 | Manager | Role | Activated by |
 |---|---|---|
-| `VSecurityManager` | User session and session authentication management | `security` |
-| `AuthenticationManager` | User authentication (login/password, token) | `authentication` |
-| `AuthorizationManager` | Authorization control (global and secured entities) | `authorization` |
-| `AccountManager` | Account and group management | `account` |
-| `IdentityProviderManager` | External identity provider synchronization | `identityProvider` |
+| `VSecurityManager` | Management of user sessions and session authentication | `security` |
+| `AuthenticationManager` | Authentication of the users (login/password, token) | `authentication` |
+| `AuthorizationManager` | Control of the authorizations (global and secured entities) | `authorization` |
+| `AccountManager` | Management of the accounts and groups | `account` |
+| `IdentityProviderManager` | Synchronization with the external identity providers | `identityProvider` |
 
 ### Features (@Feature)
 
@@ -416,65 +539,65 @@ Vertigo provides three default identity source types:
 |---|---|
 | `security` | `VSecurityManagerImpl` — session, logged user |
 | `authentication` | `AuthenticationManagerImpl` — authentication engine |
-| `authentication.text` | `TextAuthenticationPlugin` — auth from text file (PBKDF2) |
-| `authentication.store` | `StoreAuthenticationPlugin` — auth from database |
-| `authentication.ldap` | `LdapAuthenticationPlugin` — auth from LDAP directory |
-| `authentication.mock` | `MockAuthenticationPlugin` — mock auth for tests |
+| `authentication.text` | `TextAuthenticationPlugin` — auth from a text file (PBKDF2) |
+| `authentication.store` | `StoreAuthenticationPlugin` — auth from the database |
+| `authentication.ldap` | `LdapAuthenticationPlugin` — auth from the LDAP directory |
+| `authentication.mock` | `MockAuthenticationPlugin` — fictitious auth for tests |
 | `account` | `AccountManagerImpl`, `AccountDefinitionProvider` |
-| `account.store.store` | `StoreAccountStorePlugin` — accounts persisted in database |
-| `account.store.text` | `TextAccountStorePlugin` — accounts from text file |
+| `account.store.store` | `StoreAccountStorePlugin` — accounts persisted in the database |
+| `account.store.text` | `TextAccountStorePlugin` — accounts from a text file |
 | `account.store.loader` | `LoaderAccountStorePlugin` — accounts loaded by `AccountLoader`/`GroupLoader` |
-| `account.cache.memory` | `MemoryAccountCachePlugin` — account memory cache |
+| `account.cache.memory` | `MemoryAccountCachePlugin` — memory cache of the accounts |
 | `account.cache.redis` | `RedisAccountCachePlugin` — Redis cache (`Base64File`, `PhotoCodec`) |
 | `authorization` | `AuthorizationManagerImpl`, `AuthorizationAspect` |
 | `identityProvider` | `IdentityProviderManagerImpl` |
-| `identityProvider.store` | `StoreIdentityProviderPlugin` — identities from database |
+| `identityProvider.store` | `StoreIdentityProviderPlugin` — identities from the database |
 | `identityProvider.ldap` | `LdapIdentityProviderPlugin` — identities from LDAP |
-| `identityProvider.text` | `TextIdentityProviderPlugin` — identities from text file |
+| `identityProvider.text` | `TextIdentityProviderPlugin` — identities from a text file |
 
 ### Authentication Plugins
 
 | Plugin | Description |
 |---|---|
-| `TextAuthenticationPlugin` | Login/password authentication from text file |
-| `StoreAuthenticationPlugin` | Login/password authentication from database (via EntityStore) |
-| `LdapAuthenticationPlugin` | LDAP binding authentication, returns login |
-| `MockAuthenticationPlugin` | Always valid, for unit tests |
+| `TextAuthenticationPlugin` | Login/password authentication from a text file |
+| `StoreAuthenticationPlugin` | Login/password authentication from the database (via EntityStore) |
+| `LdapAuthenticationPlugin` | Authentication by LDAP binding, returns the login |
+| `MockAuthenticationPlugin` | Always valid, for the unit tests |
 
 ### Security Rules DSL
 
-Rules are translated to three targets via `SecurityRuleTranslator`:
+The rules are translated into three targets via `SecurityRuleTranslator`s:
 
 | Translator | Usage |
 |---|---|
-| `SqlSecurityRuleTranslator` | Translation to SQL `WHERE` clause for DAO queries |
-| `SearchSecurityRuleTranslator` | Translation to Elasticsearch syntax for `SearchManager` |
-| `CriteriaSecurityRuleTranslator` | Translation to Vertigo `Criteria` (cross-cutting filter) |
+| `SqlSecurityRuleTranslator` | Translation into a SQL `WHERE` clause for DAO queries |
+| `SearchSecurityRuleTranslator` | Translation into Elasticsearch syntax for `SearchManager` |
+| `CriteriaSecurityRuleTranslator` | Translation into a Vertigo `Criteria` (cross-cutting filter) |
 
-DSL elements: `DslSyntaxRules`, `DslParserUtil`, `DslExpressionRule`, `DslFixedQueryRule`, `DslOperatorRule`, `DslMultiExpressionRule`, `DslUserPropertyValueRule`.
+The elements of the DSL are: `DslSyntaxRules`, `DslParserUtil`, `DslExpressionRule`, `DslFixedValueRule`, `DslOperatorRule`, `DslMultiExpressionRule`, `DslUserPropertyValueRule`.
 
 ### Authorization Loaders
 
 | Class | Role |
 |---|---|
-| `JsonSecurityDefinitionProvider` | Rule loading from JSON file |
-| `AuthorizationDeserializer` | Authorization definition deserialization |
-| `SecuredEntityDeserializer` | Secured entity deserialization |
-| `AdvancedSecurityConfiguration` | Advanced security configuration |
+| `JsonSecurityDefinitionProvider` | Loading of the rules from a JSON file |
+| `AuthorizationDeserializer` | Deserialization of the authorization definitions |
+| `SecuredEntityDeserializer` | Deserialization of the secured entities |
+| `AdvancedSecurityConfiguration` | Advanced configuration of the security |
 
 ### Annotations
 
 | Annotation | Target | Description |
 |---|---|---|
-| `@Secured` | Class/Method | Verifies global authorizations |
-| `@SecuredOperation` | Parameter | Verifies operation on a SecuredEntity |
+| `@Secured` | Class/Method | Verifies the global authorizations |
+| `@SecuredOperation` | Parameter | Verifies the operation on a SecuredEntity |
 
 ### Exceptions
 
 | Exception | Role |
 |---|---|
-| `VSecurityException` | Thrown when authorization check fails |
+| `VSecurityException` | Thrown when the authorization check fails |
 
 ### YAML Configuration
 
-See [Configuration](#configuration) section for each Feature details and [Configuration](#configuration-1) for IdentityProvider configuration.
+See the [Configuration](#configuration) section for the details of each Feature and the [Identity Providers](#identity-providers) section (Configuration sub-section) for the IdentityProvider configuration.
