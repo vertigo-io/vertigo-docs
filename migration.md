@@ -33,7 +33,7 @@
   - **Remove any `addAspect(TraceAspect.class)` declaration** from your modules : a duplicate registration aborts the boot (`aspect ... already registered with the same class`).
   - Note : `@Trace` components must be in modules declared **after** `vertigo-commons` in your NodeConfig (an aspect only applies to the modules declared after the one registering it).
 * **[HttpClient] TLSv1.2 is now enforced as the minimum TLS version.** TLS 1.3 is now available. Legacy endpoints requiring TLSv1.0/1.1 are no longer supported by the connector.
-* **4.4.1-1 (hotfix, vertigo-planning only)** : planning plage popin JS error + duration warning restyle, strict positive value for `dureeTrancheMinute`, EasyForms ReDoS fix, test service hosts configurable via env vars. If you are on 4.4.1: use `vertigo-planning:4.4.1-1` (all other artifacts stay 4.4.1 — Maven Central is immutable, no relocation possible).
+* **[Planning] If you use `vertigo-planning`, take version `4.4.1-1` — it contains a necessary hotfix.** All other artifacts stay `4.4.1` (Maven Central is immutable, no relocation possible).
 
 # from 4.3.2 to 4.4.0
 
