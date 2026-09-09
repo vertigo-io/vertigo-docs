@@ -40,7 +40,7 @@ En HTML5, l'autofermeture n'existe pas pour les éléments non-void : le navigat
 La cause est le parsing des templates *in-DOM* par le navigateur (cf. doc Vue « DOM Template Parsing Caveats » : l'autofermeture n'est valable que dans les SFC).
 Les balises traitées côté serveur (`th:*`, `vu:*`) ne sont pas concernées : elles sont expansées par Thymeleaf avant d'arriver au navigateur. L'autofermeture reste donc possible pour `th:block`, les composants `vu:*` et les éléments void HTML (`<br>`, `<img>`, ...).
 
-?> À partir de vertigo-ui 4.5.0, les balises autofermées sont refermées automatiquement au rendu (le filtre servlet historique `UnAutoCloseTagsFilter`, réparation partielle à déclarer dans le web.xml, est déprécié).
+?> À partir de vertigo-ui 4.5.0, les balises autofermées sont refermées automatiquement au rendu. Le filtre servlet historique `UnAutoCloseTagsFilter` (à déclarer dans le web.xml) est déprécié puis supprimé en 5.0.0 : sa réparation par regex était partielle — il rate toute balise contenant un `>` dans une valeur d'attribut (ex. `:disable="[1,2].length > 5"`) et ne connaît que les préfixes `q-*`/`v-*`.
 
 ## [Ui] Comment modifier mes pages Thymeleaf sans redémarrer le serveur ?
 Le paramètre Spring Boot `spring.thymeleaf.cache=false` est sans effet en vertigo-ui : le cache des templates est piloté par la méthode `isDevMode()` de `VSpringWebConfig` (`setCacheable(!isDevMode())`).
