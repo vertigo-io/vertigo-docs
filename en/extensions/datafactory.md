@@ -446,6 +446,7 @@ Lucene index is rebuilt on each call against the provided `DtList`, so this axis
 - **FacetedQuery immutable**: built with `(FacetedQueryDefinition, SelectedFacetValues)`. No `setFilter()` or `execute()` on the object.
 - **Collection vs Index**: `collectionsManager.facetList()` recreates the Lucene index on each call against the provided `DtList`. For intensive usage, minimize repeated calls on the same list.
 - **Range facet size**: Ranges are defined statically in `FacetDefinition`. A document outside all ranges appears in no range facet. Include a catch-all range at the end.
+- **Range facets: 0-result ranges kept**: unlike term facets, range facets return **all** declared ranges, including those with 0 results, in declaration order (`createFacetRange` iterates over the declared ranges). Intended behavior: it is up to the UI to hide empty ranges if needed.
 - **SearchLoader loadData**: `loadData(SearchChunk<K>)` returns `List<SearchIndex<K, I>>`, not `void`. Do not use `SearchChunk<String>`.
 - **ListFilterBuilder**: no static `.build()` method. Use instance builder pattern: `withListFilterQuery()` → `withCriteria()` → `build()`.
 - **ESDocumentCodec**: `ESDocumentCodec` handles ElasticSearch document encoding/decoding. Serialization goes through base64 and possibly compression (confirmed by source). This impacts direct document readability in the ES interface.

@@ -10,6 +10,7 @@
 - Introduction
   - [Why Vertigo ?](/en/intro/why.md)
   - [Philosophy](/en/intro/philosophie.md)
+  - [Coding rules](/en/intro/regles-codage.md)
   - [References](/en/intro/references.md)
   - [Ecosystem](/en/intro/ecosystem.md)
 - Overview

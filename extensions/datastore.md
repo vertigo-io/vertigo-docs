@@ -78,6 +78,16 @@ Le `KVStoreManager` offre un stockage clé-valeur avec 6 backends disponibles. L
 | `EhCacheKVStorePlugin` | `kvStore.ehcache` | EhCache |
 | `DelayedMemoryKVStorePlugin` | `kvStore.delayedMemory` | Mémoire avec persistance retardée |
 
+### BerkeleyKVStorePlugin : purge et espace disque
+
+Notes d'exploitation du store Berkeley DB :
+
+- **TTL par collection** : chaque collection se déclare avec un TTL optionnel en secondes : `collName;TTL=n` (défaut `-1` = éternel) ; le suffixe `;inMemory` est possible pour une collection non persistée.
+- **Purge** : un daemon `DmnPurgeBerkeleyKvStore$a<hash>` (hash calculé sur le chemin du store) supprime les éléments expirés toutes les **60 s**. Le paramètre `purgeVersion` sélectionne l'algorithme de purge : `V1`, `V2` ou `V3` (défaut `V3`).
+- **Les fichiers ne rétrécissent pas** : Berkeley réutilise en interne l'espace libéré par la purge, mais la taille des fichiers sur disque ne diminue jamais — ne pas s'en alarmer en exploitation.
+
+!> **Espace disque libre** : prévoir au moins **1 Go** d'espace disque libre sur la partition du store : le seuil `je.freeDisk` est fixé en dur (non paramétrable) et, sous ce seuil, toute écriture est refusée avec une `com.sleepycat.je.DiskLimitException`.
+
 ## Cache
 
 Le `CacheManager` propose une abstraction vers la solution de cache pour les autres composants.

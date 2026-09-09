@@ -194,6 +194,8 @@ To address this security concern, many mechanisms are available in Vega.
 
 By default, all WebServices are accessible only to an authenticated user. This is the first level of security. Obviously, it is **necessary** but **not sufficient**.
 
+!> **Never declare `ComponentCmdWebServices` in production**: this introspection webservice exposes `GET /vertigo/components`, which returns the full NodeConfig **including its parameters** (LDAP passwords, connection secrets...), all with `@AnonymousAccessAllowed`. It is enabled by **no** feature: it is only present if it has been explicitly declared in the configuration — make sure it is not declared on production environments. Likewise, restrict the `webservices.swagger` and `webservices.catalog` features to development/staging environments unless they are truly needed: they disclose the full API surface.
+
 To go further, you can use features from the Vertigo-Account module, which provides a security model that can be applied to WebServices.
 
 Thus, during a Webservice call, you can verify:
@@ -421,6 +423,8 @@ Servlet Filters execute **before** the HandlerChain and operate at the Servlet S
 | `AuthorizationWebFilter` | Routes filter by authorization: each init-param is **named** after the `Atz`-prefixed authorization name(s) (separated by `;` = OR) and its **value** is the URL pattern(s); reserved init-params: `errorCode` (Integer, default 403), `url-include-pattern` / `url-exclude-pattern`; does not read `@Secured` |
 | `RateLimitingFilter` | Rate limiting at the Servlet level (separate from the handler) |
 | `AnalyticsFilter` | Collects metrics at the Servlet level |
+
+!> **`SetCharsetEncodingFilter` must be declared first**, before any filter that may read the request parameters — its own javadoc states it: "Must be the first filter to be effective". The Servlet spec indeed requires `setCharacterEncoding` to be called **before** the parameters are first read, otherwise the call has no effect. Typical symptom of a wrong ordering: corrupted accented characters in user-entered search criteria.
 
 > **Detail — `AuthorizationWebFilter`**: the filter declaration relies on the **name / value** semantics of init-params — the **name** of an init-param is an authorization name, its **value** is a URL pattern:
 > <!-- source : AuthorizationWebFilter.java:L56-165 -->

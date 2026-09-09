@@ -75,6 +75,24 @@ Le `SqlAdapterSupplierPlugin` complète la couche de connexion en fournissant le
 
 L'interface `SqlDataBase` regroupe la base de données et son `SqlDialect` associé. L'interface `SqlConnectionProvider` est le contrat pour tous les plugins de connexion.
 
+### Connexions multiples et dataSpace
+
+Une application peut déclarer plusieurs connexions : chaque plugin de connexion porte un paramètre `name` (défaut `main`) et le `SqlManager` y donne accès via `getConnectionProvider(name)`.
+
+C'est ce mécanisme qu'utilise l'EntityStore pour router les entités vers la bonne base, via la notion de **dataSpace** : la feature `entitystore.sql` (module vertigo-datastore) accepte les paramètres `dataSpace` et `connectionName` (défauts `main`/`main`). On déclare une instance de la feature par dataSpace ; la connexion nommée n'est nécessaire que si le dataSpace pointe vers une base distincte.
+
+```yaml
+featuresConfig:
+  # dataSpace main sur la connexion main (défauts)
+  - entitystore.sql:
+  # entités du dataSpace orchestra, stockées dans une base dédiée
+  - entitystore.sql:
+      dataSpace: orchestra
+      connectionName: orchestra
+```
+
+?> Le rattachement des entités et des tâches à un dataSpace se fait à la modélisation, avec le mot-clé `storeName` : voir [la section dataSpace](/basic/mda?id=dataspace) du chapitre MDA. Le cas d'usage visé est la base tierce dédiée (ex. Orchestra), pas deux bases interchangeables.
+
 ### Dialectes SQL
 
 Le module supporte quatre familles de SGBD, chacune implémentant l'interface `SqlDialect` :

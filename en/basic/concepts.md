@@ -93,6 +93,9 @@ Concrete objects implementing `DtObject` are annotated POJOs and can be created 
 ### DtList *(interface)*
 
 `DtList`s are **typed lists** of `DtObject`s. This interface compensates for the absence of strongly typed lists in Java and makes lists span from UI to storage.
+The rule of thumb is simple: as soon as a list of `DtObject`s is intended for the UI, storage, or a **Vertigo** API, it is a `DtList`; a plain Java `List` remains appropriate for non-persisted basic types (a list of `String` for example).
+`DtList`s integrate with Java streams through the `VCollectors.toDtList(MyDto.class)` collector (package `io.vertigo.datamodel.data.util`): `movies.stream().filter(...).collect(VCollectors.toDtList(Movie.class))`.
+To build a list from known elements (in tests for example), use `DtList.of(dto1, dto2)`.
 
 
 

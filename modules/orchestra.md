@@ -51,6 +51,8 @@ io.vertigo.orchestra.OrchestraFeatures:
 
 Pour utiliser Orchestra en version base de données, il est nécessaire d'initialiser cette base (création des tables et insertion des données primaires) à l'aide de [ce](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-orchestra/src/main/database/scripts/install/orchestra_create_init_v1.0.0.sql) fichier SQL.
 
+?> Tout le modèle Orchestra est déclaré en `@DataSpace("orchestra")` : ses accès SQL passent par la connexion nommée `orchestra`. Il est recommandé de déclarer un pool de connexions dédié sous ce nom, afin d'isoler Orchestra du pool applicatif, et de le dimensionner en cohérence avec le paramètre `workersCount`.
+
 ## A quoi cela ressemble-t-il dans le code ?
 
 ### Ecrire un ActivityEngine
@@ -136,6 +138,54 @@ orchestraServices.getReport().getSummaryByDate(myFirstProcessDefinition,
 		Instant.parse("2017-01-01T00:00:00Z"), Instant.parse("2017-12-31T23:59:59Z"));
 ```
 
+!> Chaque appel à `scheduleAt` **ajoute** une planification : il n'existe pas d'API d'annulation d'une planification déjà posée (voir [Cas des évolutions des processus](#cas-des-évolutions-des-processus) pour la purge des planifications futures).
+
+### Passer des paramètres à une exécution
+
+Le troisième argument de `scheduleAt` est une `Map<String, String>` de paramètres initiaux : elle initialise le workspace (`ActivityExecutionWorkspace`) de la première activité du processus.
+
+```java
+orchestraServices.getScheduler().scheduleAt(myFirstProcessDefinition, Instant.now(), Map.of("dossierId", "1234"));
+```
+
+Côté `ActivityEngine`, le workspace donne accès à ces paramètres :
+
+```java
+/** {@inheritDoc} */
+@Override
+public ActivityExecutionWorkspace execute(final ActivityExecutionWorkspace workspace) {
+    if (workspace.containsKey("dossierId")) {
+        final String dossierId = workspace.getValue("dossierId");
+        // ...
+    }
+    final Long preId = workspace.getProcessExecutionId(); // id de l'exécution en cours
+    workspace.setSuccess();
+    return workspace;
+}
+```
+
+Avec la feature `orchestra.webapi`, le suivi et le déclenchement sont aussi possibles via l'API REST :
+- `GET /orchestra/executions/?processName=&status=&limit=&offset=` : liste les exécutions d'un processus (`WsExecution`)
+- `GET /orchestra/executions/{preId}/activities` : détail des activités d'une exécution
+- `POST /orchestra/executionsControl/execute` et `POST /orchestra/executionsControl/executeNow` : déclenchement d'une exécution (`WsExecutionControl`)
+
+### Cycle de vie d'une exécution
+
+L'état d'une exécution est porté par l'enum `ExecutionState` :
+
+| État | Description |
+|---|---|
+| `WAITING` | En attente d'un worker disponible |
+| `RESERVED` | Réservée par un nœud (multi-nœud) |
+| `SUBMITTED` | Soumise au pool de workers du nœud |
+| `RUNNING` | En cours d'exécution |
+| `DONE` | Terminée avec succès |
+| `ERROR` | Terminée en erreur |
+| `ABORTED` | Interrompue |
+| `PENDING` | En attente de la fin d'un traitement délégué (asynchrone) |
+
+?> `WAITING` est l'état nominal d'une exécution planifiée : elle attend simplement qu'un worker se libère. Si des exécutions restent durablement en `WAITING`, dimensionnez le paramètre `workersCount` (défaut 10) selon le parallélisme attendu.
+
 ## Cas des évolutions des processus
 
 Le principe général est qu'une définition de processus Orchestra est liée à du code : une activité, un service, etc. Ces définitions sont donc par nature stables dans le temps et ne changent pas à chaque démarrage.
@@ -144,6 +194,8 @@ avec needUpdate=true (en général, cela est réalisé par un script liquibase).
 
 Pour une modification du paramétrage du déclenchement, ce n'est pas directement dans la définition mais dans la "ProcessTriggeringStrategy".
 Ces informations sont modifiables avec l'API (updateProcessDefinitionProperties), et certaines IHM proposent de modifier le cron directement par l'interface utilisateur.
+
+!> `createOrUpdateDefinition` ne purge les planifications futures que si la définition a été construite avec `withNeedUpdate()` : sans ce flag, les planifications déjà posées sont conservées. `updateProcessDefinitionProperties` purge également les planifications futures.
 
 ## Pour les experts
 

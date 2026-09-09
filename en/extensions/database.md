@@ -75,6 +75,24 @@ Two connection plugins are available:
 
 Interface `SqlDataBase` groups the database and its associated `SqlDialect`. Interface `SqlConnectionProvider` is the contract for all connection plugins.
 
+### Multiple connections and dataSpace
+
+An application can declare several connections: each connection plugin carries a `name` parameter (default `main`) and `SqlManager` gives access to them via `getConnectionProvider(name)`.
+
+This is the mechanism used by the EntityStore to route entities to the right database, through the **dataSpace** notion: the `entitystore.sql` feature (vertigo-datastore module) accepts the `dataSpace` and `connectionName` parameters (defaults `main`/`main`). One instance of the feature is declared per dataSpace; the named connection is only needed if the dataSpace points to a separate database.
+
+```yaml
+featuresConfig:
+  # main dataSpace on the main connection (defaults)
+  - entitystore.sql:
+  # entities of the orchestra dataSpace, stored in a dedicated database
+  - entitystore.sql:
+      dataSpace: orchestra
+      connectionName: orchestra
+```
+
+?> Attaching entities and tasks to a dataSpace is done at modeling time, with the `storeName` keyword: see [the dataSpace section](/en/basic/mda?id=dataspace) of the MDA chapter. The intended use case is a dedicated third-party database (e.g., Orchestra), not two interchangeable databases.
+
 ### SQL Dialects
 
 The module supports four RDBMS families, each implementing `SqlDialect`:

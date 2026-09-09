@@ -241,6 +241,16 @@ private static PublisherData createPublisherData(final String definitionName) {
 }
 ```
 
+#### Populating an image field
+
+An `imageField` is populated manually on the `PublisherNode`, with a `VFile`:
+
+```java
+publisherData.getRootNode().setImage("QRCODE", qrCodeVFile);
+```
+
+!> `PublisherDataUtil.populateData` does not handle image fields: if the business DTO contains a field of this type, the call throws `IllegalArgumentException("Type unsupported : Image")`. In that case, populate the node manually — `populateData` is only an optional utility.
+
 ## Converter
 
 The **Converter** allows converting a document from one format to another.
@@ -254,6 +264,8 @@ The **Converter** allows converting a document from one format to another.
 | `XDocReportConverterPlugin` | `converter.xDocReport` | Conversion via XDocReport (supported formats: DOC, DOCX, ODT, RTF, TXT to PDF) |
 
 `MimeTypesFileTypeDetector` automatically detects the file type from the MIME type.
+
+?> **Fonts**: the fonts used by the templates must be installed where the conversion runs, otherwise they are substituted or missing from the resulting PDF. For `OpenOfficeLocalConverterPlugin` / `OpenOfficeRemoteConverterPlugin`, install them on the OpenOffice/LibreOffice server; for `XDocReportConverterPlugin`, on the JVM's system (e.g. Linux: copy into `/usr/share/fonts` then `fc-cache -f`).
 
 ## Exporter
 
@@ -299,6 +311,12 @@ final VFile result = exporterManager.createExportFile(export);
 ```
 
 The `Export` object can contain multiple `ExportSheet`s. Each column is an `ExportField` (or `ExportDenormField`, `ExportCustomField`).
+
+### Limitations
+
+The Exporter produces tabular exports with **fixed columns**: each column is an `ExportField`, with no styling and no conditional columns. `ExportCustomField` (computed value) and `ExportDenormField` (value denormalized from a reference list) cover derived-value needs, but nothing is provided for formatting.
+
+?> For a pivot table or advanced formatting (styles, merged cells, …), use Apache POI directly or extend `XLSXExporterPlugin`.
 
 ## For Experts
 

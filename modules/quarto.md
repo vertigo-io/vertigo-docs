@@ -241,6 +241,16 @@ private static PublisherData createPublisherData(final String definitionName) {
 }
 ```
 
+#### Peupler un champ image
+
+Un `imageField` se peuple manuellement sur le `PublisherNode`, avec un `VFile` :
+
+```java
+publisherData.getRootNode().setImage("QRCODE", qrCodeVFile);
+```
+
+!> `PublisherDataUtil.populateData` ne gère pas les champs image : si le DTO métier contient un champ de ce type, l'appel jette `IllegalArgumentException("Type unsupported : Image")`. Dans ce cas, peuplez le nœud manuellement — `populateData` n'est qu'un utilitaire optionnel.
+
 ## Converter
 
 Le **Converter** permet de convertir un document d'un format vers un autre.
@@ -254,6 +264,8 @@ Le **Converter** permet de convertir un document d'un format vers un autre.
 | `XDocReportConverterPlugin` | `converter.xDocReport` | Conversion via XDocReport (formats supportés : DOC, DOCX, ODT, RTF, TXT vers PDF) |
 
 `MimeTypesFileTypeDetector` détecte automatiquement le type de fichier à partir du MIME type.
+
+?> **Fonts** : les polices utilisées par les modèles doivent être installées là où la conversion s'exécute, sinon elles sont substituées ou absentes du PDF produit. Pour `OpenOfficeLocalConverterPlugin` / `OpenOfficeRemoteConverterPlugin`, installez-les sur le serveur OpenOffice/LibreOffice ; pour `XDocReportConverterPlugin`, sur le système de la JVM (ex. Linux : copie dans `/usr/share/fonts` puis `fc-cache -f`).
 
 ## Exporter
 
@@ -299,6 +311,12 @@ final VFile result = exporterManager.createExportFile(export);
 ```
 
 L'objet `Export` peut contenir plusieurs `ExportSheet`. Chaque colonne est un `ExportField` (ou `ExportDenormField`, `ExportCustomField`).
+
+### Limites
+
+L'Exporter produit des exports tabulaires à **colonnes fixes** : chaque colonne est un `ExportField`, sans style ni colonne conditionnelle. `ExportCustomField` (valeur calculée) et `ExportDenormField` (valeur dénormalisée depuis une liste de référence) couvrent les besoins de valeurs dérivées, mais rien n'est prévu pour la mise en forme.
+
+?> Pour un tableau croisé ou une mise en forme avancée (styles, cellules fusionnées…), utilisez Apache POI directement ou étendez `XLSXExporterPlugin`.
 
 ## Pour les experts
 
