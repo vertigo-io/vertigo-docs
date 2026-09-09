@@ -34,6 +34,19 @@ Ce sont des classes fournies par la librairie de composant Quasar (https://quasa
 Il existe une extension navigateur pour vueJs qui aide au debug : `Vue.js devtools`. Pour l'utiliser il faut vue.js en version non minifiée (à ajouter au début de la page)
 Sinon la vue développeur et le débug peuvent être utilisée.
 
+## [Ui] Une partie de ma page disparait, ou un `v-if` s'applique à trop d'éléments
+Vérifiez qu'aucun composant Vue/Quasar n'est autofermé : il ne faut jamais écrire `<q-btn ... />` dans une page vertigo-ui, toujours fermer explicitement `<q-btn ...></q-btn>`.
+En HTML5, l'autofermeture n'existe pas pour les éléments non-void : le navigateur ignore le `/` et traite la balise comme une simple balise ouvrante. Tout le contenu qui suit devient alors enfant du composant : un `v-if` étend son périmètre, des blocs entiers disparaissent (avalés comme slot du composant).
+La cause est le parsing des templates *in-DOM* par le navigateur (cf. doc Vue « DOM Template Parsing Caveats » : l'autofermeture n'est valable que dans les SFC).
+Les balises traitées côté serveur (`th:*`, `vu:*`) ne sont pas concernées : elles sont expansées par Thymeleaf avant d'arriver au navigateur. L'autofermeture reste donc possible pour `th:block`, les composants `vu:*` et les éléments void HTML (`<br>`, `<img>`, ...).
+
+?> À partir de vertigo-ui 4.5.0, les balises autofermées sont refermées automatiquement au rendu (le filtre servlet historique `UnAutoCloseTagsFilter`, réparation partielle à déclarer dans le web.xml, est déprécié).
+
+## [Ui] Comment modifier mes pages Thymeleaf sans redémarrer le serveur ?
+Le paramètre Spring Boot `spring.thymeleaf.cache=false` est sans effet en vertigo-ui : le cache des templates est piloté par la méthode `isDevMode()` de `VSpringWebConfig` (`setCacheable(!isDevMode())`).
+`isDevMode()` retourne `true` par défaut (cache désactivé) : c'est la surcharge dans le `VSpringWebConfig` du projet qui active le cache en production. En dev, il suffit donc de ne pas surcharger `isDevMode()` à `false`.
+Pensez aussi à désactiver l'auto-reload du module web dans le Tomcat d'Eclipse, sinon chaque modification de ressource redémarre la webapp.
+
 ## [Ui] Les boutons `<vu:button-link>` ne fonctionnent que si ils sont placés à l'intérieur de balises `<section>`
 La balise section est liée aux layout thymeleaf.
 Tous codes html hors des balises qui sont effectivement inclus dans la page sont gardés, le reste est perdu.
@@ -143,8 +156,58 @@ Il faut penser à activer la fonctionnalité dans le fichier de configuration ya
 Les paramètres peuvent être externalisés avec une balise de type : ${myParamName}
 La valeur est alors résolue par le paramManager.
 
+## [Core] Comment lancer un traitement asynchrone ou récurrent ?
+Deux mécanismes selon le besoin :
+- `@DaemonScheduled(name = "DmnMyTask", periodInSeconds = 60)` (io.vertigo.core.daemon) pour les tâches techniques récurrentes non vitales (purge, rafraîchissement de cache, ...). Simple, mais sans reprise ni suivi : une exécution manquée est perdue ;
+- **Orchestra** pour les jobs métier critiques : planification, suivi des exécutions en base, reprise sur erreur, multi-nœuds.
+
+!> Créer son propre `ExecutorService` est un anti-pattern : les threads échappent au cycle de vie du nœud (arrêt propre, supervision) et aux transactions.
+
+## [Core] Comment fonctionnent les Aspects (et pourquoi le mien ne s'applique pas) ?
+Les aspects sont **globaux** : ils s'appliquent à tous les composants du nœud, il n'y a pas de scope par module.
+L'ordre de chargement compte en revanche : un aspect doit être déclaré dans un module chargé **avant** les modules des composants qui l'utilisent (et au sein d'un même module, les composants sont enregistrés avant les aspects). Déclaré trop tard, l'aspect ne s'applique pas aux composants déjà chargés.
+Autre limite : l'aspect est porté par un **proxy** (sous-classe javassist) qui délègue à l'instance réelle. Il ne s'applique donc que sur les appels qui passent par la référence injectée du composant : un **appel interne** (`this.maMethode()`, ou appel implicite entre deux méthodes de la même classe) ne déclenche pas l'aspect. Et seules les méthodes **publiques** sont interceptées — jamais les méthodes privées.
+Pour bénéficier d'un aspect (par exemple `@Transactional`) sur un sous-traitement, il faut soit porter l'annotation sur la méthode publique d'entrée, soit déplacer le sous-traitement dans un autre composant injecté.
+?> `@Transactional` est un aspect comme les autres, avec une sémantique REQUIRED : il rejoint la transaction courante s'il y en a une, sinon il en crée une.
+
 ## [Studio] J'essaye de faire une double association dans un .ksp vers le même DtObject, mais studio génère deux méthodes avec le même nom.
-Il faut donner un rôle à chaque association (roleA et roleB), ce rôle est utilisé pour nommer la méthode de navigation
+Il faut donner un rôle à chaque association (`roleA` et `roleB`), ce rôle est utilisé pour nommer l'accessor de navigation.
+En KSP, une association se déclare avec `roleA`/`roleB`, `labelA`/`labelB` et `fkFieldName` (obligatoire, en lowerCamelCase) ; le raccourci `type : "*>1"` porte cardinalités et navigabilité :
+
+```
+create Association ADosUtiDestinataire {
+	fkFieldName : "utiIdDestinataire"
+	dtDefinitionA : DtDossier
+	type : "*>1"
+	dtDefinitionB : DtUtilisateur
+	roleA : "Dossier"
+	labelA : "Dossier"
+	roleB : "Destinataire"
+	labelB : "Destinataire"
+}
+```
+
+Le rôle donne son nom à l'accessor généré : ici `dossier.destinataire()`, qui retourne un `StoreVAccessor` (`StoreListVAccessor` côté multiple), à utiliser via `.load()` puis `.get()`.
+En modélisation XMI/OOM, le suffixe de la FK vient du nom de l'association (cf. l'entrée Enterprise Architect ci-dessous) ; ce suffixe est obligatoire pour une auto-jointure (sinon exception « AutoJointure »).
+
+?> Cas particulier : une association NN réflexive (entité liée à elle-même) est impossible par construction — les colonnes de la table de jointure sont les PK des deux nœuds (pas de `fkFieldName` en NN), on aurait donc deux colonnes de même nom. Contournements : une entité porteuse (PK propre + 2 FK) ou une colonne JSON.
+
+## [Studio] Comment renseigner les noms de champs, libellés et clés étrangères dans Enterprise Architect (XMI) ?
+Au niveau **attribut** : le *Name* devient le code de la colonne et l'*Alias* le libellé métier (utilisé notamment dans les messages d'erreur).
+Au niveau **association** : le *Role* devient le nom de l'accessor de navigation (l'*Alias* du rôle n'est pas lu).
+Le nom de la colonne FK est déduit de la PK cible plus un suffixe extrait du **nom de l'association**, au format `{TriA}{TriB}{Suffixe}` : une association nommée `DosUtiDestinataire` entre DOSSIER et UTILISATEUR génère la FK `UTI_ID_DESTINATAIRE`.
+Le paramètre `constFieldName` du loader existe toujours (défaut `true` : le modèle est attendu en CONST_CASE).
+
+## [Studio] Comment partager des DTO entre plusieurs projets (module commun) ?
+Les définitions générées par Studio dans le module partagé (classe `DtDefinitions` + SmartTypes) se déclarent chez le consommateur via un `DefinitionProviderConfig` :
+```java
+getModuleConfigBuilder()
+	.addDefinitionProvider(DefinitionProviderConfig.builder(ModelDefinitionProvider.class)
+		.addDefinitionResource("smarttypes", "commons.domain.CommonsSmartTypes")
+		.addDefinitionResource("dtobjects", "commons.domain.DtDefinitions")
+		.build());
+```
+!> La configuration YAML ne sait pas déclarer de definition resources : ce code doit être porté par une classe `Features` Java (celle du module partagé), elle-même référencée dans le YAML du projet consommateur.
 
 
 ## [Ui] Je souhaite faire apparaitre une notification à l'utilisateur, comment faire ?
@@ -269,6 +332,10 @@ Ce paramètre défini le mode de rechargement de la liste lors de l'expiration d
 Le mode liste est préconisé pour la plupart des cas.
 Le mode unitaire, est utilisé pour les grosses listes, comme la liste des communes par exemple
 
+## [DataStore] Ma grosse liste de référence n'est pas mise en cache (limite de compression)
+Le cache sérialise et compresse les éléments par défaut, avec une taille maximale de **20 Mo** après sérialisation (`CompressionCodec.MAX_SIZE_FOR_COMPRESSION`) : au-delà, la mise en cache échoue.
+Pour les grosses listes non modifiables, désactivez la sérialisation en passant le paramètre `serializeElements` de la `CacheDefinition` à `false` : la liste est conservée telle quelle en mémoire (attention : les objets sont alors partagés, ils ne doivent pas être modifiés).
+
 ## [Ui] Le composant `vu:autocomplete` n'affiche pas le libellé de la donnée mais son identifiant
 Le composant autocomplete ne s'attend pas à recevoir un ViewContext en type de retour, mais un autre format plus spécifique.
 Pour inspiration voir comment est faire le controller générique qui gère les autocomplete
@@ -309,6 +376,10 @@ Si vous avez mis un prefix d'api dans la configuration de vega vous devez l'util
 Par exemple `_apiPrefix_/swaggerUi`
 
 
+## [Vega] Un champ calculé de mon entité n'apparaît pas dans le JSON de mon WebService
+C'est le comportement nominal : la sérialisation Vega (Gson + `DtObjectJsonAdapter`) parcourt les champs de la définition de l'entité et **exclut explicitement les champs `computed`** (elle ajoute en revanche les accessors chargés). Un getter Java ad hoc n'est jamais sérialisé non plus : seuls les champs de la définition comptent. La désérialisation applique le même filtre : un champ `computed` envoyé dans le JSON d'entrée est ignoré.
+Solution : déclarer le champ dans le modèle comme champ **non persisté** et le renseigner via le SQL de la Task ou dans le service — présent dans la définition, il est sérialisé normalement.
+
 ## [Ui] Je voudrais ajouter un contrôle automatique sur un objet en entrée de mon webservice
 Les DtObjects portent des champs qui ont tous un type métier : `SmartTypes`. 
 Ces `SmartTypes` portent une liste de contrainte, il en existe plusieurs fournit par Vertigo, mais il est possible d'en ajouter dans le projet.
@@ -333,6 +404,61 @@ Il reste le cas de l'affichage d'une entité complète, dans ce cas il est assez
 - soit on a un DTO dédié à l'affichage avec un select SQL qui à permis de le remplir en une fois, 
 - soit on a un découpage en onglet qui présente des informations différentes (et c'est plutôt le controller qui charge les données)
 
+## [DataStore] J'ai l'erreur « Accessor is not loaded, you must load it before calling get method »
+Les accessors de navigation (`StoreVAccessor` / `StoreListVAccessor`) ne chargent rien automatiquement : il faut appeler explicitement `load()` avant `get()`.
+```java
+dossier.destinataire().load();
+final Utilisateur destinataire = dossier.destinataire().get();
+```
+Le `load()` fait un accès SQL : il doit donc être exécuté **dans un service `@Transactional`** — le contrôleur ne fait ensuite que publier l'entité chargée dans le ViewContext.
+Échappatoires :
+- `loadIfAbsent()` : ne charge que si l'accessor ne l'est pas déjà (utile dans un service appelé depuis plusieurs chemins) ;
+- `lazyGet()` : fait le `load()` si nécessaire, mais est marqué `@deprecated` dès son ajout (4.3.0) — une facilité de transition, à ne pas généraliser.
+
+## [DataStore] Comment charger une entité avec toutes ses associations (fetch join à la JPA) ?
+Il n'y a pas d'équivalent, et c'est un choix : le chargement de grappes d'objets est une source classique de problèmes de performance (chargements incontrôlés, N+1) et rend le coût des services difficile à raisonner. Vertigo impose de charger explicitement ce dont le traitement a besoin.
+Trois patterns selon le cas :
+1. **Liste d'affichage** : un DTO dédié rempli en une requête par un SELECT avec les jointures ad hoc (Task) ;
+2. **Traitement métier** : deux requêtes — les entités principales, puis leurs enfants via un `WHERE IN` ;
+3. **Index de recherche** : une seule requête avec `GROUP BY` + `string_agg` pour aplatir les sous-entités (cf. l'entrée sur la facette à partir d'une liste de tags).
+
+## [DataStore] Comment insérer un grand nombre d'entités efficacement (et récupérer les clés générées) ?
+`DAO.createList(DtList<E>)` insère en batch (moteur `TaskEngineInsertBatch`) **et** repositionne les clés générées sur les entités : après l'appel, chaque élément de la liste porte sa PK.
+Pour un graphe parent/enfant à insérer dans une Task custom, il reste possible de pré-tirer les valeurs de séquence en lot (`SELECT nextval(...)`) afin d'affecter les PK des parents et de renseigner les FK des enfants avant les deux insertions batch.
+
+## [DataStore] Comment gérer une contrainte d'unicité avec un message utilisateur propre ?
+La contrainte se pose en SQL :
+```sql
+ALTER TABLE UTILISATEUR ADD CONSTRAINT UNQ_UTILISATEUR_EMAIL UNIQUE (EMAIL);
+```
+En cas de violation, Vertigo (`AbstractSqlExceptionHandler`, branché pour H2, Oracle, PostgreSQL et SQL Server) traduit l'exception SQL en `VUserException` en utilisant **le nom de la contrainte comme clé de message**.
+Il suffit donc de déclarer une ressource avec cette clé (`UNQ_UTILISATEUR_EMAIL=Cet email est déjà utilisé`) ; à défaut, le message générique (`DYNAMO_SQL_CONSTRAINT_ALREADY_REGISTERED`) est affiché.
+
+## [DataStore] Comment garantir qu'un même élément n'est pas traité par deux traitements concurrents ?
+Utilisez `EntityStoreManager.readOneForUpdate(uid)` (ou le `getForUpdate` du DAO) : un `SELECT ... FOR UPDATE` est généré selon le dialecte de la base (SQL Server : `WITH (UPDLOCK, INDEX(PK_...))`). Le verrou est posé sur la ligne et libéré au commit ou rollback de la transaction.
+!> Ne comptez pas sur `synchronized` : un verrou JVM ne protège pas en multi-nœuds. Le verrou base de données est le seul point de synchronisation commun à tous les nœuds.
+
+## [Transaction] Comment exécuter une écriture qui survit au rollback (journalisation, traçabilité) ?
+`VTransactionManager.createAutonomousTransaction()` (vertigo-commons) ouvre une transaction indépendante de la transaction courante :
+```java
+try (VTransactionWritable tx = transactionManager.createAutonomousTransaction()) {
+	journalDAO.create(journal);
+	tx.commit();
+}
+```
+Elle est commitée même si la transaction englobante est ensuite rollbackée — cas d'usage typique : journaliser une tentative qui a échoué.
+À l'inverse, pour déclencher une action seulement si la transaction principale aboutit, utilisez `VTransaction.addAfterCompletion(...)` : le callback `afterCompletion(boolean txCommitted)` permet de tester l'issue de la transaction.
+
+## [DataStore] Pourquoi ne peut-on pas créer un VFile directement depuis un InputStream ?
+Parce qu'un `VFile` est un **fournisseur de flux paresseux** : le flux doit pouvoir être (re)créé à la demande, et c'est le consommateur qui l'ouvre et le ferme (envoi HTTP, stockage, ...). Un `InputStream` déjà ouvert ne se lit qu'une fois et poserait la question de qui le ferme.
+Les fabriques reflètent ce principe :
+- `FSFile.of(path)` pour un fichier présent sur le filesystem ;
+- `StreamFile.of(...)` qui prend un `DataStream` (io.vertigo.core.lang), c'est-à-dire une lambda capable d'ouvrir un nouveau flux à chaque appel : `() -> new ByteArrayInputStream(bytes)` par exemple.
+
+## [DataStore] Berkeley (KVStore) : comment sont purgées les données, et pourquoi mes écritures sont refusées (DiskLimitException) ?
+La purge des éléments expirés est assurée par un daemon dédié qui passe toutes les 60 s. Le TTL se définit **par collection** dans le paramètre `collections` du plugin : `maCollection;TTL=3600` (en secondes ; `;inMemory` possible ; défaut -1 = éternel). Le paramètre `purgeVersion` (V1/V2/V3, défaut V3) sélectionne l'algorithme de purge.
+Côté disque, Berkeley exige **1 Go d'espace libre minimum** (seuil `je.freeDisk`, fixé en dur, non paramétrable) : sous ce seuil, toute écriture est refusée avec une `DiskLimitException`. À prévoir au dimensionnement, d'autant que les fichiers Berkeley ne rétrécissent jamais : l'espace libéré par la purge est réutilisé, pas rendu au filesystem.
+
 ## [Ui] Comment faire pour transférer des fichiers (pdf, word, ...) via des webservices ?
 Tout est pris en charge par vertigo, pour le download il suffit de retourner un `VFile`.
 Pour l'upload en utilisant le composant `<vu:fileupload>`, il suffit d'avoir un service qui prend un VFile en paramètre, le protocole utilisé est le standard multipart HTML.
@@ -354,6 +480,17 @@ public FileInfoURI uploadFile(@QueryParam("file") final VFile vFile) {
    return new FileInfoURI(new FileInfoDefinition("FiDummy", "none"), protectedPath);
 }
 ```
+
+## [Ui] Comment afficher un PDF généré suite au POST d'un formulaire ?
+Cas simple d'abord : si la page n'a pas besoin d'être mise à jour (ni vueData, ni messages d'erreur à afficher), un contrôleur POST peut retourner directement le `VFile`. Vertigo-ui l'envoie en `Content-Disposition: attachment` (`VFileReturnValueHandler`) : le navigateur reste sur la page et propose le téléchargement.
+La problématique vient des POST **Ajax** — le mode habituel des écrans vertigo-ui, nécessaire dès qu'il faut mettre à jour le vueData ou afficher les erreurs de saisie : la réponse d'un XHR n'est pas « affichée » par le navigateur, un binaire reçu en Ajax ne déclenche ni téléchargement ni ouverture de document. Même contrainte pour ouvrir le PDF dans un **nouvel onglet** : il faut une URL GET.
+Dans ces cas, le pattern est en deux temps, entièrement outillé par vertigo-ui :
+1. le POST génère le PDF, le stocke temporairement et retourne un `FileInfoURI` : retourné par un contrôleur SpringMVC, il part automatiquement vers le client sous forme de valeur **protégée**, et est re-résolu quand il revient en paramètre ;
+2. le client déclenche un GET avec cette valeur ; le contrôleur retourne un `VFile`, envoyé en `Content-Disposition: attachment`.
+
+Pour le stockage temporaire, utilisez la feature `filestore.fullFilesystem` (`FsFullFileStorePlugin`) : le fichier complet (contenu + métadonnées) va sur le filesystem, et le paramètre `purgeDelayMinutes` active un daemon de purge des fichiers obsolètes.
+
+?> La protection des valeurs s'appuie sur `ProtectedValueUtil` (vertigo-ui), qui nécessite un KVStore avec une collection `protected-value`.
 
 ## [Ui] Comment faire pour passer un paramètre d'une page à une autre coté serveur ? (par FlashAttribute ?)
 **Le plus simple est de passer les données par l'url.**
@@ -442,6 +579,51 @@ final SelectedFacetValues initialSelectedFacetValues = SelectedFacetValues.empty
      .add("FctEquipmentEquipmentTypeName", "building")
      .build();
 ```
+
+## [Search] Comment filtrer sur une liste de valeurs (12 OU 13 OU ...) ?
+Déclarez un critère groupé dans le DSL de recherche, par exemple `+PRO_ID:(#proIds#)`, et passez les valeurs séparées par des **espaces** (`"12 13"`) : à l'intérieur d'un groupe, l'espace vaut **OR**.
+- Pour un **AND** (tous les termes obligatoires), préfixez le champ dans la référence : `+PRO_ID:(#+proIds#)` ;
+- un champ de critère vide ou `null` ne génère **aucun filtre** : le bloc est ignoré, pas besoin de construire la requête dynamiquement ;
+- un séparateur collé au texte du critère n'est pas re-tokenisé : c'est voulu, pour rechercher tels quels des codes, adresses IP, etc.
+
+## [Search] Comment trier les résultats de recherche sur plusieurs champs ?
+Le tri se pilote par le `DtListState` : un seul `sortFieldName` et une seule direction. Le plugin ElasticSearch splitte cependant le nom de champ sur la virgule : `"nom,prenom"` trie sur les deux champs, avec la **même direction** pour tous.
+Pour privilégier les documents récents sans imposer un tri strict, préférez le boost de pertinence du builder de `SearchQuery` : `withDateBoost(dateField, numDaysOfBoostRef, mostRecentBoost)`.
+Pour un vrai tri multi-colonnes avec des directions différentes, faites le tri en SQL dans une Task (hors recherche full-text).
+
+## [Search] Comment trier une facette par ordre décroissant ?
+Les ordres de facette (`FacetOrder`) sont `alpha`, `count` (défaut des facettes term) et `definition` (défaut des facettes range) — il n'y a pas d'ordre descendant.
+La solution est une facette **range** : l'ordre `definition` restitue les plages dans l'ordre de déclaration, il suffit de les déclarer de la plus récente à la plus ancienne. Les bornes relatives utilisent le date-math ElasticSearch, en **minuscules** : `now-1y`, `now-10y`, ...
+
+## [Search] À quel moment l'index est-il mis à jour après un create/update/delete ?
+L'indexation est déclenchée **au commit** de la transaction, jamais avant : l'événement de store est posté dans un `addAfterCompletion` gardé par `if (txCommitted)`.
+Conséquences :
+- un rollback n'indexe rien : l'index reste cohérent avec la base ;
+- les tests transactionnels rollbackés ne polluent pas l'index ;
+- dans la transaction courante, une recherche ne voit pas encore les modifications en cours.
+
+## [Search] Puis-je indexer une structure imbriquée (nested) dans mon index ?
+Non : le mapping généré par Vertigo est **plat**, aucun type `nested` ou `object` n'est déclarable. L'index sert à retrouver des documents, pas à porter le modèle relationnel.
+Deux approches :
+- champ **multi-valué** plat : ElasticSearch accepte nativement les tableaux de valeurs (cf. l'entrée sur la facette à partir d'une liste de tags) ;
+- **dénormalisation** : si les sous-entités doivent être recherchées individuellement, créer un document d'index par sous-entité.
+
+## [Search] Comment faire une recherche transverse sur plusieurs types d'entités ?
+Créez un index dédié qui agrège les différentes entités dans un même document « générique » :
+- un KeyConcept support et un `SearchLoader` spécifique qui charge et transforme chaque type d'entité ;
+- un id de document construit comme une URN (type + id) pour retrouver l'entité d'origine ;
+- une facette « type » pour filtrer par type d'entité.
+Alternative : une recherche par index puis agrégation des résultats via `FacetedQueryResultMerger`.
+
+## [Search] Comment faire une recherche « contient » (sous-chaîne) ?
+L'`indexType` d'un SmartType ne porte qu'**un seul analyzer** (syntaxe `monAnalyzer{:type}{:stored}{:sortable}{:facetable}`) : il n'y a pas de `search_analyzer` distinct. Un analyzer edgeNGram s'appliquerait donc aussi à la requête saisie (bruit) ; un nGram complet est de toute façon déconseillé (taille d'index).
+En pratique :
+- pour un « commence par », utilisez le joker dans le DSL : `#query*#` ;
+- pour un vrai « contient » métier, construisez un champ calculé dans le SearchLoader avec un découpage adapté (tokens métier), plutôt que de compter sur l'analyzer.
+
+## [Search] Comment indexer le contenu d'un fichier (PDF, Word, ...) ?
+Vertigo n'embarque que `tika-core` (détection du type MIME) : ajoutez la dépendance **`tika-parsers`** au projet, puis extrayez le texte avec Tika dans le `SearchLoader` au moment de construire le document d'index.
+Déclarez le champ en `notStored` : le texte extrait sert à la recherche mais n'a pas à être restitué ni à gonfler le stockage de l'index.
 
 ## [Config] Comment utiliser un plugin custom pour un manager existant (par exemple Quarto) ?
 Les modules sont démarrés les uns après les autres. La configuration via leur feature doit être intègre et complète.
@@ -698,6 +880,22 @@ La console est lancée au démarrage, et accéssible via l'url indiquée dans le
 Il faudra configurer la connexion en reprenant les infos de l'url Jdbc, mais vous aurez ainsi facilement accès à la base de données.
 
 
+## [Task] Comment traiter une table très volumineuse sans saturer la mémoire ?
+Il n'y a pas d'API de curseur ou de stream (`SqlManager.executeQuery` retourne une liste bornée par une limite). Le pattern est la **keyset pagination** : traiter par lots en repartant du dernier id lu.
+```sql
+SELECT ...
+FROM MY_TABLE
+WHERE MY_TABLE_ID > #lastId#
+ORDER BY MY_TABLE_ID ASC
+```
+avec une limite de lot, en bouclant tant que la liste retournée n'est pas vide (le dernier id lu devient la borne du lot suivant).
+Contrairement à un OFFSET, ce parcours est stable si les données bougent et reste performant (parcours d'index). Pour l'écriture en masse, utilisez `TaskEngineProcBatch`.
+
+## [Task] Peut-on factoriser du SQL entre plusieurs Tasks KSP (include) ?
+Non, il n'existe aucun mécanisme d'inclusion dans les KSP. Deux contournements :
+- un **TaskEngine spécifique** qui construit la partie commune du SQL en Java ;
+- passer le fragment SQL en **paramètre** de la Task avec la syntaxe `<%= monFragment %>` (injecté tel quel dans la requête : à réserver à du SQL produit par le code, jamais à une saisie utilisateur).
+
 ## [Search] Comment créer une facette à partir d'une liste de tags dans mon objet ?
 
 *Note: Un exemple est présent sur la démo mars pour la facette des équipements par tags ([mars](https://github.com/vertigo-io/vertigo-mars/))*
@@ -772,6 +970,9 @@ ElasticSearch va 'découper' la valeur de la colonne tags suivant les |. Les maj
 Il va automatiquement peupler la facette avec les valeurs.
 
 
+## [Search] La concaténation SQL de mes champs multi-valués dépasse les limites de la base
+Quand le `string_agg`/`LISTAGG` atteint ses limites (taille maximale, lisibilité du SQL), déplacez l'assemblage en Java : `SearchLoader.loadData(SearchChunk)` est le point de construction des documents d'index — chargez les sous-entités du chunk et construisez-y la chaîne (ou le champ multi-valué).
+
 ## [DataStore] Mon entité d'authentification (credential) doit-elle être une liste de référence ?
 Non. Ne déclarez jamais l'entité de credential dans un `MasterDataDefinitionProvider` : cela casse l'authentification (le login échoue silencieusement, réponse vide ou 404).
 Gardez cette entité en dehors des données de référence.
@@ -797,6 +998,48 @@ Copiez le script de création dans un dossier **figé** et versionné (par exemp
 Oui, dès qu'un composant que vous utilisez injecte un manager de façon non optionnelle.
 Par exemple, le contrôleur générique d'autocomplete (`io.vertigo.ui.controllers.ListAutocompleteController`) injecte le `CollectionsManager` : la feature `dataFactory` (nue, sans plugin d'index) est donc requise dès qu'un `vu:autocomplete` est présent, sans pour autant tirer Lucene ou Elasticsearch.
 De même, le stockage des *Account* par le *StoreManager* (`account.store.store`) injecte un `FileStoreManager` non optionnel : la feature `filestore` (nue) est nécessaire même sans gestion de fichiers.
+
+
+## [Sécurité] Comment empêcher deux sessions simultanées avec le même login ?
+Rien de natif dans Vertigo. Pattern applicatif : maintenir dans un composant une `ConcurrentHashMap<String, UserSession>` login → session ; au login, invalider (`logout()`) la session précédente du même login avant d'enregistrer la nouvelle.
+!> En multi-nœuds, cette map est locale à chaque JVM : il faut une affinité de session, ou externaliser cet état (base, cache partagé) pour que la règle soit globale.
+
+## [Sécurité] Comment mettre en place un SSO Windows (l'utilisateur ne saisit pas de mot de passe) ?
+Privilégiez les protocoles standards, outillés nativement dans vertigo-vega : `OIDCWebAuthenticationPlugin`, `AzureAdWebAuthenticationPlugin` et `SAML2WebAuthenticationPlugin` (features `authentication.oidc`, `authentication.aad`, `authentication.saml2`). Avec un annuaire AD / Entra ID, OIDC ou SAML2 fournit le SSO sans rien gérer côté application.
+En legacy intranet pur (pas d'IdP disponible) : Kerberos/SPNEGO géré par un frontal (Apache/IIS) ou par Tomcat (`tomcatAuthentication="false"` sur le connecteur AJP), puis récupération de l'identité via `request.getRemoteUser()` dans le plugin d'authentification. NTLM est déprécié par Microsoft : ne pas construire dessus.
+
+## [Config] Déconnexions intermittentes de la base ou d'ElasticSearch (après une période d'inactivité)
+Cause classique : un firewall entre l'application et la base/ES coupe les connexions TCP inactives (souvent 10 à 20 min), alors que le keepalive TCP par défaut de l'OS est à 2 h — la connexion morte n'est détectée qu'à la première utilisation suivante.
+Symptômes : erreurs IO / `ConnectException` HTTP avec le client REST ElasticSearch ; `NoNodeAvailableException` avec l'ancien TransportClient (connecteur `elasticsearch_7_17`) ; erreurs JDBC sur connexion invalide.
+Remèdes :
+- abaisser le keepalive TCP de l'OS sous le délai de coupure du firewall ;
+- PostgreSQL : `tcp_keepalives_idle = 600` côté serveur ;
+- activer la validation des connexions à l'emprunt dans le pool JDBC.
+
+## [Config] Un audit exige que le mot de passe de la base ne soit pas stocké en clair — quelles options ?
+Rappel préalable : le mot de passe ne vit de toute façon pas dans le YAML versionné — il dépend de l'environnement et est résolu par le paramManager depuis la configuration de l'hébergeur (fichier de propriétés externe, variables d'environnement via `EnvParamPlugin`).
+Si l'exigence est « pas en clair sur le disque du serveur », les options dépendent du déploiement :
+- la réponse robuste, valable partout : l'authentification par **certificat** (aucun mot de passe), supportée par la plupart des SGBD ; ou un coffre de secrets de l'hébergeur qui injecte la variable d'environnement au lancement ;
+- en déploiement **Tomcat + JNDI** (`DataSourceConnectionProviderPlugin`, params `classname` et `source`) : la configuration de connexion vit dans le `context.xml` de Tomcat, et une `DataSourceFactory` surchargée peut décoder un mot de passe encodé ;
+- en **Jetty embarqué** (le mode standard vertigo-ui), il n'y a pas de JNDI : le mot de passe arrive par la configuration externe. Encoder le fichier avec une clé posée sur la même machine n'est que de l'obfuscation — à assumer comme telle si l'audit s'en contente.
+
+?> À garder en tête pour cadrer la discussion avec l'auditeur : dès lors que l'application démarre sans intervention humaine, tout ce qui permet de se connecter est accessible depuis la machine — aucun de ces mécanismes ne résiste à la compromission de la machine elle-même. Leur intérêt est ailleurs : éviter les fuites du fichier de configuration (sauvegardes, tickets, partages — un mot de passe en clair se copie-colle et se réutilise, pas un certificat), et limiter l'impact via rotation, credentials à courte durée de vie et révocation.
+
+## [Config] Comment lancer un batch Vertigo en ligne de commande (hors webapp) ?
+Un nœud Vertigo se démarre sans serveur web avec `AutoCloseableNode` (io.vertigo.core.node) :
+```java
+try (AutoCloseableNode node = new AutoCloseableNode(nodeConfig)) {
+	final MyBatchServices batchServices = Node.getNode().getComponentSpace().resolve(MyBatchServices.class);
+	batchServices.run(...);
+}
+```
+La configuration YAML se charge via `YamlNodeConfigBuilder`. Packagez le batch en fat-jar Maven et utilisez picocli pour le parsing des arguments de la ligne de commande.
+?> Pour un traitement récurrent planifié, préférez Orchestra à un cron externe : suivi des exécutions, reprise, et exécution portée par la webapp existante.
+
+## [Config] Quelle convention pour nommer les loggers ?
+Par défaut, un logger par classe (`LogManager.getLogger(MaClasse.class)`).
+Vertigo utilise en complément des **catégories transverses** pour les préoccupations techniques : `sql` (requêtes SQL), `tasks` (exécution des Tasks), `health`, `metric`. Elles se pilotent directement dans la configuration log4j2 (par exemple passer `sql` en DEBUG pour tracer les requêtes).
+?> Le plugin analytics `SmartLoggerAnalyticsConnectorPlugin` logge par catégorie et passe en ERROR au-delà du seuil `durationThreshold` (1000 ms par défaut) — pratique pour repérer les traitements lents sans noyer les logs.
 
 
 

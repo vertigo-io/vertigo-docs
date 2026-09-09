@@ -120,6 +120,41 @@ create Domain DoFormulaire {
 
 **Note**: `Domain` and the `Do` prefix are historical. Elsewhere in Vertigo, this concept is `SmartType`.
 
+## Fragments
+
+A `Fragment` represents **a part of an entity**: it carries a subset of the fields of its root entity while keeping the link to it. It allows loading and saving a portion of a business object — typically a UI block or a partial WebService — without exposing or transferring the complete entity.
+
+### Declaration
+
+In KSP, a fragment is declared with the `Fragment` type: the `from` keyword designates the root entity and each `alias` picks up one of its fields (SmartType and label inherited):
+
+```ksp
+create Fragment DtTestFragment {
+    from: DtTestEntity
+    alias label {}
+}
+```
+
+!> Do not alias the primary key: it is automatically carried by the fragment, as it materializes the link to the root entity.
+
+In Java, the `@Fragment(fragmentOf = "DtTestEntity")` annotation on the class is the alternative to KSP.
+
+### Usage
+
+The fragment is handled through the DAO of the root entity:
+
+- **Loading**: `getFragment(UID<E>, Class<F>)`, or `get(id, Class<F>)`
+- **Saving**: `reloadAndMerge(fragment)` reloads the root entity from storage and applies the fragment's fields to it; all that remains is to save the resulting entity
+
+```java
+final TestFragment fragment = testEntityDAO.getFragment(uid, TestFragment.class);
+// ... modify the fragment's fields ...
+final TestEntity entity = testEntityDAO.reloadAndMerge(fragment);
+testEntityDAO.save(entity);
+```
+
+?> Fragments complement Vega's `@IncludedFields`/`@ExcludedFields` annotations: the latter filter the **serialization** of a complete entity in a WebService, whereas a Fragment is a **true partial object**, typed, usable from the UI to storage.
+
 ## TaskManager
 
 `TaskManager` handles execution of tasks defined in KSP. It exposes `TaskDefinition`, `TaskBuilder`, `TaskResult` for task programming, and an annotation-based proxy system.

@@ -194,6 +194,8 @@ Afin de répondre à cet enjeu de sécurité de nombreux mécanismes sont dispon
 
 Par défaut l'ensemble des WebServices est accessible uniquement à un utilisateur authentifié. Il s'agit du premier niveau de sécurisation. Évidemment celui-ci est **nécessaire** mais **non suffisant**.
 
+!> **Ne jamais déclarer `ComponentCmdWebServices` en production** : ce webservice d'introspection expose `GET /vertigo/components`, qui retourne le NodeConfig complet **avec les paramètres** (mots de passe LDAP, secrets de connexion...), le tout en `@AnonymousAccessAllowed`. Il n'est activé par **aucune** feature : il n'est présent que s'il a été déclaré explicitement dans la configuration — vérifier qu'il ne l'est pas sur les environnements de production. De même, réserver les features `webservices.swagger` et `webservices.catalog` aux environnements de développement/recette si elles ne sont pas indispensables : elles divulguent la surface complète de l'API.
+
 Pour aller plus loin il est possible d'utiliser les fonctionnalités issues du module Vertigo-Account qui propose un modèle de sécurité qu'il est possible d'appliquer aux WebServices.
 
 Il est ainsi possible de vérifier lors d'un appel de WebService :
@@ -421,6 +423,8 @@ Les Servlet Filters s'exécutent **avant** la HandlerChain et opèrent au niveau
 | `AuthorizationWebFilter` | Filtre de routes par autorisation : chaque init-param est **nommé** d'après le(s) nom(s) d'autorisation préfixé(s) `Atz` (séparés par `;` = OR) et sa **valeur** est le(s) pattern(s) d'URL ; init-params réservés : `errorCode` (Integer, défaut 403), `url-include-pattern` / `url-exclude-pattern` ; ne lit pas `@Secured` |
 | `RateLimitingFilter` | Rate limiting au niveau Servlet (séparé du handler) |
 | `AnalyticsFilter` | Collecte métriques au niveau Servlet |
+
+!> **`SetCharsetEncodingFilter` doit être déclaré en premier**, avant tout filtre susceptible de lire les paramètres de la requête — sa propre javadoc l'indique : « Doit être le premier filter pour être efficace ». La spec Servlet impose en effet d'appeler `setCharacterEncoding` **avant** la première lecture des paramètres, sinon l'appel est sans effet. Symptôme typique d'un mauvais ordre : accents corrompus dans les critères de recherche saisis par l'utilisateur.
 
 > **Détail — `AuthorizationWebFilter`** : la déclaration du filtre repose sur la sémantique **nom / valeur** des init-params — le **nom** d'un init-param est un nom d'autorisation, sa **valeur** est un pattern d'URL :
 > <!-- source : AuthorizationWebFilter.java:L56-165 -->

@@ -31,6 +31,8 @@ public Movie getMovieById(final Long movId) {
 
 !> It is important to always favor set-based data operations (selection and modification) and avoid multiple unitary calls, which have a significant and uncontrolled performance cost.
 
+?> To load and save only a part of an entity (a UI block, a partial WebService), the DAO also provides the `getFragment(...)` and `reloadAndMerge(...)` methods: see the [Fragments](/en/extensions/datamodel?id=fragments) section of the DataModel chapter.
+
 
 ## Criteria
 

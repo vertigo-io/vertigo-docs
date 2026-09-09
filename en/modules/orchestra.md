@@ -51,6 +51,8 @@ io.vertigo.orchestra.OrchestraFeatures:
 
 To use Orchestra in database mode, you must initialize the database (table creation and primary data insertion) using [this](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-orchestra/src/main/database/scripts/install/orchestra_create_init_v1.0.0.sql) SQL file.
 
+?> The whole Orchestra model is declared with `@DataSpace("orchestra")`: its SQL accesses go through the connection named `orchestra`. It is recommended to declare a dedicated connection pool under this name, to isolate Orchestra from the application pool, and to size it consistently with the `workersCount` parameter.
+
 ## What does it look like in code?
 
 ### Writing an ActivityEngine
@@ -136,6 +138,54 @@ orchestraServices.getReport().getSummaryByDate(myFirstProcessDefinition,
 	Instant.parse("2017-01-01T00:00:00Z"), Instant.parse("2017-12-31T23:59:59Z"));
 ```
 
+!> Each call to `scheduleAt` **adds** a scheduling entry: there is no API to cancel an already placed scheduling (see [Process evolution cases](#process-evolution-cases) for the purge of future schedulings).
+
+### Passing parameters to an execution
+
+The third argument of `scheduleAt` is a `Map<String, String>` of initial parameters: it initializes the workspace (`ActivityExecutionWorkspace`) of the first activity of the process.
+
+```java
+orchestraServices.getScheduler().scheduleAt(myFirstProcessDefinition, Instant.now(), Map.of("dossierId", "1234"));
+```
+
+On the `ActivityEngine` side, the workspace gives access to these parameters:
+
+```java
+/** {@inheritDoc} */
+@Override
+public ActivityExecutionWorkspace execute(final ActivityExecutionWorkspace workspace) {
+    if (workspace.containsKey("dossierId")) {
+        final String dossierId = workspace.getValue("dossierId");
+        // ...
+    }
+    final Long preId = workspace.getProcessExecutionId(); // id of the current execution
+    workspace.setSuccess();
+    return workspace;
+}
+```
+
+With the `orchestra.webapi` feature, tracking and triggering are also available via the REST API:
+- `GET /orchestra/executions/?processName=&status=&limit=&offset=`: lists the executions of a process (`WsExecution`)
+- `GET /orchestra/executions/{preId}/activities`: details of the activities of an execution
+- `POST /orchestra/executionsControl/execute` and `POST /orchestra/executionsControl/executeNow`: triggers an execution (`WsExecutionControl`)
+
+### Execution lifecycle
+
+The state of an execution is carried by the `ExecutionState` enum:
+
+| State | Description |
+|---|---|
+| `WAITING` | Waiting for an available worker |
+| `RESERVED` | Reserved by a node (multi-node) |
+| `SUBMITTED` | Submitted to the node's worker pool |
+| `RUNNING` | Currently running |
+| `DONE` | Completed successfully |
+| `ERROR` | Ended in error |
+| `ABORTED` | Aborted |
+| `PENDING` | Waiting for the end of a delegated (asynchronous) processing |
+
+?> `WAITING` is the nominal state of a scheduled execution: it is simply waiting for a worker to become available. If executions stay in `WAITING` for a long time, size the `workersCount` parameter (default 10) according to the expected parallelism.
+
 ## Process evolution cases
 
 The general principle is that an Orchestra process definition is tied to code: an activity, a service, etc. These definitions are therefore naturally stable over time and do not change at each startup.
@@ -144,6 +194,8 @@ with needUpdate=true (typically, this is done via a liquibase script). With this
 
 For a change to the triggering configuration, this is not directly in the definition but in the "ProcessTriggeringStrategy".
 This information can be modified via the API (updateProcessDefinitionProperties), and some UIs allow modifying the cron directly from the user interface.
+
+!> `createOrUpdateDefinition` only purges future schedulings if the definition was built with `withNeedUpdate()`: without this flag, already placed schedulings are kept. `updateProcessDefinitionProperties` also purges future schedulings.
 
 ## For Experts
 

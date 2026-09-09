@@ -31,6 +31,8 @@ public Movie getMovieById(final Long movId) {
 
 !> Il est important de toujours privilégier les manipulations de données ensemblistes (sélection et modification) et d'éviter les appels unitaires multiples qui ont un coût en performances important et non-maitrisé.
 
+?> Pour charger et enregistrer une partie seulement d'une entité (un bloc d'IHM, un WebService partiel), le DAO propose également les méthodes `getFragment(...)` et `reloadAndMerge(...)` : voir la section [Fragments](/extensions/datamodel?id=fragments) du chapitre DataModel.
+
 
 ## Criteria
 

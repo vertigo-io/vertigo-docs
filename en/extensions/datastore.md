@@ -76,6 +76,16 @@ Module **DataStore** provides multi-backend storage abstraction organized around
 | `EhCacheKVStorePlugin` | `kvStore.ehcache` | EhCache (distributed cache) |
 | `DelayedMemoryKVStorePlugin` | `kvStore.delayedMemory` | Memory with delayed persistence |
 
+### BerkeleyKVStorePlugin: Purge and Disk Space
+
+Operational notes for the Berkeley DB store:
+
+- **Per-collection TTL**: each collection is declared with an optional TTL in seconds: `collName;TTL=n` (default `-1` = eternal); the `;inMemory` suffix is available for a non-persisted collection.
+- **Purge**: a daemon `DmnPurgeBerkeleyKvStore$a<hash>` (hash computed from the store path) removes expired elements every **60 s**. The `purgeVersion` parameter selects the purge algorithm: `V1`, `V2` or `V3` (default `V3`).
+- **Files never shrink**: Berkeley internally reuses the space freed by the purge, but the file size on disk never decreases — do not be alarmed by this in operations.
+
+!> **Free disk space**: keep at least **1 GB** of free disk space on the store partition: the `je.freeDisk` threshold is hardcoded (not configurable) and, below it, any write is rejected with a `com.sleepycat.je.DiskLimitException`.
+
 ## Cache
 
 `CacheManager` provides abstraction to the caching solution for other components.

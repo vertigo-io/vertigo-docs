@@ -104,6 +104,24 @@ public class StudioGenerate {
 
 ```
 
+## dataSpace
+
+By default, all entities belong to the `main` *dataSpace*. When a part of the model is stored in a dedicated third-party database (for example the Orchestra module's database), the relevant definitions can be attached to another dataSpace with the `storeName` keyword, on a `DtDefinition` or a `Task`.
+
+This keyword can be set afterwards via an `alter`, which is useful when the model comes from a modeling tool (PowerDesigner, Enterprise Architect) that cannot express this notion:
+
+```
+alter DtDefinition DtExternalData {
+    storeName : "external"
+}
+```
+
+At generation time, Studio then produces one SQL file per dataSpace: `crebas.sql` for the main dataSpace and `crebas_<dataSpace>.sql` for each of the others.
+
+?> The intended use case is a dedicated third-party database (e.g., Orchestra), not spreading a single business model across two interchangeable databases.
+
+At runtime, each dataSpace is attached to a storage plugin and, if needed, to a named connection: see [the connection configuration](/en/extensions/database?id=multiple-connections-and-dataspace) in the Database chapter.
+
 ## Appendix
 
 So you can launch Studio after reading this chapter, here are files that will be necessary.

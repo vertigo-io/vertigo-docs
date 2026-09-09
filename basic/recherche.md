@@ -428,6 +428,24 @@ Exemple :
   }
 ```
 
+### Changement de structure de l'index
+
+Au démarrage de l'application, le plugin ElasticSearch vérifie l'index :
+
+- si l'index n'existe pas, il est créé automatiquement (settings + mapping)
+- si les settings d'analyse (section `analysis` du fichier `elasticsearch.yml`) sont incompatibles avec l'index existant, le démarrage **échoue explicitement** : le message d'erreur donne la commande à exécuter, du type `curl -X DELETE "http://localhost:9200/<index>"`
+- un mapping incompatible est quant à lui rejeté par ElasticSearch lui-même
+
+La procédure de livraison d'un changement de structure d'index est donc : **suppression de l'index** (commande `curl` ci-dessus) puis **réindexation**.
+
+Le `SearchManager` propose trois stratégies de réindexation :
+
+- `reindexAll` : reconstruit l'intégralité de l'index
+- `reindexAllModified` : réindexe les documents modifiés (s'appuie sur le filtre SQL du SearchLoader)
+- `reindexDelta` : réindexation incrémentale depuis le dernier curseur
+
+?> Vertigo ne fournit pas d'écran d'administration de la réindexation : le webservice ou l'écran d'admin qui déclenche ces méthodes est à créer côté application (comme le service `reindexAllEquipements` ci-dessus).
+
 ### Lancer une recherche
 
 Pour lancer une recherche, Vertigo a généré du code dans le SearchClient de l'index. Il faut d'abord créer une SearchQuery et la faire exécuter par le SearchClient.

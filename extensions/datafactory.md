@@ -485,6 +485,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 - **FacetedQuery immutable** : construit avec `(FacetedQueryDefinition, SelectedFacetValues)`. Pas de méthode `setFilter()` ou `execute()` sur l'objet.
 - **Collection vs Index** : `collectionsManager.facetList()` recrée l'index Lucene à chaque appel sur la `DtList` fournie. Pour un usage intensif, minimiser les appels répétés sur la même liste.
 - **Taille des facettes range** : les plages sont définies statiquement dans la `FacetDefinition`. Un document hors de toutes les plages n'apparaît dans aucune facette range. Inclure une plage catch-all en dernière position.
+- **Facettes range : plages à 0 résultat conservées** : contrairement aux facettes term, les facettes range remontent **toutes** les plages déclarées, y compris celles à 0 résultat, dans l'ordre de déclaration (`createFacetRange` itère sur les ranges déclarées). Comportement voulu : c'est à l'IHM de masquer les plages vides si besoin.
 - **LoadData du SearchLoader** : `loadData(SearchChunk<K>)` retourne `List<SearchIndex<K, I>>`, pas `void`. Ne pas utiliser `SearchChunk<String>`.
 - **ListFilterBuilder** : pas de méthode statique `.build()`. Utiliser le pattern de builder instance : `withListFilterQuery()` → `withCriteria()` → `build()`.
 - **ESDocumentCodec** : `ESDocumentCodec` gère l'encodage/décodage des documents ElasticSearch. La sérialisation passe par base64 et éventuellement compression (à confirmer par source). Cela impacte la lisibilité directe des documents dans l'interface ES.

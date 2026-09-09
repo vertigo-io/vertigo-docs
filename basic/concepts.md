@@ -92,7 +92,10 @@ Les APIs **Vertigo** utilisent cette notion pour guider les développeurs.
 
 ### DtList *(interface)*
 
-Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de compenser l'absence de liste fortement typée en Java et de rendre les listes transverses de l'IHM au stockage. 
+Les `DtList` sont des **listes typées** de `DtObject`. Cette interface permet de compenser l'absence de liste fortement typée en Java et de rendre les listes transverses de l'IHM au stockage.
+La règle de choix est simple : dès qu'une liste de `DtObject` est destinée à l'IHM, au stockage ou à une API **Vertigo**, c'est une `DtList` ; une `List` Java classique reste adaptée pour les types de base non persistés (une liste de `String` par exemple).
+Les `DtList` s'intègrent aux streams Java grâce au collecteur `VCollectors.toDtList(MyDto.class)` (package `io.vertigo.datamodel.data.util`) : `movies.stream().filter(...).collect(VCollectors.toDtList(Movie.class))`.
+Pour construire une liste à partir d'éléments connus (dans les tests par exemple), utiliser `DtList.of(dto1, dto2)`.
 
 
 

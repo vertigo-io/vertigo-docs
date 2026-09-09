@@ -120,6 +120,41 @@ create Domain DoFormulaire {
 
 **Note** : `Domain` et le préfixe `Do` sont historiques. Dans le reste de Vertigo, cette notion est `SmartType`.
 
+## Fragments
+
+Un `Fragment` représente **une partie d'une entité** : il reprend un sous-ensemble des champs de son entité racine tout en conservant le lien vers celle-ci. Il permet de charger et d'enregistrer une portion d'un objet métier — typiquement un bloc d'IHM ou un WebService partiel — sans exposer ni transporter l'entité complète.
+
+### Déclaration
+
+En KSP, un fragment se déclare avec le type `Fragment` : le mot-clé `from` désigne l'entité racine et chaque `alias` reprend un champ de celle-ci (SmartType et libellé hérités) :
+
+```ksp
+create Fragment DtTestFragment {
+    from: DtTestEntity
+    alias label {}
+}
+```
+
+!> Ne pas aliaser la clé primaire : elle est portée automatiquement par le fragment, c'est elle qui matérialise le lien vers l'entité racine.
+
+En Java, l'annotation `@Fragment(fragmentOf = "DtTestEntity")` posée sur la classe est l'alternative au KSP.
+
+### Utilisation
+
+Le fragment se manipule via le DAO de l'entité racine :
+
+- **Chargement** : `getFragment(UID<E>, Class<F>)`, ou `get(id, Class<F>)`
+- **Enregistrement** : `reloadAndMerge(fragment)` recharge l'entité racine depuis le stockage et y reporte les champs du fragment ; il ne reste plus qu'à sauvegarder l'entité obtenue
+
+```java
+final TestFragment fragment = testEntityDAO.getFragment(uid, TestFragment.class);
+// ... modification des champs du fragment ...
+final TestEntity entity = testEntityDAO.reloadAndMerge(fragment);
+testEntityDAO.save(entity);
+```
+
+?> Les Fragments sont complémentaires des annotations `@IncludedFields`/`@ExcludedFields` de Vega : ces dernières filtrent la **sérialisation** d'une entité complète dans un WebService, alors qu'un Fragment est un **véritable objet partiel**, typé, utilisable de l'IHM au stockage.
+
 ## TaskManager
 
 Le `TaskManager` gère l'exécution des tâches définies dans le KSP. Il expose `TaskDefinition`, `TaskBuilder`, `TaskResult` pour la programmation des tâches, et un système de proxy basé sur les annotations.
