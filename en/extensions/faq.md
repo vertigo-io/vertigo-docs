@@ -40,7 +40,7 @@ In HTML5, self-closing does not exist for non-void elements: the browser ignores
 The cause is the browser's *in-DOM* template parsing (see Vue doc "DOM Template Parsing Caveats": self-closing is only valid in SFCs).
 Server-side processed tags (`th:*`, `vu:*`) are not affected: they are expanded by Thymeleaf before reaching the browser. Self-closing thus remains fine for `th:block`, `vu:*` components and HTML void elements (`<br>`, `<img>`, ...).
 
-?> Starting with vertigo-ui 4.5.0, self-closed tags are automatically closed at render time (the legacy `UnAutoCloseTagsFilter` servlet filter, a partial repair declared in web.xml, is deprecated).
+?> Starting with vertigo-ui 4.5.0, self-closed tags are automatically closed at render time. The legacy `UnAutoCloseTagsFilter` servlet filter (declared in web.xml) is deprecated, then removed in 5.0.0: its regex-based repair was partial — it misses any tag holding a `>` inside an attribute value (e.g. `:disable="[1,2].length > 5"`) and only knows the `q-*`/`v-*` prefixes.
 
 ## [Ui] How to edit my Thymeleaf pages without restarting the server?
 Spring Boot's `spring.thymeleaf.cache=false` has no effect in vertigo-ui: template caching is driven by the `isDevMode()` method of `VSpringWebConfig` (`setCacheable(!isDevMode())`).

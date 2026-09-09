@@ -18,6 +18,7 @@
 * **[Commons] `PegResult` is now a record** : rename accessors `getIndex()` -> `index()` and `getValue()` -> `value()` if you use the Peg parser API.
 * **[Ui] Embedded Jetty : `extraClasspath` parameter renamed to `addonPaths`** (`JettyBootParams` builder).
 * **[Ui] Multipart configuration is now part of `JettyBootParams`** (`multiPartTempPath`, `maxPartSizeMb`, `maxRequestSize`, `maxPartSizeInMemoryKb`) : remove any multipart handler you registered at server start.
+* **[Ui] `UnAutoCloseTagsFilter` is removed : delete its `<filter>` and `<filter-mapping>` from your `web.xml`.** The class no longer exists, so a leftover declaration aborts the webapp startup (`ClassNotFoundException`). Nothing replaces it in your configuration : self-closed custom elements (`<q-btn ... />`) are now closed by a Thymeleaf post-processor that is always active, and which also handles the cases the filter missed (a `>` inside an attribute value, prefixes other than `q-*`/`v-*`, tags coming from a `vu:` component).
 * **[Ui][Wysiwyg] TipTap upgraded v2 -> v3** : custom wysiwyg extensions must be migrated to the TipTap v3 API.
 * **[Vega] ContentSecurityPolicyFilter ${..} are now resolved by the paramManager. Old syntax must be updated :**
   - `${cspFrameAncestor}` => `${CSP_FRAME_ANCESTOR}`
@@ -26,6 +27,12 @@
   - `${cspParam3}` => `${CSP_PARAM3}`
 * [All] Internal logging now uses LOG4J api directly (SLF4J dropped from vertigo-libs).
 * [All] Tests now run with JUnit 6 (`junit-jupiter` aggregator).
+
+# from 4.4.1 to 4.5.0
+
+* **[Ui] Self-closed custom elements are now closed automatically.** In-DOM templates are parsed by the browser, which per the HTML spec ignores the trailing `/` on anything but a void element : `<q-btn v-if="..." />` stayed open and swallowed the markup that followed it, silently extending the `v-if` scope and turning the next siblings into the component default slot. A Thymeleaf post-processor now rewrites such a tag into `<q-btn ...></q-btn>` before the page is written out. Nothing to configure, and no impact on correct templates.
+  - If you declared `io.vertigo.ui.impl.vuejs.filter.UnAutoCloseTagsFilter` in your `web.xml`, you can remove it : it is deprecated, does the same repair less reliably, and now finds nothing left to close. It is **removed** in 5.0.0.
+  - The repair is silent by design. Templates keep their faulty tags until you fix them at the source, so a pass on your views is still worth it.
 
 # from 4.4.0 to 4.4.1
 
