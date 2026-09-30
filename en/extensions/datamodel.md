@@ -67,6 +67,8 @@ create DtDefinition DtUser {
   - `label`: field label
   - `cardinality`: `?` (0-1), `1` (required), `*` (multiple)
 - `id`: designates the persistent entity and its primary key *(no multiple PK, except N-N association tables)*
+- `sortField`: default sort field for the object's lists
+- `sortFieldDesc`: `"true"` for a descending default sort *(default: ascending)*
 
 __Stereotype__
 

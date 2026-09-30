@@ -67,6 +67,8 @@ create DtDefinition DtUsager {
 	- `label` : libellé du champ
 	- `cardinality` : `?` (0-1), `1` (obligatoire), `*` (multiple)
 - `id` : désigne l'entité persistante et sa clé primaire *(pas de PK multiple, sauf tables d'association N-N)*
+- `sortField` : champ de tri par défaut des listes de l'objet
+- `sortFieldDesc` : `"true"` pour un tri par défaut décroissant *(défaut : croissant)*
 
 __StereoType__
 
