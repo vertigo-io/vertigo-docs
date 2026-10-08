@@ -584,17 +584,17 @@ modules:
 | `password` | Optional\<String\> | Non | — |
 | `apiKeyId` | Optional\<String\> | Non | — |
 | `apiKeySecret` | Optional\<String\> | Non | — |
-| `ssl` | boolean | Non | `false` |
+| `ssl` | boolean | Oui | — |
 | `trustStoreUrl` | Optional\<String\> | Non | — |
 | `trustStorePassword` | Optional\<String\> | Non | — |
 
 #### Serveur embarqué (tests)
 
-La feature `vertigo-elasticsearch-connector#embeddedServer` lance un Docker testcontainer avec ES 9.4.3 pour l'environnement de test.
+La feature `embeddedServer` du module `io.vertigo.connectors.elasticsearch.ElasticSearchFeatures` (artefact `vertigo-elasticsearch-connector`) démarre un conteneur [testcontainers](https://java.testcontainers.org/) avec ES 9.4.3 (image par défaut, paramètre `esImage` pour la changer) pour l'environnement de test.
 
 #### ES7 LTS
 
-Depuis la version 4.4.0, la pile standard est ES9 ; la pile ES 7.17 est maintenue en **LTS** : connecteur `vertigo-elasticsearch_7_17-connector` + plugin datafactory `vertigo-datafactory-plugin-elasticsearch_7_17` (repo [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs)). Deux obligations : pinner Lucene 8.11.3 dans le `<dependencyManagement>` et déclarer `lucene_8_11.LuceneIndexPlugin` sous `plugins:` (ne pas conserver la feature standard `collections.luceneIndex`, incompatible avec le pin) — guide complet : [ES7 LTS Migration](../migration.md#datafactory-es7-lts-migration).
+Depuis la version 4.4.0, la pile standard est ES9 ; la pile ES 7.17 est maintenue en **LTS** : connecteur `vertigo-elasticsearch_7_17-connector` + plugin datafactory `vertigo-datafactory-plugin-elasticsearch_7_17` (repo [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs)). Deux obligations : pinner Lucene 8.11.3 dans le `<dependencyManagement>` et déclarer `lucene_8_11.LuceneIndexPlugin` sous `plugins:` (ne pas conserver la feature standard `collections.luceneIndex`, incompatible avec le pin) — guide complet : [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
 
 ### API SearchManager
 
