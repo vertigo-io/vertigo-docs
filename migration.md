@@ -148,7 +148,7 @@ Without an `IndexPlugin`, in-memory list search — e.g. `vu:autocomplete-edit` 
 </repository>
 ```
 
-3. **Lucene Version Conflict (required fix):** The `vertigo-ui` / `vertigo-datafactory` BOMs pin Lucene 9.12.3 (for the standard `LuceneIndexPlugin` and the ES9 stack), which overrides the Lucene 8.11.3 required by ES 7.17. With Lucene 9 on the classpath, the ES 7.17 client fails at startup (`NoSuchFieldError` on `LuceneVersion.LUCENE_7_0_0` — `org.elasticsearch.LuceneVersion` needs `org.apache.lucene.util.Version`, removed in Lucene 9). You **must** pin Lucene 8.11.3 in your `pom.xml` `<dependencyManagement>`:
+3. **Lucene Version Conflict (required fix):** The `vertigo-datafactory` BOM pins Lucene 9.12.3 (for the standard `LuceneIndexPlugin` and the ES9 stack), which overrides the Lucene version required by ES 7.17 (ES 7.17.28 is built against Lucene 8.11.3 — for other ES 7.x patches, pin the Lucene version that patch is built against : ES 7.9.3 → Lucene 8.6.2, ES 7.10.2 → Lucene 8.7.0). With Lucene 9 on the classpath, the ES 7.17 client fails at startup (`NoSuchFieldError` on `LUCENE_7_0_0` — the ES 7.17 class `org.elasticsearch.Version` references constants of `org.apache.lucene.util.Version`, which were removed in Lucene 9). You **must** pin Lucene 8.11.3 in your `pom.xml` `<dependencyManagement>`:
 
 ```xml
 <dependency>

@@ -514,7 +514,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 | `search.elasticsearch.rest` | `RestClientESSearchServicesPlugin` (ES9 REST) ← recommandé |
 | `search.elasticsearch.restHL` | Alias déprécié vers `search.elasticsearch.rest` |
 | `search.elasticsearch.client` | **Déprécié** — lève `UnsupportedOperationException` |
-| `collections.luceneIndex` | `LuceneIndexPlugin` (Lucene **9.12.3**) — indexation in-mémoire (autocomplete, facettage) ; pile ES 7.17 / Lucene 8.11 : voir [ES7 — LTS](#es7--lts) (`lucene_8_11.LuceneIndexPlugin`) |
+| `collections.luceneIndex` | `LuceneIndexPlugin` (Lucene **9.12.3**) — indexation in-mémoire (autocomplete, facettage) ; pile ES 7.17 / Lucene 8.11 : voir [ES7 LTS](#es7-lts) (`lucene_8_11.LuceneIndexPlugin`) |
 
 ### API fluide (Suppliers)
 | Supplier | Rôle |
@@ -592,54 +592,9 @@ modules:
 
 La feature `vertigo-elasticsearch-connector#embeddedServer` lance un Docker testcontainer avec ES 9.4.3 pour l'environnement de test.
 
-#### ES7 — LTS
+#### ES7 LTS
 
-La pile ES 7.17 (retirée de la ligne standard en 4.4.0, devenue ES9) est maintenue en **LTS** (Long Time Support). Elle est utilisée par certains projets legacy (ex. vertigo-geo).
-
-Deux artefacts, publiés sur Maven Central :
-
-| Artefact | Repo source | Rôle |
-|---|---|---|
-| `vertigo-elasticsearch_7_17-connector` | [vertigo-connectors](https://github.com/vertigo-io/vertigo-connectors) | Connecteur ES 7.17 — features `embeddedServer`, `transport`, `node`, `restHL` de `io.vertigo.connectors.elasticsearch_7_17.ElasticSearchFeatures` |
-| `vertigo-datafactory-plugin-elasticsearch_7_17` | [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs) | Plugin search ES 7.17 **et** plugin d'indexation collections Lucene 8.11 (`io.vertigo.datafactory.plugins.collections.lucene_8_11.LuceneIndexPlugin`) |
-
-```xml
-<dependency>
-    <groupId>io.vertigo</groupId>
-    <artifactId>vertigo-datafactory-plugin-elasticsearch_7_17</artifactId>
-    <version>${vertigo.version}</version>
-</dependency>
-```
-
-(Le connecteur `vertigo-elasticsearch_7_17-connector` est apporté transitivement.)
-
-Configuration minimale :
-
-```yaml
-modules:
-  io.vertigo.connectors.elasticsearch_7_17.ElasticSearchFeatures:
-    __flags__: ["searchES"]
-    features:
-      - restHL:
-          servers.names: ${ES_SERVERS_NAMES}
-          ssl: false
-  io.vertigo.datafactory.DataFactoryFeatures:
-    features:
-      - search:
-          __flags__: ["searchES"]
-    plugins:
-      - io.vertigo.datafactory.plugins.search.elasticsearch_7_17.rest.RestHLClientESSearchServicesPlugin:
-          __flags__: ["searchES"]
-          envIndexPrefix: ${APP_ENV_NAME}
-          rowsPerQuery: 300
-          config.file: search/elasticsearch.yml
-      - io.vertigo.datafactory.plugins.collections.lucene_8_11.LuceneIndexPlugin: {}
-```
-
-⚠️ **Deux obligations pour la pile ES 7.17** (détails dans [migration.md](migration.md#datafactory-es7-lts-migration)) :
-
-1. **Pin Lucene 8.11.3** dans le `<dependencyManagement>` du projet (`lucene-core`, `lucene-analyzers-common`, `lucene-queryparser`) : les BOM `vertigo-ui` / `vertigo-datafactory` imposent Lucene 9.12.3, incompatible avec le client ES 7.17 (échec au boot).
-2. **Plugin d'indexation collections `lucene_8_11`** : ne pas conserver la feature standard `collections.luceneIndex` (plugin Lucene 9, incompatible avec le pin 8.11.3). Sans `IndexPlugin`, l'autocomplete (`vu:autocomplete-edit`, `POST /autocomplete/_searchFullText`) échoue **au runtime** avec `IllegalStateException: An IndexPlugin is required to use this function` — le nœud boote normalement, ce piège est facile à manquer lors d'une migration.
+Depuis la version 4.4.0, la pile standard est ES9 ; la pile ES 7.17 est maintenue en **LTS** : connecteur `vertigo-elasticsearch_7_17-connector` + plugin datafactory `vertigo-datafactory-plugin-elasticsearch_7_17` (repo [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs)). Deux obligations : pinner Lucene 8.11.3 dans le `<dependencyManagement>` et déclarer `lucene_8_11.LuceneIndexPlugin` sous `plugins:` (ne pas conserver la feature standard `collections.luceneIndex`, incompatible avec le pin) — guide complet : [ES7 LTS Migration](../migration.md#datafactory-es7-lts-migration).
 
 ### API SearchManager
 
