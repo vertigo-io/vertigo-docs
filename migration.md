@@ -48,8 +48,9 @@
   - `EmbeddedServer` removed — use testcontainer for tests (see `withEmbeddedServer`, requires a reachable docker via `DOCKER_HOST`)
   - `_all` field removed from index mapping
   - `markToOptimize` only applies to deletes (removeByQuery)
+  - the standard in-memory index plugin (`collections.luceneIndex` feature) is now built against **Lucene 9** : projects staying on ES 7.17 (Lucene 8.11.3) must use the `lucene_8_11` variant shipped in `vertigo-datafactory-plugin-elasticsearch_7_17` (see [ES7 LTS Migration](#datafactory-es7-lts-migration) below)
 * **[DataFactory] Remove deprecated `searchManager.findIndexDefinitionByKeyConcept`** — you must use `findFirstIndexDefinitionByKeyConcept` instead
-* **[DataFactory]If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#es7-lts-migration) below.
+* **[DataFactory]If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#datafactory-es7-lts-migration) below.
 * **[Ui] Reset componentStates each request.** If you relied on component states persisting across multiple requests within the same context, you must manage them explicitly.
 * **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. Switch to `RedisConnector` (`RedisFeatures.withJedis(...)`), which auto-detects Single/Sentinel/Cluster mode.
 * **[Ui] `vu:message` text colors are now driven by css variables** — `messages.html` no longer hardcodes `text-white` / `text-black`, it uses `text-<level>-inverted` classes based on `--v-negative-invert`, `--v-warning-invert`, `--v-info-invert` and `--v-positive-invert` ([commit](https://github.com/vertigo-io/vertigo-libs/commit/8da1fea78)). **The default values change the rendering of the info and success messages, whose text was black and is now white** (error was already white, warning already black). To keep the previous rendering, redefine the variables in a css of your own, loaded after `vertigo-ui.css` :
@@ -107,13 +108,27 @@ modules:
     features:
       - search:
           __flags__: ["searchES"]
-    featuresConfig:
-      - collections.luceneIndex:
+    plugins:
       - io.vertigo.datafactory.plugins.search.elasticsearch_7_17.rest.RestHLClientESSearchServicesPlugin:
+          __flags__: ["searchES"]
           envIndexPrefix: ${APP_ENV_NAME}
           rowsPerQuery: 300
           config.file: search/elasticsearch.yml
+      - io.vertigo.datafactory.plugins.collections.lucene_8_11.LuceneIndexPlugin: {}
 ```
+
+**YAML syntax reminder**
+
+- `features:` / `featuresConfig:` only accept `@Feature` names (e.g. `search`, `collections.luceneIndex`) : declaring a plugin class name there fails at boot with `Unable to find method for feature ...`. Raw plugin classes must be declared under `plugins:`.
+- Keep the ES plugin behind the same `__flags__` as the `search` feature so both are enabled or disabled together.
+
+**Collections index (autocomplete) — required**
+
+Since 4.4.0, the standard `collections.luceneIndex` feature registers the Lucene **9** index plugin (`io.vertigo.datafactory.plugins.collections.lucene.LuceneIndexPlugin`), which is incompatible with the Lucene 8.11.3 pin mandated below. Do **not** keep it when staying on ES 7.17.
+
+The LTS artifact `vertigo-datafactory-plugin-elasticsearch_7_17` also ships the Lucene 8.11 variant `io.vertigo.datafactory.plugins.collections.lucene_8_11.LuceneIndexPlugin` — declare it under `plugins:` as above (no flag : in-memory list search is independent of the `search` flag).
+
+Without an `IndexPlugin`, in-memory list search — e.g. `vu:autocomplete-edit` calling `POST /autocomplete/_searchFullText` — fails **at runtime** with `IllegalStateException: An IndexPlugin is required to use this function` (HTTP 500). The node boots fine and tests that don't touch autocomplete pass, so this is easy to miss during a migration.
 
 **Important Notes**
 
@@ -133,7 +148,7 @@ modules:
 </repository>
 ```
 
-3. **Lucene Version Conflict (required fix):** The `vertigo-ui` / `vertigo-datafactory` BOMs pin Lucene 9.12.3 (for the `collections.luceneIndex` plugin), which overrides the Lucene 8.11.3 required by ES 7.17. This causes `NoSuchFieldError` on `LuceneVersion.LUCENE_7_0_0` at startup. You **must** pin Lucene 8.11.3 in your `pom.xml` `<dependencyManagement>`:
+3. **Lucene Version Conflict (required fix):** The `vertigo-ui` / `vertigo-datafactory` BOMs pin Lucene 9.12.3 (for the standard `LuceneIndexPlugin` and the ES9 stack), which overrides the Lucene 8.11.3 required by ES 7.17. With Lucene 9 on the classpath, the ES 7.17 client fails at startup (`NoSuchFieldError` on `LuceneVersion.LUCENE_7_0_0` — `org.elasticsearch.LuceneVersion` needs `org.apache.lucene.util.Version`, removed in Lucene 9). You **must** pin Lucene 8.11.3 in your `pom.xml` `<dependencyManagement>`:
 
 ```xml
 <dependency>
@@ -143,7 +158,7 @@ modules:
 </dependency>
 <dependency>
     <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-analysis-common</artifactId>
+    <artifactId>lucene-analyzers-common</artifactId>
     <version>8.11.3</version>
 </dependency>
 <dependency>
@@ -153,9 +168,9 @@ modules:
 </dependency>
 ```
 
-Direct entries in your project's `dependencyManagement` take precedence over imported BOMs.
+Direct entries in your project's `dependencyManagement` take precedence over imported BOMs. Note : `lucene-analyzers-common` is the Lucene 8.x artifact name (renamed `lucene-analysis-common` in Lucene 9) — this pin also covers the `lucene_8_11` collections index plugin, another reason the standard `collections.luceneIndex` feature (Lucene 9) must not be used in this setup.
 
-4. **Features:** The `restHL` feature uses `RestHighLevelClient` which is now in the LTS connector.
+4. **Features:** the connector feature `restHL` is provided by `io.vertigo.connectors.elasticsearch_7_17.ElasticSearchFeatures` (LTS connector `vertigo-elasticsearch_7_17-connector`, pulled transitively by the LTS datafactory artifact) and uses `RestHighLevelClient`. The datafactory search plugin to declare under `plugins:` is `io.vertigo.datafactory.plugins.search.elasticsearch_7_17.rest.RestHLClientESSearchServicesPlugin`.
 5. **Migration Path:** If you need to migrate to ES9 later, you'll need to:
    - Replace `vertigo-datafactory-plugin-elasticsearch_7_17` with `vertigo-elasticsearch-connector`
    - Update YAML configuration to use ES9 client

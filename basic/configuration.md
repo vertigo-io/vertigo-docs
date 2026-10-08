@@ -375,13 +375,16 @@ modules:
     features:
       - embeddedServer:
           __flags__: ["home"]
-          home: search/
-      - restHL:
+      - rest:
           __flags__: ["home"]
+          name: main
           servers.names: "localhost:9200"
-      - restHL:
+          ssl: false
+      - rest:
           __flags__: ["klee"]
+          name: main
           servers.names: ${esHost}
+          ssl: ${esSsl}
   io.vertigo.connectors.mqtt.MqttFeatures:
     __flags__: ["klee"]
     features:
@@ -462,12 +465,11 @@ modules:
   io.vertigo.datafactory.DataFactoryFeatures:
     features:
       - search:
-    featuresConfig:
-      - collections.luceneIndex:
-      - search.elasticsearch.restHL:
+      - search.elasticsearch.rest:
           envIndexPrefix: mars
           rowsPerQuery: 50
           config.file: search/elasticsearch.yml
+      - collections.luceneIndex:
   io.vertigo.account.AccountFeatures:
     features:
       - security:

@@ -42,21 +42,26 @@ Vertigo maintient deux versions du plugin ElasticSearch : la version courante et
 
 ### Activer le module
 
-Pour commencer, il faut activer le module **vertigo-datafactory** et le connecteur **vertigo-elasticsearch-connector**<br/>
+Pour commencer, il faut activer le module **vertigo-datafactory** et le connecteur **vertigo-elasticsearch-connector** (ElasticSearch 9 depuis la version 4.4.0 de Vertigo)<br/>
 Le module propose deux modes de fonctionnement : 
 - le mode *standard* utilisant un serveur ElasticSearch distant
-- le mode *embedded* utilisant un serveur ElasticSearch local, démarré en même temps que l'application (utile pour les tests) 
+- le mode *embedded* utilisant un conteneur ElasticSearch local démarré via [testcontainers](https://java.testcontainers.org/) (utile pour les tests)
 
-!> Le mode embedded est déprécié par ElasticSearch depuis la version 5.
+!> Depuis la 4.4.0, le connecteur ElasticSearch est basé sur le client ES9. Les projets qui doivent rester sur ElasticSearch 7.17 utilisent la pile LTS (connecteur `vertigo-elasticsearch_7_17-connector` + artefact `vertigo-datafactory-plugin-elasticsearch_7_17`) : voir [DataFactory — ES7 LTS](extensions/datafactory.md#es7--lts) et [migration.md](migration.md#datafactory-es7-lts-migration).
 
 Exemple de configuration pour le mode Standard :
 ```yaml
 modules:
+  io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
+    features:
+      - rest:
+          name: main
+          servers.names: ${esHost}
+          ssl: ${esSsl}
   io.vertigo.datafactory.DataFactoryFeatures:
     features:
       - search:
-    featuresConfig:
-      - search.elasticsearch.restHL:
+      - search.elasticsearch.rest:
           envIndexPrefix: mars
           rowsPerQuery: 50
           config.file: search/elasticsearch.yml
@@ -67,18 +72,21 @@ Exemple de configuration pour le mode Embedded :
 modules:
   io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
     features:
-      - restHL:
-          servers.names: ${esHost}
+      - embeddedServer:
+      - rest:
+          name: main
+          servers.names: "localhost:9200"
+          ssl: false
   io.vertigo.datafactory.DataFactoryFeatures:
     features:
       - search:
-    featuresConfig:
-      - collections.luceneIndex:
-      - search.elasticsearch.restHL:
+      - search.elasticsearch.rest:
           envIndexPrefix: mars
           rowsPerQuery: 50
           config.file: search/elasticsearch.yml
 ```
+
+!> Si votre projet utilise l'autocomplete plein texte (`vu:autocomplete-edit`), déclarez en plus un plugin d'indexation collections : la feature `collections.luceneIndex` de `DataFactoryFeatures` pour la pile ES9, ou la variante `lucene_8_11.LuceneIndexPlugin` (sous `plugins:`) pour la pile ES 7.17 LTS. Sans `IndexPlugin`, `POST /autocomplete/_searchFullText` échoue au runtime.
 
 > Notez que le paramètre `envIndexPrefix` permet d'indiquer un préfixe des index pour un environnement applicatif, ainsi un même serveur ElasticSearch peut être utilisé pour différents environnements.
 > Les nouvelles versions d'ElasticSearch imposent un seul type de documents par index.
