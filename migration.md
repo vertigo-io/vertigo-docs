@@ -11,7 +11,7 @@
 * **[All] Dependency injection switched from `javax.inject` to `jakarta.inject`.** Replace all `javax.inject.Inject` imports by `jakarta.inject.Inject` in your code.
 * **[All] Web stack upgraded : Jetty 11 -> 12, Javalin 6 -> 7, Spring 6 -> 7.** Update your own spring modules versions accordingly (spring-test, spring-security...). Jetty websocket maven artifact is renamed `websocket-jetty-server` -> `jetty-websocket-jetty-server`.
 * **[App] Embedded Jetty + JSP (ex: web.xml error pages) : replace the `org.eclipse.jetty:apache-jsp` dependency by `org.eclipse.jetty.ee10:jetty-ee10-apache-jsp`** (artifact moved with jetty 12). Without it JSP support silently disappears and every server error shows up as a bare 404 instead of your error page.
-* **[Connectors] ElasticSearch 7 support dropped** : `vertigo-elasticsearch_7_17-connector` module is removed, only the ES 9 connector remains (stay on vertigo 4.x LTS if you need ES 7).
+* **[Connectors] ElasticSearch 7 support dropped** : the `vertigo-elasticsearch_7_17-connector` module is no longer released with standard versions (maintained in the LTS line, `vertigo-lts-libs`); only the ES 9 connector remains in 5.0.0 — stay on Vertigo 4.x with the LTS stack if you need ES 7.
 * **[Connectors] `vertigo-twitter-connector` and `vertigo-ifttt-connector` are removed.**
 * [Connectors] New module `vertigo-connector-commons` (shared SSL helper `ConnectorSslUtil`), pulled automatically by connectors using SSL.
 * **[DataModel] Blackboard (BB) moved from vertigo-vortex to vertigo-datamodel** : package `io.vertigo.vortex.bb` -> `io.vertigo.datamodel.bb`, the `vertigo-vortex` module no longer exists.

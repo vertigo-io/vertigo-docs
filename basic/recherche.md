@@ -47,7 +47,7 @@ Le module propose deux modes de fonctionnement :
 - le mode *standard* utilisant un serveur ElasticSearch distant
 - le mode *embedded* utilisant un conteneur ElasticSearch local démarré via [testcontainers](https://java.testcontainers.org/) (utile pour les tests)
 
-!> Depuis la version 4.4.0, le connecteur ElasticSearch est basé sur le client ES9. Les projets qui doivent rester sur ElasticSearch 7.17 utilisent la pile LTS (connecteur `vertigo-elasticsearch_7_17-connector` + artefact `vertigo-datafactory-plugin-elasticsearch_7_17`) : voir [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
+!> Depuis la version 4.4.0, le connecteur ElasticSearch est basé sur le client ES9. Les projets qui doivent rester sur ElasticSearch 7.17 utilisent la pile LTS (connecteur `vertigo-elasticsearch_7_17-connector` + plugin `vertigo-datafactory-plugin-elasticsearch_7_17`) : voir [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
 
 Exemple de configuration pour le mode Standard :
 ```yaml

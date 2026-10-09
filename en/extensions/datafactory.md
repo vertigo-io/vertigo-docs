@@ -544,33 +544,17 @@ modules:
 | `password` | Optional\<String\> | No | — |
 | `apiKeyId` | Optional\<String\> | No | — |
 | `apiKeySecret` | Optional\<String\> | No | — |
-| `ssl` | boolean | No | `false` |
+| `ssl` | boolean | Yes | — |
 | `trustStoreUrl` | Optional\<String\> | No | — |
 | `trustStorePassword` | Optional\<String\> | No | — |
 
 #### Embedded Server (tests)
 
-Feature `vertigo-elasticsearch-connector#embeddedServer` launches a Docker testcontainer with ES 9.4.3 for the test environment.
+The `embeddedServer` feature of module `io.vertigo.connectors.elasticsearch.ElasticSearchFeatures` (artifact `vertigo-elasticsearch-connector`) starts a [testcontainers](https://java.testcontainers.org/) container with ES 9.4.3 (default image, `esImage` parameter to change it) for the test environment.
 
-#### ES7 — LTS
+#### ES7 LTS
 
-The ES7 connector (`vertigo-elasticsearch_7_17-connector`) is available in **LTS** (Long Time Support) in the `vertigo-libs-lts` repo. It is used by some legacy projects (e.g., vertigo-geo).
-
-```xml
-<repository>
-    <id>vertigo-lts</id>
-    <url>https://nexus.vertigo.io/content/repositories/vertigo-lts</url>
-</repository>
-```
-
-```xml
-<dependency>
-    <groupId>io.vertigo</groupId>
-    <artifactId>vertigo-elasticsearch_7_17-connector</artifactId>
-</dependency>
-```
-
-The ES7 feature is `vertigo-elasticsearch-connector#rest` (package `io.vertigo.connectors.elasticsearch_7_17`). See `migration.md` for details.
+Since version 4.4.0, the standard stack is ES9; the ES 7.17 stack is maintained as **LTS**: connector `vertigo-elasticsearch_7_17-connector` (repo [vertigo-connectors](https://github.com/vertigo-io/vertigo-connectors)) + plugin `vertigo-datafactory-plugin-elasticsearch_7_17` (repo [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs)). Two requirements: pin Lucene 8.11.3 in `<dependencyManagement>` and declare `lucene_8_11.LuceneIndexPlugin` under `plugins:` (do not keep the standard `collections.luceneIndex` feature, incompatible with this Lucene version) — full guide: [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
 
 ### SearchManager API
 

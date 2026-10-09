@@ -42,10 +42,12 @@ Vertigo maintains two versions of the ElasticSearch plugin: the current version 
 
 ### Activating the Module
 
-First, you need to activate the **vertigo-datafactory** module and the **vertigo-elasticsearch-connector** connector.<br/>
+First, you need to activate the **vertigo-datafactory** module and the **vertigo-elasticsearch-connector** connector (ElasticSearch 9 since Vertigo version 4.4.0)<br/>
 The module offers two operating modes:
 - *standard* mode using a remote ElasticSearch server
-- *embedded* mode using a local ElasticSearch server, started alongside the application (useful for testing)
+- *embedded* mode using a local ElasticSearch container started via [testcontainers](https://java.testcontainers.org/) (useful for testing)
+
+!> Since version 4.4.0, the ElasticSearch connector is based on the ES9 client. Projects that must stay on ElasticSearch 7.17 use the LTS stack (connector `vertigo-elasticsearch_7_17-connector` + plugin `vertigo-datafactory-plugin-elasticsearch_7_17`): see [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
 
 !> Embedded mode has been deprecated by ElasticSearch since version 5.
 

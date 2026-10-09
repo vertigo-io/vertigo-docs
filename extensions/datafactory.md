@@ -594,7 +594,7 @@ La feature `embeddedServer` du module `io.vertigo.connectors.elasticsearch.Elast
 
 #### ES7 LTS
 
-Depuis la version 4.4.0, la pile standard est ES9 ; la pile ES 7.17 est maintenue en **LTS** : connecteur `vertigo-elasticsearch_7_17-connector` + plugin datafactory `vertigo-datafactory-plugin-elasticsearch_7_17` (repo [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs)). Deux obligations : pinner Lucene 8.11.3 dans le `<dependencyManagement>` et déclarer `lucene_8_11.LuceneIndexPlugin` sous `plugins:` (ne pas conserver la feature standard `collections.luceneIndex`, incompatible avec le pin) — guide complet : [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
+Depuis la version 4.4.0, la pile standard est ES9 ; la pile ES 7.17 est maintenue en **LTS** : connecteur `vertigo-elasticsearch_7_17-connector` (repo [vertigo-connectors](https://github.com/vertigo-io/vertigo-connectors)) + plugin `vertigo-datafactory-plugin-elasticsearch_7_17` (repo [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs)). Deux obligations : fixer Lucene 8.11.3 dans le `<dependencyManagement>` et déclarer `lucene_8_11.LuceneIndexPlugin` sous `plugins:` (ne pas conserver la feature standard `collections.luceneIndex`, incompatible avec cette version de Lucene) — guide complet : [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
 
 ### API SearchManager
 
