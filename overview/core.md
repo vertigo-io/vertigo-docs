@@ -55,10 +55,17 @@ Une manière simplifiée consiste à ajouter l'annotation `@DaemonScheduled` sur
 >   boot:
 >     params:
 >       threadPoolSize: 4
+>       daemonMinDurationInSeconds: 120   # durée minimale avant de juger qu'un daemon pose problème
+>       daemonMaxDurationInSeconds: 7200  # durée maximale d'un daemon : au-delà, il doit devenir un job Orchestra
 >   ```
 > - Les daemons doivent être **optimisés et simples** : une tâche courte et récurrente. Un daemon dont l'exécution est trop longue peut bloquer les autres daemons (heartbeats, analytics...).
 > - Si des daemons longs sont inévitables, pensez à augmenter `threadPoolSize` (4-6 recommandé si daemons >10s) ou à exécuter les traitements très longs (>60s) dans un thread dédié.
-> - Le pool daemon expose un healthcheck `poolUtilization` et des logs d'alerte si un daemon dépasse sa période ou si des tâches restent en file d'attente.
+> - Un daemon doit durer moins que sa période, et jamais plus de `daemonMaxDurationInSeconds` (2h). Il pose problème au-delà de sa limite : `min(max(4 x période, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
+> - Le DaemonManager expose trois healthchecks (feature `daemons`), qui jugent le moteur de daemons et non le métier :
+>   - `daemonsAlive` : **RED** si un daemon est mort (sa planification a été annulée par une `Error`), **YELLOW** si un daemon tourne depuis plus que sa limite ;
+>   - `poolUtilization` : **YELLOW** si un daemon attend un thread libre depuis plus que sa limite (vérifiez d'abord `daemonsAlive` : un daemon trop long occupe souvent les threads, puis augmentez `threadPoolSize`), **RED** au-delà de 2 x `daemonMaxDurationInSeconds` ou si le pool est arrêté ;
+>   - `lastExecs` : **YELLOW** dès qu'un daemon échoue, jusqu'à deux succès consécutifs ; jamais RED.
+> - Des métriques du pool (taille, exécutions, échecs, durée et retard moyens depuis le dernier relevé) sont publiées toutes les heures, et un log d'alerte signale un daemon qui dépasse sa période.
 
 ## Monitor
 

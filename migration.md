@@ -34,6 +34,13 @@
   - If you declared `io.vertigo.ui.impl.vuejs.filter.UnAutoCloseTagsFilter` in your `web.xml`, you can remove it : it is deprecated, does the same repair less reliably, and now finds nothing left to close. It is **removed** in 5.0.0.
   - The repair is silent by design. Templates keep their faulty tags until you fix them at the source, so a pass on your views is still worth it.
 
+* **[Core] Daemon health checks reworked** (feature `daemons` ; a RED status makes `/healthcheck/readiness` fail) :
+  - `lastExecs` is no longer RED when all daemons fail : a failing daemon is YELLOW until two consecutive successes.
+  - `poolUtilization` (permanently RED in 4.4.1) now reports daemons waiting for a free thread : YELLOW beyond the daemon limit, RED beyond 2 x `daemonMaxDurationInSeconds` (4h by default). If it turns YELLOW, check `daemonsAlive` first (a daemon running too long often holds the threads), then increase `boot.params.threadPoolSize`.
+  - `daemonsAlive` is new : RED when a daemon is dead (an `Error` cancelled its schedule), YELLOW when a daemon runs longer than its limit `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
+  - A daemon must not run more than `daemonMaxDurationInSeconds` (2h by default) : move longer processings to an Orchestra job.
+* [Core] `boot.params.threadPoolSize` is now actually applied (it was silently ignored) : if you had set it, check the value.
+
 # from 4.4.0 to 4.4.1
 
 * **[Commons] `TraceAspect` is now auto-registered by `CommonsFeatures`.** The core `@Trace` annotation works out of the box in applications using `vertigo-commons` : no need to declare the aspect in a module anymore.
