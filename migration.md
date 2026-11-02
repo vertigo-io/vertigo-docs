@@ -36,9 +36,9 @@
 
 * **[Core] Daemon health checks reworked** (feature `daemons` ; a RED status makes `/healthcheck/readiness` fail) :
   - `lastExecs` is no longer RED when all daemons fail : a failing daemon is YELLOW until two consecutive successes.
-  - `poolUtilization` (permanently RED in 4.4.1) now reports daemons waiting for a free thread : YELLOW beyond the daemon limit, RED beyond 2 x `daemonMaxDurationInSeconds` (4h by default). If it turns YELLOW, check `daemonsAlive` first (a daemon running too long often holds the threads), then increase `boot.params.threadPoolSize`.
+  - `poolUtilization` (in 4.4.1 it counted the scheduled daemons, not the waiting ones : RED as soon as `threadPoolSize` daemons were scheduled, i.e. on every application with the defaults) now reports daemons waiting for a free thread : YELLOW beyond the daemon limit, RED beyond twice `daemonMaxDurationInSeconds` (4h with the default 2h) or if the daemon pool is shut down. If it turns YELLOW, check `daemonsAlive` first (a daemon running too long often holds the threads), then increase `boot.params.threadPoolSize`.
   - `daemonsAlive` is new : RED when a daemon is dead (an `Error` cancelled its schedule), YELLOW when a daemon runs longer than its limit `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
-  - A daemon must not run more than `daemonMaxDurationInSeconds` (2h by default) : move longer processings to an Orchestra job.
+  - A daemon must not run more than `daemonMaxDurationInSeconds` (2h by default) : move longer processing to an Orchestra job.
 * [Core] `boot.params.threadPoolSize` is now actually applied (it was silently ignored) : if you had set it, check the value.
 
 # from 4.4.0 to 4.4.1

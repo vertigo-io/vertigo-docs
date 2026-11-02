@@ -56,11 +56,11 @@ A simplified approach is to add the `@DaemonScheduled` annotation to a public me
 >     params:
 >       threadPoolSize: 4
 >       daemonMinDurationInSeconds: 120   # minimum duration before judging that a daemon has a problem
->       daemonMaxDurationInSeconds: 7200  # maximum duration of a daemon: beyond, it should be an Orchestra job
+>       daemonMaxDurationInSeconds: 7200  # maximum duration of a daemon: a longer processing should be an Orchestra job
 >   ```
 > - Daemons should be **optimized and simple**: short, recurring tasks. A daemon that runs too long can block other daemons (heartbeats, analytics...).
 > - If long-running daemons are unavoidable, increase `threadPoolSize` (4-6 recommended if daemons >10s) or run very long tasks (>60s) in a dedicated thread.
-> - A daemon must last less than its period, and never more than `daemonMaxDurationInSeconds` (2h). It has a problem beyond its limit: `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
+> - A daemon must last less than its period, and never more than `daemonMaxDurationInSeconds` (2h). Beyond its limit, `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`, a daemon is considered to have a problem.
 > - The DaemonManager exposes three healthchecks (feature `daemons`), which judge the daemon engine, not the business:
 >   - `daemonsAlive`: **RED** if a daemon is dead (its schedule was cancelled by an `Error`), **YELLOW** if a daemon has been running for more than its limit;
 >   - `poolUtilization`: **YELLOW** if a daemon has been waiting for a free thread for more than its limit (check `daemonsAlive` first: a daemon running too long often holds the threads, then increase `threadPoolSize`), **RED** beyond 2 x `daemonMaxDurationInSeconds` or if the pool is shut down;

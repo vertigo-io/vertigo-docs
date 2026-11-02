@@ -892,7 +892,7 @@ Keep this entity out of reference data.
 **Cause**: A long-running daemon (>60s) blocks the shared daemon thread pool (2 threads default). The orchestra daemon heartbeat is no longer updated, and another node considers this node dead.
 
 **Solutions**:
-1. Find your long-running daemons (>60s) via the analytics dashboard (`/dashboard`, `daemon` trace durations) and the WARN log `Daemon [xxx] took Nms (> period Pms)`. The `poolUtilization` healthcheck reports a daemon waiting for a free thread; `daemonsAlive` only reports a daemon running too long beyond `max(4 x period, 120s)`
+1. Find your long-running daemons (>60s) via the analytics dashboard (`/dashboard`, `daemon` trace durations) and the WARN log `Daemon [xxx] took Nms (> period Pms)`. The `poolUtilization` healthcheck reports a daemon waiting for a free thread; `daemonsAlive` only reports a daemon running too long beyond `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)` (120 s and 2 h by default)
 2. If necessary, increase `threadPoolSize` in `boot.params` of `configuration.yaml` (minimum 4 recommended)
 3. Move very long-running tasks out of the daemon pool (execute in a dedicated thread)
 

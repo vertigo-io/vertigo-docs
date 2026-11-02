@@ -30,12 +30,12 @@ Une application est constituée de modules, chacun apportant à la fois ses __d�
 
 ## Run
 
-En partant de la configuration et du paramètrage d'une application il est dès lors possible de créer un noeud d'éxecution (Node).
+En partant de la configuration et du paramétrage d'une application il est dès lors possible de créer un nœud d'exécution (Node).
 Le cycle de démarrage est le suivant :
 
 1. Création de l'ensemble des composants : module par module et en utilisant un mécanisme d'inversion du contrôle pour résoudre les dépendances entre composants
 2. Vérouillage de l'espace des composants (aucun nouveau composant ne peut etre enregistré)
-3. Enregistrerment de l'ensemble des définitions : module par module via les DefinitionProvider, les composants eux-même pouvant être des DefinitionProvider
+3. Enregistrement de l'ensemble des définitions : module par module via les DefinitionProvider, les composants eux-même pouvant être des DefinitionProvider
 4. Vérouillage de l'espace des définitions (aucune nouvelle définition ne peut être enregistrée)
 5. Démarrage de l'ensemble des composants : appel de la méthode start() des composants activables, ils ont alors accès à l'espace des définitions
 (5.bis Création des composants éphémères _Initializer_ pour certains besoins)
@@ -43,9 +43,9 @@ Le cycle de démarrage est le suivant :
 
 A l'issue de ce cycle de démarrage le _Node_ est prêt, et l'ensemble de ses fonctionnalités sont utilisables via ses composants.
 
-Lors de l'arret du noeud de l'application, l'ensemble des composants sont arretés dans l'ordre inverse de leur démarrage.
+Lors de l'arrêt du nœud de l'application, l'ensemble des composants sont arrêtés dans l'ordre inverse de leur démarrage.
 
-D'autre part Vertigo-Core fournit un environnement d'execution dédié aux démons (Daemons en anglais), au sens tache récurrente technique, par le biais du DaemonManager. Pour enregistrer un nouveau démon il suffit de créer la une `DaemonDefinition`.
+D'autre part Vertigo-Core fournit un environnement d'exécution dédié aux démons (Daemons en anglais), au sens tâche récurrente technique, par le biais du DaemonManager. Pour enregistrer un nouveau démon il suffit de créer une `DaemonDefinition`.
 Une manière simplifiée consiste à ajouter l'annotation `@DaemonScheduled` sur une méthode publique d'un composant enregistré dans le ComponentSpace.
 
 > **⚠️ Pool de threads daemon :**
@@ -69,8 +69,8 @@ Une manière simplifiée consiste à ajouter l'annotation `@DaemonScheduled` sur
 
 ## Monitor
 
-Une fois une application démarée il important de suivre son activité et ses performances.
-Un module d'analytics est nativement présent dans Vertigo pour permettre un suivi fin des traitements qui son effectués.
+Une fois une application démarrée, il est important de suivre son activité et ses performances.
+Un module d'analytics est nativement présent dans Vertigo pour permettre un suivi fin des traitements qui sont effectués.
 Il permet de suivre trois types d'indicateurs :
 
 - **HealthStatus** : Permet d'indiquer un état de santé (rouge, orange, vert) pour une fonction précise

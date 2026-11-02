@@ -983,7 +983,7 @@ Gardez cette entité en dehors des données de référence.
 **Cause** : Un daemon long (>60s) bloque le pool de threads daemon partagé (2 threads par défaut). Le heartbeat du daemon orchestra n'est plus mis à jour, et un autre nœud considère le nœud comme mort.
 
 **Solutions** :
-1. Rechercher vos daemons longs (>60s) via le dashboard analytics (`/dashboard`, durée des traces `daemon`) et le log WARN `Daemon [xxx] took Nms (> period Pms)`. Le healthcheck `poolUtilization` signale un daemon en attente d'un thread libre ; `daemonsAlive` ne signale un daemon trop long qu'au-delà de `max(4 x période, 120s)`
+1. Rechercher vos daemons longs (>60s) via le dashboard analytics (`/dashboard`, durée des traces `daemon`) et le log WARN `Daemon [xxx] took Nms (> period Pms)`. Le healthcheck `poolUtilization` signale un daemon en attente d'un thread libre ; `daemonsAlive` ne signale un daemon trop long qu'au-delà de `min(max(4 x période, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)` (120 s et 2 h par défaut)
 2. Si nécessaire, augmenter `threadPoolSize` dans `boot.params` de `configuration.yaml` (4 recommandé minimum)
 3. Sortir les traitements très longs du pool daemon (exécuter dans un thread dédié)
 
