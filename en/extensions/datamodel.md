@@ -27,10 +27,10 @@ The following generators are related to this module:
 - `vertigo.domain.java`: generates Java classes for DtObject
 - `vertigo.domain.java.targetSubDir`: specifies generation directory (default *~/javagen*)
 - `vertigo.domain.java.generateDtResources`: generates .properties files for field label i18n
-- `vertigo.domain.sql`: generates crebase.sql to regenerate database structure
+- `vertigo.domain.sql`: generates crebas.sql to regenerate database structure
 - `vertigo.domain.sql.targetSubDir`: specifies SQL generation directory
 - `vertigo.domain.sql.baseCible`: Database type *(for specific syntaxes)*
-- `vertigo.domain.sql.generateDrop`: generates DROP statements in crebase.sql
+- `vertigo.domain.sql.generateDrop`: generates DROP statements in crebas.sql
 - `vertigo.domain.sql.generateMasterData`: generates reference data population scripts
 - `vertigo.task`: generates Java classes for data access tasks
 - `mermaid`: generates an HTML file for graphical model visualization

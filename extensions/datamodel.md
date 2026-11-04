@@ -27,10 +27,10 @@ Les générateurs suivants sont liés à ce module :
 - `vertigo.domain.java`: génère les classes Java des DtObject
 - `vertigo.domain.java.targetSubDir`: précise le répertoire de génération (par défaut *~/javagen*)
 - `vertigo.domain.java.generateDtResources`: génère les fichiers .properties pour le i18n des libellés des champs
-- `vertigo.domain.sql`: génère le fichier crebase.sql pour régénérer la structure de la base
+- `vertigo.domain.sql`: génère le fichier crebas.sql pour régénérer la structure de la base
 - `vertigo.domain.sql.targetSubDir`: précise le répertoire de génération du SQL
 - `vertigo.domain.sql.baseCible`: Type de la base *(pour les syntaxes spécifiques)*
-- `vertigo.domain.sql.generateDrop`: génère les DROP dans crebase.sql
+- `vertigo.domain.sql.generateDrop`: génère les DROP dans crebas.sql
 - `vertigo.domain.sql.generateMasterData`: génère les scripts de remplissage des données de référence
 - `vertigo.task`: génère les classes Java des tâches d'accès aux données
 - `mermaid`: génère un fichier HTML pour visualiser le modèle graphiquement

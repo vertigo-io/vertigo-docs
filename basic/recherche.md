@@ -217,7 +217,7 @@ L'**IndexDefinition** représente un Index. Il n'en faut qu'une seule par KeyCon
 **Propriétés**
 - `keyConcept`* : Nom du Dt KeyConcept, utilisé pour suivre les modifications et déclencher les réindexations
 - `dtIndex`* : Nom du Dt représentant le document, à la fois les champs recherchés et les champs retournés
-- `searchLoader`* : Nom d'un composant Vertigo utilisé pour recharger les documents à partir d'une liste d'Ids (doit implémenter l'interface SearchLoader<keyConcept, dtIndex>)
+- `loaderId`* : Nom d'un composant Vertigo utilisé pour recharger les documents à partir d'une liste d'Ids (doit implémenter l'interface SearchLoader<keyConcept, dtIndex>)
 - `indexCopyTo` : Ajoute un champ agrégeant une liste de champs du document, utilise la fonction de *copy* optimisée du moteur (le champ doit préexister dans le DtIndex)
   - `from` : liste des champs séparés par une virgule
 
@@ -315,7 +315,7 @@ La **FacetedQueryDefinition** représente une définition de requête de recherc
 - `dtIndex`* : Nom du Dt d'index
 - `domainCriteria`* : Nom du domain du critère d'entrée.
 - `facets`* : Liste des facettes activées dans cette recherche
-- `listFilterBuilderClass`* : Nom du moteur permettant la traduction de la requête(*io.vertigo.dynamox.search.DslListFilterBuilder* préconisé)
+- `listFilterBuilderClass`* : Nom du moteur permettant la traduction de la requête(*io.vertigo.datafactory.impl.search.dsl.DslListFilterBuilder* préconisé)
 - `listFilterBuilderQuery`* : Requête de la recherche (voir syntaxe [VertigoSearchDSL](#syntaxe-vertigosearchdsl))
 - `geoSearchQuery` : Permet de compléter (si besoin) la requete avec un filtre géographique (pour les bornes d'une carte par exemple)
   
