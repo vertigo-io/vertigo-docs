@@ -100,7 +100,7 @@ La requête est un champ texte qui contient le traitement à effectuer.
 Ce champ permet l'utilisation des paramètres d'entrées sous forme de paramètres bindés à l'aide de la syntaxe suivante : 
 
 - *#nomParametrePrimitif#* : pour un paramètre primitif
-- *#nomParametrePrimitif.rownum#* : pour un paramètre de type liste de primitif et utilisation d'un champ dans le cadre des requêtes de type batch 
+- *#nomParametrePrimitif.rownum#* : pour un paramètre de type liste de primitif. Dans une clause `IN (...)`, chaque valeur de la liste devient un paramètre bindé (exemple : `where cou_id in (#countriesIds.rownum#)`) ; également utilisé dans le cadre des requêtes de type batch 
 
 - *#nomParametre.champ#* : pour un paramètre de type objet et utilisation d'un champ
 - *#nomParametreList.index.champ#* : pour un paramètre de type liste d'objet et utilisation d'un champ (*à utiliser pour les clauses de type Where IN(...)*)

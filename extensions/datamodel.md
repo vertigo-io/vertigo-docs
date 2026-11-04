@@ -165,13 +165,15 @@ Le `TaskManager` gère l'exécution des tâches définies dans le KSP. Il expose
 
 | Annotation | Rôle |
 |---|---|
-| `@TaskAnnotation` | Déclare une méthode comme proxy de tâche |
-| `@TaskProxyAnnotation` | Interface de proxy de tâche |
+| `@TaskAnnotation` | Déclare une tâche sur une méthode concrète d'un composant déclaré (c'est ce que génère Studio dans les DAO et PAO) : le `TaskManager` en crée la définition au démarrage, le corps de la méthode exécute la tâche |
+| `@TaskProxyAnnotation` | Déclare une tâche sur une méthode d'une interface `Amplifier`, sans corps : la plateforme en fournit l'implémentation (feature `taskProxyMethod` des `DataStoreFeatures`) |
 | `@TaskInput` | Paramètre d'entrée de la tâche |
 | `@TaskOutput` | Résultat de sortie de la tâche |
 | `@TaskContextProperty` / `@TaskContextProperties` | Propriété du contexte d'exécution |
 
 L'implémentation `TaskAmplifierMethod` relie les annotations proxy aux `TaskDefinition` réelles.
+
+!> Sur une interface `Amplifier`, utilisez `@TaskProxyAnnotation` : une méthode annotée `@TaskAnnotation` n'y est pas reconnue et le démarrage échoue avec `No way to find a proxy annotation on method : ...`.
 
 ## SmartType Annotations
 

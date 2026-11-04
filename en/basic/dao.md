@@ -100,7 +100,7 @@ The query is a text field containing the processing to be performed.
 This field allows the use of input parameters as bound parameters using the following syntax:
 
 - *#primitiveParameterName#*: for a primitive parameter
-- *#primitiveParameterName.rownum#*: for a primitive list type parameter and field usage in batch type queries
+- *#primitiveParameterName.rownum#*: for a primitive list type parameter. In an `IN (...)` clause, each value of the list becomes a bound parameter (example: `where cou_id in (#countriesIds.rownum#)`); also used in batch type queries
 
 - *#objectParameter.field#*: for an object type parameter and field usage
 - *#objectListParameter.index.field#*: for an object list type parameter and field usage (*to use for clauses of type Where IN(...)*)

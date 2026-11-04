@@ -165,13 +165,15 @@ testEntityDAO.save(entity);
 
 | Annotation | Role |
 |---|---|
-| `@TaskAnnotation` | Declares a method as a task proxy |
-| `@TaskProxyAnnotation` | Task proxy interface |
+| `@TaskAnnotation` | Declares a task on a concrete method of a declared component (what Studio generates in DAOs and PAOs): the `TaskManager` builds its definition at startup, the method body executes the task |
+| `@TaskProxyAnnotation` | Declares a task on a method of an `Amplifier` interface, without body: the platform provides the implementation (`taskProxyMethod` feature of `DataStoreFeatures`) |
 | `@TaskInput` | Task input parameter |
 | `@TaskOutput` | Task output result |
 | `@TaskContextProperty` / `@TaskContextProperties` | Execution context property |
 
 Implementation `TaskAmplifierMethod` links proxy annotations to actual `TaskDefinition`.
+
+!> On an `Amplifier` interface, use `@TaskProxyAnnotation`: a method annotated with `@TaskAnnotation` is not recognized there and startup fails with `No way to find a proxy annotation on method : ...`.
 
 ## SmartType Annotations
 
