@@ -59,7 +59,7 @@ Overall, in an application, `Exceptions` never need to be caught by the develope
 Three types are used:
 
 - `VUserException`: For exceptions corresponding to a business rule (screen validation, validation, or business rule). The exception is associated with a message and possibly a screen field and will be presented to the user indicating what happened.
-- `VSystemException`: For exceptions corresponding to a system error (Assertions, I/O errors, etc.)
+- `VSystemException`: For exceptions corresponding to a system error (I/O errors, etc.). `Assertion` checks throw standard Java exceptions instead (`NullPointerException`, `IllegalArgumentException`, `IllegalStateException`), also handled as system errors.
 - `WrappedException`: For wrapping technical exceptions, allows encapsulating a third-party technical error to let it bubble up to Vertigo's interception.
 
 ## Data-Model

@@ -59,7 +59,7 @@ Globalement, dans une application, les `Exceptions` n'ont jamais à être interc
 Trois types sont utilisés : 
 
 - `VUserException` : Pour les exceptions correspondant à une règle métier (contrôle de surface, validation ou règle de gestion). L'exception est associée à un message et éventuellement un champ de l'écran et sera présentée à l'utilisateur en lui indiquant ce qui s'est passé.
-- `VSystemException` : Pour les exceptions correspondant à une erreur système (Assertions, erreurs I/O, etc...) 
+- `VSystemException` : Pour les exceptions correspondant à une erreur système (erreurs I/O, etc...). Les vérifications `Assertion` lèvent, elles, des exceptions Java standard (`NullPointerException`, `IllegalArgumentException`, `IllegalStateException`), traitées elles aussi comme des erreurs système.
 - `WrappedException` : Pour l'encapsulation d'exceptions techniques, permet d'encapsuler une erreur technique tierce afin de la laisser remonter jusqu'à l'interception Vertigo.  
 
 ## Data-Model
