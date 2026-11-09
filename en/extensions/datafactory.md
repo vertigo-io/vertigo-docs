@@ -115,11 +115,12 @@ The first parameter is of type `DataDefinition`, not `DtDefinition`. The copyTo 
 
 `SearchLoader` is a Component responsible for feeding an index from a data source. `AbstractSqlSearchLoader` provides the skeleton for batch SQL loading.
 
-This Component is injected via `@Component` and receives `TaskManager` and `VTransactionManager` as parameters. Method `loadData(SearchChunk<K>)` is called with a batch of UIDs identified by a cursor, and returns a `List<SearchIndex<K, I>>` containing documents to index. `getSqlQueryFilter()` returns the additional SQL filter applied during incremental reindexing (Delta and Modified), typically a timestamp condition like `WHERE LAST_UPDATE > :lastDate`.
+This Component is injected via `@Component` and receives `TaskManager` and `VTransactionManager` as parameters. Method `loadData(SearchChunk<K>)` is called with a batch of UIDs identified by a cursor, and returns a `List<SearchIndex<K, I>>` containing documents to index. `getSqlQueryFilter()` adds a **structural** SQL filter to the scan of the identifiers to index (for example `TYPE = 'text'`): it must not depend on the state of the data during its life. Activity filtering (disabled, archived element…) is done in the `loadData` query. `getVersionFieldName()` designates the version field used by incremental reindexing.
 
 `AbstractSqlSearchLoader` is a parameterized abstract class whose constructor injects `TaskManager` and `VTransactionManager`. The implementing class must override:
 - `loadData(SearchChunk<K>)` → `List<SearchIndex<K, I>>`: loads chunk SQL data and returns documents to index.
-- `getSqlQueryFilter()` → `String`: returns SQL filter for incremental reindexing (e.g., `WHERE LAST_UPDATE > :lastDate`).
+- `getSqlQueryFilter()` → `String` *(optional, empty by default)*: structural SQL filter added to the scan of the identifiers.
+- `getVersionFieldName()` → `Optional<DataFieldName<K>>` *(optional, empty by default)*: version field, comparable over the whole table (sequence, last modification date); required by `reindexDelta` and `reindexAllModified`.
 
 The loader is declared with `@Component`. `loadData` returns `List<SearchIndex<K, I>>`, not `void`. The parameter is `SearchChunk<K>` (UID type of the KeyConcept), not `SearchChunk<String>`.
 
@@ -134,12 +135,12 @@ Long nombreIndexe = futureCount.get();
 ```
 
 ```java
-// Reindex modified documents — uses the timestamp field
+// Reindexes documents whose version in database differs from the indexed version (getVersionFieldName)
 Future<Long> futureModified = searchManager.reindexAllModified(idxTache);
 ```
 
 ```java
-// Incremental reindexing — add/remove from last cursor
+// Resumes from the last indexed version (getVersionFieldName)
 Future<Long> futureDelta = searchManager.reindexDelta(idxTache);
 ```
 
@@ -391,7 +392,7 @@ Loader `TacheSearchLoader` extends `AbstractSqlSearchLoader` and is declared as 
 
 `loadData(SearchChunk<K>)` receives a batch of UIDs (identified by a cursor) and returns `List<SearchIndex<K, I>>`: for each chunk UID, load task data, map to `DtTacheIndex`, and return the list of documents to index.
 
-`getSqlQueryFilter()` returns the dynamic SQL filter used for incremental reindexing. For example, `WHERE LAST_UPDATE > :lastDate` only reindexes tasks modified since the last reindex.
+`getSqlQueryFilter()` can restrict the indexed tasks with a stable criterion (for example only the tasks of a given type). For incremental reindexing, `getVersionFieldName()` designates the version field, for example the task's last modification date.
 
 ### Step 4 — Facet Definition
 
@@ -437,7 +438,7 @@ Lucene index is rebuilt on each call against the provided `DtList`, so this axis
 
 - **SearchIndexDefinition constructor**: takes exactly 5 parameters: name, keyConceptDataDefinition (`DataDefinition`), indexDataDefinition (`DataDefinition`), indexCopyFromFieldsMap (`Map<DataField, List<DataField>>` — direction `toField → [fromFields]`, not `fromField → [toFields]`), searchLoaderId. No fluent builder `SearchIndexDefinitionBuilder` exists. Do not confuse `DataDefinition` with `DtDefinition`; do not use `Map<String, String>` for the copyTo map.
 - **Automatic reindexing**: `SearchManagerImpl` listens to `StoreEvent` on EventBus to mark KeyConcepts as dirty, then queues a `ReindexTask` with 1-second delay to avoid multiple calls.
-- **Delta reindexing**: `getSqlQueryFilter()` in SearchLoader must return a SQL filter with a timestamp parameter. Deleted documents are detected by KeyConcept disappearance.
+- **Delta and Modified reindexing**: they require `getVersionFieldName()`, a version field that increases and is comparable over the whole table. `getSqlQueryFilter()` plays no incremental role. Deleted documents are detected by KeyConcept disappearance.
 - **Ranges in DSL**: `[min TO max]` includes bounds. Use `*` for open infinite bounds: `[0 TO *]`.
 - **Geo**: Geographic expressions are not inline in DSL. Configure via `SearchQueryBuilder.withGeoSearchQuery(String)`.
 - **Boost and clustering**: `decay()` and `cluster()` are not inline. Use `withDateBoost(DataField, int, int)` and `withFacetClustering(FacetDefinition)` on the builder.
