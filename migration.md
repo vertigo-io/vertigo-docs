@@ -39,7 +39,14 @@
   - `poolUtilization` (in 4.4.1 it counted the scheduled daemons, not the waiting ones : RED as soon as `threadPoolSize` daemons were scheduled, i.e. on every application with the defaults) now reports daemons waiting for a free thread : YELLOW beyond the daemon limit, RED beyond twice `daemonMaxDurationInSeconds` (4h with the default 2h) or if the daemon pool is shut down. If it turns YELLOW, check `daemonsAlive` first (a daemon running too long often holds the threads), then increase `boot.params.threadPoolSize`.
   - `daemonsAlive` is new : RED when a daemon is dead (an `Error` cancelled its schedule), YELLOW when a daemon runs longer than its limit `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
   - A daemon must not run more than `daemonMaxDurationInSeconds` (2h by default) : move longer processing to an Orchestra job.
+  - Both limits are set in `configuration.yaml` with `boot.params.daemonMinDurationInSeconds` (default 120) and `boot.params.daemonMaxDurationInSeconds` (default 7200), see [Core > Run](https://vertigo-io.github.io/vertigo-docs/#/en/overview/core?id=run).
 * [Core] `boot.params.threadPoolSize` is now actually applied (it was silently ignored) : if you had set it, check the value.
+
+* **[DataFactory] ES9 index settings are checked again at startup** (the check was broken since 4.4.0) : if an analyzer, tokenizer, filter or normalizer of your index config file is missing or different on the existing index, the startup now fails with `Index settings have changed and are no more compatible, you must remove your index like : curl -X DELETE ...`. If you changed your index config since its creation in 4.4.x, plan to delete the index and reindex your data when you deploy 4.5.0.
+
+* **[Vega] Node configuration files by environment variable or system property : singular names.** Like `boot.applicationConfiguration` in `web.xml`, they are now read from `VERTIGO_BOOT_APPLICATION_CONFIGURATION` or `-Dboot.application-configuration` (a `;` separated list of files). The plural names `VERTIGO_BOOT_APPLICATION_CONFIGURATIONS` and `-Dboot.application-configurations` were silently ignored since 3.4.0 (the `web.xml` value was used) and are no longer read.
+  - If your deployment sets a plural name, rename it and check its value : it now overrides your `web.xml`.
+  - Precedence : system property, then external properties file (`-Dexternal-properties`), then environment variable, then `web.xml`.
 
 # from 4.4.0 to 4.4.1
 
@@ -55,6 +62,7 @@
   - `EmbeddedServer` removed — use testcontainer for tests (see `withEmbeddedServer`, requires a reachable docker via `DOCKER_HOST`)
   - `_all` field removed from index mapping
   - `markToOptimize` only applies to deletes (removeByQuery)
+  - custom facets : the `_innerWriteTo` param is ignored by the ES9 plugin (it was only needed by the ES7 Transport client, for aggregations with specific params like `geohash_grid`), you may remove it from your definitions ; the other params (`_type`, the aggregation JSON body, `#criteria#` placeholders, `_decimalPrecision`) are unchanged
   - the standard in-memory index plugin (`collections.luceneIndex` feature) is now built against **Lucene 9** : projects staying on ES 7.17 (Lucene 8.11.3) must use the `lucene_8_11` variant shipped in `vertigo-datafactory-plugin-elasticsearch_7_17` (see [ES7 LTS Migration](#datafactory-es7-lts-migration) below)
 * **[DataFactory] Remove deprecated `searchManager.findIndexDefinitionByKeyConcept`** — you must use `findFirstIndexDefinitionByKeyConcept` instead
 * **[DataFactory]If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#datafactory-es7-lts-migration) below.
