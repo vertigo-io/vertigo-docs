@@ -86,7 +86,7 @@ Pour la configuration Vertigo, les éléments importants sont :
 > - Le format Yaml utilise les indentations pour donner du sens, il faut y faire attention.
 > - L'indentation avec `-` n'est utilisée que pour déclarer les listes. ie. pour le nom des plugins actives (1er niveau sous `features:` et `featuresConfig:`), pour les plugins custom (1er niveau sous `plugins:`) et les initialisers (1er niveau sous `initializers:`)
 > - L'indentation seule, sans `-` est utilisée pour les attributs et les maps. Notamment les Features sous `modules:` et les paramètres en général (de plugin, feature, ...)
-> - Des valeurs peuvent venir de paramètres externes avec `${ }`. _Ceux du `boot` viennent de sources limitées et doivent être préfixés par `boot.`_
+> - Des valeurs peuvent venir de paramètres, avec `${NOM}` ou `${NOM!défaut}` : voir [Paramètres](#parametres).
 !> - Vertigo support l'attribut particulier `__flags__:` placé sous n'importe quels éléments il permet de conditionner l'inclusion de l'élément dans la configuration en fonction des activeFlags (paramètre de démarrage de l'application : ligne de commande, web.xml, etc...). _le flag peut être inclus : `__flags__: ["redis"]` ou exclus : `__flags__: ["!redis"]`
 
 
@@ -229,6 +229,30 @@ Habituellement on déclare des Initializers tel que :
   - io.mars.support.boot.OrchestraInitializer:
 ```
 
+## Paramètres :id=parametres
+
+Une valeur de la configuration peut venir d'un paramètre : `${NOM}`, ou `${NOM!défaut}` avec une valeur par défaut. Seule une valeur entière est remplacée : `url: ${PROPS_URL}`, pas `url: file:${DIR}/app.properties` (exception : les chemins de fichier, voir plus bas).
+
+Le `ParamManager` cherche un paramètre dans ses plugins, **dans l'ordre de leur déclaration** sous `boot.plugins` : le premier qui le trouve l'emporte. Une variable d'environnement vide compte comme absente.
+
+| Plugin | Source |
+|---|---|
+| `EnvParamPlugin` | variables d'environnement |
+| `SystemPropertyParamPlugin` | propriétés système (`-DNOM=valeur`) |
+| `PropertiesParamPlugin` (`url`) | fichier `.properties` |
+| `WebAppContextParamPlugin` (vertigo-vega) | paramètres de contexte du `web.xml` |
+| `XmlParamPlugin` (`url`) | fichier de paramètres au format XML |
+| `ManifestParamPlugin` (`url`, optionnel) | attributs du `MANIFEST.MF` |
+
+Ces classes sont dans `io.vertigo.core.plugins.param.env`, `.properties`, `.xml` et `.manifest` ; `WebAppContextParamPlugin` dans `io.vertigo.vega.plugins.webservice.servlet`.
+
+Dans l'exemple de la section [boot](#boot), le fichier est déclaré avant l'environnement : sa valeur l'emporte sur une variable d'environnement du même nom. Déclaré en premier, `EnvParamPlugin` laisse au contraire l'environnement surcharger les valeurs du fichier.
+
+Les plugins du `boot` sont créés avant le `ParamManager` : un `${NOM}` y est cherché dans les propriétés système, puis dans les variables d'environnement. `${boot.nom}` désigne un paramètre de démarrage (voir [Démarrage d'une application web](#démarrage-dune-application-web)) : il est remplacé à la lecture du YAML, sans valeur par défaut possible, et doit exister. Il s'utilise dans `node`, dans les plugins du `boot` et dans les paramètres numériques de `boot.params` (`threadPoolSize`…).
+
+Dans un chemin de fichier, `${user.home}`, `${user.dir}` et `${java.io.tmpdir}` sont remplacés à l'intérieur du chemin (`dbFilePath: ${java.io.tmpdir}/vertigo-ui/ViewContext`). Cette substitution est faite par les plugins qui lisent un fichier (paramètres, KVStore, FileStore) : ce ne sont pas des paramètres.
+
+Côté code, un composant reçoit ses paramètres de configuration par `@ParamValue("nom")`, et lit un paramètre de l'application par `ParamManager.getParam("NOM")` (ou `getOptionalParam`).
 
 ## Flags
 
@@ -242,7 +266,7 @@ A l'aide d'un flag il est possible d'activer ou de désactiver :
 - Un plugin additionnel
 - Un initializer
 
-Au démarrage de l'application, la liste des flags actifs doit être fournie via l'intermédiaire du paramètre *boot.activeFlags*, qui est une liste de chaînes de caractères séparées par des `;`
+Au démarrage de l'application, la liste des flags actifs doit être fournie via l'intermédiaire du paramètre *boot.activeFlags*, qui est une liste de chaînes de caractères séparées par des `;` (voir [Démarrage d'une application web](#démarrage-dune-application-web)).
 
 Au sein de la configuration YAML, les flags sont associés aux éléments de configuration via intermédiaire d'un paramètre spécial *\_\_flags\_\_* qui est un tableau de chaines de caractères. L'opérateur **ou** s'applique entre les différents éléments de la liste des flags. Si le paramètre spécial *\_\_flags\_\_* n'est pas positionné, l'élément de configuration sera toujours activé. 
 
@@ -286,15 +310,25 @@ Dans l'exemple ci-dessus :
 - Le plugin additionnel *my.additional.Plugin* est ajouté lorsque le *flag4* est positionné
 - L'initializer *my.module.Initializer* est exécuté au démarrage de l'application lorsque le *flag5* est positionné
 
+Une entrée de `__flags__` peut combiner des flags : `!` pour la négation, `&&` (ou `and`, entouré d'espaces) pour un **et** ; un flag ne contient pas d'espace. Ainsi `__flags__: ["redis && !devMode", "prod"]` active l'élément si `redis` est actif sans `devMode`, ou si `prod` est actif.
 
+Un même élément peut être déclaré plusieurs fois sous des flags exclusifs, pour choisir une variante selon l'environnement :
 
-Il est alors possible de changer la configuration par l'intermédiaire d'un fichier de paramètrage.
+```yaml
+    featuresConfig:
+      - cache.memory:
+          __flags__: ["!redis"]
+      - cache.redis:
+          __flags__: ["redis"]
+```
 
-> La configuration par fichier xml est également décrite par un fichier XSD disponible [ici](https://github.com/vertigo-io/vertigo/blob/master/vertigo-core/src/main/java/io/vertigo/app/config/xml/vertigo_1_0.xsd)
+Le code peut tester un flag actif : `Node.getNode().getNodeConfig().hasFlag("monFlag")`.
 
-# Utilisation
+Pièges : un flag mal orthographié (dans `boot.activeFlags` ou `__flags__`) est simplement inactif ; `__flags__` se place parmi les paramètres de l'élément, avec une indentation de plus que lui.
 
-?> Cette section décrit la configuration legacy Servlet/Tomcat. Avec Javalin standalone, ces configurations ne sont plus nécessaires.
+## Démarrage d'une application web
+
+?> Une application web démarre son node par le *listener* déclaré dans le `web.xml` (c'est le cas des applications Vertigo-UI). Sans servlet (classe main, Javalin standalone), l'application construit elle-même sa configuration (`YamlNodeConfigBuilder` ou API Java) : cette section ne s'applique pas.
 
 Dans le cadre des applications Web, un *listener* doit être paramétré sur la servlet.
 
@@ -322,12 +356,18 @@ Les flags actifs peuvent être fournis à l'aide du paramètre *boot.activeFlags
 </context-param>
 ```
 
-Pour les environnements qui le nécessitent, il est possible de passer les flags actifs par une variable d'environnement : `VERTIGO_BOOT_ACTIVE_FLAGS`.
+Ces deux paramètres de démarrage peuvent aussi venir d'autres sources ; de la plus faible à la plus forte :
 
-Exemple : 
-```xml
-VERTIGO_BOOT_ACTIVE_FLAGS=devPages;redis;kvSpeedb;searchES;analytics;cspReportWs
-```
+| Source | Fichiers de configuration | Flags actifs |
+|---|---|---|
+| `web.xml` (`context-param`) | `boot.applicationConfiguration` | `boot.activeFlags` |
+| variable d'environnement | `VERTIGO_BOOT_APPLICATION_CONFIGURATION` (depuis 4.5.0) | `VERTIGO_BOOT_ACTIVE_FLAGS` |
+| fichier de propriétés `-Dexternal-properties=<chemin>` | `boot.applicationConfiguration` | `boot.activeFlags` |
+| propriété système | `-Dboot.application-configuration` (depuis 4.5.0) | `-Dboot.active-flags` |
+
+Exemple : `VERTIGO_BOOT_ACTIVE_FLAGS=redis;searchES;analytics`.
+
+Les autres paramètres de démarrage (`boot.xxx`, utilisés par `${boot.xxx}`) viennent des `context-param` du `web.xml` préfixés par `boot.`, ou du fichier `-Dexternal-properties`. Ce fichier n'alimente pas le `ParamManager` : un `${NOM}` est cherché dans les plugins de paramètres (les `context-param` du `web.xml` par `WebAppContextParamPlugin`).
 
 ## Exemple
 
