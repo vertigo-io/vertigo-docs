@@ -328,6 +328,19 @@ Pour l'appliquer sur des requêtes générales du DAO
 
  Pour l'appliquer sur des tasks spécifiques du DAO.
  Il faut passer un AuthorizationCriteria par les paramètres IN de la Task. Il est alors possible de le traduire en SQL directement dans la requête SQL.
+ Le paramètre utilise un domaine dédié, déclaré une fois dans le projet, et son SmartType :
+```
+create Domain DoAuthorizationCriteria {
+    dataType : ValueObject
+    type : "io.vertigo.account.authorization.AuthorizationCriteria"
+}
+```
+```Java
+// dans l'enum des SmartTypes du projet
+@SmartTypeDefinition(AuthorizationCriteria.class)
+@Adapter(clazz = DummyAuthorizationCriteriaAdapter.class, targetBasicType = BasicType.String)
+AuthorizationCriteria,
+```
 ```Java
 return equipmentDAO.getLastPurchasedEquipmentsByBaseId(baseId,
 				AuthorizationUtil.authorizationCriteria(Equipment.class, SecuredEntities.EquipmentOperations.read));
@@ -429,22 +442,21 @@ L'évaluation de ces listes côté client sert à **l'affichage uniquement** (bo
 
 Pour le stack SSR (rendu Thymeleaf) : voir [UI](/extensions/ui) (`vu:authz` / `th:if`), et [Sécurité](/basic/securite) pour le concept de périmètre.
 
-#### Aspect
+#### Annotations `@Secured` et `@SecuredOperation`
 
-!> Bien que pratique, le contrôle de sécurité par aspect n'est pas préconisé, à cause du caractère non systématique de cette technique (non-réentrance). À réserver aux développeurs avertis.
+- **@Secured** (`{liste de noms d'authorization}`) : sur une *méthode* ou toute une *classe*, vérifie que l'utilisateur a l'une des autorisations
+- **@SecuredOperation** (`nom d'opération`) : sur un *paramètre*, vérifie que l'utilisateur peut réaliser cette opération sur la `SecuredEntity` passée ; nécessite `@Secured` sur la méthode ou la classe
 
-**Vertigo Authorization** propose deux annotations permettant l'implémentation des contrôles de sécurité par AOP.
+> Les noms s'écrivent **sans** le préfixe `Atz`, qui est ajouté automatiquement (`@Secured("AdmMasterData")`).
 
-- **@Secured** (`{liste de noms d'authorization}`) : Permet de sécuriser une *méthode* seule ou toute une *classe* en vérifiant que l'utilisateur a l'une des autorisations
-- **@SecuredOperation** (`nom d'opération`) : Permet de sécuriser une `SecuredEntity` passée en paramètre en vérifiant que l'utilisateur est autorisé à réaliser cette opération sur l'entité
+Le contrôle dépend de l'endroit :
 
-> Dans ces annotations, il n'est pas nécessaire d'utiliser le préfixe `Atz` pour le nom des authorisations
+- **Controller Vertigo-UI** (qui hérite d'`AbstractVSpringMvcController`) : `@Secured` est vérifié par un intercepteur Spring MVC, à l'entrée de la requête. C'est la protection normale d'un écran. `@SecuredOperation` y provoque une erreur : l'entité n'est pas encore disponible à ce stade. Le paramètre `devMode.authzLogOnly` fait seulement journaliser les refus (en développement).
+- **Composant** (webservice, service) : les deux annotations sont vérifiées par un aspect, ajouté par la feature `authorization`, qui doit donc être active. Sur un webservice, point d'entrée appelé par Vega, c'est l'usage normal. Les annotations sont lues sur la classe d'implémentation : posées sur une interface, elles sont ignorées.
 
-> `@SecuredOperation` nécessite l'annotation `@Secured`, portée par la **méthode ou par la classe** (l'aspect retombe sur la classe déclarante)
+!> L'aspect ne contrôle que les appels qui passent par le composant : une méthode annotée appelée depuis une autre méthode du même composant n'est pas contrôlée (non-réentrance). Dans un service, préférer `AuthorizationUtil`, explicite.
 
-!> Attention : les annotations sont vérifiées par AOP, ce mode de contrôle est donc **non réentrant**
-
-!> Attention : le `@SecuredOperation` nécessite l'entité, ce qui signifie qu'elle doit déjà être chargée (avant le contrôle de sécurité)
+!> `@SecuredOperation` nécessite l'entité, qui doit donc être chargée avant le contrôle de sécurité.
 
 
 
@@ -458,6 +470,18 @@ Les autorisations sont chargées via un DefinitionProvider dans la Feature du mo
     .addDefinitionResource("security", "io/mars/basemanagement/base-auth-config.json")
     .build())
 ```
+
+Studio génère les constantes correspondantes quand le fichier est déclaré dans `studio-config.yaml` avec la propriété `vertigo.authorization` :
+
+```yaml
+resources:
+  - { type: security, path: src/main/resources/io/mars/basemanagement/base-auth-config.json }
+mdaConfig:
+  properties:
+    vertigo.authorization: true
+```
+
+Elles sont produites dans le package `<projet>.authorization` : l'enum `GlobalAuthorizations` (autorisations globales, préfixées `Atz`) et la classe `SecuredEntities`, avec pour chaque entité un enum `<Entité>Authorizations` et un enum `<Entité>Operations` (utilisé dans les exemples ci-dessus : `SecuredEntities.EquipmentOperations.read`).
 
 
 ### Exemple pour les règles de sécurité : ENUM et TREE
@@ -596,7 +620,7 @@ Les éléments du DSL sont : `DslSyntaxRules`, `DslParserUtil`, `DslExpressionRu
 
 | Exception | Rôle |
 |---|---|
-| `VSecurityException` | Lancée quand le contrôle d'autorisation échoue |
+| `VSecurityException` | Lancée quand le contrôle d'autorisation échoue ; renvoyée en **403** par les webservices (Vega) comme par les écrans (Vertigo-UI) |
 
 ### Configuration YAML
 
