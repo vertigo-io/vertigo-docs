@@ -129,12 +129,12 @@ modules:
     featuresConfig:
       // liste des configurations des fonctionalités activées. Une configuration est identifiée par son nom composé du nom de la fonctionnalité et de la solution technique retenue
       - myFeature.mySolution:
-        // paramètres d'une configuration de fonctionnalités
+          // paramètres d'une configuration de fonctionnalités
     plugins:
       // liste de plugins additionnels identifiés par leur nom complet de classe
       - my.additional.Plugin:
-        // paramètres d'un plugin
-        paramName : paramValue
+          // paramètres d'un plugin
+          paramName : paramValue
 initializers:
   // liste d'initializers identifiés par leur nom complet de classe
   - my.module.Initializer:
@@ -269,11 +269,11 @@ modules:
           __flags__ : ["flag2"]
     plugins:
       - my.additional.Plugin:
-        __flags__ : ["flag4"]
-        paramName : paramValue
+          __flags__ : ["flag4"]
+          paramName : paramValue
 initializers:
   - my.module.Initializer:
-    __flags__ : ["flag5"]
+      __flags__ : ["flag5"]
 
 ```
 
@@ -375,13 +375,16 @@ modules:
     features:
       - embeddedServer:
           __flags__: ["home"]
-          home: search/
-      - restHL:
+      - rest:
           __flags__: ["home"]
+          name: main
           servers.names: "localhost:9200"
-      - restHL:
+          ssl: false
+      - rest:
           __flags__: ["klee"]
+          name: main
           servers.names: ${esHost}
+          ssl: ${esSsl}
   io.vertigo.connectors.mqtt.MqttFeatures:
     __flags__: ["klee"]
     features:
@@ -462,12 +465,11 @@ modules:
   io.vertigo.datafactory.DataFactoryFeatures:
     features:
       - search:
-    featuresConfig:
-      - collections.luceneIndex:
-      - search.elasticsearch.restHL:
+      - search.elasticsearch.rest:
           envIndexPrefix: mars
           rowsPerQuery: 50
           config.file: search/elasticsearch.yml
+      - collections.luceneIndex:
   io.vertigo.account.AccountFeatures:
     features:
       - security:

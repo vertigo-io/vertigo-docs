@@ -27,10 +27,10 @@ The following generators are related to this module:
 - `vertigo.domain.java`: generates Java classes for DtObject
 - `vertigo.domain.java.targetSubDir`: specifies generation directory (default *~/javagen*)
 - `vertigo.domain.java.generateDtResources`: generates .properties files for field label i18n
-- `vertigo.domain.sql`: generates crebase.sql to regenerate database structure
+- `vertigo.domain.sql`: generates crebas.sql to regenerate database structure
 - `vertigo.domain.sql.targetSubDir`: specifies SQL generation directory
 - `vertigo.domain.sql.baseCible`: Database type *(for specific syntaxes)*
-- `vertigo.domain.sql.generateDrop`: generates DROP statements in crebase.sql
+- `vertigo.domain.sql.generateDrop`: generates DROP statements in crebas.sql
 - `vertigo.domain.sql.generateMasterData`: generates reference data population scripts
 - `vertigo.task`: generates Java classes for data access tasks
 - `mermaid`: generates an HTML file for graphical model visualization
@@ -67,6 +67,7 @@ create DtDefinition DtUser {
   - `label`: field label
   - `cardinality`: `?` (0-1), `1` (required), `*` (multiple)
 - `id`: designates the persistent entity and its primary key *(no multiple PK, except N-N association tables)*
+- `sortField`: default sort field for the object's lists
 
 __Stereotype__
 
@@ -163,13 +164,15 @@ testEntityDAO.save(entity);
 
 | Annotation | Role |
 |---|---|
-| `@TaskAnnotation` | Declares a method as a task proxy |
-| `@TaskProxyAnnotation` | Task proxy interface |
+| `@TaskAnnotation` | Declares a task on a concrete method of a declared component (what Studio generates in DAOs and PAOs): the `TaskManager` builds its definition at startup, the method body executes the task |
+| `@TaskProxyAnnotation` | Declares a task on a method of an `Amplifier` interface, without body: the platform provides the implementation (`taskProxyMethod` feature of `DataStoreFeatures`) |
 | `@TaskInput` | Task input parameter |
 | `@TaskOutput` | Task output result |
 | `@TaskContextProperty` / `@TaskContextProperties` | Execution context property |
 
 Implementation `TaskAmplifierMethod` links proxy annotations to actual `TaskDefinition`.
+
+!> On an `Amplifier` interface, use `@TaskProxyAnnotation`: a method annotated with `@TaskAnnotation` is not recognized there and startup fails with `No way to find a proxy annotation on method : ...`.
 
 ## SmartType Annotations
 

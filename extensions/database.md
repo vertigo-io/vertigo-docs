@@ -97,16 +97,17 @@ featuresConfig:
 
 Le module supporte quatre familles de SGBD, chacune implémentant l'interface `SqlDialect` :
 
-| SGBD | Classes Dialect | Version supportée |
-|---|---|---|
-| H2 | `H2SqlDialect` | Dev / Test |
-| PostgreSQL | `PostgreSqlDialect` | Toute version récente |
-| Oracle | `OracleDialect`, `Oracle11Dialect` | 11g et supérieur |
-| SQL Server | `SqlServerDialect` | Toute version récente |
+| SGBD | Classe à déclarer (`dataBaseClass`) | Classe Dialect | Version supportée |
+|---|---|---|---|
+| H2 | `io.vertigo.database.impl.sql.vendor.h2.H2DataBase` | `H2SqlDialect` | Dev / Test |
+| PostgreSQL | `io.vertigo.database.impl.sql.vendor.postgresql.PostgreSqlDataBase` | `PostgreSqlDialect` | Toute version récente |
+| Oracle | `io.vertigo.database.impl.sql.vendor.oracle.OracleDataBase` | `OracleDialect` | 12c et supérieur |
+| Oracle 11g | `io.vertigo.database.impl.sql.vendor.oracle.Oracle11DataBase` | `Oracle11Dialect` | 11g |
+| SQL Server | `io.vertigo.database.impl.sql.vendor.sqlserver.SqlServerDataBase` | `SqlServerDialect` | Toute version récente |
 
 Chaque dialecte implémente la syntaxe spécifique du vendor : pagination, gestion des identifiants, fonctions natives, et mapping des types. L'interface `SqlExceptionHandler` traduit les codes erreur SQL du vendor vers des exceptions standardisées.
 
-Le mécanisme de détection fonctionne automatiquement : au moment de l'ouverture de la première connexion, le `SqlStatementDriver` identifie le vendor depuis la métadonnée JDBC et applique le `SqlDialect` correspondant.
+Le dialecte n'est pas détecté : il est porté par la classe de base de données déclarée pour la connexion (`dataBaseClass` pour `sql.c3p0`, `classname` pour `sql.datasource`). Chaque classe `SqlDataBase` fournit son `SqlDialect`.
 
 L'interface `SqlMapping` définit les correspondances entre les types Java et les types JDBC pour chaque dialecte.
 
@@ -197,13 +198,13 @@ Le `MigrationManager` orchestre les migrations de schéma de base de données de
 
 ### Principe
 
-Le `MigrationManagerImpl` délègue l'exécution des migrations au `MigrationPlugin` enregistré. Ce modèle permet de changer de moteur de migration sans impact sur le code appelant.
+Le `MigrationManagerImpl` délègue l'exécution des migrations aux `MigrationPlugin` enregistrés, un par connexion (`connectionName`, `main` par défaut). Ce modèle permet de changer de moteur de migration sans impact sur le code appelant.
 
 ### Plugin Liquibase
 
 Le plugin `LiquibaseMigrationPlugin` implémente `MigrationPlugin` en utilisant Liquibase comme moteur de migration. Il supporte les fichiers changelog au format XML, SQL ou YAML.
 
-L'exécution se fait au démarrage de l'application : le plugin détecte les migrations non appliquées et les exécute séquentiellement. L'historique des migrations est tracé dans une table dédiée gérée par Liquibase.
+Au démarrage, le paramètre `mode` de la feature `migration` fixe ce qui est fait sur chaque connexion : `check` (par défaut) vérifie que la base est à jour, sans rien appliquer, et refuse de démarrer sur une base en retard ; `update` applique les changements en attente ; `none` ne fait rien. En `check` comme en `update`, une base plus récente que l'application (changements inconnus de ses fichiers) est refusée. L'historique des migrations est tracé dans une table dédiée gérée par Liquibase.
 
 ### Exemple
 
@@ -244,9 +245,10 @@ modules:
       - sql:
       - timeseries:
       - migration:
+          mode: update # check par défaut
     featuresConfig:
       - sql.c3p0:
-          dataBaseClass: org.postgresql.PGDatabase
+          dataBaseClass: io.vertigo.database.impl.sql.vendor.postgresql.PostgreSqlDataBase
           jdbcDriver: org.postgresql.Driver
           jdbcUrl: jdbc:postgresql://localhost:5432/mydb
       - timeseries.influxdb:
@@ -256,19 +258,19 @@ modules:
           masterFile: db/changelog/changelog-master.xml
 ```
 
-Chaque feature `sql.*` de connexion (`sql.c3p0`, `sql.datasource`) est incompatible avec les autres : un seul plugin de connexion `SqlConnectionProvider` peut être actif. De même, un seul `TimeSeriesPlugin` et un seul `MigrationPlugin` peuvent être actifs simultanément.
+Chaque feature `sql.c3p0` ou `sql.datasource` déclare une connexion, identifiée par son `name` (`main` par défaut, noms uniques) : voir [Connexions multiples et dataSpace](#connexions-multiples-et-dataspace). Un `MigrationPlugin` est déclaré par connexion. Un seul `TimeSeriesPlugin` peut être actif.
 
 ---
 
 ## Vigilance
 
-- **Un seul plugin de connexion** : `sql.c3p0` et `sql.datasource` sont mutuellement exclusifs. Déclarer les deux provoque une erreur de démarrage.
-- **Dialecte automatique** : le `SqlDialect` est détecté automatiquement depuis la connexion JDBC. Aucune configuration manuelle du dialecte n'est requise. L'ordre de détection est : PostgreSQL, Oracle, SQL Server, H2.
+- **Nom des connexions** : chaque connexion a un `name` unique ; une seule peut garder le nom par défaut `main`. Une connexion secondaire n'est utilisée que là où on la désigne (`connectionName`).
+- **Dialecte** : `dataBaseClass` (ou `classname`) est obligatoire et doit correspondre au SGBD de `jdbcUrl` : c'est lui qui fixe la syntaxe SQL générée (pagination, séquences…).
 - **Generated keys** : la méthode `executeBatchWithGeneratedKeys` n'est supportée que sur les SGBD exposant `getGeneratedKeys()`. Vérifier la compatibilité du driver JDBC.
-- **Oracle11Dialect** : ce dialecte est spécialisé pour Oracle 11g et versions antérieures à 12c. Pour Oracle 12c+, utiliser `OracleDialect`.
+- **Oracle11Dialect** : ce dialecte est spécialisé pour Oracle 11g et versions antérieures à 12c. Pour Oracle 12c+, déclarer `OracleDataBase` (dialecte `OracleDialect`) ; pour Oracle 11g, `Oracle11DataBase`.
 - **TimeSeries sans plugin** : si la feature `timeseries` est activée mais qu'aucun `TimeSeriesPlugin` n'est enregistré, toute opération sur le manager échouera. Toujours activer au moins une feature de plugin (`timeseries.influxdb` ou `timeseries.fake`).
 - **InfluxDB et Flux** : le plugin InfluxDB utilise le langage Flux pour les requêtes. La syntaxe Flux diffère du langage Line Protocol utilisé pour les écritures.
-- **Liquibase au démarrage** : le plugin Liquibase exécute les migrations automatiquement au démarrage. Ne pas configurer d'exécution manuelle en parallèle pour éviter les conflits de verrouillage.
+- **Migration au démarrage** : avec le mode par défaut `check`, rien n'est appliqué. Les migrations ne s'exécutent au démarrage qu'en `mode: update`.
 - **SqlMapping et les types** : le mapping Java→SQL est défini par `SqlMapping`. Pour les types Java non couverts (ex : `Mail`), utiliser `BasicTypeAdapter` pour convertir vers un type primitif supporté (via le paramètre `basicTypeAdapters` des méthodes d'exécution).
 - **Connection pool C3P0** : les paramètres de pool (taille minimale, maximale, timeout) sont configurables via les `Param` de la feature `sql.c3p0`. En l'absence de configuration, les valeurs par défaut C3P0 s'appliquent (pool min 3, max 15).
 
@@ -306,11 +308,11 @@ L'exécution passe par `SqlStatementDriver`, classe qui bridge les appels JDBC v
 |---|---|---|
 | `sql` | — | `SqlManager` (`SqlManagerImpl`) |
 | `sql.c3p0` | `name`, `dataBaseClass`, `jdbcDriver`, `jdbcUrl`, `minPoolSize`, `maxPoolSize`, `acquireIncrement`, `configName` | `C3p0ConnectionProviderPlugin` |
-| `sql.datasource` | params DataSource | `DataSourceConnectionProviderPlugin` |
+| `sql.datasource` | `name`, `classname`, `source` | `DataSourceConnectionProviderPlugin` |
 | `timeseries` | — | `TimeSeriesManager` (`TimeSeriesManagerImpl`) |
 | `timeseries.influxdb` | `connectorName`, `dbNames` (requis : `InfluxDbConnector`) | `FluxInfluxDbTimeSeriesPlugin` |
 | `timeseries.fake` | — | `FakeTimeSeriesPlugin` |
-| `migration` | `Param...` | `MigrationManager` (`MigrationManagerImpl`) |
+| `migration` | `mode` (`check` par défaut, `update`, `none`) | `MigrationManager` (`MigrationManagerImpl`) |
 | `migration.liquibase` | `masterFile`, `connectionName`, `contexts` | `LiquibaseMigrationPlugin` |
 
 ### Plugins

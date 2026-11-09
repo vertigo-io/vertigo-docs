@@ -93,24 +93,22 @@ Pour l'utilisation du plugin OpenOfficeLocalConverterPlugin (gestion de l'ODT en
 </dependency>
 ```
 
-* Définir le provider Java qui contiendra les fichiers de définition du modèle :
+* Enregistrer le provider Java qui contient les définitions du modèle (voir [Définition du dictionnaire](#définition-du-dictionnaire)) dans la classe `Features` d'un module de l'application :
 
-```xml
-<module name="myApp-ressources">
-	<definitions>
-            <provider class="fr.projet.appli.MyPublisherDefinitionProvider" />
-	</definitions>
-</module>
+```java
+getModuleConfigBuilder()
+		.addDefinitionProvider(MyPublisherDefinitionProvider.class);
 ```
 
-* Ajouter le module dans foundation.xml :
+* Activer le module Quarto dans le fichier YAML de configuration (`publisher.odt` pour un modèle OpenOffice, `publisher.docx` pour un modèle Word) :
 
-```xml
-<module name="vertigo-quarto">
-	<component api="PublisherManager" class="io.vertigo.quarto.publisher.impl.PublisherManagerImpl">
-		<plugin class="io.vertigo.quarto.plugins.publisher.odt.OpenOfficeMergerPlugin"/>
-	</component>
-</module>
+```yaml
+modules:
+  io.vertigo.quarto.QuartoFeatures:
+    features:
+      - publisher:
+    featuresConfig:
+      - publisher.odt:
 ```
 
 ### Syntaxe des modèles

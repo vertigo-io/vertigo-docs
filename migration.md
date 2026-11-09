@@ -11,7 +11,7 @@
 * **[All] Dependency injection switched from `javax.inject` to `jakarta.inject`.** Replace all `javax.inject.Inject` imports by `jakarta.inject.Inject` in your code.
 * **[All] Web stack upgraded : Jetty 11 -> 12, Javalin 6 -> 7, Spring 6 -> 7.** Update your own spring modules versions accordingly (spring-test, spring-security...). Jetty websocket maven artifact is renamed `websocket-jetty-server` -> `jetty-websocket-jetty-server`.
 * **[App] Embedded Jetty + JSP (ex: web.xml error pages) : replace the `org.eclipse.jetty:apache-jsp` dependency by `org.eclipse.jetty.ee10:jetty-ee10-apache-jsp`** (artifact moved with jetty 12). Without it JSP support silently disappears and every server error shows up as a bare 404 instead of your error page.
-* **[Connectors] ElasticSearch 7 support dropped** : `vertigo-elasticsearch_7_17-connector` module is removed, only the ES 9 connector remains (stay on vertigo 4.x LTS if you need ES 7).
+* **[Connectors] ElasticSearch 7 support dropped** : the `vertigo-elasticsearch_7_17-connector` module is no longer released with standard versions (maintained in the LTS line, `vertigo-lts-libs`); only the ES 9 connector remains in 5.0.0 — stay on Vertigo 4.x with the LTS stack if you need ES 7.
 * **[Connectors] `vertigo-twitter-connector` and `vertigo-ifttt-connector` are removed.**
 * [Connectors] New module `vertigo-connector-commons` (shared SSL helper `ConnectorSslUtil`), pulled automatically by connectors using SSL.
 * **[DataModel] Blackboard (BB) moved from vertigo-vortex to vertigo-datamodel** : package `io.vertigo.vortex.bb` -> `io.vertigo.datamodel.bb`, the `vertigo-vortex` module no longer exists.
@@ -34,6 +34,20 @@
   - If you declared `io.vertigo.ui.impl.vuejs.filter.UnAutoCloseTagsFilter` in your `web.xml`, you can remove it : it is deprecated, does the same repair less reliably, and now finds nothing left to close. It is **removed** in 5.0.0.
   - The repair is silent by design. Templates keep their faulty tags until you fix them at the source, so a pass on your views is still worth it.
 
+* **[Core] Daemon health checks reworked** (feature `daemons` ; a RED status makes `/healthcheck/readiness` fail) :
+  - `lastExecs` is no longer RED when all daemons fail : a failing daemon is YELLOW until two consecutive successes.
+  - `poolUtilization` (in 4.4.1 it counted the scheduled daemons, not the waiting ones : RED as soon as `threadPoolSize` daemons were scheduled, i.e. on every application with the defaults) now reports daemons waiting for a free thread : YELLOW beyond the daemon limit, RED beyond twice `daemonMaxDurationInSeconds` (4h with the default 2h) or if the daemon pool is shut down. If it turns YELLOW, check `daemonsAlive` first (a daemon running too long often holds the threads), then increase `boot.params.threadPoolSize`.
+  - `daemonsAlive` is new : RED when a daemon is dead (an `Error` cancelled its schedule), YELLOW when a daemon runs longer than its limit `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
+  - A daemon must not run more than `daemonMaxDurationInSeconds` (2h by default) : move longer processing to an Orchestra job.
+  - Both limits are set in `configuration.yaml` with `boot.params.daemonMinDurationInSeconds` (default 120) and `boot.params.daemonMaxDurationInSeconds` (default 7200), see [Core > Run](https://vertigo-io.github.io/vertigo-docs/#/en/overview/core?id=run).
+* [Core] `boot.params.threadPoolSize` is now actually applied (it was silently ignored) : if you had set it, check the value.
+
+* **[DataFactory] ES9 index settings are checked again at startup** (the check was broken since 4.4.0) : if an analyzer, tokenizer, filter or normalizer of your index config file is missing or different on the existing index, the startup now fails with `Index settings have changed and are no more compatible, you must remove your index like : curl -X DELETE ...`. If you changed your index config since its creation in 4.4.x, plan to delete the index and reindex your data when you deploy 4.5.0.
+
+* **[Vega] Node configuration files by environment variable or system property : singular names.** Like `boot.applicationConfiguration` in `web.xml`, they are now read from `VERTIGO_BOOT_APPLICATION_CONFIGURATION` or `-Dboot.application-configuration` (a `;` separated list of files). The plural names `VERTIGO_BOOT_APPLICATION_CONFIGURATIONS` and `-Dboot.application-configurations` were silently ignored since 3.4.0 (the `web.xml` value was used) and are no longer read.
+  - If your deployment sets a plural name, rename it and check its value : it now overrides your `web.xml`.
+  - Precedence : system property, then external properties file (`-Dexternal-properties`), then environment variable, then `web.xml`.
+
 # from 4.4.0 to 4.4.1
 
 * **[Commons] `TraceAspect` is now auto-registered by `CommonsFeatures`.** The core `@Trace` annotation works out of the box in applications using `vertigo-commons` : no need to declare the aspect in a module anymore.
@@ -48,8 +62,10 @@
   - `EmbeddedServer` removed — use testcontainer for tests (see `withEmbeddedServer`, requires a reachable docker via `DOCKER_HOST`)
   - `_all` field removed from index mapping
   - `markToOptimize` only applies to deletes (removeByQuery)
+  - custom facets : the `_innerWriteTo` param is ignored by the ES9 plugin (it was only needed by the ES7 Transport client, for aggregations with specific params like `geohash_grid`), you may remove it from your definitions ; the other params (`_type`, the aggregation JSON body, `#criteria#` placeholders, `_decimalPrecision`) are unchanged
+  - the standard in-memory index plugin (`collections.luceneIndex` feature) is now built against **Lucene 9** : projects staying on ES 7.17 (Lucene 8.11.3) must use the `lucene_8_11` variant shipped in `vertigo-datafactory-plugin-elasticsearch_7_17` (see [ES7 LTS Migration](#datafactory-es7-lts-migration) below)
 * **[DataFactory] Remove deprecated `searchManager.findIndexDefinitionByKeyConcept`** — you must use `findFirstIndexDefinitionByKeyConcept` instead
-* **[DataFactory]If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#es7-lts-migration) below.
+* **[DataFactory]If your project must stay on ElasticSearch 7, you must use the LTS connector provided by [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs).** See [ES7 LTS Migration](#datafactory-es7-lts-migration) below.
 * **[Ui] Reset componentStates each request.** If you relied on component states persisting across multiple requests within the same context, you must manage them explicitly.
 * **[Redis] `RedisSingleConnector` deprecated** — no longer supports Sentinel configuration. Switch to `RedisConnector` (`RedisFeatures.withJedis(...)`), which auto-detects Single/Sentinel/Cluster mode.
 * **[Ui] `vu:message` text colors are now driven by css variables** — `messages.html` no longer hardcodes `text-white` / `text-black`, it uses `text-<level>-inverted` classes based on `--v-negative-invert`, `--v-warning-invert`, `--v-info-invert` and `--v-positive-invert` ([commit](https://github.com/vertigo-io/vertigo-libs/commit/8da1fea78)). **The default values change the rendering of the info and success messages, whose text was black and is now white** (error was already white, warning already black). To keep the previous rendering, redefine the variables in a css of your own, loaded after `vertigo-ui.css` :
@@ -107,13 +123,27 @@ modules:
     features:
       - search:
           __flags__: ["searchES"]
-    featuresConfig:
-      - collections.luceneIndex:
+    plugins:
       - io.vertigo.datafactory.plugins.search.elasticsearch_7_17.rest.RestHLClientESSearchServicesPlugin:
+          __flags__: ["searchES"]
           envIndexPrefix: ${APP_ENV_NAME}
           rowsPerQuery: 300
           config.file: search/elasticsearch.yml
+      - io.vertigo.datafactory.plugins.collections.lucene_8_11.LuceneIndexPlugin: {}
 ```
+
+**YAML syntax reminder**
+
+- `features:` / `featuresConfig:` only accept `@Feature` names (e.g. `search`, `collections.luceneIndex`) : declaring a plugin class name there fails at boot with `Unable to find method for feature ...`. Raw plugin classes must be declared under `plugins:`.
+- Keep the ES plugin behind the same `__flags__` as the `search` feature so both are enabled or disabled together.
+
+**Collections index (autocomplete) — required**
+
+Since 4.4.0, the standard `collections.luceneIndex` feature registers the Lucene **9** index plugin (`io.vertigo.datafactory.plugins.collections.lucene.LuceneIndexPlugin`), which is incompatible with the Lucene 8.11.3 pin mandated below. Do **not** keep it when staying on ES 7.17.
+
+The LTS artifact `vertigo-datafactory-plugin-elasticsearch_7_17` also ships the Lucene 8.11 variant `io.vertigo.datafactory.plugins.collections.lucene_8_11.LuceneIndexPlugin` — declare it under `plugins:` as above (no flag : in-memory list search is independent of the `search` flag).
+
+Without an `IndexPlugin`, in-memory list search — e.g. `vu:autocomplete-edit` calling `POST /autocomplete/_searchFullText` — fails **at runtime** with `IllegalStateException: An IndexPlugin is required to use this function` (HTTP 500). The node boots fine and tests that don't touch autocomplete pass, so this is easy to miss during a migration.
 
 **Important Notes**
 
@@ -133,7 +163,7 @@ modules:
 </repository>
 ```
 
-3. **Lucene Version Conflict (required fix):** The `vertigo-ui` / `vertigo-datafactory` BOMs pin Lucene 9.12.3 (for the `collections.luceneIndex` plugin), which overrides the Lucene 8.11.3 required by ES 7.17. This causes `NoSuchFieldError` on `LuceneVersion.LUCENE_7_0_0` at startup. You **must** pin Lucene 8.11.3 in your `pom.xml` `<dependencyManagement>`:
+3. **Lucene Version Conflict (required fix):** The `vertigo-datafactory` BOM pins Lucene 9.12.3 (for the standard `LuceneIndexPlugin` and the ES9 stack), which overrides the Lucene version required by ES 7.17 (ES 7.17.28 is built against Lucene 8.11.3 — for other ES 7.x patches, pin the Lucene version that patch is built against : ES 7.9.3 → Lucene 8.6.2, ES 7.10.2 → Lucene 8.7.0). With Lucene 9 on the classpath, the ES 7.17 client fails at startup (`NoSuchFieldError` on `LUCENE_7_0_0` — the ES 7.17 class `org.elasticsearch.Version` references constants of `org.apache.lucene.util.Version`, which were removed in Lucene 9). You **must** pin Lucene 8.11.3 in your `pom.xml` `<dependencyManagement>`:
 
 ```xml
 <dependency>
@@ -143,7 +173,7 @@ modules:
 </dependency>
 <dependency>
     <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-analysis-common</artifactId>
+    <artifactId>lucene-analyzers-common</artifactId>
     <version>8.11.3</version>
 </dependency>
 <dependency>
@@ -153,9 +183,9 @@ modules:
 </dependency>
 ```
 
-Direct entries in your project's `dependencyManagement` take precedence over imported BOMs.
+Direct entries in your project's `dependencyManagement` take precedence over imported BOMs. Note : `lucene-analyzers-common` is the Lucene 8.x artifact name (renamed `lucene-analysis-common` in Lucene 9) — this pin also covers the `lucene_8_11` collections index plugin, another reason the standard `collections.luceneIndex` feature (Lucene 9) must not be used in this setup.
 
-4. **Features:** The `restHL` feature uses `RestHighLevelClient` which is now in the LTS connector.
+4. **Features:** the connector feature `restHL` is provided by `io.vertigo.connectors.elasticsearch_7_17.ElasticSearchFeatures` (LTS connector `vertigo-elasticsearch_7_17-connector`, pulled transitively by the LTS datafactory artifact) and uses `RestHighLevelClient`. The datafactory search plugin to declare under `plugins:` is `io.vertigo.datafactory.plugins.search.elasticsearch_7_17.rest.RestHLClientESSearchServicesPlugin`.
 5. **Migration Path:** If you need to migrate to ES9 later, you'll need to:
    - Replace `vertigo-datafactory-plugin-elasticsearch_7_17` with `vertigo-elasticsearch-connector`
    - Update YAML configuration to use ES9 client

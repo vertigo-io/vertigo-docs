@@ -116,11 +116,12 @@ Le premier paramètre est de type `DataDefinition`, non `DtDefinition`. La map c
 
 Le `SearchLoader` est un Component chargé d'alimenter un index depuis une source de données. L'abstraction `AbstractSqlSearchLoader` fournit le squelette pour un chargement SQL batch.
 
-Ce Component s'injecte via `@Component` et reçoit en paramètres `TaskManager` et `VTransactionManager`. La méthode `loadData(SearchChunk<K>)` est appelée avec un lot d'UIDs identifié par un curseur, et retourne une `List<SearchIndex<K, I>>` contenant les documents à indexer. La méthode `getSqlQueryFilter()` retourne le filtre SQL additionnel appliqué lors des reindexations incrémentales (Delta et Modified), typiquement une condition sur un champ timestamp du style `WHERE LAST_UPDATE > :lastDate`.
+Ce Component s'injecte via `@Component` et reçoit en paramètres `TaskManager` et `VTransactionManager`. La méthode `loadData(SearchChunk<K>)` est appelée avec un lot d'UIDs identifié par un curseur, et retourne une `List<SearchIndex<K, I>>` contenant les documents à indexer. La méthode `getSqlQueryFilter()` ajoute un filtre SQL **structurel** au parcours des identifiants à indexer (par exemple `TYPE = 'texte'`) : il ne doit pas dépendre de l'état des données au cours de leur vie. Le filtrage d'activité (élément désactivé, archivé…) se fait dans la requête de `loadData`. La méthode `getVersionFieldName()` désigne le champ de version utilisé par les réindexations incrémentales.
 
 `AbstractSqlSearchLoader` est une classe abstraite paramétrée dont le constructeur injecte `TaskManager` et `VTransactionManager`. La classe implémentante doit surcharger :
 - `loadData(SearchChunk<K>)` → `List<SearchIndex<K, I>>` : charge les données du chunk SQL et retourne les documents à indexer.
-- `getSqlQueryFilter()` → `String` : retourne le filtre SQL pour les reindexations incrémentales (ex. `WHERE LAST_UPDATE > :lastDate`).
+- `getSqlQueryFilter()` → `String` *(optionnel, vide par défaut)* : filtre SQL structurel ajouté au parcours des identifiants.
+- `getVersionFieldName()` → `Optional<DataFieldName<K>>` *(optionnel, vide par défaut)* : champ de version, comparable sur toute la table (séquence, date de dernière modification) ; requis par `reindexDelta` et `reindexAllModified`.
 
 Le loader se déclare avec `@Component`. La méthode `loadData` retourne `List<SearchIndex<K, I>>`, non `void`. Le paramètre est `SearchChunk<K>` (type UID du KeyConcept), non `SearchChunk<String>`.
 
@@ -135,12 +136,12 @@ Long nombreIndexe = futureCount.get();
 ```
 
 ```java
-// Reindexation des documents modifiés — utilise le champ timestamp
+// Réindexe les documents dont la version en base diffère de la version indexée (getVersionFieldName)
 Future<Long> futureModified = searchManager.reindexAllModified(idxTache);
 ```
 
 ```java
-// Reindexation incrémentale — ajoute/supprime depuis le dernier curseur
+// Reprend à partir de la dernière version indexée (getVersionFieldName)
 Future<Long> futureDelta = searchManager.reindexDelta(idxTache);
 ```
 
@@ -430,7 +431,7 @@ Le loader `TacheSearchLoader` étend `AbstractSqlSearchLoader` et est déclaré 
 
 La méthode `loadData(SearchChunk<K>)` reçoit un lot d'UIDs (identifiés par un curseur) et retourne `List<SearchIndex<K, I>>` : pour chaque UID du chunk, on charge les données de la tâche, on mappe vers `DtTacheIndex`, et on retourne la liste des documents à indexer.
 
-La méthode `getSqlQueryFilter()` retourne le filtre SQL dynamique utilisé pour les reindexations incrémentales. Par exemple, une clause `WHERE LAST_UPDATE > :lastDate` permet de ne réindexer que les tâches modifiées depuis la dernière reindexation.
+La méthode `getSqlQueryFilter()` peut restreindre les tâches indexées par un critère stable (par exemple les seules tâches d'un type donné). Pour les réindexations incrémentales, `getVersionFieldName()` désigne le champ de version, par exemple la date de dernière modification de la tâche.
 
 ### Étape 4 — Définition des facettes
 
@@ -476,7 +477,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 
 - **Constructeur SearchIndexDefinition** : le constructeur prend exactement 5 paramètres : name, keyConceptDataDefinition (`DataDefinition`), indexDataDefinition (`DataDefinition`), indexCopyFromFieldsMap (`Map<DataField, List<DataField>>` — direction `toField → [fromFields]`, pas `fromField → [toFields]`), searchLoaderId. Aucun builder fluide de type `SearchIndexDefinitionBuilder` n'existe. Ne pas confondre `DataDefinition` avec `DtDefinition` ; ne pas utiliser `Map<String, String>` pour la map copyTo.
 - **Reindexation automatique** : `SearchManagerImpl` écoute les `StoreEvent` sur l'EventBus pour marquer les KeyConcepts comme dirty, puis file un `ReindexTask` avec un délai de 1 seconde pour éviter les appels multiples.
-- **Reindexation Delta** : la méthode `getSqlQueryFilter()` du SearchLoader doit retourner un filtre SQL avec un paramètre timestamp. Les documents supprimés sont détectés par disparition du KeyConcept.
+- **Réindexation Delta et Modified** : elles exigent `getVersionFieldName()`, un champ de version croissant et comparable sur toute la table. `getSqlQueryFilter()` n'y joue aucun rôle incrémental. Les documents supprimés sont détectés par disparition du KeyConcept.
 - **Ranges dans le DSL** : `[min TO max]` inclut les bornes. Utiliser `*` pour les bornes ouvertes infinies : `[0 TO *]`.
 - **Géo** : les expressions géographiques ne sont pas inline dans le DSL. Elles se configurent via `SearchQueryBuilder.withGeoSearchQuery(String)`.
 - **Boost et clustering** : `decay()` et `cluster()` ne sont pas inline. Utiliser `withDateBoost(DataField, int, int)` et `withFacetClustering(FacetDefinition)` sur le builder.
@@ -514,7 +515,7 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 | `search.elasticsearch.rest` | `RestClientESSearchServicesPlugin` (ES9 REST) ← recommandé |
 | `search.elasticsearch.restHL` | Alias déprécié vers `search.elasticsearch.rest` |
 | `search.elasticsearch.client` | **Déprécié** — lève `UnsupportedOperationException` |
-| `collections.luceneIndex` | `LuceneIndexPlugin` |
+| `collections.luceneIndex` | `LuceneIndexPlugin` (Lucene **9.12.3**) — indexation in-mémoire (autocomplete, facettage) ; pile ES 7.17 / Lucene 8.11 : voir [ES7 LTS](#es7-lts) (`lucene_8_11.LuceneIndexPlugin`) |
 
 ### API fluide (Suppliers)
 | Supplier | Rôle |
@@ -536,7 +537,8 @@ L'index Lucene est reconstruit à chaque appel sur la `DtList` fournie, donc cet
 ### Plugins
 | Plugin | Rôle | Feature |
 |---|---|---|
-| `LuceneIndexPlugin` | Index Lucene en RAM pour le facettage in-mémoire | `collections.luceneIndex` |
+| `LuceneIndexPlugin` | Index Lucene en RAM (Lucene 9.12.3) pour le facettage in-mémoire | `collections.luceneIndex` |
+| `lucene_8_11.LuceneIndexPlugin` | Index Lucene en RAM (Lucene 8.11) — variante LTS, déclarée sous `plugins:` | — (artefact `vertigo-datafactory-plugin-elasticsearch_7_17`) |
 | `RestClientESSearchServicesPlugin` | Client REST ElasticSearch 9 | `search.elasticsearch.rest` |
 | `ClientESSearchServicesPlugin` | **Déprécié** — lève `UnsupportedOperationException` | `search.elasticsearch.client` |
 
@@ -561,9 +563,9 @@ Pour connecter un serveur ES9, utiliser la feature du connecteur :
 
 ```yaml
 modules:
-    io.vertigo.elasticsearchconnector.ElasticsearchConnectorFeatures:
+    io.vertigo.connectors.elasticsearch.ElasticSearchFeatures:
         features:
-            - vertigo-elasticsearch-connector#rest:
+            - rest:
                   name: "main"
                   servers.names: "es1:9200,es2:9200"
                   username: "elastic"
@@ -583,35 +585,17 @@ modules:
 | `password` | Optional\<String\> | Non | — |
 | `apiKeyId` | Optional\<String\> | Non | — |
 | `apiKeySecret` | Optional\<String\> | Non | — |
-| `ssl` | boolean | Non | `false` |
+| `ssl` | boolean | Oui | — |
 | `trustStoreUrl` | Optional\<String\> | Non | — |
 | `trustStorePassword` | Optional\<String\> | Non | — |
 
 #### Serveur embarqué (tests)
 
-La feature `vertigo-elasticsearch-connector#embeddedServer` lance un Docker testcontainer avec ES 9.4.3 pour l'environnement de test.
+La feature `embeddedServer` du module `io.vertigo.connectors.elasticsearch.ElasticSearchFeatures` (artefact `vertigo-elasticsearch-connector`) démarre un conteneur [testcontainers](https://java.testcontainers.org/) avec ES 9.4.3 (image par défaut, paramètre `esImage` pour la changer) pour l'environnement de test.
 
-#### ES7 — LTS
+#### ES7 LTS
 
-Le connecteur ES7 (`vertigo-elasticsearch_7_17-connector`) est disponible en **LTS** (Long Time Support) dans le repo `vertigo-libs-lts`. Il est utilisé par certains projets legacy (ex. vertigo-geo).
-
-Pour l'utiliser :
-
-```xml
-<repository>
-    <id>vertigo-lts</id>
-    <url>https://nexus.vertigo.io/content/repositories/vertigo-lts</url>
-</repository>
-```
-
-```xml
-<dependency>
-    <groupId>io.vertigo</groupId>
-    <artifactId>vertigo-elasticsearch_7_17-connector</artifactId>
-</dependency>
-```
-
-La feature ES7 est `vertigo-elasticsearch-connector#rest` (package `io.vertigo.connectors.elasticsearch_7_17`). Voir `migration.md` pour les détails.
+Depuis la version 4.4.0, la pile standard est ES9 ; la pile ES 7.17 est maintenue en **LTS** : connecteur `vertigo-elasticsearch_7_17-connector` (repo [vertigo-connectors](https://github.com/vertigo-io/vertigo-connectors)) + plugin `vertigo-datafactory-plugin-elasticsearch_7_17` (repo [vertigo-lts-libs](https://github.com/vertigo-io/vertigo-lts-libs)). Deux obligations : fixer Lucene 8.11.3 dans le `<dependencyManagement>` et déclarer `lucene_8_11.LuceneIndexPlugin` sous `plugins:` (ne pas conserver la feature standard `collections.luceneIndex`, incompatible avec cette version de Lucene) — guide complet : [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
 
 ### API SearchManager
 

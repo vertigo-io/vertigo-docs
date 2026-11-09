@@ -42,10 +42,12 @@ Vertigo maintains two versions of the ElasticSearch plugin: the current version 
 
 ### Activating the Module
 
-First, you need to activate the **vertigo-datafactory** module and the **vertigo-elasticsearch-connector** connector.<br/>
+First, you need to activate the **vertigo-datafactory** module and the **vertigo-elasticsearch-connector** connector (ElasticSearch 9 since Vertigo version 4.4.0)<br/>
 The module offers two operating modes:
 - *standard* mode using a remote ElasticSearch server
-- *embedded* mode using a local ElasticSearch server, started alongside the application (useful for testing)
+- *embedded* mode using a local ElasticSearch container started via [testcontainers](https://java.testcontainers.org/) (useful for testing)
+
+!> Since version 4.4.0, the ElasticSearch connector is based on the ES9 client. Projects that must stay on ElasticSearch 7.17 use the LTS stack (connector `vertigo-elasticsearch_7_17-connector` + plugin `vertigo-datafactory-plugin-elasticsearch_7_17`): see [ES7 LTS Migration](migration.md#datafactory-es7-lts-migration).
 
 !> Embedded mode has been deprecated by ElasticSearch since version 5.
 
@@ -209,7 +211,7 @@ The **IndexDefinition** represents an Index. Only one is needed per KeyConcept.<
 **Properties**
 - `keyConcept`*: Name of the KeyConcept Dt, used to track modifications and trigger reindexing
 - `dtIndex`*: Name of the Dt representing the document, both search fields and returned fields
-- `searchLoader`*: Name of a Vertigo component used to reload documents from a list of IDs (must implement the SearchLoader<keyConcept, dtIndex> interface)
+- `loaderId`*: Name of a Vertigo component used to reload documents from a list of IDs (must implement the SearchLoader<keyConcept, dtIndex> interface)
 - `indexCopyTo`: Adds a field aggregating a list of document fields, uses the engine's optimized *copy* function (the field must already exist in the DtIndex)
   - `from`: list of comma-separated fields
 
@@ -307,7 +309,7 @@ The **FacetedQueryDefinition** represents a search query definition. Associated 
 - `dtIndex`*: Name of the index Dt
 - `domainCriteria`*: Name of the input criteria domain.
 - `facets`*: List of facets activated in this search
-- `listFilterBuilderClass`*: Name of the engine for translating the query (*io.vertigo.dynamox.search.DslListFilterBuilder* recommended)
+- `listFilterBuilderClass`*: Name of the engine for translating the query (*io.vertigo.datafactory.impl.search.dsl.DslListFilterBuilder* recommended)
 - `listFilterBuilderQuery`*: Search query (see [VertigoSearchDSL](#vertigosearchdsl-syntax) syntax)
 - `geoSearchQuery`: Allows completing (if needed) the query with a geographic filter (for map bounding boxes, for example)
 

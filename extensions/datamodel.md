@@ -27,10 +27,10 @@ Les générateurs suivants sont liés à ce module :
 - `vertigo.domain.java`: génère les classes Java des DtObject
 - `vertigo.domain.java.targetSubDir`: précise le répertoire de génération (par défaut *~/javagen*)
 - `vertigo.domain.java.generateDtResources`: génère les fichiers .properties pour le i18n des libellés des champs
-- `vertigo.domain.sql`: génère le fichier crebase.sql pour régénérer la structure de la base
+- `vertigo.domain.sql`: génère le fichier crebas.sql pour régénérer la structure de la base
 - `vertigo.domain.sql.targetSubDir`: précise le répertoire de génération du SQL
 - `vertigo.domain.sql.baseCible`: Type de la base *(pour les syntaxes spécifiques)*
-- `vertigo.domain.sql.generateDrop`: génère les DROP dans crebase.sql
+- `vertigo.domain.sql.generateDrop`: génère les DROP dans crebas.sql
 - `vertigo.domain.sql.generateMasterData`: génère les scripts de remplissage des données de référence
 - `vertigo.task`: génère les classes Java des tâches d'accès aux données
 - `mermaid`: génère un fichier HTML pour visualiser le modèle graphiquement
@@ -67,6 +67,7 @@ create DtDefinition DtUsager {
 	- `label` : libellé du champ
 	- `cardinality` : `?` (0-1), `1` (obligatoire), `*` (multiple)
 - `id` : désigne l'entité persistante et sa clé primaire *(pas de PK multiple, sauf tables d'association N-N)*
+- `sortField` : champ de tri par défaut des listes de l'objet
 
 __StereoType__
 
@@ -163,13 +164,15 @@ Le `TaskManager` gère l'exécution des tâches définies dans le KSP. Il expose
 
 | Annotation | Rôle |
 |---|---|
-| `@TaskAnnotation` | Déclare une méthode comme proxy de tâche |
-| `@TaskProxyAnnotation` | Interface de proxy de tâche |
+| `@TaskAnnotation` | Déclare une tâche sur une méthode concrète d'un composant déclaré (c'est ce que génère Studio dans les DAO et PAO) : le `TaskManager` en crée la définition au démarrage, le corps de la méthode exécute la tâche |
+| `@TaskProxyAnnotation` | Déclare une tâche sur une méthode d'une interface `Amplifier`, sans corps : la plateforme en fournit l'implémentation (feature `taskProxyMethod` des `DataStoreFeatures`) |
 | `@TaskInput` | Paramètre d'entrée de la tâche |
 | `@TaskOutput` | Résultat de sortie de la tâche |
 | `@TaskContextProperty` / `@TaskContextProperties` | Propriété du contexte d'exécution |
 
 L'implémentation `TaskAmplifierMethod` relie les annotations proxy aux `TaskDefinition` réelles.
+
+!> Sur une interface `Amplifier`, utilisez `@TaskProxyAnnotation` : une méthode annotée `@TaskAnnotation` n'y est pas reconnue et le démarrage échoue avec `No way to find a proxy annotation on method : ...`.
 
 ## SmartType Annotations
 

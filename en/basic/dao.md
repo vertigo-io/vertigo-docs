@@ -100,7 +100,7 @@ The query is a text field containing the processing to be performed.
 This field allows the use of input parameters as bound parameters using the following syntax:
 
 - *#primitiveParameterName#*: for a primitive parameter
-- *#primitiveParameterName.rownum#*: for a primitive list type parameter and field usage in batch type queries
+- *#primitiveParameterName.rownum#*: for a primitive list type parameter. In an `IN (...)` clause, each value of the list becomes a bound parameter (example: `where cou_id in (#countriesIds.rownum#)`); also used in batch type queries
 
 - *#objectParameter.field#*: for an object type parameter and field usage
 - *#objectListParameter.index.field#*: for an object list type parameter and field usage (*to use for clauses of type Where IN(...)*)
@@ -161,7 +161,7 @@ create Task TkGetActorsInMovie {
 Once this Task is declared and the generator executed, a new method is available in the associated DAO. Tasks are placed in the DAO of the object concerned by the parameters (output or input) when there is no ambiguity, or in a PAO (Package Access Object) otherwise.
 
 ```java
-public io.vertigo.dynamo.domain.model.DtList<io.vertigo.samples.dao.domain.Actor> getActorsInMovie(final Long movId) {
+public io.vertigo.datamodel.data.model.DtList<io.vertigo.samples.dao.domain.Actor> getActorsInMovie(final Long movId) {
 		final Task task = createTaskBuilder("TkGetActorsInMovie")
 				.addValue("movId", movId)
 				.build();
