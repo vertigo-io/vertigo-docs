@@ -150,15 +150,17 @@ Ce KPR expose `DtAgenda`, `DtAgendaDisplay` et `DtReservationCreneau` (pour ratt
 
 Les tables du module (`AGENDA`, `PLAGE_HORAIRE`, `TRANCHE_HORAIRE`, `CRENEAU`, `RESERVATION_CRENEAU`) et leurs séquences sont créées par les scripts livrés dans le module (`io/vertigo/planning/sql/`), écrits pour PostgreSQL, à intégrer dans les scripts de migration de l'application (par exemple Liquibase) :
 
-- [`planning_create_init_4.3.0.sql`](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/resources/io/vertigo/planning/sql/planning_create_init_4.3.0.sql) : création de la base de données initiale
+- [`planning_create_init_4.5.0.sql`](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/resources/io/vertigo/planning/sql/planning_create_init_4.5.0.sql) : création de la base de données initiale, avec ses contraintes d'unicité (une réservation n'occupe qu'un créneau ; deux plages d'un agenda ne commencent pas au même moment) et ses index de consultation
+- [`planning_update_4.5.0.sql`](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/resources/io/vertigo/planning/sql/planning_update_4.5.0.sql) : mise à jour d'une base existante vers 4.5.0 (contraintes et index) ; la pose des contraintes échoue si les données contiennent déjà des doublons, que les requêtes en commentaire du script permettent de repérer
 
 !> Les scripts de création initiale commencent par supprimer les tables du module (`drop table IF EXISTS … cascade`) : ils ne s'exécutent qu'à l'installation, jamais sur une base qui contient des données.
 
 Versions précédentes :
 
+- `planning_create_init_4.3.0.sql` : création de la base de données initiale en 4.3.0
 - `planning_create_init_4.2.0.sql` : création de la base de données initiale en 4.2.0
 - `planning_update_4.2.0.1.sql` : mise à jour vers 4.2.0.1 (longueur du nom de l'agenda)
-<!-- source : resources/io/vertigo/planning/sql/ (3 scripts) ; planning_update_4.2.0.1.sql:L1 -->
+<!-- source : resources/io/vertigo/planning/sql/ (5 scripts) ; planning_update_4.2.0.1.sql:L1 ; planning_create_init_4.5.0.sql (contraintes A_RESERVATION_CRENEAU_CRENEAU_RESERVATION_CRENEAU_UNIQUE_FK, A_PLAGE_HORAIRE_UNIQUE, index IDX_*) ; planning_update_4.5.0.sql -->
 
 ### Ajout des messages ressource
 
@@ -223,6 +225,8 @@ __Compléments JavaScript__
 - `agenda-create-plage` : Composant de modale création de plage horaire
   - `plage_actions_slot` : Slot des boutons du composant (défaut : bouton de création, selon le mode guichet ou agenda personnel)
 
+- `agenda-edit-plage` : Composant de modale de modification de plage horaire ; sa confirmation signale les rendez-vous déjà réservés et la republication nécessaire
+
 - `agenda-detail-plage` : Composant de modale détail de plage horaire
   - `plage_actions_slot` : Slot des boutons du composant (défaut : aucun)
 
@@ -252,6 +256,7 @@ __Exemple__
     </vu:slot>
 </vu:agenda-week>
 <vu:agenda-create-plage/>
+<vu:agenda-edit-plage/>
 <vu:agenda-detail-plage>
     <vu:slot name="plage_actions_slot">
         <vu:include-data-primitive key="selectedProjetId" />
@@ -296,11 +301,12 @@ Les opérations de BackOffice sont portées par le service `PlanningServices` :
 - `createPlageHoraire(form, authorizedAgeUids, maxWeekDaysNumber)` : crée une plage et la découpe en tranches de `dureeCreneau` minutes. La création contrôle les seuils de `services.config` (durée, heures de début et de fin, nombre de guichets, éloignement de la date), le jour de la semaine, et l'absence de chevauchement avec les plages des agendas autorisés. Les erreurs sont collectées par champ du formulaire et levées ensemble (`ValidationUserException`). Un agenda non autorisé provoque une `VSecurityException` ; les autres refus métier sont des `VUserException` dont le message est destiné à l'utilisateur.
 - `duplicateSemaine(…)`, `duplicateJour(…)` : reproduisent les plages d'une semaine ou d'un jour sur d'autres dates, en ignorant les jours fermés et les plages qui chevaucheraient l'existant.
 - `deletePlageHoraireCascade(ageUid, plhUid)` : supprime une plage, ses tranches et ses créneaux. Les réservations sont conservées : elles deviennent hors planning.
+- `updatePlageHoraire(plhUid, form, authorizedAgeUids, maxWeekDaysNumber)` : modifie une plage sur la même date (heures, nombre de guichets, agenda). La plage est supprimée puis recréée, avec les contrôles de la création ; elle n'est plus publiée : l'agent la vérifie, puis la publie, ce qui rattache de nouveau ses réservations. Un changement de date, ou une modification qui ne change rien, est refusé.
 - `closeTrancheHoraire(ageUid, trhUid)` : ferme une tranche : son nombre de guichets passe à zéro, ses créneaux sont supprimés, et elle n'est plus proposée.
 - `checkAuthorizedAgenda(ageUid, authorizedAgeUids)`, `checkAuthorizedAgendaOfPlh(plhUid, authorizedAgeUids)` : vérifient que l'agenda concerné fait partie des agendas autorisés pour l'utilisateur.
 
-La création, la duplication et la suppression de plages, ainsi que la fermeture d'une tranche, verrouillent la ligne de l'agenda en base (`readOneForUpdate`) : deux actions simultanées sur un même agenda ne créent pas de plages en double. La publication ne pose pas ce verrou.
-<!-- source : PlanningServices.java:L90 (@Transactional), L110-197 (création, contrôles, verrou L167, conflits L169-179, UiErrorBuilder L128, L181), L235-312 (duplications, verrou L329), L403-431, L459-468 (jours fermés, conflits), L470-484 (verrous L474, L482), L881-883, L895-907 ; agenda_tasks.ksp:L28-36 (fermeture d'une tranche) -->
+La création, la duplication, la modification et la suppression de plages, ainsi que la fermeture d'une tranche, verrouillent la ligne de l'agenda en base (`readOneForUpdate`) : deux actions simultanées sur un même agenda ne créent pas de plages en double. La publication ne pose pas ce verrou.
+<!-- source : PlanningServices.java:L90 (@Transactional), L110-197 (création, contrôles, verrou L167, conflits L169-179, UiErrorBuilder L128, L181), L235-312 (duplications, verrou L329), L403-431, L459-468 (jours fermés, conflits), L470-484 (verrous L474, L482), updatePlageHoraire (suppression puis création), L881-883, L895-907 ; agenda_tasks.ksp:L28-36 (fermeture d'une tranche) -->
 
 !> Les requêtes SQL écrites par l'application sur les tables du module ne bénéficient pas de ces verrous, ni de ceux de la réservation : préférer les méthodes du service pour modifier les plages, les tranches et les réservations.
 
@@ -399,6 +405,7 @@ Fournit les actions standards :
 - `POST ~/_duplicateJour(agendaRange,duplicationJourForm,duplicationSemaineForm)` : duplique un jour vers les jours choisis
 - `POST ~/_publishPlage(agendaRange,publicationTrancheHoraireForm)` : publie les tranches des agendas affichés sur la période du formulaire
 - `POST ~/_deletePlage(agendaRange,plhId)` : supprime la plage horaire identifiée
+- `POST ~/_editPlage(agendaRange,plhId,creationPlageHoraireForm)` : modifie la plage horaire identifiée en fonction du formulaire envoyé ; elle est à publier de nouveau
 - `POST ~/_loadPlageHoraireDetail(agendaRange,plhId)` : charge les données de la popin de détail de la plage horaire
 - `POST ~/_deleteTrancheHoraire(agendaRange,plageHoraireDetail,trhId)` : ferme la tranche horaire identifiée, et recharge le détail de la plage
 <!-- source : AbstractAgendaController.java:L87-178 -->

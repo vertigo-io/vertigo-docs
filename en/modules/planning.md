@@ -150,15 +150,17 @@ This KPR exposes `DtAgenda`, `DtAgendaDisplay` and `DtReservationCreneau` (to li
 
 The module tables (`AGENDA`, `PLAGE_HORAIRE`, `TRANCHE_HORAIRE`, `CRENEAU`, `RESERVATION_CRENEAU`) and their sequences are created by the scripts shipped in the module (`io/vertigo/planning/sql/`), written for PostgreSQL, to be included in the application's migration scripts (for example Liquibase):
 
-- [`planning_create_init_4.3.0.sql`](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/resources/io/vertigo/planning/sql/planning_create_init_4.3.0.sql): initial database creation
+- [`planning_create_init_4.5.0.sql`](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/resources/io/vertigo/planning/sql/planning_create_init_4.5.0.sql): initial database creation, with its unique constraints (a reservation occupies a single slot; two time periods of an agenda never start at the same time) and its consultation indexes
+- [`planning_update_4.5.0.sql`](https://github.com/vertigo-io/vertigo-modules/blob/master/vertigo-planning/src/main/resources/io/vertigo/planning/sql/planning_update_4.5.0.sql): update of an existing database to 4.5.0 (constraints and indexes); adding the constraints fails if the data already contains duplicates, which the queries commented in the script help find
 
 !> The initial creation scripts start by dropping the module tables (`drop table IF EXISTS … cascade`): they only run at installation, never on a database that contains data.
 
 Previous versions:
 
+- `planning_create_init_4.3.0.sql`: initial database creation in 4.3.0
 - `planning_create_init_4.2.0.sql`: initial database creation in 4.2.0
 - `planning_update_4.2.0.1.sql`: update to 4.2.0.1 (length of the agenda name)
-<!-- source : resources/io/vertigo/planning/sql/ (3 scripts) ; planning_update_4.2.0.1.sql:L1 -->
+<!-- source : resources/io/vertigo/planning/sql/ (5 scripts) ; planning_update_4.2.0.1.sql:L1 ; planning_create_init_4.5.0.sql (contraintes A_RESERVATION_CRENEAU_CRENEAU_RESERVATION_CRENEAU_UNIQUE_FK, A_PLAGE_HORAIRE_UNIQUE, index IDX_*) ; planning_update_4.5.0.sql -->
 
 ### Adding resource messages
 
@@ -223,6 +225,8 @@ __JavaScript additions__
 - `agenda-create-plage`: Time period creation modal component
   - `plage_actions_slot`: Component buttons slot (default: creation button, depending on counter or personal agenda mode)
 
+- `agenda-edit-plage`: Time period edition modal component; its confirmation reports the appointments already booked and the publication needed again
+
 - `agenda-detail-plage`: Time period detail modal component
   - `plage_actions_slot`: Component buttons slot (default: none)
 
@@ -252,6 +256,7 @@ __Example__
     </vu:slot>
 </vu:agenda-week>
 <vu:agenda-create-plage/>
+<vu:agenda-edit-plage/>
 <vu:agenda-detail-plage>
     <vu:slot name="plage_actions_slot">
         <vu:include-data-primitive key="selectedProjetId" />
@@ -296,11 +301,12 @@ BackOffice operations are carried by the `PlanningServices` service:
 - `createPlageHoraire(form, authorizedAgeUids, maxWeekDaysNumber)`: creates a time period and divides it into time ranges of `dureeCreneau` minutes. Creation checks the `services.config` thresholds (duration, start and end times, number of counters, distance of the date), the day of the week, and the absence of overlap with the time periods of the authorized agendas. Errors are collected per form field and raised together (`ValidationUserException`). An unauthorized agenda raises a `VSecurityException`; the other business refusals are `VUserException`s whose message is intended for the user.
 - `duplicateSemaine(…)`, `duplicateJour(…)`: reproduce the time periods of a week or a day on other dates, ignoring closed days and time periods that would overlap existing ones.
 - `deletePlageHoraireCascade(ageUid, plhUid)`: deletes a time period, its time ranges and its slots. Reservations are kept: they become off-schedule.
+- `updatePlageHoraire(plhUid, form, authorizedAgeUids, maxWeekDaysNumber)`: modifies a time period on the same date (times, number of counters, agenda). The time period is deleted and created again, with the creation checks; it is no longer published: the agent checks it, then publishes it, which links its reservations again. A change of date, or a modification that changes nothing, is refused.
 - `closeTrancheHoraire(ageUid, trhUid)`: closes a time range: its number of counters drops to zero, its slots are deleted, and it is no longer offered.
 - `checkAuthorizedAgenda(ageUid, authorizedAgeUids)`, `checkAuthorizedAgendaOfPlh(plhUid, authorizedAgeUids)`: check that the agenda concerned is among the agendas authorized for the user.
 
-Creating, duplicating and deleting time periods, as well as closing a time range, lock the agenda row in the database (`readOneForUpdate`): two simultaneous actions on the same agenda do not create duplicate time periods. Publication does not set this lock.
-<!-- source : PlanningServices.java:L90 (@Transactional), L110-197 (création, contrôles, verrou L167, conflits L169-179, UiErrorBuilder L128, L181), L235-312 (duplications, verrou L329), L403-431, L459-468 (jours fermés, conflits), L470-484 (verrous L474, L482), L881-883, L895-907 ; agenda_tasks.ksp:L28-36 (fermeture d'une tranche) -->
+Creating, duplicating, modifying and deleting time periods, as well as closing a time range, lock the agenda row in the database (`readOneForUpdate`): two simultaneous actions on the same agenda do not create duplicate time periods. Publication does not set this lock.
+<!-- source : PlanningServices.java:L90 (@Transactional), L110-197 (création, contrôles, verrou L167, conflits L169-179, UiErrorBuilder L128, L181), L235-312 (duplications, verrou L329), L403-431, L459-468 (jours fermés, conflits), L470-484 (verrous L474, L482), updatePlageHoraire (suppression puis création), L881-883, L895-907 ; agenda_tasks.ksp:L28-36 (fermeture d'une tranche) -->
 
 !> SQL queries written by the application on the module tables do not benefit from these locks, nor from the reservation ones: prefer the service methods to modify time periods, time ranges and reservations.
 
@@ -399,6 +405,7 @@ Provides standard actions:
 - `POST ~/_duplicateJour(agendaRange,duplicationJourForm,duplicationSemaineForm)`: duplicates a day to the chosen days
 - `POST ~/_publishPlage(agendaRange,publicationTrancheHoraireForm)`: publishes the time ranges of the displayed agendas over the period of the form
 - `POST ~/_deletePlage(agendaRange,plhId)`: deletes the identified time period
+- `POST ~/_editPlage(agendaRange,plhId,creationPlageHoraireForm)`: modifies the identified time period according to the submitted form; it must be published again
 - `POST ~/_loadPlageHoraireDetail(agendaRange,plhId)`: loads the data of the time period detail popin
 - `POST ~/_deleteTrancheHoraire(agendaRange,plageHoraireDetail,trhId)`: closes the identified time range, and reloads the time period detail
 <!-- source : AbstractAgendaController.java:L87-178 -->
