@@ -170,6 +170,22 @@ Excerpt from the security configuration file of the Mars demo application
 }
 ```
 
+## Implementation
+
+Rights are declared once, then checked at each entry point and in the services. Each point is detailed in [Account](/en/extensions/account).
+
+1. **Declare** the authorizations in a JSON file (see [Example](#example)), loaded by a `Features` class of the application, with the `security` and `authorization` features activated (see [Configuration](#configuration)).
+2. **Generate the constants**: the file is declared in `studio-config.yaml` (`type: security`) with the `vertigo.authorization: true` property; Studio produces `GlobalAuthorizations` and `SecuredEntities`, used in the code instead of hard-coded names (Account, "Loading" section).
+3. **Grant the rights** at login: authorizations and perimeter keys, in the user session (Account, "Granting Rights to the User" section).
+4. **Protect the entry points**: `@Secured("AuthorizationName")` on a controller or a webservice, on the class or the method (Account, "`@Secured` and `@SecuredOperation` annotations" section); for webservices, see also "Securing the WebService" in [WebServices](/en/basic/webservices). `@Secured("Base$read")` checks that the user has this right, not that they have a right on the requested data: this is the role of the next step.
+5. **Check in the services**: any service that loads or modifies a secured entity checks the operation on this entity, after loading (`AuthorizationUtil.assertOperations(entity, operation)`, or `assertOperationsWithLoad(uid, operation)` which loads it); `AuthorizationUtil.assertAuthorizations(...)` for the access to a function.
+6. **Filter the lists** according to the perimeter: `getCriteriaSecurity` for a `findAll`, `AuthorizationUtil.authorizationCriteria` as a task parameter, `getSearchSecurity` for a search (Account, "Criteria" section).
+7. **Adapt the screen** with `vu:authz` or `th:if` (see [UI](/en/extensions/ui)): this is a display convenience.
+
+A refusal throws a `VSecurityException`, returned as **403**.
+
+!> The security filter is not automatic: a query to which the service does not apply it returns all rows. Hiding a button protects nothing: the check is done server side.
+
 ## Going Further
 
 To delegate a user's authentication to an external identity server (Keycloak, for example), you should use the **OIDC** or **SAML** authentication plugins of Vega: features `authentication.oidc` / `authentication.saml2` (as well as `authentication.aad` for Azure AD).

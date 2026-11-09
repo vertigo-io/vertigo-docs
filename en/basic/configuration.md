@@ -82,7 +82,7 @@ For Vertigo configuration, the important points are:
 > - YAML format uses indentation to convey meaning; be careful with it.
 > - Indentation with `-` is only used to declare lists. i.e., for active plugin names (first level under `features:` and `featuresConfig:`), for custom plugins (first level under `plugins:`), and initializers (first level under `initializers:`)
 > - Indentation alone, without `-`, is used for attributes and maps. Notably Features under `modules:` and parameters in general (plugin, feature, ...)
-> - Values can come from external parameters with `${ }`. _Those from `boot` come from limited sources and must be prefixed with `boot.`_
+> - Values can come from parameters, with `${NAME}` or `${NAME!default}`: see [Parameters](#parameters).
 !> - Vertigo supports the special attribute `__flags__:` placed under any element; it conditions the inclusion of the element in the configuration based on activeFlags (application startup parameter: command line, web.xml, etc.). _The flag can be included: `__flags__: ["redis"]` or excluded: `__flags__: ["!redis"]`
 
 Excerpt from [Wikipedia](https://fr.wikipedia.org/wiki/YAML):
@@ -224,6 +224,30 @@ Typically, Initializers are declared as:
   - io.mars.support.boot.OrchestraInitializer:
 ```
 
+## Parameters
+
+A configuration value can come from a parameter: `${NAME}`, or `${NAME!default}` with a default value. Only a whole value is replaced: `url: ${PROPS_URL}`, not `url: file:${DIR}/app.properties` (exception: file paths, see below).
+
+The `ParamManager` looks for a parameter in its plugins, **in their declaration order** under `boot.plugins`: the first one that finds it wins. An empty environment variable counts as absent.
+
+| Plugin | Source |
+|---|---|
+| `EnvParamPlugin` | environment variables |
+| `SystemPropertyParamPlugin` | system properties (`-DNAME=value`) |
+| `PropertiesParamPlugin` (`url`) | `.properties` file |
+| `WebAppContextParamPlugin` (vertigo-vega) | `web.xml` context parameters |
+| `XmlParamPlugin` (`url`) | parameters file in XML format |
+| `ManifestParamPlugin` (`url`, optional) | `MANIFEST.MF` attributes |
+
+These classes are in `io.vertigo.core.plugins.param.env`, `.properties`, `.xml` and `.manifest`; `WebAppContextParamPlugin` in `io.vertigo.vega.plugins.webservice.servlet`.
+
+In the example of the [boot](#boot) section, the file is declared before the environment: its value wins over an environment variable with the same name. Declared first, `EnvParamPlugin` instead lets the environment override the file values.
+
+The `boot` plugins are created before the `ParamManager`: a `${NAME}` there is looked up in the system properties, then in the environment variables. `${boot.name}` designates a startup parameter (see [Starting a web application](#starting-a-web-application)): it is replaced when the YAML is read, with no possible default value, and must exist. It is used in `node` and in the `boot` plugins.
+
+In a file path, `${user.home}`, `${user.dir}` and `${java.io.tmpdir}` are replaced inside the path (`dbFilePath: ${java.io.tmpdir}/vertigo-ui/ViewContext`). This substitution is done by the plugins that read a file (parameters, KVStore, FileStore): these are not parameters.
+
+On the code side, a component receives its configuration parameters with `@ParamValue("name")`, and reads an application parameter with `ParamManager.getParam("NAME")` (or `getOptionalParam`).
 
 ## Flags
 
@@ -237,7 +261,7 @@ Using a flag, you can enable or disable:
 - An additional plugin
 - An initializer
 
-At application startup, the list of active flags must be provided via the *boot.activeFlags* parameter, which is a list of strings separated by `;`
+At application startup, the list of active flags must be provided via the *boot.activeFlags* parameter, which is a list of strings separated by `;` (see [Starting a web application](#starting-a-web-application)).
 
 Within the YAML configuration, flags are associated with configuration elements through a special parameter *\_\_flags\_\_* which is an array of strings. The **OR** operator applies between the different elements of the flag list. If the special parameter *\_\_flags\_\_* is not set, the configuration element will always be activated.
 
@@ -281,15 +305,25 @@ In the above example:
 - The additional plugin *my.additional.Plugin* is added when *flag4* is set
 - The initializer *my.module.Initializer* is executed at application startup when *flag5* is set
 
+A `__flags__` entry can combine flags: `!` for negation, `&&` (or `and`, surrounded by spaces) for an **and**; a flag contains no space. So `__flags__: ["redis && !devMode", "prod"]` activates the element when `redis` is active without `devMode`, or when `prod` is active.
 
+The same element can be declared several times under exclusive flags, to choose a variant depending on the environment:
 
-The configuration can then be changed through a parameter file.
+```yaml
+    featuresConfig:
+      - cache.memory:
+          __flags__: ["!redis"]
+      - cache.redis:
+          __flags__: ["redis"]
+```
 
-> XML file configuration is also described by an XSD file available [here](https://github.com/vertigo-io/vertigo/blob/master/vertigo-core/src/main/java/io/vertigo/app/config/xml/vertigo_1_0.xsd)
+Code can test an active flag: `Node.getNode().getNodeConfig().hasFlag("myFlag")`.
 
-# Usage
+Pitfalls: a misspelled flag (in `boot.activeFlags` or `__flags__`) is simply inactive; `__flags__` goes among the element's parameters, indented one level deeper than the element.
 
-?> This section describes legacy Servlet/Tomcat configuration. With standalone Javalin, these configurations are no longer necessary.
+## Starting a web application
+
+?> A web application starts its node with the *listener* declared in `web.xml` (this is the case of Vertigo-UI applications). Without a servlet (main class, standalone Javalin), the application builds its configuration itself (`YamlNodeConfigBuilder` or Java API): this section does not apply.
 
 For web applications, a *listener* must be configured on the servlet.
 
@@ -317,12 +351,18 @@ Active flags can be provided via the *boot.activeFlags* servlet parameter.
 </context-param>
 ```
 
-For environments that require it, active flags can be passed via an environment variable: `VERTIGO_BOOT_ACTIVE_FLAGS`.
+These two startup parameters can also come from other sources; from the weakest to the strongest:
 
-Example:
-```xml
-VERTIGO_BOOT_ACTIVE_FLAGS=devPages;redis;kvSpeedb;searchES;analytics;cspReportWs
-```
+| Source | Configuration files | Active flags |
+|---|---|---|
+| `web.xml` (`context-param`) | `boot.applicationConfiguration` | `boot.activeFlags` |
+| environment variable | — | `VERTIGO_BOOT_ACTIVE_FLAGS` |
+| properties file `-Dexternal-properties=<path>` | `boot.applicationConfiguration` | `boot.activeFlags` |
+| system property | — | `-Dboot.active-flags` |
+
+Example: `VERTIGO_BOOT_ACTIVE_FLAGS=redis;searchES;analytics`.
+
+The other startup parameters (`boot.xxx`, used through `${boot.xxx}`) come from the `web.xml` `context-param` prefixed with `boot.`, or from the `-Dexternal-properties` file. This file does not feed the `ParamManager`: a `${NAME}` is looked up in the parameter plugins (the `web.xml` `context-param` through `WebAppContextParamPlugin`).
 
 ## Example
 

@@ -170,6 +170,22 @@ Extrait du fichier de configuration de sécurité de l'application de démonstra
 }
 ```
 
+## Mise en œuvre
+
+Les droits se déclarent une fois, puis se contrôlent à chaque point d'entrée et dans les services. Le détail de chaque point est dans [Account](/extensions/account).
+
+1. **Déclarer** les autorisations dans un fichier JSON (voir [Exemple](#exemple)), chargé par une classe `Features` de l'application, avec les features `security` et `authorization` activées (voir [Configuration](#configuration)).
+2. **Générer les constantes** : le fichier est déclaré dans `studio-config.yaml` (`type: security`) avec la propriété `vertigo.authorization: true` ; Studio produit `GlobalAuthorizations` et `SecuredEntities`, utilisées dans le code à la place des noms en dur (Account, section « Chargement »).
+3. **Accorder les droits** au login : autorisations et clés de périmètre, dans la session de l'utilisateur (Account, section « Accorder les droits à l'utilisateur »).
+4. **Protéger les points d'entrée** : `@Secured("NomAutorisation")` sur un controller ou un webservice, sur la classe ou la méthode (Account, section « Annotations `@Secured` et `@SecuredOperation` ») ; pour les webservices, voir aussi « Sécurisation du WebService » dans [WebServices](/basic/webservices). `@Secured("Base$read")` vérifie que l'utilisateur possède ce droit, pas qu'il y a droit sur la donnée demandée : c'est le rôle de l'étape suivante.
+5. **Contrôler dans les services** : tout service qui charge ou modifie une entité sécurisée vérifie l'opération sur cette entité, après chargement (`AuthorizationUtil.assertOperations(entité, opération)`, ou `assertOperationsWithLoad(uid, opération)` qui la charge) ; `AuthorizationUtil.assertAuthorizations(...)` pour l'accès à une fonction.
+6. **Filtrer les listes** selon le périmètre : `getCriteriaSecurity` pour un `findAll`, `AuthorizationUtil.authorizationCriteria` en paramètre d'une tâche, `getSearchSecurity` pour une recherche (Account, section « Criteria »).
+7. **Adapter l'écran** avec `vu:authz` ou `th:if` (voir [UI](/extensions/ui)) : c'est un confort d'affichage.
+
+Un refus lève une `VSecurityException`, renvoyée en **403**.
+
+!> Le filtre de sécurité n'est pas automatique : une requête à laquelle le service ne l'applique pas renvoie toutes les lignes. Masquer un bouton ne protège rien : le contrôle se fait côté serveur.
+
 ## Pour aller plus loin
 
 Pour déléguer l'authentification d'un utilisateur à un serveur d'identité externe (Keycloak, par exemple), il convient d'utiliser les plugins d'authentification **OIDC** ou **SAML** de Vega : features `authentication.oidc` / `authentication.saml2` (ainsi que `authentication.aad` pour Azure AD).

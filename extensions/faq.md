@@ -153,8 +153,8 @@ Le plus simple est que le `<vu:message>` soit dans le template parent
 Il faut penser à activer la fonctionnalité dans le fichier de configuration yaml de l'appli (https://vertigo-io.github.io/vertigo-docs/#/basic/configuration)
 
 ## [Core] Comment rendre un paramètre du fichier de configuration yaml modifiable par l'hébergeur ?
-Les paramètres peuvent être externalisés avec une balise de type : ${myParamName}
-La valeur est alors résolue par le paramManager.
+Les paramètres peuvent être externalisés avec une balise de type : `${myParamName}`, ou `${myParamName!valeurParDéfaut}`.
+La valeur est alors résolue par le paramManager, en général depuis une variable d'environnement : voir [Configuration > Paramètres](/basic/configuration?id=parametres) (sources et ordre).
 
 ## [Core] Comment lancer un traitement asynchrone ou récurrent ?
 Deux mécanismes selon le besoin :

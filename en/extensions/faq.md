@@ -148,8 +148,8 @@ Best to have `<vu:messages>` in the parent template.
 Activate the feature in app YAML config file (https://vertigo-io.github.io/vertigo-docs/#/basic/configuration)
 
 ## [Core] How to make a YAML config parameter modifiable by the hoster?
-Parameters can be externalized with `${myParamName}` tag.
-Value is then resolved by paramManager.
+Parameters can be externalized with `${myParamName}` tag, or `${myParamName!defaultValue}`.
+Value is then resolved by paramManager, usually from an environment variable: see [Configuration > Parameters](/en/basic/configuration?id=parameters) (sources and order).
 
 ## [Core] How to run an asynchronous or recurring task?
 Two mechanisms depending on the need:
