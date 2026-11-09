@@ -466,12 +466,14 @@ Exemple de déclaration (noms d'autorisation et URLs fictifs) :
 
 ### RateLimiting
 
-Le `RateLimitingWebServiceHandlerPlugin` implémente le rate limiting via une fenêtre glissante. Le backend de stockage est configurable :
+Deux mécanismes indépendants limitent le débit des appels :
 
-| Backend | Feature | Description |
-|---|---|---|
-| Mémoire locale | `rateLimiting.mem` | Stockage local, non persisté, non partagé |
-| Redis | `rateLimiting.redis` | Stockage partagé via Redis, compatible cluster |
+| Mécanisme | Feature | Ce qu'il limite | Compteur |
+|---|---|---|---|
+| `RateLimitingWebServiceHandlerPlugin` (handler, stack index 100) | `webservices.rateLimiting` (`windowSeconds`, défaut `300` ; `limitValue`, défaut `150`) | tous les webservices Vega | en mémoire, propre à chaque nœud ; par session utilisateur, à défaut par IP et user-agent ; fenêtre fixe, remise à zéro toutes les `windowSeconds` |
+| `RateLimitingManager` (`RateLimitingManagerImpl`) | `rateLimiting`, avec un stockage : `rateLimiting.mem` (mémoire locale, non partagée) ou `rateLimiting.redis` (Redis, partagé entre les nœuds) | ce qui l'appelle : le filtre servlet `RateLimitingFilter`, l'intercepteur `RateLimitingHandlerInterceptor` des controllers Vertigo-UI, ou le code applicatif | selon le stockage ; paramètres : voir *Paramètres de la feature `rateLimiting`* |
+
+Le handler n'utilise pas le `RateLimitingManager` : les paramètres de la feature `rateLimiting` et le stockage Redis ne s'appliquent pas aux webservices limités par `webservices.rateLimiting`. Le handler renvoie les en-têtes `X-Rate-Limit-Limit`, `X-Rate-Limit-Remaining` et `X-Rate-Limit-Reset`, et rejette l'appel au-delà de la limite (`TooManyRequestException`).
 
 Les adresses localhost (`127.0.0.1`, `[0:0:0:0:0:0:0:1]`) sont ignorées comme **source d'IP utilisateur issue des headers** (`X-Forwarded-For` / en-tête custom) — protection contre le spoofing ; elles ne sont **pas** exemptées du rate limiting.
 <!-- source : RateLimitingManagerImpl.java:L66 — USER_EXCLUDED_IPS, utilisé uniquement dans obtainUserIpFromHeader -->

@@ -466,12 +466,14 @@ Declaration example (fictional authorization names and URLs):
 
 ### RateLimiting
 
-The `RateLimitingWebServiceHandlerPlugin` implements rate limiting via a sliding window. The storage backend is configurable:
+Two independent mechanisms limit the call rate:
 
-| Backend | Feature | Description |
-|---|---|---|
-| Local memory | `rateLimiting.mem` | Local storage, not persisted, not shared |
-| Redis | `rateLimiting.redis` | Shared storage via Redis, cluster compatible |
+| Mechanism | Feature | What it limits | Counter |
+|---|---|---|---|
+| `RateLimitingWebServiceHandlerPlugin` (handler, stack index 100) | `webservices.rateLimiting` (`windowSeconds`, default `300`; `limitValue`, default `150`) | all Vega webservices | in memory, specific to each node; per user session, otherwise per IP and user-agent; fixed window, reset every `windowSeconds` |
+| `RateLimitingManager` (`RateLimitingManagerImpl`) | `rateLimiting`, with a store: `rateLimiting.mem` (local memory, not shared) or `rateLimiting.redis` (Redis, shared between nodes) | whatever calls it: the `RateLimitingFilter` servlet filter, the `RateLimitingHandlerInterceptor` of Vertigo-UI controllers, or application code | depends on the store; parameters: see *Parameters of the `rateLimiting` feature* |
+
+The handler does not use the `RateLimitingManager`: the parameters of the `rateLimiting` feature and the Redis store do not apply to webservices limited by `webservices.rateLimiting`. The handler returns the `X-Rate-Limit-Limit`, `X-Rate-Limit-Remaining` and `X-Rate-Limit-Reset` headers, and rejects the call beyond the limit (`TooManyRequestException`).
 
 The localhost addresses (`127.0.0.1`, `[0:0:0:0:0:0:0:1]`) are ignored as a **source of user IP read from headers** (`X-Forwarded-For` / custom header) — protection against spoofing; they are **not** exempted from rate limiting.
 <!-- source : RateLimitingManagerImpl.java:L66 — USER_EXCLUDED_IPS, utilisé uniquement dans obtainUserIpFromHeader -->
