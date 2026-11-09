@@ -31,7 +31,7 @@ Les `MasterData` et `StaticMasterData` sont chargés via `AbstractMasterDataDefi
 
 ### Métriques
 
-L'`EntityMetricsProvider` expose la métrique `entityCount` (compteur d'accès) pour chaque entité.
+L'`EntityMetricsProvider` expose la métrique `entityCount` : le nombre de lignes de chaque entité persistante (un `count` SQL par entité), recalculé à chaque collecte des métriques, toutes les heures. Sur de grosses tables, ce comptage a un coût.
 
 ## FileStore
 
@@ -76,7 +76,7 @@ Le `KVStoreManager` offre un stockage clé-valeur avec 6 backends disponibles. L
 | `SpeedbKVStorePlugin` | `kvStore.speedb` | Speedb (fork optimisé de RocksDB / TtlDB, LZ4_COMPRESSION, multi-collection) |
 | `H2KVStorePlugin` | `kvStore.h2` | Base H2 intégrée (MVStore/collection, purge daemon 30s, multi-collection) |
 | `EhCacheKVStorePlugin` | `kvStore.ehcache` | EhCache |
-| `DelayedMemoryKVStorePlugin` | `kvStore.delayedMemory` | Mémoire avec persistance retardée |
+| `DelayedMemoryKVStorePlugin` | `kvStore.delayedMemory` | Mémoire, sans persistance ni transaction ; éléments supprimés après `timeToLiveSeconds` (obligatoire), purge toutes les min(60 s, TTL) |
 
 ### BerkeleyKVStorePlugin : purge et espace disque
 
@@ -186,7 +186,7 @@ Les filtres vides sont ignorés (correctif). Les mesures multiples en union util
 | `kvStore.speedb` | `Param...` | `SpeedbKVStorePlugin` |
 | `kvStore.h2` | `Param...` | `H2KVStorePlugin` |
 | `kvStore.ehcache` | `Param...` | `EhCacheKVStorePlugin` |
-| `kvStore.delayedMemory` | `Param...` | `DelayedMemoryKVStorePlugin` |
+| `kvStore.delayedMemory` | `collections`, `timeToLiveSeconds` | `DelayedMemoryKVStorePlugin` |
 | `taskProxyMethod` | — | AmplifierMethod `TaskAmplifierMethod` |
 | `entityMetrics` | — | `EntityMetricsProvider` |
 | `cache` | — | `CacheManager` (`CacheManagerImpl`) |
@@ -265,5 +265,5 @@ modules:
 
 ## Vigilance
 
-- **KVStore multi-collections** : H2 et Speedb supportent les collections multiples. Chaque collection utilise un store dédié (`MVStore` pour H2, `SpeedbDB` séparé pour Speedb). Sur H2, le daemon de purge TTL s'exécute toutes les 30s. Sur Speedb, le cleanup se fait via `forceRemoveTooOldElements()` (à appeler manuellement si besoin).
+- **KVStore multi-collections** : H2 et Speedb supportent les collections multiples. Chaque collection utilise un store dédié (`MVStore` pour H2, `SpeedbDB` séparé pour Speedb). Sur H2, le daemon de purge TTL s'exécute toutes les 30s. Sur Speedb, un daemon purge les éléments expirés toutes les 60s ; `forceRemoveTooOldElements()` force une purge immédiate.
 - **Tika config** : `TikaMimeTypeResolverPlugin` accepte un paramètre `tikaConfigResource` optionnel pour une config Tika personnalisée (fichier TikaConfig dans le classpath).

@@ -31,7 +31,7 @@ Module **DataStore** provides multi-backend storage abstraction organized around
 
 ### Metrics
 
-`EntityMetricsProvider` exposes the `entityCount` metric (access counter) per entity.
+`EntityMetricsProvider` exposes the `entityCount` metric: the number of rows of each persistent entity (one SQL `count` per entity), computed again at each metrics collection, every hour. On large tables, this count has a cost.
 
 ## FileStore
 
@@ -74,7 +74,7 @@ Module **DataStore** provides multi-backend storage abstraction organized around
 | `SpeedbKVStorePlugin` | `kvStore.speedb` | Speedb (optimized RocksDB fork) |
 | `H2KVStorePlugin` | `kvStore.h2` | Embedded H2 database |
 | `EhCacheKVStorePlugin` | `kvStore.ehcache` | EhCache (distributed cache) |
-| `DelayedMemoryKVStorePlugin` | `kvStore.delayedMemory` | Memory with delayed persistence |
+| `DelayedMemoryKVStorePlugin` | `kvStore.delayedMemory` | Memory, no persistence nor transaction; elements removed after `timeToLiveSeconds` (required), purged every min(60 s, TTL) |
 
 ### BerkeleyKVStorePlugin: Purge and Disk Space
 
@@ -126,7 +126,7 @@ Operational notes for the Berkeley DB store:
 | `kvStore.speedb` | `Param...` | `SpeedbKVStorePlugin` |
 | `kvStore.h2` | `Param...` | `H2KVStorePlugin` |
 | `kvStore.ehcache` | `Param...` | `EhCacheKVStorePlugin` |
-| `kvStore.delayedMemory` | `Param...` | `DelayedMemoryKVStorePlugin` |
+| `kvStore.delayedMemory` | `collections`, `timeToLiveSeconds` | `DelayedMemoryKVStorePlugin` |
 | `taskProxyMethod` | — | AmplifierMethod `TaskAmplifierMethod` |
 | `entityMetrics` | — | `EntityMetricsProvider` |
 | `cache` | — | `CacheManager` (`CacheManagerImpl`) |
@@ -261,5 +261,5 @@ Empty filters are ignored (fix). Multiple measures in union use `toFloat()`/`toS
 
 ## Vigilance
 
-- **KVStore multi-collections**: H2 and Speedb support multiple collections. Each collection uses a dedicated store (`MVStore` for H2, separate `SpeedbDB` for Speedb). On H2, the TTL purge daemon runs every 30s. On Speedb, cleanup is done via `forceRemoveTooOldElements()` (call manually if needed).
+- **KVStore multi-collections**: H2 and Speedb support multiple collections. Each collection uses a dedicated store (`MVStore` for H2, separate `SpeedbDB` for Speedb). On H2, the TTL purge daemon runs every 30s. On Speedb, a daemon purges expired elements every 60s; `forceRemoveTooOldElements()` forces an immediate purge.
 - **Tika config**: `TikaMimeTypeResolverPlugin` accepts an optional `tikaConfigResource` parameter for custom Tika configuration (TikaConfig file in classpath).

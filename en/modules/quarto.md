@@ -93,24 +93,22 @@ For using the OpenOfficeLocalConverterPlugin (local ODT management):
 </dependency>
 ```
 
-* Define the Java provider that will contain the template definition files:
+* Register the Java provider that contains the template definitions (see [Dictionary definition](#dictionary-definition)) in the `Features` class of an application module:
 
-```xml
-<module name="myApp-ressources">
-	<definitions>
-            <provider class="fr.projet.appli.MyPublisherDefinitionProvider" />
-	</definitions>
-</module>
+```java
+getModuleConfigBuilder()
+		.addDefinitionProvider(MyPublisherDefinitionProvider.class);
 ```
 
-* Add the module to foundation.xml:
+* Activate the Quarto module in the YAML configuration file (`publisher.odt` for an OpenOffice template, `publisher.docx` for a Word template):
 
-```xml
-<module name="vertigo-quarto">
-	<component api="PublisherManager" class="io.vertigo.quarto.publisher.impl.PublisherManagerImpl">
-		<plugin class="io.vertigo.quarto.plugins.publisher.odt.OpenOfficeMergerPlugin"/>
-	</component>
-</module>
+```yaml
+modules:
+  io.vertigo.quarto.QuartoFeatures:
+    features:
+      - publisher:
+    featuresConfig:
+      - publisher.odt:
 ```
 
 ### Template syntax
