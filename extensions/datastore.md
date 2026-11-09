@@ -194,7 +194,7 @@ Les filtres vides sont ignorés (correctif). Les mesures multiples en union util
 | `cache.memory` | — | `MemoryCachePlugin` |
 | `cache.eh` | — | `EhCachePlugin` |
 
-> Les features `jedis`, `jedisSingle`, `jedisCluster`, `jedisSentineled` sont fournies par le module **redis-connector** (connecteur Redis).
+> Le connecteur Redis est fourni par le module **vertigo-redis-connector** (`io.vertigo.connectors.redis.RedisFeatures`), feature `jedis`. Le mode (single, Sentinel, cluster) se déduit des paramètres renseignés : `host`/`port`, `mastername` + `sentinels`, ou `clusterNodes`. Plusieurs connecteurs se distinguent par leur `name` (`main` par défaut).
 
 ### Configuration
 
@@ -220,8 +220,8 @@ Configuration du connecteur Redis (mode single) :
 
 ```yaml
 modules:
-  io.vertigo.services.redis.RedisFeatures:
-    featuresConfig:
+  io.vertigo.connectors.redis.RedisFeatures:
+    features:
       - jedis:
           host: localhost
           port: 6379
@@ -236,10 +236,11 @@ Configuration du connecteur Redis (mode cluster) :
 
 ```yaml
 modules:
-  io.vertigo.services.redis.RedisFeatures:
-    featuresConfig:
+  io.vertigo.connectors.redis.RedisFeatures:
+    features:
       - jedis:
           clusterNodes: "redis-node1:6379;redis-node2:6379;redis-node3:6379"
+          database: 0
           password:
           ssl: false
           maxTotal: 8
@@ -250,8 +251,8 @@ Configuration du connecteur Redis (mode Sentinel) :
 
 ```yaml
 modules:
-  io.vertigo.services.redis.RedisFeatures:
-    featuresConfig:
+  io.vertigo.connectors.redis.RedisFeatures:
+    features:
       - jedis:
           mastername: mymaster
           sentinels: "sentinel1:26379;sentinel2:26379;sentinel3:26379"

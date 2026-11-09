@@ -35,7 +35,6 @@ modules:
            - webapi:
        featuresConfig:
            - mail.javax:
-                 connectorName: 'default'
                  developmentMode: true
                  developmentMailTo: team@vertigo.io
                  charset: "UTF8"
@@ -77,10 +76,10 @@ modules:
 The *Mail* feature requires a MailSessionConnector connector. Here are the proposed connectors:
 
 - `JndiMailSessionConnector`: Connector for accessing the mail server using a JNDI resource.
-  - connectorName *(optional)*: Name of the connector used (default `main`)
+  - name *(optional)*: name of the connector (default `main`), designated by `connectorName` in `mail.javax`
   - mail.session: JNDI name of the mail resource (must start with `java:comp/env`)
 - `NativeMailSessionConnector`: Connector for accessing the mail server using the JDK implementation.
-  - connectorName *(optional)*: Name of the connector used (default `main`)
+  - name *(optional)*: name of the connector (default `main`), designated by `connectorName` in `mail.javax`
   - storeProtocol: Protocol used (e.g.: `smtp`)
   - host: Mail server name (DNS or IP)
   - port *(optional)*: Network port

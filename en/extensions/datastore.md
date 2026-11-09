@@ -158,8 +158,8 @@ Redis connector configuration (single mode):
 
 ```yaml
 modules:
-  io.vertigo.services.redis.RedisFeatures:
-    featuresConfig:
+  io.vertigo.connectors.redis.RedisFeatures:
+    features:
       - jedis:
           host: localhost
           port: 6379
@@ -174,10 +174,11 @@ Redis connector configuration (cluster mode):
 
 ```yaml
 modules:
-  io.vertigo.services.redis.RedisFeatures:
-    featuresConfig:
+  io.vertigo.connectors.redis.RedisFeatures:
+    features:
       - jedis:
           clusterNodes: "redis-node1:6379;redis-node2:6379;redis-node3:6379"
+          database: 0
           password:
           ssl: false
           maxTotal: 8
@@ -188,8 +189,8 @@ Redis connector configuration (Sentinel mode):
 
 ```yaml
 modules:
-  io.vertigo.services.redis.RedisFeatures:
-    featuresConfig:
+  io.vertigo.connectors.redis.RedisFeatures:
+    features:
       - jedis:
           mastername: mymaster
           sentinels: "sentinel1:26379;sentinel2:26379;sentinel3:26379"

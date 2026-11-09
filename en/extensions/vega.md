@@ -105,7 +105,7 @@ To call a remote WebService:
 ```
 3. Add HttpClient connector to configuration:
 ```yaml
-  io.vertigo.connectors.httpclient.HttpClientConnector:
+  io.vertigo.connectors.httpclient.HttpClientFeatures:
     features:
       - httpclient:
           urlPrefix: http://mySpUrl:8080

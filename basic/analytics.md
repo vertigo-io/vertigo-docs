@@ -34,9 +34,10 @@ boot:
     - io.vertigo.core.plugins.analytics.log.SmartLoggerAnalyticsConnectorPlugin:
         aggregatedBy: sql
     - io.vertigo.core.plugins.analytics.log.SocketLoggerAnalyticsConnectorPlugin:
-        appName: YourApp
         hostName: ${boot.analyticsHost}
 ```
+
+Le nom de l'application envoyé est celui du node (`node.appName`), suffixé de l'environnement si `envNameParam` est renseigné. Le serveur et le port se donnent en dur (`hostName`, `port`) ou par le nom d'un paramètre de l'application (`hostNameParam`, `portParam`), ce qui permet de les faire varier par environnement ; les deux formes sont exclusives.
 
 ## Affichage des résultats
 

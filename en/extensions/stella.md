@@ -89,11 +89,12 @@ Stella is activated exclusively via `@Feature` annotations in YAML configuration
 | `master.rest` | `RestMasterPlugin`, `RestMasterWebService` |
 | `worker.rest` | `RestWorkersPlugin` |
 
-### Worker Parameters
+### Master and Worker Parameters
 
-- `workTypes` (required): format `Package.WorkEngineImpl^N;Another^M`. N defines the number of dispatcher threads per type (ScheduledExecutorService).
-- `workersCount` (required): size of the single execution pool
-- `pollFrequencyMs`: poll frequency, 5000ms default
+- `nodeId` (required, master and worker): identifier of the node in the farm, unique per node; usually read from an environment variable (`${NODE_NAME}`)
+- `pollFrequencyMs` (master and worker): poll frequency, 5000ms default
+- `workTypes` (required, worker): format `Package.WorkEngineImpl^N;Another^M`. N defines the number of dispatcher threads per type (ScheduledExecutorService).
+- `workersCount` (required, worker): size of the single execution pool
 
 ### Redis Parameters
 
@@ -229,6 +230,7 @@ modules:
     io.vertigo.stella.StellaFeatures:
         features:
             - worker:
+                nodeId: ${NODE_NAME}
                 workTypes: "my.app.task.ProjectStatsWorkEngine^3;my.app.task.ExportPdfWorkEngine^2"
                 workersCount: 5
                 pollFrequencyMs: 5000
@@ -247,6 +249,7 @@ modules:
     io.vertigo.stella.StellaFeatures:
         features:
             - worker:
+                nodeId: ${NODE_NAME}
                 workTypes: "my.app.task.ProjectStatsWorkEngine^3;my.app.task.ExportPdfWorkEngine^2"
                 workersCount: 5
         featuresConfig:
@@ -263,7 +266,9 @@ modules:
     io.vertigo.stella.StellaFeatures:
         features:
             - master:
+                nodeId: ${NODE_NAME}
             - worker:
+                nodeId: ${NODE_NAME}
                 workTypes: "my.app.task.ProjectStatsWorkEngine^3;my.app.task.ExportPdfWorkEngine^2"
                 workersCount: 5
         featuresConfig:
@@ -340,7 +345,12 @@ modules:
     io.vertigo.stella.StellaFeatures:
         features:
             - master:
+                nodeId: ${NODE_NAME}
             - worker:
+                nodeId: ${NODE_NAME}
+                workTypes: "my.app.task.ProjectStatsWorkEngine^3;my.app.task.ExportPdfWorkEngine^2"
+                workersCount: 5
+                pollFrequencyMs: 5000
         featuresConfig:
             - master.redis:
                   connectorName: "main"
@@ -348,8 +358,4 @@ modules:
             - worker.redis:
                   connectorName: "main"
                   timeoutSeconds: 60
-            - worker:
-                  workTypes: "my.app.task.ProjectStatsWorkEngine^3;my.app.task.ExportPdfWorkEngine^2"
-                  workersCount: 5
-                  pollFrequencyMs: 5000
 ```

@@ -124,12 +124,12 @@ modules:
     featuresConfig:
       // list of configurations for enabled features. A configuration is identified by a name composed of the feature name and the chosen technical solution
       - myFeature.mySolution:
-        // feature configuration parameters
+          // feature configuration parameters
     plugins:
       // list of additional plugins identified by their full class name
       - my.additional.Plugin:
-        // plugin parameters
-        paramName : paramValue
+          // plugin parameters
+          paramName : paramValue
 initializers:
   // list of initializers identified by their full class name
   - my.module.Initializer:
@@ -264,11 +264,11 @@ modules:
           __flags__ : ["flag2"]
     plugins:
       - my.additional.Plugin:
-        __flags__ : ["flag4"]
-        paramName : paramValue
+          __flags__ : ["flag4"]
+          paramName : paramValue
 initializers:
   - my.module.Initializer:
-    __flags__ : ["flag5"]
+      __flags__ : ["flag5"]
 
 ```
 
