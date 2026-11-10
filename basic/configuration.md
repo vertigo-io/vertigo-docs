@@ -61,7 +61,12 @@ Cette classe permet une configuration plus aisée d'un module en abstrayant le c
 
 Dans l'exemple, il est possible d'activer la fonctionalité **EmbeddedServer** (donc un serveur web embarqué) uniquement en appelant une méthode et en fournissant le port.
 
-> Il est possible de créer autant de classes de Features que souhaité. La configuration des modules métier des applications peut être réalisée selon la même procédure.
+> Il est possible de créer autant de classes de Features que souhaité. Les modules métier d'une application suivent la même procédure, avec une classe `Features` par module.
+
+La classe `Features` d'un module applicatif hérite en général de `ModuleDiscoveryFeatures`, ou de `DefaultUiModuleFeatures` pour un module web (qui en hérite) : tous les composants de son package et de ses sous-packages sont enregistrés automatiquement, sans `addComponent` (les classes non abstraites qui implémentent `Component` : services, DAO, PAO, webservices). Une interface doit y avoir une seule implémentation ; l'annotation `@NotDiscoverable` exclut une classe de cette découverte. La classe `Features` déclare en plus les définitions du module (modèle, fichier de sécurité) et, dans des méthodes `@Feature`, les composants optionnels qu'un environnement active ou non depuis le fichier YAML : ces composants sont marqués `@NotDiscoverable`.
+
+!> Un composant découvert ne reçoit aucun paramètre de configuration : un `@ParamValue` obligatoire n'est jamais fourni (`Components or params not found` au démarrage), un `@ParamValue` facultatif reste vide. Un composant métier lit ses réglages dans le `ParamManager` (voir [Paramètres](#parametres)).
+<!-- source : ModuleDiscoveryFeatures.java ; ComponentDiscovery.java:L53-148 (CoreComponent du package, une implémentation par API, NotDiscoverable) ; DefaultUiModuleFeatures.java:L26-36 ; vérifié sur un nœud 4.4.1 (paramètre obligatoire : DIException ; facultatif : Optional.empty) -->
 
 Une fois cet objet NodeConfig créé, il est possible de démarrer l'application : 
 
@@ -252,7 +257,7 @@ Les plugins du `boot` sont créés avant le `ParamManager` : un `${NOM}` y est c
 
 Dans un chemin de fichier, `${user.home}`, `${user.dir}` et `${java.io.tmpdir}` sont remplacés à l'intérieur du chemin (`dbFilePath: ${java.io.tmpdir}/vertigo-ui/ViewContext`). Cette substitution est faite par les plugins qui lisent un fichier (paramètres, KVStore, FileStore) : ce ne sont pas des paramètres.
 
-Côté code, un composant reçoit ses paramètres de configuration par `@ParamValue("nom")`, et lit un paramètre de l'application par `ParamManager.getParam("NOM")` (ou `getOptionalParam`).
+Côté code, un composant reçoit ses paramètres de configuration par `@ParamValue("nom")`, et lit un paramètre de l'application par `ParamManager.getParam("NOM")` (ou `getOptionalParam`). Un composant découvert automatiquement n'a pas de paramètres de configuration : il utilise le `ParamManager`.
 
 ## Flags
 

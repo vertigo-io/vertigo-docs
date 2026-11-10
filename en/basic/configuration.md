@@ -57,7 +57,12 @@ This class simplifies module configuration by abstracting the choice of componen
 
 In the example, the **EmbeddedServer** feature (an embedded web server) can be activated by simply calling a method and providing the port.
 
-> You can create as many Features classes as needed. Application business module configuration can follow the same procedure.
+> You can create as many Features classes as needed. The business modules of an application follow the same procedure, with one `Features` class per module.
+
+The `Features` class of an application module usually extends `ModuleDiscoveryFeatures`, or `DefaultUiModuleFeatures` for a web module (which extends it): all the components of its package and its sub-packages are registered automatically, without `addComponent` (the non-abstract classes implementing `Component`: services, DAOs, PAOs, webservices). An interface must have a single implementation there; the `@NotDiscoverable` annotation excludes a class from this discovery. The `Features` class also declares the definitions of the module (model, security file) and, in `@Feature` methods, the optional components that an environment activates or not from the YAML file: these components are marked `@NotDiscoverable`.
+
+!> A discovered component receives no configuration parameter: a mandatory `@ParamValue` is never provided (`Components or params not found` at startup), an optional `@ParamValue` stays empty. A business component reads its settings from the `ParamManager` (see [Parameters](#parameters)).
+<!-- source : ModuleDiscoveryFeatures.java ; ComponentDiscovery.java:L53-148 (CoreComponent du package, une implémentation par API, NotDiscoverable) ; DefaultUiModuleFeatures.java:L26-36 ; vérifié sur un nœud 4.4.1 (paramètre obligatoire : DIException ; facultatif : Optional.empty) -->
 
 Once this NodeConfig object is created, the application can be started:
 
@@ -247,7 +252,7 @@ The `boot` plugins are created before the `ParamManager`: a `${NAME}` there is l
 
 In a file path, `${user.home}`, `${user.dir}` and `${java.io.tmpdir}` are replaced inside the path (`dbFilePath: ${java.io.tmpdir}/vertigo-ui/ViewContext`). This substitution is done by the plugins that read a file (parameters, KVStore, FileStore): these are not parameters.
 
-On the code side, a component receives its configuration parameters with `@ParamValue("name")`, and reads an application parameter with `ParamManager.getParam("NAME")` (or `getOptionalParam`).
+On the code side, a component receives its configuration parameters with `@ParamValue("name")`, and reads an application parameter with `ParamManager.getParam("NAME")` (or `getOptionalParam`). An automatically discovered component has no configuration parameters: it uses the `ParamManager`.
 
 ## Flags
 
