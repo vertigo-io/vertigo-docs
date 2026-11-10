@@ -228,25 +228,24 @@ initializers:
 ```
 <!-- source : vertigo-mars OrchestraInitializer.java:L20-35 ; mars.yaml:L319 (master) -->
 
-**Un composant par processus**, enregistré dans la classe `Features` de son module : il enregistre sa définition au démarrage, dans sa méthode `start()` (`Activeable`), et peut recevoir ses réglages de la configuration (`@ParamValue`). Par exemple, une purge dont le nombre de jours est un paramètre, enregistrée par `.addComponent(PurgeJob.class, Param.of("olderThanDays", "30"))` :
+**Un composant par processus**, rangé dans le package de son module : comme les autres composants du module, il est découvert par sa classe `Features` (voir [Configuration](/basic/configuration#configuration-par-features-api-java)). Il enregistre sa définition au démarrage, dans sa méthode `start()` (`Activeable`), et lit ses réglages dans le `ParamManager`, qui les cherche dans les paramètres de l'application : variables d'environnement, fichier de propriétés… (voir [Paramètres](/basic/configuration#parametres)). Par exemple, une purge dont le nombre de jours se règle par environnement :
 
 ```java
 public class PurgeJob implements Component, Activeable {
 
-	private final OrchestraDefinitionManager orchestraDefinitionManager;
-	private final Integer olderThanDays;
-
 	@Inject
-	public PurgeJob(final OrchestraDefinitionManager orchestraDefinitionManager, @ParamValue("olderThanDays") final Integer olderThanDays) {
-		this.orchestraDefinitionManager = orchestraDefinitionManager;
-		this.olderThanDays = olderThanDays;
-	}
+	private OrchestraDefinitionManager orchestraDefinitionManager;
+	@Inject
+	private ParamManager paramManager;
 
 	@Override
 	public void start() {
+		final int olderThanDays = paramManager.getOptionalParam("PURGE_OLDER_THAN_DAYS")
+				.map(Param::getValueAsInt)
+				.orElse(30);
 		orchestraDefinitionManager.createOrUpdateDefinition(ProcessDefinition.builder("ProPurge", "Purge des données anciennes")
 				.withCronExpression("0 30 5 1/1 * ? *") // tous les jours à 5h30
-				.addInitialParam("olderThanDays", olderThanDays.toString())
+				.addInitialParam("olderThanDays", String.valueOf(olderThanDays))
 				.addActivity("PURGE", "Purge", PurgeActivityEngine.class)
 				.build());
 	}
@@ -257,7 +256,26 @@ public class PurgeJob implements Component, Activeable {
 	}
 }
 ```
-<!-- source : vertigo-core Activeable (start/stop), ParamValue, Param.java:L80 (Param.of), ModuleConfigBuilder.java:L141 (addComponent avec paramètres) -->
+<!-- source : vertigo-core ComponentDiscovery.java (découverte du package), ParamManager.java:L67 (getOptionalParam), Param.java:L128 (getValueAsInt), Activeable (start/stop) -->
+
+Un job qu'un environnement doit pouvoir désactiver (par exemple sur les nœuds qui n'exécutent pas de traitements) est au contraire exclu de la découverte par `@NotDiscoverable`, et déclaré par une feature de son module, que le fichier YAML active, ici sous un flag :
+
+```java
+@Feature("purge.job")
+public MyModuleFeatures withPurgeJob() {
+	getModuleConfigBuilder().addComponent(PurgeJob.class);
+	return this;
+}
+```
+
+```yaml
+modules:
+  com.mycompany.myapp.mymodule.MyModuleFeatures:
+    features:
+      - purge.job:
+          __flags__: ["jobs"]
+```
+<!-- source : ComponentDiscovery.java:L64 (NotDiscoverable), YamlNodeConfigBuilder.java:L223-240 (features, __flags__) -->
 
 !> En mode base de données, une définition déjà enregistrée n'est pas remplacée au démarrage suivant : changer le cron, les activités ou un paramètre initial (ici `olderThanDays`) dans le code ou dans la configuration n'a pas d'effet tant que la définition n'est pas mise à jour (voir [Cas des évolutions des processus](#cas-des-évolutions-des-processus)).
 <!-- source : DbProcessDefinitionStorePlugin.java:L199-218 -->
