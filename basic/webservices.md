@@ -381,6 +381,10 @@ Le backend de stockage de la feature `rateLimiting` est fourni par l'une des fea
 
 La feature `webservices.proxyclient` active l'`AmplifierMethod` `WebServiceClientAmplifierMethod` qui génère dynamiquement des proxies Java à partir d'une `WebServiceDefinition`. Le proxy utilise un `HttpRequestBuilder` interne pour construire les requêtes HTTP (méthode, URL, headers, body JSON) et un `JsonEngine` (implémentation par défaut `GoogleJsonEngine`/Gson, injectée) pour la lecture/écriture JSON.
 
+Les valeurs des `@PathParam` et `@QueryParam` sont encodées selon la RFC 3986 (UTF-8, encodage `%XX`) : l'espace devient `%20` et les caractères qui ont un sens dans une URL (`+`, `&`, `=`, `/`, `?`...) sont encodés, ils sont donc transmis comme des données. Cet encodage est compris par tous les serveurs : les serveurs Java (Vertigo, servlet, Spring) comme les API REST qui décodent strictement l'URL, et pour lesquelles un `+` reste un plus.
+
+!> Les valeurs se passent **en clair** au proxy : une valeur déjà encodée serait encodée une seconde fois (`%20` devient `%2520`) et le serveur recevrait le texte `%20`.
+
 ### HandlerChain — Architecture interne
 
 Vega traite chaque requête HTTP via une chaîne de plugins (`WebServiceHandlerPlugin`) triés par `getStackIndex()`. La `HandlerChain` itère sur les handlers actifs et appelle `accept(WebServiceDefinition)` pour déterminer si un handler s'applique à ce webservice. Le premier qui accepte exécute `handle()` et passe au suivant via `chain.handle()`. Si le dernier handler ne produit pas de body, une `IllegalStateException` est levée.
