@@ -186,6 +186,9 @@ public FacetedQueryResult search(
 
 
 
+A DtObject received in JSON is checked like a screen input: SmartType formats and validators, otherwise a 422 response. `@IncludedFields` or `@ExcludedFields` on the parameter limit the fields the caller can modify: another modified field is rejected by a `VSecurityException` (403 response). On the method, they filter the returned fields. See the examples of [Vega](/en/extensions/vega) and [One object, from the database to the screen](/en/basic/ui#same-object).
+<!-- source : vertigo-vega DtObjectJsonConverter.java, UiObjectUtil.java (checkUnauthorizedFieldModifications : VSecurityException), ValidatorWebServiceHandlerPlugin.java (ValidationUserException), ExceptionWebServiceHandlerPlugin.java (422, 403), DefaultJsonSerializer.java (champs de la réponse filtrés) -->
+
 ## Securing the WebService
 
 It is absolutely essential to secure webservice calls.
