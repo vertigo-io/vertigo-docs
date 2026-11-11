@@ -154,6 +154,21 @@ Thus, the typical workflow of a detail screen is as follows:
 
 Once this controller is created, all that remains is to create the corresponding view.
 
+## One object, from the database to the screen :id=same-object
+
+Vertigo carries the same business object (DtObject), described by its definition, from the DAO to the screen. There is no object per layer (entity, DTO, view model) linked to the others by mappers: these mappers copy the fields at runtime without adding anything, neither in productivity nor in performance, and cost writing and maintenance at every added field. The definition of the object, with its fields and their SmartTypes, is enough for the screen to format, check and display.
+
+A dedicated DtObject, without identifier, is relevant when the screen or the API shows something else than the entity: search criteria, a display object gathering several entities (filled by a task), or an API contract to keep stable independently of the model.
+
+This choice is safe, because the exchange with the browser is controlled:
+
+- **The object stays on the server.** `publishDto` puts it in the ViewContext, kept on the server between requests (in a KVStore). The browser only receives the fields the page needs (see `vueData` in [vertigo-ui Components](#vertigo-ui-components)).
+- **The input is checked before reaching the object.** On POST, it is kept aside, as text, checked by the SmartTypes of the fields and by the validators, then merged into the object: `@ViewAttribute` gives the updated object to the controller. On error, a `ValidationUserException` is raised before the controller is called, and the messages come back on the fields concerned.
+- **Only the fields made editable by the page are accepted.** A `vu:` component that makes a field editable (or `vu:include-data` with `modifiable="true"`) registers it as such. On every request, any `vContext[...]` parameter that is not registered is rejected by a `VSecurityException` (403 response), before the controller: a user cannot modify a field that the page did not make editable, even by forging the request. This is the countermeasure to *mass assignment*, a vulnerability listed by OWASP.
+
+Webservices exchange the same DtObjects, in JSON, with equivalent checks (see [WebServices](/en/basic/webservices#using-parameters)).
+<!-- source : vertigo-ui ViewContextMap.java (publish, addKeyForClient), AbstractVSpringMvcController.java (ViewContext dans le KVStoreManager), ViewAttributeMethodArgumentResolver.java (checkFormat, mergeAndCheckInput, ValidationUserException), VegaUiObject.java (inputBuffer, SmartTypeManager), components/common/utils/include-data.html (addKeyForClient modifiable), VSpringMvcControllerAdvice.java (mapRequestParams : assertAllowedFields), ViewContextUpdateSecurity.java (VSecurityException), VSpringMvcExceptionHandler.java (403) -->
+
 ## View Creation
 
 To limit code verbosity, we prefer a *Convention Over Configuration* approach when appropriate.
@@ -220,7 +235,7 @@ vertigo-ui components encapsulate Quasar component library Vue.js components.
 
 The ViewContext is made available to Vue.js components via the `vueData` key of the Vue instance.
 
-!> To maximize application security, only data requested by the server-side template is available in the `vueData` variable. You can request data inclusion on the client side either by including a high-level component (for example, `vu:text-field` natively includes the concerned object's field for client transfer) or through the `vu:include-data` component, which allows specifying the context key to include.
+!> To maximize application security, only data requested by the server-side template is available in the `vueData` variable. You can request data inclusion on the client side either by including a high-level component (for example, `vu:text-field` natively includes the concerned object's field for client transfer) or through the `vu:include-data` component, which allows specifying the context key to include. Only the editable fields are accepted back (see [One object, from the database to the screen](#same-object)).
 
 The list of available components in vertigo-ui is available in the chapter dedicated to [vertigo-ui](/en/extensions/ui)
 

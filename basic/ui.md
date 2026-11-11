@@ -151,6 +151,21 @@ Ainsi, la cinématique typique d'un écran de détail est la suivante :
 
 Une fois ce controller créé, il ne reste plus qu'a créer la vue correspondante.
 
+## Un même objet, de la base à l'écran :id=meme-objet
+
+Vertigo fait circuler le même objet métier (DtObject), décrit par sa définition, du DAO jusqu'à l'écran. Il n'y a pas un objet par couche (entité, DTO, modèle de vue) relié aux autres par des mappers : ces mappers recopient les champs à l'exécution sans rien apporter, ni en productivité ni en performances, et coûtent à écrire et à maintenir à chaque champ ajouté. La définition de l'objet, avec ses champs et leurs SmartTypes, suffit à l'écran pour formater, contrôler et afficher.
+
+Un DtObject dédié, sans identifiant, se justifie quand l'écran ou l'API montre autre chose que l'entité : des critères de recherche, un objet d'affichage qui réunit plusieurs entités (rempli par une tâche), ou un contrat d'API qu'on veut stabiliser indépendamment du modèle.
+
+Ce choix est sûr, parce que l'échange avec le navigateur est contrôlé :
+
+- **L'objet reste côté serveur.** `publishDto` le place dans le ViewContext, conservé côté serveur entre les requêtes (dans un KVStore). Le navigateur ne reçoit que les champs dont la page a besoin (voir `vueData` dans [Composants vertigo-ui](#composants-vertigo-ui)).
+- **La saisie est contrôlée avant d'atteindre l'objet.** Au POST, elle est gardée à part, sous forme de texte, contrôlée par les SmartTypes des champs et par les validateurs, puis reportée dans l'objet : `@ViewAttribute` rend au controller l'objet mis à jour. En cas d'erreur, une `ValidationUserException` est levée avant l'appel du controller, et les messages reviennent sur les champs concernés.
+- **Seuls les champs modifiables à l'écran sont acceptés.** Un composant `vu:` qui rend un champ modifiable (ou `vu:include-data` avec `modifiable="true"`) l'enregistre comme tel. À chaque requête, tout paramètre `vContext[...]` non enregistré est rejeté par une `VSecurityException` (réponse 403), avant le controller : un utilisateur ne peut pas modifier un champ que la page n'a pas rendu modifiable, même en forgeant la requête. C'est la parade au *mass assignment*, une faille recensée par l'OWASP.
+
+Les webservices échangent les mêmes DtObject, en JSON, avec des contrôles équivalents (voir [WebServices](/basic/webservices#utilisation-de-paramètres)).
+<!-- source : vertigo-ui ViewContextMap.java (publish, addKeyForClient), AbstractVSpringMvcController.java (ViewContext dans le KVStoreManager), ViewAttributeMethodArgumentResolver.java (checkFormat, mergeAndCheckInput, ValidationUserException), VegaUiObject.java (inputBuffer, SmartTypeManager), components/common/utils/include-data.html (addKeyForClient modifiable), VSpringMvcControllerAdvice.java (mapRequestParams : assertAllowedFields), ViewContextUpdateSecurity.java (VSecurityException), VSpringMvcExceptionHandler.java (403) -->
+
 ## Création de la vue
 
 Afin de limiter la verbosité du code, nous privilégions une approche *Convention Over Configuration* lorsque cela est pertinent.
@@ -217,7 +232,7 @@ Les composants vertigo-ui encapsulent les composants Vue.js de la bibliothèque 
 
 Le ViewContext est mis à disposition des composants Vue.js via clé `vueData` de l'instance Vue.
 
-!> Afin de sécuriser au maximum les applications, seules les données demandées par le template côté serveur sont disponibles dans la variable `vueData`. Il est possible de demander l'inclusion d'une donnée au client soit par inclusion d'un composant de haut niveau (par exemple `vu:text-field` inclut nativement le champ de l'objet concerné pour transfert vers le client) ou via le composant `vu:include-data` qui permet de spécifier la clé de contexte à inclure).
+!> Afin de sécuriser au maximum les applications, seules les données demandées par le template côté serveur sont disponibles dans la variable `vueData`. Il est possible de demander l'inclusion d'une donnée au client soit par inclusion d'un composant de haut niveau (par exemple `vu:text-field` inclut nativement le champ de l'objet concerné pour transfert vers le client) ou via le composant `vu:include-data` qui permet de spécifier la clé de contexte à inclure). Les champs modifiables sont seuls acceptés en retour (voir [Un même objet, de la base à l'écran](#meme-objet)).
 
 La liste des composants disponibles dans vertigo-ui est disponible dans le chapitre dédié à [vertigo-ui](/extensions/ui)
 
