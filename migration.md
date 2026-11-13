@@ -33,6 +33,7 @@
 * **[Ui] Self-closed custom elements are now closed automatically.** In-DOM templates are parsed by the browser, which per the HTML spec ignores the trailing `/` on anything but a void element : `<q-btn v-if="..." />` stayed open and swallowed the markup that followed it, silently extending the `v-if` scope and turning the next siblings into the component default slot. A Thymeleaf post-processor now rewrites such a tag into `<q-btn ...></q-btn>` before the page is written out. Nothing to configure, and no impact on correct templates.
   - If you declared `io.vertigo.ui.impl.vuejs.filter.UnAutoCloseTagsFilter` in your `web.xml`, you can remove it : it is deprecated, does the same repair less reliably, and now finds nothing left to close. It is **removed** in 5.0.0.
   - The repair is silent by design. Templates keep their faulty tags until you fix them at the source, so a pass on your views is still worth it.
+* [dsfr-ui] `vu:dsfr-text-area` now displays a character counter and sets `maxlength` when the field has a max length (smartType constraint or `max` attribute). Hide the counter with `showCounter="false"`.
 
 * **[Core] Daemon health checks reworked** (feature `daemons` ; a RED status makes `/healthcheck/readiness` fail) :
   - `lastExecs` is no longer RED when all daemons fail : a failing daemon is YELLOW until two consecutive successes.
@@ -40,13 +41,21 @@
   - `daemonsAlive` is new : RED when a daemon is dead (an `Error` cancelled its schedule), YELLOW when a daemon runs longer than its limit `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
   - A daemon must not run more than `daemonMaxDurationInSeconds` (2h by default) : move longer processing to an Orchestra job.
   - Both limits are set in `configuration.yaml` with `boot.params.daemonMinDurationInSeconds` (default 120) and `boot.params.daemonMaxDurationInSeconds` (default 7200), see [Core > Run](https://vertigo-io.github.io/vertigo-docs/#/en/overview/core?id=run).
-* [Core] `boot.params.threadPoolSize` is now actually applied (it was silently ignored) : if you had set it, check the value.
+  - Health checks no longer log : the 4.4.1 `Daemon pool saturated` warning is removed. If you alerted on this log, alert on the `poolUtilization` health status instead.
+* [Core] `boot.params.threadPoolSize` is now actually applied (it was silently ignored) : if you had set it, check the value. Invalid daemon params now fail the startup : `threadPoolSize` lower than 1, `daemonMinDurationInSeconds` greater than `daemonMaxDurationInSeconds`, or a value that is not an integer.
 
 * **[DataFactory] ES9 index settings are checked again at startup** (the check was broken since 4.4.0) : if an analyzer, tokenizer, filter or normalizer of your index config file is missing or different on the existing index, the startup now fails with `Index settings have changed and are no more compatible, you must remove your index like : curl -X DELETE ...`. If you changed your index config since its creation in 4.4.x, plan to delete the index and reindex your data when you deploy 4.5.0.
 
 * **[Vega] Node configuration files by environment variable or system property : singular names.** Like `boot.applicationConfiguration` in `web.xml`, they are now read from `VERTIGO_BOOT_APPLICATION_CONFIGURATION` or `-Dboot.application-configuration` (a `;` separated list of files). The plural names `VERTIGO_BOOT_APPLICATION_CONFIGURATIONS` and `-Dboot.application-configurations` were silently ignored since 3.4.0 (the `web.xml` value was used) and are no longer read.
   - If your deployment sets a plural name, rename it and check its value : it now overrides your `web.xml`.
   - Precedence : system property, then external properties file (`-Dexternal-properties`), then environment variable, then `web.xml`.
+
+* **[Planning] Database update `planning_update_4.5.0.sql`** (PostgreSQL ; new databases use `planning_create_init_4.5.0.sql`) : it adds unique constraints (a reservation occupies a single creneau ; one plage per agenda, day and start time) and consultation indexes.
+  - Run first the two duplicate-check queries at the top of the script : adding the constraints fails on duplicate data.
+  - The script can be run again, but each run rebuilds the unique constraints with a lock on `CRENEAU` and `PLAGE_HORAIRE` : run it during a maintenance window.
+* [Planning] `AbstractAgendaController` now provides the `_editPlage` route. If your agenda controller already declared it, remove it, or keep it only as an override of `editPlage(ViewContext, AgendaDisplayRange, Long, CreationPlageHoraireForm, UiMessageStack)` : another method on the same route fails the startup (`Ambiguous mapping`).
+
+* [Orchestra] The Orchestra UI failed to load since 4.4.0 (`process is not defined`). Nothing to do if you use the bundle of the jar ; if your project ships its own copy of `vertigo-orchestra-ui.umd.js`, replace it with the 4.5.0 one.
 
 # from 4.4.0 to 4.4.1
 
