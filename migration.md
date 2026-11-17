@@ -68,6 +68,11 @@
 
 * [Orchestra] The Orchestra UI failed to load since 4.4.0 (`process is not defined`). Its files are now served by Vertigo-UI under `/vertigo-ui/static/orchestra/` : if your project ships its own copy (`vertigo-orchestra-ui.umd.js`, `vertigo-orchestra-ui.js`, `vertigo-orchestra-ui.css`), remove it and load the files served by Vertigo, see [Orchestra > Embedded UI](https://vertigo-io.github.io/vertigo-docs/#/en/modules/orchestra?id=embedded-ui).
 
+* **[Stella] REST plugins (`withRestMasterPlugin` / `withRestWorkerPlugin`)** : fixed (unusable since 4.3.2) and aligned on the params of the Redis plugins. Upgrade the master and the workers together : the workers now send a heartbeat to a new master route.
+  - Workers : `timeoutSeconds` (mandatory before) was the HTTP read timeout, it is now the node timeout : a node without heartbeat (every 20s) for this time is seen dead and its works are re-queued (60s by default, more than 20s and at most 3600s, checked at startup). Remove it ; if you had raised it for a slow server, put this value in the new `httpTimeoutSeconds` (10s by default, more than 5s : the long poll of the server).
+  - Master : remove `timeoutSeconds` (always ignored, now deprecated). The timeout of the works waiting without an active node for their type (60s) is set with `deadWorkTypeTimeoutSeconds` (5 to 3600s).
+  - Redis plugins : nothing to change.
+
 * [Connectors] jsch 0.2.26 -> 2.28.8 : same library (`com.github.mwiede:jsch`) with a new numbering, nothing to change in your code. If your project declares jsch itself, align its version.
 
 # from 4.4.0 to 4.4.1

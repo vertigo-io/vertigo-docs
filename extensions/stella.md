@@ -21,7 +21,7 @@ Côté Worker, `WorkersManagerImpl` crée un pool d'exécution unique (`workersC
 ### Transports
 
 - **Redis** : communication pair-à-pair via `RedisMasterPlugin` et `RedisWorkersPlugin`. Files atomiques Redis (`lmove`), heartbeat via `SETEX`, namespace `vertigo:work:{workType}:{id}`. Sérialisation : Java + Base64.
-- **REST** : communication via un serveur centralisé. `RestMasterPlugin`, `RestMasterWebService`, et `RestWorkersPlugin`. Endpoints : `GET /pollWork/{type}`, `POST /event/{start,success,failure}/{uuid}`. Sérialisation : Java + GZip + Base64 + JSON.
+- **REST** : communication via un serveur centralisé. `RestMasterPlugin`, `RestMasterWebService`, et `RestWorkersPlugin`. Endpoints : `POST /heartBeat`, `GET /pollWork/{type}`, `POST /event/{start,success,failure}/{uuid}`. Sérialisation : Java + GZip + Base64 + JSON.
 
 ## API
 
@@ -105,16 +105,19 @@ Stella s'active exclusivement via les annotations `@Feature` dans la configurati
 ### Paramètres REST
 
 - `serverUrl` : requis côté worker, URL du serveur REST
+- `timeoutSeconds` : 60s (côté worker), délai sans heartbeat (envoyé toutes les 20s) au-delà duquel le nœud est vu mort et ses travaux remis en file ; plus de 20s, au plus 3600s
+- `httpTimeoutSeconds` : 10s (côté worker), délai de lecture HTTP, plus que l'attente longue du serveur (5s)
+- `deadWorkTypeTimeoutSeconds` : 60s (côté master, de 5 à 3600s), délai avant abandon des travaux d'un workType sans worker actif
 
 ## Transport REST
 
-`RestMasterWebService` expose des endpoints sous le préfixe `/backend/workQueue` pour le polling et le signalement des événements de travail.
+`RestMasterWebService` expose des endpoints sous le préfixe `/backend/workQueue` pour le polling et le signalement des événements de travail. Ils sont destinés aux seuls workers de la ferme : gardez-les sur le réseau privé des nœuds, sans les exposer à l'extérieur (comme l'accès à Redis pour le transport Redis).
 
 ## Résilience
 
-### Retry automatique
+### Échecs et reprise
 
-En cas d'échec d'un `WorkItem`, le système tente automatiquement jusqu'à 3 exécutions (`MAX_WORK_RETRY_COUNT = 3`) avant d'abandonner et de propager l'erreur au master.
+Un `WorkItem` en échec n'est pas réexécuté : l'erreur est relayée au master. Seuls les travaux d'un nœud vu mort sont remis en file : le travail d'un nœud lent vu mort à tort peut ainsi s'exécuter deux fois (son second résultat est ignoré), un `WorkEngine` doit le supporter.
 
 ### Dead-node detection
 
@@ -296,7 +299,7 @@ modules:
 - `WorkEngine` et ses paramètres (work et result) **doivent implémenter `Serializable`** (sérialisation Java nécessaire pour le transport Redis et REST).
 - `WorkPromise.join()` bloque le thread appelant. Utiliser `schedule()` avec `WorkResultHandler` pour les appels non bloquants.
 - En cas d'erreur durant le traitement, l'exception est relayée par `join()`. Le handler `onDone()` reçoit l'erreur en second paramètre.
-- Retry automatique : chaque `WorkItem` échoué est réessayé jusqu'à 3 fois avant abandon.
+- Un `WorkItem` en échec n'est pas réessayé : l'erreur est relayée au master (seuls les travaux d'un nœud vu mort sont remis en file).
 - Les travaux orphelins (node mort) sont réinjectés dans la file Todo par le daemon de détection de nœuds morts (période 20s).
 
 ## Références

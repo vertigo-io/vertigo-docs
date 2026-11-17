@@ -21,7 +21,7 @@ On the Worker side, `WorkersManagerImpl` creates a single execution pool (`worke
 ### Transports
 
 - **Redis**: peer-to-peer communication via `RedisMasterPlugin` and `RedisWorkersPlugin`. Atomic Redis queues (`lmove`), heartbeat via `SETEX`, namespace `vertigo:work:{workType}:{id}`. Serialization: Java + Base64.
-- **REST**: communication via centralized server. `RestMasterPlugin`, `RestMasterWebService`, and `RestWorkersPlugin`. Endpoints: `GET /pollWork/{type}`, `POST /event/{start,success,failure}/{uuid}`. Serialization: Java + GZip + Base64 + JSON.
+- **REST**: communication via centralized server. `RestMasterPlugin`, `RestMasterWebService`, and `RestWorkersPlugin`. Endpoints: `POST /heartBeat`, `GET /pollWork/{type}`, `POST /event/{start,success,failure}/{uuid}`. Serialization: Java + GZip + Base64 + JSON.
 
 ## API
 
@@ -105,16 +105,19 @@ Stella is activated exclusively via `@Feature` annotations in YAML configuration
 ### REST Parameters
 
 - `serverUrl`: required on worker side, REST server URL
+- `timeoutSeconds`: 60s (worker side), time without heartbeat (sent every 20s) after which the node is seen dead and its works re-queued; more than 20s, at most 3600s
+- `httpTimeoutSeconds`: 10s (worker side), HTTP read timeout, more than the long poll of the server (5s)
+- `deadWorkTypeTimeoutSeconds`: 60s (master side, 5 to 3600s), time before the works of a workType without active worker are abandoned
 
 ## REST Transport
 
-`RestMasterWebService` exposes endpoints under prefix `/backend/workQueue` for polling and work event reporting.
+`RestMasterWebService` exposes endpoints under prefix `/backend/workQueue` for polling and work event reporting. They are for the workers of the farm only: keep them on the private network of the nodes, not exposed outside (as the access to Redis for the Redis transport).
 
 ## Resilience
 
-### Automatic Retry
+### Failures and recovery
 
-On `WorkItem` failure, the system automatically retries up to 3 executions (`MAX_WORK_RETRY_COUNT = 3`) before giving up and propagating the error to the master.
+A failed `WorkItem` is not executed again: the error is relayed to the master. Only the works of a node seen dead are re-queued: the work of a slow node wrongly seen dead may so run twice (its second result is ignored), a `WorkEngine` must bear it.
 
 ### Dead-node detection
 
@@ -296,7 +299,7 @@ modules:
 - `WorkEngine` parameters (work and result) **must implement `Serializable`** (Java serialization required for Redis and REST transport).
 - `WorkPromise.join()` blocks the calling thread. Use `schedule()` with `WorkResultHandler` for non-blocking calls.
 - On processing error, the exception is relayed by `join()`. Handler `onDone()` receives the error as the second parameter.
-- Automatic retry: each failed `WorkItem` is retried up to 3 times before abandonment.
+- A failed `WorkItem` is not retried: the error is relayed to the master (only the works of a node seen dead are re-queued).
 - Orphaned work (dead node) is reinjected into the Todo queue by the dead-node detection daemon (20s period).
 
 ## References
