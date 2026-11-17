@@ -472,6 +472,29 @@ The result object `FacetedQueryResult` provides many useful pieces of informatio
 The method generated in the SearchClient takes a `SelectedFacetValues` parameter.
 Vertigo provides a bridge between this object and the UI frameworks used (WebServices, SpringMVC, or Struts2)
 
+### Skipping facets for one search
+
+The `FacetedQueryDefinition` sets the facets computed by a search. The `SearchQueryBuilder` can leave some of them out for one search: their aggregation is not requested from ElasticSearch and they are absent from the `FacetedQueryResult`. The same definition thus serves several screens that do not display the same facets, without computing the facets that are not displayed.
+
+- `withSkippedFacets(Set<DefinitionId<FacetDefinition>>)`: the facets to skip, given by their id
+- `withSkippedFacetFilter(Function<FacetedQueryDefinition, Set<DefinitionId<FacetDefinition>>>)`: a function choosing the facets to skip among those of the builder's `FacetedQueryDefinition`; it is only available on a builder created from a `FacetedQueryDefinition`, like the SearchClient one
+
+Example:
+```java
+      final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
+	     .withSkippedFacetFilter(facetedQueryDefinition -> facetedQueryDefinition.getFacetDefinitions().stream()
+	           .filter(facetDefinition -> !"FctEquipmentType".equals(facetDefinition.getName())) // only FctEquipmentType is computed
+	           .map(FacetDefinition::id)
+	           .collect(Collectors.toSet()))
+	     .build();
+```
+
+- The clustering facet (`withFacetClustering`) is never skipped: the cluster counts are read from its result.
+- The values already selected on a skipped facet still filter the results, but Vertigo-UI no longer displays them (they are absent from `_selectedFacets`). So only skip facets the user cannot select on the screen.
+- The ElasticSearch 9 and ElasticSearch 7.17 (vertigo-lts-libs) search plugins handle the skipped facets.
+
+<!-- source : SearchQueryBuilder.java (withSkippedFacets, withSkippedFacetFilter : assertion "Skipped facets need a FacetedQueryDefinition") ; SearchQuery.java (clustering facet filtered out of skippedFacets) ; ESAggregationBuilder.java:85, ESFacetedQueryResultBuilder.java:203 ; ESSearchQueryBuilder.java (selected values filter every facet) ; ViewContext.java:530-537 (_selectedFacets without skipped facets) ; AbstractSearchManagerTest (testFacetQueryWithSkippedFacet*) ; vertigo-lts-libs AsbtractESSearchRequestBuilder (ES 7.17 RestHL and transport) -->
+
 
 ## VertigoSearchDSL Syntax
 

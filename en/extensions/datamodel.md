@@ -68,7 +68,10 @@ create DtDefinition DtUser {
   - `cardinality`: `?` (0-1), `1` (required), `*` (multiple)
 - `id`: designates the persistent entity and its primary key *(no multiple PK, except N-N association tables)*
 - `sortField`: default sort field for the object's lists
-- `sortFieldDesc`: `"true"` for a descending default sort *(default: ascending)*
+- `sortFieldDesc`: `"true"` for a descending default sort *(default: ascending)*; generated as `@SortField(desc = true)`
+
+The default sort (field and direction) is the one of `DtListState.defaultOf(entityClass)` and of the cached MasterData lists, for which the `sortField` is mandatory.
+<!-- source : DtListState.defaultOf (getSortField, getSortDesc) ; CacheDataStore.loadMDList (sortField mandatory, sortDesc) ; studio KSP sortFieldDesc -> @SortField(desc = true) -->
 
 __Stereotype__
 
@@ -196,7 +199,7 @@ For DtObject, Java annotations are an alternative to KSP:
 | `@DataSpace` | Data space |
 | `@Field` | DtObject field |
 | `@DisplayField` | Display field |
-| `@SortField` | Sort field |
+| `@SortField` | Default sort field; `desc = true` for a descending sort (ascending by default) |
 | `@KeyField` | Key field |
 | `@ForeignKey` | Foreign key |
 | `@Association` | 1-N Association |

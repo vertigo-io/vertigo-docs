@@ -361,9 +361,9 @@ These two startup parameters can also come from other sources; from the weakest 
 | Source | Configuration files | Active flags |
 |---|---|---|
 | `web.xml` (`context-param`) | `boot.applicationConfiguration` | `boot.activeFlags` |
-| environment variable | `VERTIGO_BOOT_APPLICATION_CONFIGURATION` (since 4.5.0) | `VERTIGO_BOOT_ACTIVE_FLAGS` |
+| environment variable | `VERTIGO_BOOT_APPLICATION_CONFIGURATION` | `VERTIGO_BOOT_ACTIVE_FLAGS` |
 | properties file `-Dexternal-properties=<path>` | `boot.applicationConfiguration` | `boot.activeFlags` |
-| system property | `-Dboot.application-configuration` (since 4.5.0) | `-Dboot.active-flags` |
+| system property | `-Dboot.application-configuration` | `-Dboot.active-flags` |
 
 Example: `VERTIGO_BOOT_ACTIVE_FLAGS=redis;searchES;analytics`.
 

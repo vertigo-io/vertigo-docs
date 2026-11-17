@@ -68,7 +68,10 @@ create DtDefinition DtUsager {
 	- `cardinality` : `?` (0-1), `1` (obligatoire), `*` (multiple)
 - `id` : désigne l'entité persistante et sa clé primaire *(pas de PK multiple, sauf tables d'association N-N)*
 - `sortField` : champ de tri par défaut des listes de l'objet
-- `sortFieldDesc` : `"true"` pour un tri par défaut décroissant *(défaut : croissant)*
+- `sortFieldDesc` : `"true"` pour un tri par défaut décroissant *(défaut : croissant)* ; généré en `@SortField(desc = true)`
+
+Le tri par défaut (champ et sens) est celui de `DtListState.defaultOf(entityClass)` et des listes MasterData mises en cache, pour lesquelles le `sortField` est obligatoire.
+<!-- source : DtListState.defaultOf (getSortField, getSortDesc) ; CacheDataStore.loadMDList (sortField mandatory, sortDesc) ; studio KSP sortFieldDesc -> @SortField(desc = true) -->
 
 __StereoType__
 
@@ -196,7 +199,7 @@ Pour les DtObject, les annotations Java sont alternatives au KSP :
 | `@DataSpace` | Espace de données |
 | `@Field` | Champ d'un DtObject |
 | `@DisplayField` | Champ d'affichage |
-| `@SortField` | Champ de tri |
+| `@SortField` | Champ de tri par défaut ; `desc = true` pour un tri décroissant (croissant par défaut) |
 | `@KeyField` | Champ de clé |
 | `@ForeignKey` | Clé étrangère |
 | `@Association` | Association 1-N |

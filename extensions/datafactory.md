@@ -367,6 +367,9 @@ Le module Collections supporte les facettes multi-valeur via la propriété smar
 | `sep_punct` | Split sur ponctuation (`,\|;:-)`) | `"A, B; C"` → 3 facettes |
 | `text_fr` | Tokenizer Lucene français | `"les chats noirs"` → 2 facettes (chats, noirs) |
 
+Seules ces quatre valeurs découpent le champ ; c'est la première partie de l'`INDEX_TYPE`, avant le premier `:`, qui est lue. Sans `INDEX_TYPE`, ou avec une autre valeur, la valeur entière du champ forme une seule valeur de facette, et un filtre de liste `CHAMP:valeur` la compare en entier. En mémoire, l'`INDEX_TYPE` n'est donc pas obligatoire, contrairement aux champs `String` d'un index ElasticSearch.
+<!-- source : DtListPatternFilterUtil.java (TOKENIZED_INDEX_TYPES sep_comma/sep_pipe/text_fr/sep_punct, readIndexAnalyzer : raw INDEX_TYPE split on ':', absent = not tokenized) ; FacetManagerTest.testNotTokenizedWithoutIndexType ; IndexType.checkIndexType (String requires indexType for ES) -->
+
 On peut combiner avec `facetable` :
 
 ```java

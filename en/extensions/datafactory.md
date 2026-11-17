@@ -354,6 +354,46 @@ FacetedQueryResult result =
 
 The method rebuilds the Lucene index on each call against provided data; usage is suited for moderately-sized lists already loaded in memory.
 
+### Multi-value facets and IndexType
+
+The Collections module supports multi-value facets through the smartType property `DtProperty.INDEX_TYPE`. A `Keyword` field can be split automatically into several values for faceting:
+
+| `INDEX_TYPE` value | Behavior | Example |
+|---|---|---|
+| `sep_comma` | Split on `,` | `"A,B,C"` → 3 facets (A, B, C) |
+| `sep_pipe` | Split on `\|` | `"A\|B\|C"` → 3 facets |
+| `sep_punct` | Split on punctuation (`,\|;:-)`) | `"A, B; C"` → 3 facets |
+| `text_fr` | French Lucene tokenizer | `"les chats noirs"` → 2 facets (chats, noirs) |
+
+Only these four values split the field; the first part of the `INDEX_TYPE`, before the first `:`, is the one read. Without `INDEX_TYPE`, or with another value, the whole field value is a single facet value, and a list filter `FIELD:value` compares it as a whole. In memory, the `INDEX_TYPE` is therefore not mandatory, unlike the `String` fields of an ElasticSearch index.
+<!-- source : DtListPatternFilterUtil.java (TOKENIZED_INDEX_TYPES sep_comma/sep_pipe/text_fr/sep_punct, readIndexAnalyzer : raw INDEX_TYPE split on ':', absent = not tokenized) ; FacetManagerTest.testNotTokenizedWithoutIndexType ; IndexType.checkIndexType (String requires indexType for ES) -->
+
+It can be combined with `facetable`:
+
+```java
+// In the Keyword SmartType definition
+@DtProperty(name = DtProperty.INDEX_TYPE, value = "sep_comma:facetable")
+```
+
+`IndexType` is a model parsing the `INDEX_TYPE` string into an `io.vertigo.datafactory.collections.model.IndexType` object exposing:
+
+| Method | Type | Description |
+|---|---|---|
+| `getIndexAnalyzer()` | `Optional<String>` | Lucene analyzer (fr, en, ...) |
+| `getIndexDataType()` | `String` | Indexing type (`text`, `keyword`, `date`, `long`, `double`, `boolean`) |
+| `isIndexStored()` | `boolean` | Stored value (true by default) |
+| `isIndexSubKeyword()` | `boolean` | Sub-keyword (for sortable + facetable) |
+| `getSortableNormalizer()` | `String` | Sub-keyword normalizer (`sortable` by default) |
+| `isIndexFieldData()` | `boolean` | Field data field (ES aggregations) |
+
+Full syntax:
+
+```
+"analyzer{:dataType}{:stored|notStored}{:sortable|notSortable}{:facetable|notFacetable}{:fieldData|notFieldData}"
+```
+
+Example: `text_fr:keyword:stored:sortable:facetable`
+
 ---
 
 ## Comparison: ElasticSearch vs Collections

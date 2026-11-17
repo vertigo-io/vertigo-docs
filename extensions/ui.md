@@ -128,7 +128,7 @@ Pour une application Vue pure (SPA) sans rendu serveur Thymeleaf, Vertigo ne fou
 
 La documentation de Quasar sur [quasar.dev](https://quasar.dev/vue-components/)
 
-!> Vertigo-UI 4.4.1 utilise Quasar **2.21.1** (Vue 3). La migration Quasar 1 → 2 concernait notamment `q-modal` → `q-dialog` (`QModal` est absent de Quasar 2). Pour l'upload de fichiers, ce n'est pas un changement d'API Quasar : `QUploader` existe bien dans Quasar 2.21.1 ; c'est le composant Vertigo-UI qui utilise désormais le composant maison `v-file-upload-quasar` (plutôt que `q-uploader` de Quasar).
+!> Vertigo-UI utilise Quasar **2.35.4** (Vue 3). La migration Quasar 1 → 2 concernait notamment `q-modal` → `q-dialog` (`QModal` est absent de Quasar 2). Pour l'upload de fichiers, ce n'est pas un changement d'API Quasar : `QUploader` existe bien dans Quasar 2 ; c'est le composant Vertigo-UI qui utilise désormais le composant maison `v-file-upload-quasar` (plutôt que `q-uploader` de Quasar).
 
 Les composants les plus courants sont :
 
@@ -224,34 +224,35 @@ Nécessite :
 - `vu:head` : Pose le tag head et les méta du head html
   - `title`* : Titre de la page
   - `content` : Le body du tag est conservé
-  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.39`)
-  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.18.1`)
+  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.45`)
+  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.21.1`)
   - `vuejsDevMode` : **boolean** (défaut `false`) : passe VueJS en mode dev — charge les builds non minifiés (`vue.global.js` au lieu de `vue.global.prod.js`, et `quasar.umd.js` au lieu de `quasar.umd.prod.js`) *(nous avons noté des bugs sur VueJS dans quelques cas qui n'apparaissent qu'en devMode)*
   - `vuiDevMode` : **boolean** (défaut `false`) : active le mode développeur pour les composants Vertigo-UI (il faut un serveur de dev Vite — `npm run dev`, port 3000 — qui distribue les modules source transformés à la volée)
   - `vuiSsr` : **boolean** (défaut `false`) : Active le mode Server Side Rendering (le serveur Node.js est optionnel ; à défaut, la pré-compilation du template est assurée par le moteur Nashorn embarqué — `vue-template-compiler` browser.js) — charge `vertigo-ui-mpa-ssr.js` au lieu de `vertigo-ui-mpa.js`
-  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.4.1`)
+  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.5.0`)
   - `useQuasar` : **boolean** (défaut `true`) : charge Quasar (CSS, script UMD, locale)
-  - `quasarVersion` : Version du Quasar chargé (défaut `2.21.1`)
+  - `quasarVersion` : Version du Quasar chargé (défaut `2.35.4`)
   - `robotoVersion` : Version de la police Roboto chargée (défaut `51` ; la valeur `null` ne charge pas Roboto)
   - `fontAwesomeVersion` : Version de Font Awesome chargée (défaut `6.7.2` ; la valeur `null` ne charge pas Font Awesome)
   - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`)
   - `useWysiwyg` : **boolean** : charge les assets de l'éditeur Vertigo-Wysiwyg (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js` ; non chargé si non précisé
   - `additional_defer_libs_slot` : Slot pour injecter des scripts supplémentaires (deferred), posés après Quasar et avant l'UMD Vertigo-UI
 - `vu:head-meta` : Composant obligatoire posant les éléments **méta** du head (script js, css, ...)
-  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.39`)
-  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.18.1`)
+  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.45`)
+  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.21.1`)
   - `vuejsDevMode` : **boolean** (défaut `false`) : passe VueJS en mode dev — charge les builds non minifiés (`vue.global.js` au lieu de `vue.global.prod.js`, et `quasar.umd.js` au lieu de `quasar.umd.prod.js`) *(nous avons noté des bugs sur VueJS dans quelques cas qui n'apparaissent qu'en devMode)*
   - `vuiDevMode` : **boolean** (défaut `false`) : active le mode développeur pour les composants Vertigo-UI (il faut un serveur de dev Vite — `npm run dev`, port 3000 — qui distribue les modules source transformés à la volée)
   - `vuiSsr` : **boolean** (défaut `false`) : Active le mode Server Side Rendering — charge `vertigo-ui-mpa-ssr.js` au lieu de `vertigo-ui-mpa.js`
-  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.4.1`)
+  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.5.0`)
   - `useQuasar` : **boolean** (défaut `true`) : charge Quasar (CSS, script UMD, locale)
-  - `quasarVersion` : Version du Quasar chargé (défaut `2.21.1`)
+  - `quasarVersion` : Version du Quasar chargé (défaut `2.35.4`)
   - `onlyDsfrStyle` : **boolean** (défaut `false`) : masque tous les CSS 3rd-party non-DSFR (Roboto, Material Icons, Font Awesome, Ionicons, Material Design Icons, Animate.css) ainsi que le CSS Quasar (les scripts JS Quasar restent chargés)
   - `robotoVersion` : Version de la police Roboto chargée (défaut `51` ; la valeur `null` ne charge pas Roboto) — non chargé si `onlyDsfrStyle`
   - `fontAwesomeVersion` : Version de Font Awesome chargée (défaut `6.7.2` ; la valeur `null` ne charge pas Font Awesome) — non chargé si `onlyDsfrStyle`
   - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`)
   - `useWysiwyg` : **boolean** : charge les assets de l'éditeur Vertigo-Wysiwyg (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js` ; non chargé si non précisé
   - `additional_defer_libs_slot` : Slot pour injecter des scripts supplémentaires (deferred), posés après Quasar et avant l'UMD Vertigo-UI
+  > Vertigo-UI embarque deux versions de Vue, Quasar et axios : celle par défaut et la précédente (Vue `3.5.45` / `3.5.39`, Quasar `2.35.4` / `2.21.1`, axios `1.21.1` / `1.18.1`). La version précédente permet de décaler la montée de version d'une application, les autres valeurs de `vueJsVersion`, `quasarVersion` et `axiosVersion` ne correspondent à aucun fichier embarqué.
   <!-- source : head.html:1-89 — params exhaustifs extraits du fragment -->
 - `vu:form` : Pose un formulaire et référence le contexte de page associé
   - `content` : Le body du tag est conservé

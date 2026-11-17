@@ -366,9 +366,9 @@ Ces deux paramètres de démarrage peuvent aussi venir d'autres sources ; de la 
 | Source | Fichiers de configuration | Flags actifs |
 |---|---|---|
 | `web.xml` (`context-param`) | `boot.applicationConfiguration` | `boot.activeFlags` |
-| variable d'environnement | `VERTIGO_BOOT_APPLICATION_CONFIGURATION` (depuis 4.5.0) | `VERTIGO_BOOT_ACTIVE_FLAGS` |
+| variable d'environnement | `VERTIGO_BOOT_APPLICATION_CONFIGURATION` | `VERTIGO_BOOT_ACTIVE_FLAGS` |
 | fichier de propriétés `-Dexternal-properties=<chemin>` | `boot.applicationConfiguration` | `boot.activeFlags` |
-| propriété système | `-Dboot.application-configuration` (depuis 4.5.0) | `-Dboot.active-flags` |
+| propriété système | `-Dboot.application-configuration` | `-Dboot.active-flags` |
 
 Exemple : `VERTIGO_BOOT_ACTIVE_FLAGS=redis;searchES;analytics`.
 
