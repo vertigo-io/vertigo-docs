@@ -34,6 +34,10 @@
   - If you declared `io.vertigo.ui.impl.vuejs.filter.UnAutoCloseTagsFilter` in your `web.xml`, you can remove it : it is deprecated, does the same repair less reliably, and now finds nothing left to close. It is **removed** in 5.0.0.
   - The repair is silent by design. Templates keep their faulty tags until you fix them at the source, so a pass on your views is still worth it.
 * [dsfr-ui] `vu:dsfr-text-area` now displays a character counter and sets `maxlength` when the field has a max length (smartType constraint or `max` attribute). Hide the counter with `showCounter="false"`.
+* **[Ui] Quasar 2.35.4, Vue 3.5.45 and axios 1.21.1 are the new defaults of `vu:head` / `vu:head-meta`.** The embedded CDN serves the default versions and the previous ones only (Vue 3.5.39, Quasar 2.21.1, axios 1.18.1) : Vue 3.5.13, Quasar 2.18.1 and axios 1.8.4 are no longer served, a page that sets `vueJsVersion`, `quasarVersion` or `axiosVersion` to one of them no longer loads. Set a served version, or remove the attribute to follow the defaults.
+  - The message zone under a field (hint, error) now takes its place in the layout (Quasar 2.25.1) instead of being drawn over the 20px reserved below the field. Forms keep the same aspect, but in a `vu:table-modifiable` this zone counts in the column width : narrow columns get wider (about 15px) and their rows higher.
+  - A field that contains a popup (calendar of `vu:date` / `vu:datetime`, or a `q-menu` / `q-popup-proxy` of your own) stays highlighted as focused while the popup is open. If you put your own `@blur` / `@focus` listeners on such a field, they no longer fire when the popup opens : `blur` fires when the user leaves the field.
+  - `Quasar.date.extractDate` returns an Invalid Date for a value that does not match the mask, an empty value included (it returned a date in 1900). Check your own code calling it on an optional date : a comparison with an Invalid Date is always `false`, `formatDate` no longer gives a 1900 date. The date column sorts of Vertigo tables are adapted (empty dates first in ascending order, last in descending order).
 
 * **[Core] Daemon health checks reworked** (feature `daemons` ; a RED status makes `/healthcheck/readiness` fail) :
   - `lastExecs` is no longer RED when all daemons fail : a failing daemon is YELLOW until two consecutive successes.
@@ -56,6 +60,8 @@
 * [Planning] `AbstractAgendaController` now provides the `_editPlage` route. If your agenda controller already declared it, remove it, or keep it only as an override of `editPlage(ViewContext, AgendaDisplayRange, Long, CreationPlageHoraireForm, UiMessageStack)` : another method on the same route fails the startup (`Ambiguous mapping`).
 
 * [Orchestra] The Orchestra UI failed to load since 4.4.0 (`process is not defined`). Nothing to do if you use the bundle of the jar ; if your project ships its own copy of `vertigo-orchestra-ui.umd.js`, replace it with the 4.5.0 one.
+
+* [Connectors] jsch 0.2.26 -> 2.28.8 : same library (`com.github.mwiede:jsch`) with a new numbering, nothing to change in your code. If your project declares jsch itself, align its version.
 
 # from 4.4.0 to 4.4.1
 
