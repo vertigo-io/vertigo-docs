@@ -73,6 +73,14 @@ create DtDefinition DtUser {
 The default sort (field and direction) is the one of `DtListState.defaultOf(entityClass)` and of the cached MasterData lists, for which the `sortField` is mandatory.
 <!-- source : DtListState.defaultOf (getSortField, getSortDesc) ; CacheDataStore.loadMDList (sortField mandatory, sortDesc) ; studio KSP sortFieldDesc -> @SortField(desc = true) -->
 
+`DtListState.defaultOf(entityClass)` also limits the number of loaded rows: 250 by default, or the value of the `DT_LIST_DEFAULT_MAX_ROWS` param provided by the `ParamManager` (5000 at most), read only once on first use.
+
+Two other limits apply to the lists of a screen:
+- a list sent to the page holds at most 1000 rows, or `DT_LIST_DEFAULT_MAX_ROWS` if higher: a list loaded by `defaultOf` always fits in the page;
+- a modifiable list (`UiListModifiable`) holds at most 250 rows, or the value of the `UI_LIST_MODIFIABLE_MAX_ROWS` param.
+<!-- source : DtListState.getDefaultMaxRows (param DT_LIST_DEFAULT_MAX_ROWS, read once, ABSOLUTE_MAX_ROWS 5000) ; AbstractUiListUnmodifiable.getMaxElements (max(1000, default max rows)) ; AbstractUiListModifiable.getModifiableMaxRows (param UI_LIST_MODIFIABLE_MAX_ROWS, 250) -->
+
+
 __Stereotype__
 
 ```ksp
