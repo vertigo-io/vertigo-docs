@@ -40,7 +40,7 @@ In HTML5, self-closing does not exist for non-void elements: the browser ignores
 The cause is the browser's *in-DOM* template parsing (see Vue doc "DOM Template Parsing Caveats": self-closing is only valid in SFCs).
 Server-side processed tags (`th:*`, `vu:*`) are not affected: they are expanded by Thymeleaf before reaching the browser. Self-closing thus remains fine for `th:block`, `vu:*` components and HTML void elements (`<br>`, `<img>`, ...).
 
-?> Vertigo-UI automatically closes self-closed tags at render time. The legacy `UnAutoCloseTagsFilter` servlet filter (declared in web.xml) is deprecated and no longer useful: its regex-based repair was partial — it misses any tag holding a `>` inside an attribute value (e.g. `:disable="[1,2].length > 5"`) and only knows the `q-*`/`v-*` prefixes.
+?> Vertigo-UI automatically closes at render time the self-closed tags whose name starts with `q-`, `v-`, `vui-` or `dsfr-` (list extended by overriding `VSpringWebConfig.getAutoCloseTagsPrefixes()`); another self-closed tag is to be fixed in the template. The legacy `UnAutoCloseTagsFilter` servlet filter (declared in web.xml) is deprecated and no longer useful: its regex-based repair was partial, it misses any tag holding a `>` inside an attribute value (e.g. `:disable="[1,2].length > 5"`).
 
 ## [Ui] How to edit my Thymeleaf pages without restarting the server?
 Spring Boot's `spring.thymeleaf.cache=false` has no effect in vertigo-ui: template caching is driven by the `isDevMode()` method of `VSpringWebConfig` (`setCacheable(!isDevMode())`).
