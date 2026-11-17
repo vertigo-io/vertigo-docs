@@ -58,6 +58,7 @@
   - Precedence : system property, then external properties file (`-Dexternal-properties`), then environment variable, then `web.xml`.
 
 * **[Planning] Database update `planning_update_4.5.0.sql`** (PostgreSQL ; new databases use `planning_create_init_4.5.0.sql`) : it adds unique constraints (a reservation occupies a single creneau ; one plage per agenda, day and start time) and consultation indexes.
+  - Check your schema first : if it already has these constraints and indexes under the same names (`A_RESERVATION_CRENEAU_CRENEAU_RESERVATION_CRENEAU_UNIQUE_FK`, `A_PLAGE_HORAIRE_UNIQUE`, `IDX_TRH_AGE_DATE_PUBLICATION_MINUTE`, `IDX_PLH_AGE_DATE`, `IDX_REC_AGE_DATE`), you don't need the script.
   - Run first the two duplicate-check queries at the top of the script : adding the constraints fails on duplicate data.
   - The script can be run again, but each run rebuilds the unique constraints with a lock on `CRENEAU` and `PLAGE_HORAIRE` : run it during a maintenance window.
 * [Planning] `AbstractAgendaController` now provides the `_editPlage` route. If your agenda controller already declared it, remove it, or keep it only as an override of `editPlage(ViewContext, AgendaDisplayRange, Long, CreationPlageHoraireForm, UiMessageStack)` : another method on the same route fails the startup (`Ambiguous mapping`).
