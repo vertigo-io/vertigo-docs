@@ -420,14 +420,14 @@ Content-Type: application/json
 
 Le module embarque une IHM Vue.js (4 vues, libellés en français et en anglais), à intégrer dans une page [Vertigo-UI](/extensions/ui) : un controller et sa vue, dans le layout de l'application (voir dans cette page les sections « Controller : SpringMVC » et « Moteur de layout : Thymeleaf Layout »). Elle s'appuie sur l'API REST : la feature `orchestra.webapi` doit être active.
 
-- Ses fichiers sont dans le jar, sous `io/vertigo/orchestra/static/` : `js/vertigo-orchestra-ui.umd.js` (les composants), `js/vertigo-orchestra-ui.js` (qui les installe dans l'application Vertigo-UI, à l'événement `vui-before-plugins`) et `css/vertigo-orchestra-ui.css`. Vertigo-UI ne sert que ses propres ressources (`/vertigo-ui/static/`) : l'application doit rendre ces fichiers accessibles, par exemple en les copiant dans les ressources statiques de sa webapp. L'exemple ci-dessous suppose les fichiers JavaScript copiés dans `static/js/orchestra/` et la feuille de style dans `static/css/orchestra/`.
+- Ses fichiers sont servis par Vertigo-UI, sous `/vertigo-ui/static/orchestra/` : `js/vertigo-orchestra-ui.umd.js` (les composants), `js/vertigo-orchestra-ui.js` (qui les installe dans l'application Vertigo-UI, à l'événement `vui-before-plugins`) et `js/vertigo-orchestra-ui.css`. L'application n'a pas à les copier : elle les charge depuis le jar, comme les ressources de Vertigo-UI.
 - Le composant `vui-orchestra` affiche la liste des processus, puis le détail d'un processus : ses exécutions, ses activités et leurs journaux, ses réglages, et le lancement d'une exécution. Il reçoit `api-url`, l'adresse de l'API d'Orchestra (le préfixe des webservices suivi de `/orchestra`), et `read-only`.
 
 ```html
 <head>
-	<link rel="stylesheet" th:href="@{/static/css/orchestra/vertigo-orchestra-ui.css}">
-	<script th:src="@{/static/js/orchestra/vertigo-orchestra-ui.js}"></script>
-	<script th:src="@{/static/js/orchestra/vertigo-orchestra-ui.umd.js}"></script>
+	<link rel="stylesheet" th:href="@{/vertigo-ui/static/orchestra/js/vertigo-orchestra-ui.css}">
+	<script th:src="@{/vertigo-ui/static/orchestra/js/vertigo-orchestra-ui.js}"></script>
+	<script th:src="@{/vertigo-ui/static/orchestra/js/vertigo-orchestra-ui.umd.js}"></script>
 </head>
 <body>
 	<section layout:fragment="content">
@@ -437,7 +437,7 @@ Le module embarque une IHM Vue.js (4 vues, libellés en français et en anglais)
 ```
 
 !> `read-only` masque seulement les boutons de modification et de lancement : les webservices restent appelables. Si l'IHM est utilisée en production, l'accès à la page et à l'API doit être protégé côté serveur (voir [Piloter Orchestra par webservices](#piloter-orchestra-par-webservices)).
-<!-- source : vertigo-orchestra/src/main/vuejs/src/main.js (composants), src/views/ (4 vues), src/lang/ (fr, en) ; views/VuOApp.vue:L16 (props apiUrl, readOnly) ; views/VuOProcess.vue:L58 (orchestraUiReadOnly) ; resources/io/vertigo/orchestra/static/ ; vuejs/README.md (« If used in production, you must protect access ») ; VSpringWebConfig.java:L341 -->
+<!-- source : vertigo-orchestra/src/main/vuejs/src/main.js (composants), src/views/ (4 vues), src/lang/ (fr, en) ; views/VuOApp.vue:L16 (props apiUrl, readOnly) ; views/VuOProcess.vue:L58 (orchestraUiReadOnly) ; resources/io/vertigo/ui/static/orchestra/ ; vuejs/README.md (« If used in production, you must protect access ») ; VSpringWebConfig.java:L360 -->
 
 Autre option, retenue par Mars : construire ses propres écrans de suivi des processus (le module [`job`](https://github.com/vertigo-io/vertigo-mars/tree/master/src/main/java/io/mars/job) : liste des processus, détail, exécutions), avec Vertigo-UI, sur les requêtes de suivi d'Orchestra (les PAO du package `io.vertigo.orchestra.monitoring`).
 <!-- source : vertigo-mars io/mars/job (JobServices, Job*Controller), views/job/*.html -->

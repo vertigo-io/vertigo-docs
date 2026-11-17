@@ -65,7 +65,7 @@
   - The script can be run again, but each run rebuilds the unique constraints with a lock on `CRENEAU` and `PLAGE_HORAIRE` : run it during a maintenance window.
 * [Planning] `AbstractAgendaController` now provides the `_editPlage` route. If your agenda controller already declared it, remove it, or keep it only as an override of `editPlage(ViewContext, AgendaDisplayRange, Long, CreationPlageHoraireForm, UiMessageStack)` : another method on the same route fails the startup (`Ambiguous mapping`).
 
-* [Orchestra] The Orchestra UI failed to load since 4.4.0 (`process is not defined`). Nothing to do if you use the bundle of the jar ; if your project ships its own copy of `vertigo-orchestra-ui.umd.js`, replace it with the 4.5.0 one.
+* [Orchestra] The Orchestra UI failed to load since 4.4.0 (`process is not defined`). Its files are now served by Vertigo-UI under `/vertigo-ui/static/orchestra/` : if your project ships its own copy (`vertigo-orchestra-ui.umd.js`, `vertigo-orchestra-ui.js`, `vertigo-orchestra-ui.css`), remove it and load the files served by Vertigo, see [Orchestra > Embedded UI](https://vertigo-io.github.io/vertigo-docs/#/en/modules/orchestra?id=embedded-ui).
 
 * [Connectors] jsch 0.2.26 -> 2.28.8 : same library (`com.github.mwiede:jsch`) with a new numbering, nothing to change in your code. If your project declares jsch itself, align its version.
 
