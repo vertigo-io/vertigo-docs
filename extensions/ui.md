@@ -472,6 +472,17 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `uploader_attrs` : Liste des attributs à ajouter sur le composant upload (tag `v-file-upload-quasar`)
 - `vu:fileupload-dropzone` : Zone de dépôt de fichiers par glisser-déposer
   - `fileComponentId`* : Identifiant obligatoire liant la zone de dépôt au composant d'upload correspondant
+- `vu:v-fileupload` : Composant d'ajout de fichiers (composant Vue `v-file-upload`), présenté comme un champ avec son libellé (pendant Quasar de `vu:dsfr-v-fileupload`)
+  - `url`* : Url du WebService d'upload
+  - `downloadUrl` : Url de téléchargement d'un fichier, suivie de son identifiant (défaut : `url` + `/download/`)
+  - `object` + `field` : Champ d'un objet du contexte recevant les fichiers ; le libellé est celui du champ
+  - `key` : Clé du contexte recevant les fichiers (liste de fichiers sans objet) ; `label` est alors obligatoire en édition
+  - `label` : Libellé (surcharge celui du champ)
+  - `required` : Surcharge du caractère obligatoire
+  - `multiple` : Indique si on autorise plusieurs fichiers
+  - `label_attrs` : Liste des attributs à ajouter sur le cadre du champ (tag `<q-field>`)
+  - `uploader_attrs` : Liste des attributs à ajouter sur le composant upload (tag `v-file-upload`)
+- `vu:v-fileupload-simple` (par `key`) et `vu:v-fileupload-simple-object` (par `object` + `field`) : variantes compactes de `vu:v-fileupload`, mêmes paramètres
 
 > Pour adapter leur rendu ces composants utilisent des mécanismes particuliers.
 > Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi :

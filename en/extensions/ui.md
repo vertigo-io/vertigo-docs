@@ -472,6 +472,17 @@ The components in **Edit** also natively handle the error messages from the vali
   - `uploader_attrs`: List of attributes to add on the upload component (tag `v-file-upload-quasar`)
 - `vu:fileupload-dropzone`: File drop zone by drag-and-drop
   - `fileComponentId`*: Mandatory identifier linking the drop zone to the corresponding upload component
+- `vu:v-fileupload`: File upload component (Vue component `v-file-upload`), shown as a field with its label (counterpart of `vu:dsfr-v-fileupload`)
+  - `url`*: Url of the upload WebService
+  - `downloadUrl`: Url to download a file, followed by its id (default: `url` + `/download/`)
+  - `object` + `field`: Field of an object of the context receiving the files; the label is the one of the field
+  - `key`: Key of the context receiving the files (list of files without object); `label` is then mandatory in edit mode
+  - `label`: Label (overrides the one of the field)
+  - `required`: Override of the required flag
+  - `multiple`: Whether several files are allowed
+  - `label_attrs`: List of attributes to add on the field frame (tag `<q-field>`)
+  - `uploader_attrs`: List of attributes to add on the upload component (tag `v-file-upload`)
+- `vu:v-fileupload-simple` (by `key`) and `vu:v-fileupload-simple-object` (by `object` + `field`): compact variants of `vu:v-fileupload`, same params
 
 > To adapt their rendering these components use particular mechanisms.
 > Globally a **Vertigo-UI: inputs** component is written thus:
