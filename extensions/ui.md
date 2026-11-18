@@ -616,6 +616,12 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
    - labelCancel : libellé du bouton annuler (par défaut Non)
    - other_attrs : tous autres attributs. Posés sur le `<q-btn>` (pas sur le bouton interne de confirmation)
 
+- `vu:buttons-group` : Regroupe les boutons d'action d'une page : selon la place disponible, les premiers sont affichés en ligne, les suivants dans un menu ouvert par un bouton « … »
+   - xs, sm, md, lg, xl : nombre de boutons affichés en ligne pour chaque taille d'écran Quasar (xs < 600px, sm < 1024px, md < 1440px, lg < 1920px, xl) ; tous par défaut, une taille non précisée suit la suivante (ex. `sm="0" md="2"` : aucun bouton en ligne en xs et sm, 2 en md, tous en lg et xl)
+   - moreLabel : libellé du bouton « … » (accessibilité)
+   - color, textColor : couleurs du bouton « … »
+   - btn_attrs : liste des attributs à ajouter sur le bouton « … » (tag `<q-btn>`)
+   - les boutons du groupe sont des composants `vu:` (`vu:button`, `vu:button-link`…) : ils reçoivent les classes de visibilité par taille d'écran. Un bouton écrit directement (`<q-btn>`) ne les reçoit pas : il reste affiché en ligne à toutes les tailles, et il est répété dans le menu « … » quand son rang l'y place
 
 ## Composants VueJS Vertigo-UI
 

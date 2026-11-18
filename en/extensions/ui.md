@@ -616,6 +616,12 @@ The components in **Edit** also natively handle the error messages from the vali
    - labelCancel: label of the cancel button (default No)
    - other_attrs: all other attributes. Set on the `<q-btn>` (not on the internal confirmation button)
 
+- `vu:buttons-group`: Groups the action buttons of a page: depending on the available room, the first ones are shown inline, the next ones in a menu opened by a "…" button
+   - xs, sm, md, lg, xl: number of buttons shown inline for each Quasar screen size (xs < 600px, sm < 1024px, md < 1440px, lg < 1920px, xl); all by default, a size not given follows the next one (ex. `sm="0" md="2"`: no button inline in xs and sm, 2 in md, all in lg and xl)
+   - moreLabel: label of the "…" button (accessibility)
+   - color, textColor: colors of the "…" button
+   - btn_attrs: list of attributes to add on the "…" button (tag `<q-btn>`)
+   - the buttons of the group are `vu:` components (`vu:button`, `vu:button-link`…): they get the visibility classes by screen size. A button written directly (`<q-btn>`) does not get them: it stays inline at every size, and it is repeated in the "…" menu when its rank puts it there
 
 ## Vertigo-UI VueJS Components
 
