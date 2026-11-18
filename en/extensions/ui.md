@@ -382,6 +382,13 @@ The components in **Edit** also natively handle the error messages from the vali
   - `label`: Override of the label
   - `label_attrs`: List of attributes to add on the label (tag `<q-field>`)
   - `input_attrs`: List of attributes to add on the input field (tag `<q-checkbox>`)
+- `vu:checkbox-inline`: Checkbox with its label next to it, on the whole width ("I accept the terms…"), as for a consent; `vu:checkbox` puts the label in the label column of the form. In read mode, the box is disabled (the given consent stays visible) and its value is not sent. `vu:checkbox-inline-edit` stays editable even in a read page (a consent to give on a summary page); `vu:checkbox-confirm`, deprecated (it showed no confirmation), is its former name
+  - `object`*: Name of the object of the context
+  - `field`*: Name of the field
+  - `label`: Override of the label
+  - `required`: Override of the required flag
+  - `label_attrs`: List of attributes to add on the field frame (tag `<q-field>`)
+  - `input_attrs`: List of attributes to add on the box (tag `<q-checkbox>`)
 - `vu:select`: Selection component by a combobox
   - `object`*: Name of the object of the context
   - `field`*: Name of the field

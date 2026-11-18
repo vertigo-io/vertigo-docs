@@ -382,6 +382,13 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `label` : Surcharge du label
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
   - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-checkbox>`)  
+- `vu:checkbox-inline` : Case à cocher avec son libellé à côté, sur toute la largeur (« J'accepte les conditions… »), comme pour un recueil de consentement ; `vu:checkbox` place le libellé dans la colonne des libellés du formulaire. En lecture, la case est désactivée (l'accord donné reste visible) et sa valeur n'est pas envoyée. `vu:checkbox-inline-edit` reste modifiable même dans une page en lecture (un consentement à donner sur une page récapitulative) ; `vu:checkbox-confirm`, déprécié (il n'affichait aucune confirmation), en est l'ancien nom
+  - `object`* : Nom de l'objet du contexte
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `required` : Surcharge du caractère obligatoire
+  - `label_attrs` : Liste des attributs à ajouter sur le cadre du champ (tag `<q-field>`)
+  - `input_attrs` : Liste des attributs à ajouter sur la case (tag `<q-checkbox>`)
 - `vu:select` : Composant de sélection par une combobox
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
