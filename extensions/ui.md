@@ -142,7 +142,7 @@ Les composants les plus courants sont :
 - `q-knob`
 - `q-slider`
 
-> **Thèmes** : le thème d'un layout se choisit avec `useDsfr` (défaut `false`, disponible sur `vu:head` et `vu:head-meta`), qui charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`). Le paramètre `onlyDsfrStyle` (défaut `false`) est exclusif à `vu:head-meta` : il masque tous les CSS 3rd-party non-DSFR (y compris le CSS Quasar) — passé sur `vu:head`, il est sans effet. Le thème DSFR est complété par une famille de composants `vu:dsfr-*` (boutons, collections, inputs, layout, table), documentée dans la page [Écosystème UI](/extensions/ui-ecosystem).
+> **Thèmes** : le thème d'un layout se choisit avec `useDsfr` (défaut `false`, disponible sur `vu:head` et `vu:head-meta`), qui charge le thème DSFR (`vertigo-dsfr.css` + `vertigo-dsfr.umd.js`). Le paramètre `onlyDsfrStyle` (défaut `false`) est exclusif à `vu:head-meta` : il masque tous les CSS 3rd-party non-DSFR (y compris le CSS Quasar) — passé sur `vu:head`, il est sans effet. Le thème DSFR est complété par une famille de composants `vu:dsfr-*` (boutons, collections, inputs, layout, table), documentée dans la page [Écosystème UI](/extensions/ui-ecosystem).
 
 ## Moteur de templating : Thymeleaf
 
@@ -234,7 +234,8 @@ Nécessite :
   - `quasarVersion` : Version du Quasar chargé (défaut `2.35.4`)
   - `robotoVersion` : Version de la police Roboto chargée (défaut `51` ; la valeur `null` ne charge pas Roboto)
   - `fontAwesomeVersion` : Version de Font Awesome chargée (défaut `6.7.2` ; la valeur `null` ne charge pas Font Awesome)
-  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`)
+  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `vertigo-dsfr.umd.js`, servis depuis `3rdParty/dsfr/vue-dsfr@8.21.0/` : le dossier porte la version de vue-dsfr compilée avec les composants DSFR de Vertigo)
+  - `vueDsfrVersion` : Version de vue-dsfr du thème DSFR chargé (défaut `8.21.0`)
   - `useWysiwyg` : **boolean** : charge les assets de l'éditeur Vertigo-Wysiwyg (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js` ; non chargé si non précisé
   - `additional_defer_libs_slot` : Slot pour injecter des scripts supplémentaires (deferred), posés après Quasar et avant l'UMD Vertigo-UI
 - `vu:head-meta` : Composant obligatoire posant les éléments **méta** du head (script js, css, ...)
@@ -249,10 +250,11 @@ Nécessite :
   - `onlyDsfrStyle` : **boolean** (défaut `false`) : masque tous les CSS 3rd-party non-DSFR (Roboto, Material Icons, Font Awesome, Ionicons, Material Design Icons, Animate.css) ainsi que le CSS Quasar (les scripts JS Quasar restent chargés)
   - `robotoVersion` : Version de la police Roboto chargée (défaut `51` ; la valeur `null` ne charge pas Roboto) — non chargé si `onlyDsfrStyle`
   - `fontAwesomeVersion` : Version de Font Awesome chargée (défaut `6.7.2` ; la valeur `null` ne charge pas Font Awesome) — non chargé si `onlyDsfrStyle`
-  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`)
+  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `vertigo-dsfr.umd.js`, servis depuis `3rdParty/dsfr/vue-dsfr@8.21.0/` : le dossier porte la version de vue-dsfr compilée avec les composants DSFR de Vertigo)
+  - `vueDsfrVersion` : Version de vue-dsfr du thème DSFR chargé (défaut `8.21.0`)
   - `useWysiwyg` : **boolean** : charge les assets de l'éditeur Vertigo-Wysiwyg (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js` ; non chargé si non précisé
   - `additional_defer_libs_slot` : Slot pour injecter des scripts supplémentaires (deferred), posés après Quasar et avant l'UMD Vertigo-UI
-  > Vertigo-UI embarque deux versions de Vue, Quasar et axios : celle par défaut et la précédente (Vue `3.5.45` / `3.5.39`, Quasar `2.35.4` / `2.21.1`, axios `1.21.1` / `1.18.1`). La version précédente permet de décaler la montée de version d'une application, les autres valeurs de `vueJsVersion`, `quasarVersion` et `axiosVersion` ne correspondent à aucun fichier embarqué.
+  > Vertigo-UI embarque deux versions de Vue, Quasar, axios et vue-dsfr : celle par défaut et la précédente (Vue `3.5.45` / `3.5.39`, Quasar `2.35.4` / `2.21.1`, axios `1.21.1` / `1.18.1`, vue-dsfr `8.21.0` / `8.17.0`, les deux compilées avec les mêmes composants DSFR de Vertigo). La version précédente permet de décaler la montée de version d'une application, les autres valeurs de `vueJsVersion`, `quasarVersion`, `axiosVersion` et `vueDsfrVersion` ne correspondent à aucun fichier embarqué.
   <!-- source : head.html:1-89 — params exhaustifs extraits du fragment -->
 - `vu:form` : Pose un formulaire et référence le contexte de page associé
   - `content` : Le body du tag est conservé
