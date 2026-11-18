@@ -494,9 +494,26 @@ The components in **Edit** also natively handle the error messages from the vali
 
 ### Vertigo-UI Components: collections
 - `vu:cards`: Generates a list of cards. During the rendering of a card, you can use the VueJS attribute `item` to retrieve the current object.
-- `vu:collection`
+  - `list`*: Name of the list of the context
+  - `componentId`*: Identifier of the component (state of the pagination on the client side)
+  - `rowsPerPage`: Number of items per page (default `15`)
+  - `showMore`: **boolean** (default `false`): a "show more" button adds the next items; otherwise a pagination (`q-pagination`) goes from one page to another
+  - `showMoreLabel`: Label of the "show more" button (default `Show more`)
+  - `selectable`: **boolean** (default `false`): selectable items
+  - `rowKey`: Field identifying an item (default: the id of the list)
+  - `sortUrl`: Url of the server side sort
+  - `cardClass`: Classes of the block of each card (ex. `col-4`, `col-lg-3 col-md-6 col-xs-12`)
+  - `pagination_attrs`: List of attributes to add on the pagination (tag `<q-pagination>`), ex. `pagination_color="secondary"`
+  - `qcard_attrs`: List of attributes to add on each card (tag `<q-card>`)
+- `vu:collection`: Base of `vu:list` and `vu:cards`: sets the state of the list on the client side and, below the content, the "show more" button or the pagination. Same params `list`, `componentId`, `rowsPerPage`, `showMore`, `showMoreLabel`, `selectable`, `sortUrl` and `pagination_attrs`
 - `vu:field-read`
-- `vu:list`
+- `vu:list`: Generates a list (`q-list`); each item is a `q-item`, the current object is `item`.
+  - Same params as `vu:cards` (`list`*, `componentId`*, `rowsPerPage`, `showMore`, `showMoreLabel`, `selectable`, `rowKey`, `sortUrl`, `pagination_attrs`)
+  - `separator`: **boolean**: a separator between the items
+  - `listClass`: classes added on the list (tag `<q-list>`)
+  - `item_attrs`: List of attributes to add on each item (tag `<q-item>`)
+
+> `vu:list` and `vu:cards` display data of the list on the client side: the page includes the displayed fields with `vu:include-data` (ex. `<vu:include-data object="movies" field="title"/>`).
 - `vu:search`
 - `vu:facets`
 

@@ -494,9 +494,26 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
 
 ### Composants Vertigo-UI : collections
 - `vu:cards` : Génère une liste de card. Lors du rendu d'une card, vous pouvez utiliser l'attribut VueJS `item` pour récupérer l'objet courant.
-- `vu:collection`
+  - `list`* : Nom de la liste du contexte
+  - `componentId`* : Identifiant du composant (état de la pagination côté client)
+  - `rowsPerPage` : Nombre d'éléments par page (défaut `15`)
+  - `showMore` : **boolean** (défaut `false`) : un bouton « voir plus » ajoute les éléments suivants ; sinon une pagination (`q-pagination`) passe d'une page à l'autre
+  - `showMoreLabel` : Libellé du bouton « voir plus » (défaut `Show more`)
+  - `selectable` : **boolean** (défaut `false`) : éléments sélectionnables
+  - `rowKey` : Champ identifiant un élément (défaut : l'identifiant de la liste)
+  - `sortUrl` : Url de tri côté serveur
+  - `cardClass` : Classes du bloc de chaque card (ex. `col-4`, `col-lg-3 col-md-6 col-xs-12`)
+  - `pagination_attrs` : Liste des attributs à ajouter sur la pagination (tag `<q-pagination>`), ex. `pagination_color="secondary"`
+  - `qcard_attrs` : Liste des attributs à ajouter sur chaque card (tag `<q-card>`)
+- `vu:collection` : Base de `vu:list` et `vu:cards` : pose l'état de la liste côté client et, sous le contenu, le bouton « voir plus » ou la pagination. Mêmes paramètres `list`, `componentId`, `rowsPerPage`, `showMore`, `showMoreLabel`, `selectable`, `sortUrl` et `pagination_attrs`
 - `vu:field-read`
-- `vu:list`
+- `vu:list` : Génère une liste (`q-list`) ; chaque élément est un `q-item`, l'objet courant est `item`.
+  - Mêmes paramètres que `vu:cards` (`list`*, `componentId`*, `rowsPerPage`, `showMore`, `showMoreLabel`, `selectable`, `rowKey`, `sortUrl`, `pagination_attrs`)
+  - `separator` : **boolean** : un séparateur entre les éléments
+  - `listClass` : classes ajoutées sur la liste (tag `<q-list>`)
+  - `item_attrs` : Liste des attributs à ajouter sur chaque élément (tag `<q-item>`)
+
+> `vu:list` et `vu:cards` affichent des données de la liste côté client : la page inclut les champs affichés avec `vu:include-data` (ex. `<vu:include-data object="movies" field="title"/>`).
 - `vu:search`
 - `vu:facets`
 
