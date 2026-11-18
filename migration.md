@@ -73,7 +73,19 @@
   - Master : remove `timeoutSeconds` (always ignored, now deprecated). The timeout of the works waiting without an active node for their type (60s) is set with `deadWorkTypeTimeoutSeconds` (5 to 3600s).
   - Redis plugins : nothing to change.
 
+* **[Vega] SAML2 : the SAML response is checked as required by the SAML 2.0 Web Browser SSO profile, and its assertion must be encrypted, on by default.** Test a login with your IdP after the upgrade : a response that does not comply fails the login, with an error in the logs naming the param of the `saml` feature to adapt.
+  - `SAML assertion is not encrypted : encrypted assertions are required by default...` : the `cryptAssertion` param (true by default) was not applied before, it now is, and your IdP sends plain assertions. Have the IdP encrypt them with the SP certificate of the SP metadata, or set `cryptAssertion=false`.
+  - `SAML response destination '...' is not the callback url '...' (param checkDestination)`, or a recipient refused for `checkDestination` : the url the IdP posts to is not the one the application computes, typically behind a reverse proxy (`http` instead of `https`, internal host or port). Set `externalUrl` (recommended whenever `checkDestination` is on : without it, the callback url is built from the request) to the public url of the application (`https://my-app.example.fr/context`, without final `/`) : the callback url is `externalUrl` + `urlHandlerPrefix` (`/saml/` by default) + `callback`.
+  - `SAML assertion audience is not '...' (param checkAudience)` : the IdP gives another audience than `clientName` (the entityID of the application). Fix the application declared in the IdP, or set `checkAudience=false`.
+  - `not yet valid` or `expired` (param `clockSkewSeconds`) : the clocks of the IdP and of the application differ by more than 180s. Synchronize them, or raise `clockSkewSeconds` (600s at most).
+  - `SAML assertion already used` : an assertion is accepted once, until it expires. A user who posts the same response again (back or refresh on the callback before the application session is set) gets this error : a new login fixes it, nothing to set.
+  - `SAML assertion has no valid bearer subject confirmation : ...` : the profile requires a bearer subject confirmation with the callback url as recipient and an expiry. Fix the application declared in the IdP.
+  - Checked at startup, with a clear message : `externalUrl` absolute without final `/` (an empty value is no `externalUrl`), `clockSkewSeconds` from 0 to 600s, the `saml.ip.metadata` file describing one SAML 2.0 IdP with its signing certificate (a federation file of several entities is accepted), `nextCertFile` the path of a certificate file (not the certificate itself).
+  - `saml.ip.metadata` loaded from an url : `https` in production, `http` only on a trusted network (a test environment).
+  - `checkInResponseTo=true` (false by default) also checks that the response answers a request of the user session. Enable it only if the session cookie reaches the callback, a cross-site POST from the IdP : this needs `SameSite=None`, the cookie is then sent with any cross-site request, keep a CSRF protection on the forms.
+
 * [Connectors] jsch 0.2.26 -> 2.28.8 : same library (`com.github.mwiede:jsch`) with a new numbering, nothing to change in your code. If your project declares jsch itself, align its version.
+* [Connectors] BouncyCastle 1.87 in the saml2 connector : if your project declares `bcprov` / `bcpkix` itself, align its version.
 
 # from 4.4.0 to 4.4.1
 
