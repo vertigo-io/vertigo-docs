@@ -723,6 +723,8 @@ Le module vertigo-ui ne dispose pas de `XxxFeatures.java` dédié. Les composant
 
 !> **`vu:authz` en mode développement** : avec la variable de contexte `authz-dev`, les éléments non autorisés ne sont pas supprimés, ils sont affichés en état verrouillé. Cela permet de visualiser les autorisations (quels éléments sont masqués et pourquoi) et de tester la sécurité côté serveur en conditions de développement.
 
+!> **Mode développement des gabarits** : le paramètre `THYMELEAF_DEV_MODE` (`true` par défaut) relit les gabarits à chaque requête (pas de cache : une modification est visible sans redémarrer) et journalise une fois, en WARN, chaque élément `vu:` sans composant (composant retiré ou renommé, faute de frappe : l'élément est sinon écrit tel quel et ignoré par le navigateur). Un WARN au démarrage rappelle ce mode : **en production, mettez `THYMELEAF_DEV_MODE=false`** (variable d'environnement, propriété système ou fichier de paramètres). Un projet peut aussi surcharger `VSpringWebConfig.isDevMode()`.
+
 ### UI Data Wrappers
 
 | Classe | Description |

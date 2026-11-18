@@ -723,6 +723,8 @@ The vertigo-ui module has no dedicated `XxxFeatures.java`. UI components are act
 
 !> **`vu:authz` in development mode**: with the context variable `authz-dev`, the unauthorized elements are not removed, they are displayed in locked state. This allows visualizing the authorizations (which elements are hidden and why) and testing the server-side security in development conditions.
 
+!> **Development mode of the templates**: the `THYMELEAF_DEV_MODE` param (`true` by default) reads the templates again at each request (no cache: a change is visible without restarting) and logs once, as a WARN, each `vu:` element without component (component removed or renamed, typo: the element is otherwise written as is and ignored by the browser). A WARN at startup recalls this mode: **in production, set `THYMELEAF_DEV_MODE=false`** (environment variable, system property or params file). A project may also override `VSpringWebConfig.isDevMode()`.
+
 ### UI Data Wrappers
 
 | Class | Description |

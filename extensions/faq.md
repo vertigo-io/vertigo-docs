@@ -44,7 +44,7 @@ Les balises traitées côté serveur (`th:*`, `vu:*`) ne sont pas concernées : 
 
 ## [Ui] Comment modifier mes pages Thymeleaf sans redémarrer le serveur ?
 Le paramètre Spring Boot `spring.thymeleaf.cache=false` est sans effet en vertigo-ui : le cache des templates est piloté par la méthode `isDevMode()` de `VSpringWebConfig` (`setCacheable(!isDevMode())`).
-`isDevMode()` retourne `true` par défaut (cache désactivé) : c'est la surcharge dans le `VSpringWebConfig` du projet qui active le cache en production. En dev, il suffit donc de ne pas surcharger `isDevMode()` à `false`.
+`isDevMode()` suit le paramètre `THYMELEAF_DEV_MODE`, `true` par défaut (cache désactivé) : en production, il est mis à `false`, ce qui active le cache. En dev, il suffit donc de le laisser à `true`. La surcharge de `isDevMode()` dans le `VSpringWebConfig` du projet reste possible.
 Pensez aussi à désactiver l'auto-reload du module web dans le Tomcat d'Eclipse, sinon chaque modification de ressource redémarre la webapp.
 
 ## [Ui] Les boutons `<vu:button-link>` ne fonctionnent que si ils sont placés à l'intérieur de balises `<section>`

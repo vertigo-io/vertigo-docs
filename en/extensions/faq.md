@@ -44,7 +44,7 @@ Server-side processed tags (`th:*`, `vu:*`) are not affected: they are expanded 
 
 ## [Ui] How to edit my Thymeleaf pages without restarting the server?
 Spring Boot's `spring.thymeleaf.cache=false` has no effect in vertigo-ui: template caching is driven by the `isDevMode()` method of `VSpringWebConfig` (`setCacheable(!isDevMode())`).
-`isDevMode()` returns `true` by default (cache disabled): it is the project's override in its `VSpringWebConfig` that enables the cache in production. In dev, simply do not override `isDevMode()` to `false`.
+`isDevMode()` follows the `THYMELEAF_DEV_MODE` param, `true` by default (cache disabled): in production, it is set to `false`, which enables the cache. In dev, simply leave it to `true`. Overriding `isDevMode()` in the project's `VSpringWebConfig` is still possible.
 Also disable auto-reload of the web module in Eclipse's Tomcat, otherwise every resource change restarts the webapp.
 
 ## [Ui] `<vu:button-link>` buttons only work inside `<section>` tags

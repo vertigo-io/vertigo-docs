@@ -30,6 +30,7 @@
 
 # from 4.4.1 to 4.5.0
 
+* **[Ui] Set the param `THYMELEAF_DEV_MODE=false` in production.** Without it (or an override of `VSpringWebConfig.isDevMode()`), the templates are not cached : they are read again at each request, as before. A WARN at startup now says so. In this dev mode, each `vu:` element without component is logged once as a WARN (component removed or renamed, typo) : after the upgrade, go through your screens and check the logs.
 * **[Ui] Self-closed custom elements are now closed automatically.** In-DOM templates are parsed by the browser, which per the HTML spec ignores the trailing `/` on anything but a void element : `<q-btn v-if="..." />` stayed open and swallowed the markup that followed it, silently extending the `v-if` scope and turning the next siblings into the component default slot. A Thymeleaf post-processor now rewrites such a tag into `<q-btn ...></q-btn>` before the page is written out. Nothing to configure, and no impact on correct templates.
   - If you declared `io.vertigo.ui.impl.vuejs.filter.UnAutoCloseTagsFilter` in your `web.xml`, you can remove it : it is deprecated, does the same repair less reliably, and now finds nothing left to close. It is **removed** in 5.0.0.
   - The repair is silent by design. Templates keep their faulty tags until you fix them at the source, so a pass on your views is still worth it.
