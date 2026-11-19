@@ -206,6 +206,28 @@ Vertigo-UI n'a pas vocation à encapsuler ainsi tous les composants d'ihm, la st
 - le composant nécessite des interactions particulières avec le contexte. Par exemple pour sélectionner les données à intégrer dans vueData, et parfois pour les encoder de manière spécifique.
 - le composant propose une API plus ergonomique, plus adaptée ou moins verbeuse pour le développeur
 
+Les composants nommés de Vertigo-UI simplifient et enrichissent le mécanisme des fragments de Thymeleaf : un fragment s'utilise comme une balise HTML, ses paramètres s'écrivent comme des attributs, et le composant apporte en plus la transmission des attributs VueJS, le contenu, les slots et le choix du mode lecture ou édition.
+
+```HTML
+<!-- fragment Thymeleaf de signature text-field(object, field, label, required) -->
+<th:block th:replace="~{components/inputs :: text-field(object='movie', field='title', label='Titre du film', required=true)}"/>
+<!-- composant Vertigo-UI -->
+<vu:text-field object="movie" field="title" label="Titre du film" required/>
+```
+
+| | Fragment Thymeleaf | Composant Vertigo-UI |
+|---|---|---|
+| Appel | une expression `~{fichier :: fragment(...)}` | une balise `<vu:fragment .../>` |
+| Texte | un littéral : `label='Titre du film'` | directement : `label="Titre du film"` |
+| Expression, objet | `items=${movies}` | `items="${movies}"` : le composant reconnaît l'expression et en reçoit la valeur (une liste reste une liste) |
+| Paramètre non donné | à écrire (tous les paramètres de la signature sont attendus) | facultatif (`null`) ; un attribut sans valeur (`required`) vaut `true` |
+| Attributs supplémentaires (VueJS, classes) | à prévoir comme paramètres | recopiés sur la balise interne (`*_attrs`), un préfixe (`label_`, `input_`) choisit laquelle |
+| Contenu | un fragment passé en paramètre (`~{::#bloc}`) | le corps de la balise (`vu:content`) et des slots nommés (`vu:slot`) |
+| Lecture ou édition | un appel par mode | le composant choisit son fragment (`vu:selector`) |
+| `th:if`, `th:each`, `th:with` | sur la balise d'appel | sur la balise du composant |
+
+Sur un composant, un paramètre s'écrit sans `th:` : le composant reconnaît une expression à sa forme (voir [Valeur d'un paramètre : texte ou expression](#valeur-dun-paramètre-texte-ou-expression)) et en reçoit la valeur.
+
 Nécessite :
 ```HTML
 <html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
@@ -216,6 +238,23 @@ Nécessite :
 - `abc_attrs` : Agrégation de tous les paramètres préfixés par `abc_` passés lors de l'appel du composant. Ex: sur `vu:table` on peut passer l'attribut `tr_class`, le paramètre `class` (avec sa valeur) sera récupéré dans le composant par le paramètre `tr_attrs` pour le placer sur le tag `tr` interne. *Évite de prévoir tous les cas lors de la conception du composant.*
 - `other_attrs` : Agrégation de tous les paramètres non identifiés comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifiés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round>` donnera `<q-input round>`)
 - `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de `contentItem`. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. `contentItem` permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocs et `vu:grid-cell` possède un comportement particulier)
+
+### Valeur d'un paramètre : texte ou expression
+Un paramètre de composant s'écrit sans préfixe `th:` : Vertigo-UI regarde sa valeur pour savoir s'il la passe comme une expression Thymeleaf, comme le ferait l'attribut `th:` correspondant (`label="${user.name}"` comme `th:label="${user.name}"`), ou comme un texte.
+- **Expression** : la valeur contient `${`, `#{` ou `@{` (`${user.name}`, `!${flag}`, `#{welcome.message}`, `'/search?q=' + @{/x}`), ou commence par `*{`, `~{`, une substitution `|...|` ou un littéral `'...'`.
+- **Texte** : dans tous les autres cas, y compris avec un `$`, `#` ou `@` qui n'ouvre pas d'expression (`href="#anchor"`, `label="contact@mail.fr"`, `100$`). `true`, `false` et les nombres restent des valeurs Thymeleaf.
+
+Une expression suit la syntaxe Thymeleaf, sans extension : `label="Bonjour ${user.name}"` n'est pas plus lisible par Thymeleaf que `th:label="Bonjour ${user.name}"`, un texte mêlé d'expressions s'écrit avec une substitution `label="|Bonjour ${user.name}|"`.
+`*{` et `~{` ne sont reconnus qu'en début de valeur : une négation se place dans l'expression de sélection (`disabled="*{!#lists.isEmpty(items)}"`).
+
+Un lien avec des parties variables s'écrit avec les paramètres de lien de Thymeleaf, qui les encodent : `url="@{/movies/{id}(id=${movie.movId})}"`.
+
+Les attributs non déclarés, regroupés dans les paramètres `*_attrs`, sont recopiés sur la balise interne : leur valeur, souvent du JavaScript pour VueJS (`@click="..."`), est un texte, sauf si elle commence par `${`, `#{`, `@{`, `*{`, `~{` ou une substitution `|...|` (`@click="|openModal(${movie.movId})|"`) : aucun JavaScript ne commence ainsi, alors qu'un texte `'...'` et un gabarit `` `...${...}...` `` restent du JavaScript.
+Le préprocesseur `__${...}__` de Thymeleaf s'applique à toutes ces valeurs, texte compris.
+Un texte s'affiche tel qu'il est écrit, `\` comprise (`C:\dir\`, `@click="confirm('l\'effacer ?')"`) ; seul `\_\_` garde son sens Thymeleaf et affiche `__`.
+
+Un attribut écrit avec `th:` (`th:label="${...}"`) est évalué par Thymeleaf avant le composant : le composant reçoit la valeur calculée par Thymeleaf, comme un texte, et la passe telle quelle ; seuls `true`, `false` et les nombres gardent leur type. Il en va de même des valeurs qu'un composant transmet à un composant interne (`label_attrs`) et des attributs posés sur `vu:content`. `th:` sert donc aux expressions sans marque (`th:x="#strings.toUpperCase(...)"`) et aux comportements propres à Thymeleaf (attributs booléens, `th:attr`, `th:classappend`) ; pour une expression simple, l'écriture sans `th:` passe la vraie valeur au composant (`list="${movies}"`, `url="@{/commons/upload}"`).
+Un littéral texte contenant une expression (`th:url="'@{/commons/upload}'"`) donne ce texte, pas le lien : en mode dev (`THYMELEAF_DEV_MODE`), la page échoue avec l'écriture à utiliser (`url="@{/commons/upload}"`), pour un paramètre, ou pour un attribut non déclaré dont le texte commence par une expression. Une valeur donnée par la page et transmise par un composant l'emporte sur celle que le composant écrit sur la même balise.
 
 ### Composants Vertigo-UI : layout
 - `vu:page` : Composant obligatoire encadrant la zone sur laquelle VueJS est actif.

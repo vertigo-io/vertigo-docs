@@ -206,6 +206,28 @@ Vertigo-UI is not intended to encapsulate all UI components this way, the strate
 - the component requires particular interactions with the context. For example to select the data to integrate in vueData, and sometimes to encode them in a specific way.
 - the component offers a more ergonomic, more suitable or less verbose API for the developer
 
+The Vertigo-UI named components simplify and enrich the Thymeleaf fragments: a fragment is used as an HTML tag, its params are written as attributes, and the component brings the forwarding of the VueJS attributes, the content, the slots and the choice of the read or edit mode.
+
+```HTML
+<!-- Thymeleaf fragment of signature text-field(object, field, label, required) -->
+<th:block th:replace="~{components/inputs :: text-field(object='movie', field='title', label='Movie title', required=true)}"/>
+<!-- Vertigo-UI component -->
+<vu:text-field object="movie" field="title" label="Movie title" required/>
+```
+
+| | Thymeleaf fragment | Vertigo-UI component |
+|---|---|---|
+| Call | an expression `~{file :: fragment(...)}` | a tag `<vu:fragment .../>` |
+| Text | a literal: `label='Movie title'` | directly: `label="Movie title"` |
+| Expression, object | `items=${movies}` | `items="${movies}"`: the component recognizes the expression and gets its value (a list stays a list) |
+| Param not given | to write (all the params of the signature are expected) | optional (`null`); an attribute without value (`required`) is `true` |
+| Additional attributes (VueJS, classes) | to plan as params | copied onto the inner tag (`*_attrs`), a prefix (`label_`, `input_`) chooses which one |
+| Content | a fragment given as a param (`~{::#block}`) | the body of the tag (`vu:content`) and named slots (`vu:slot`) |
+| Read or edit | one call by mode | the component chooses its fragment (`vu:selector`) |
+| `th:if`, `th:each`, `th:with` | on the calling tag | on the component tag |
+
+On a component, a param is written without `th:`: the component recognizes an expression by its form (see [Parameter value: text or expression](#parameter-value-text-or-expression)) and gets its value.
+
 Requires:
 ```HTML
 <html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
@@ -216,6 +238,23 @@ Requires:
 - `abc_attrs`: Aggregation of all the parameters prefixed by `abc_` passed during the call of the component. Ex: on `vu:table` one can pass the attribute `tr_class`, the parameter `class` (with its value) will be retrieved in the component by the parameter `tr_attrs` to place it on the internal `tr` tag. *Avoids having to provide for all cases during the design of the component.*
 - `other_attrs`: Aggregation of all the parameters not identified as a parameter of the component, and allows determining where they should be placed. (Ex: in the component `vu:text-field`, the attributes not identified as a parameter are placed on the internal `q-input`, for example `<vu:text-field round>` will give `<q-input round>`)
 - `contentTags`: Particular parameter retrieving the tags in the body of the component during the call, in the form of a list of `contentItem`. This case is quite rare, usually one rather uses `<vu:content>` which places the whole body. `contentItem` allows testing the tags to process them specifically (Ex: `grid` places the tags in blocks and `vu:grid-cell` has a particular behavior)
+
+### Parameter value: text or expression
+A component parameter is written without the `th:` prefix: Vertigo-UI looks at its value to pass it either as a Thymeleaf expression, as the matching `th:` attribute would (`label="${user.name}"` as `th:label="${user.name}"`), or as a text.
+- **Expression**: the value holds `${`, `#{` or `@{` (`${user.name}`, `!${flag}`, `#{welcome.message}`, `'/search?q=' + @{/x}`), or starts with `*{`, `~{`, a literal substitution `|...|` or a text literal `'...'`.
+- **Text**: in every other case, including a `$`, `#` or `@` that opens no expression (`href="#anchor"`, `label="contact@mail.fr"`, `100$`). `true`, `false` and numbers stay Thymeleaf values.
+
+An expression follows the Thymeleaf syntax, with no extension: `label="Hello ${user.name}"` is no more readable by Thymeleaf than `th:label="Hello ${user.name}"`, a text mixed with expressions is written with a literal substitution `label="|Hello ${user.name}|"`.
+`*{` and `~{` are recognized only at the start of the value: a negation goes inside the selection expression (`disabled="*{!#lists.isEmpty(items)}"`).
+
+A link with variable parts is written with the Thymeleaf link params, which encode them: `url="@{/movies/{id}(id=${movie.movId})}"`.
+
+The undeclared attributes, gathered in the `*_attrs` parameters, are copied onto the inner tag: their value, often JavaScript for VueJS (`@click="..."`), is a text, unless it starts with `${`, `#{`, `@{`, `*{`, `~{` or a literal substitution `|...|` (`@click="|openModal(${movie.movId})|"`): no JavaScript starts so, whereas a text `'...'` and a template literal `` `...${...}...` `` stay JavaScript.
+The Thymeleaf preprocessor `__${...}__` applies to all these values, text included.
+A text is shown as written, `\` included (`C:\dir\`, `@click="confirm('l\'effacer ?')"`); only `\_\_` keeps its Thymeleaf meaning and shows `__`.
+
+An attribute written with `th:` (`th:label="${...}"`) is evaluated by Thymeleaf before the component: the component gets the value computed by Thymeleaf, as a text, and passes it as it is; only `true`, `false` and numbers keep their type. The same goes for the values a component forwards to an inner component (`label_attrs`) and the attributes put on `vu:content`. So `th:` is for the expressions without a marker (`th:x="#strings.toUpperCase(...)"`) and the behaviours of Thymeleaf (boolean attributes, `th:attr`, `th:classappend`); for a simple expression, writing it without `th:` passes the actual value to the component (`list="${movies}"`, `url="@{/commons/upload}"`).
+A text literal holding an expression (`th:url="'@{/commons/upload}'"`) gives that text, not the link: in dev mode (`THYMELEAF_DEV_MODE`), the page fails with the way to write it (`url="@{/commons/upload}"`), for a param, or for an undeclared attribute whose text starts with an expression. A value given by the page and forwarded by a component wins over the value the component writes on the same tag.
 
 ### Vertigo-UI Components: layout
 - `vu:page`: Mandatory component framing the zone on which VueJS is active.

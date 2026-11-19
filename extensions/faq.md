@@ -253,7 +253,7 @@ Coté `Controller`, le champ sera une chaine de caractère qui pourra être pers
 
 Coté page :
 ```Html
-<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" th:url="'@{/commons/upload}'" key="baseTmpPictureUris" multiple />   
+<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" url="@{/commons/upload}" key="baseTmpPictureUris" multiple />   
 ```
 
 Coté Controller
