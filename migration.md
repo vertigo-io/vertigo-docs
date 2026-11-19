@@ -30,6 +30,8 @@
 
 # from 4.4.1 to 4.5.0
 
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_ : target `4.4.1 to 4.5.0` (`th:xxxUrl="'@{...}'"` to `th:xxxUrl="@{...}"`, `vu:checkbox-confirm` to `vu:checkbox-inline-edit`, path of the DSFR bundle of vertigo-ui ; the other text literals holding an expression are found with the regular expression below)<br/>
+
 * **[Ui] Set the param `THYMELEAF_DEV_MODE=false` in production.** Without it (or an override of `VSpringWebConfig.isDevMode()`), the templates are not cached : they are read again at each request, as before. A WARN at startup now says so. In this dev mode, each `vu:` element without component is logged once as a WARN (component removed or renamed, typo) : after the upgrade, go through your screens and check the logs.
 * **[Ui] Self-closed custom elements are now closed automatically.** In-DOM templates are parsed by the browser, which per the HTML spec ignores the trailing `/` on anything but a void element : `<q-btn v-if="..." />` stayed open and swallowed the markup that followed it, silently extending the `v-if` scope and turning the next siblings into the component default slot. A Thymeleaf post-processor now rewrites such a tag into `<q-btn ...></q-btn>` before the page is written out. Nothing to configure, and no impact on correct templates.
   - If you declared `io.vertigo.ui.impl.vuejs.filter.UnAutoCloseTagsFilter` in your `web.xml`, you can remove it : it is deprecated, does the same repair less reliably, and now finds nothing left to close. It is **removed** in 5.0.0.
@@ -273,7 +275,7 @@ You may need it, if you have some input component in table. It force a `vue-js c
 
 # from 4.2.0 to 4.3.0
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 
 * **[DataModel] Package renamed `io.vertigo.datamodel.structure.*` → `io.vertigo.datamodel.data.*`**. Update your imports:
 * **[DataModel] `Criteria`, `Task`, and property-related classes moved to DataFactory** module. Update your pom.xml if you import these classes directly (they're no longer in vertigo-datamodel).
@@ -330,7 +332,7 @@ You can use them for example to register vue components :
 
 ⚠️ Do not use 4.2.0 of vertigo-studio, use 4.2.0a instead
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 
 * **[DataModel] Renamings** : (use renaming tool)
   - `DtObject` to `DataObject`
@@ -372,7 +374,7 @@ Example, before `th:` not needed :
 
 # from 3.6.0 to 4.0.0
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 
 * [Core] Update to JDK17
 * [Core] Rename MessageText to LocaleMessageText (included in renaming tool)
@@ -462,7 +464,7 @@ protected String getCustomComponentsPathPrefix() {
 **We encourage to upgrade to 3.1.1 version it contains some important fix**
 
 # from 2.1.0 to 3.0.0
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 * **[Dynamo] Split Dynamo to multiple module : DataStore, DataModel, DataBase, DataFactory**
 * [Core] Update to Java 11
 * [Core] Lots of renames (you should use renaming tools)
@@ -775,7 +777,7 @@ in web.xml :
 
 # from 1.1.3 to 2.0.0
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 This tools is a set of ant's tasks. In case of this 2.0, it comes with two usefull targets :
 
 - CONST Java Entity to CamelCase java : Replace old java definitions to CamelCase definition new in vertigo 2.0
@@ -1151,7 +1153,7 @@ For projects that need to transition from version 1.7 to version 2.4, the indexT
 
 WARN : There is a blocker issue in vertigo-studio use vertigo-studio v0.9.4a
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 * Simpler boot declaration in managers.xml *(not in renaming tool)*. 
   - Remove all loaderPlugins 
   - Remove all RegistryPlugin
@@ -1233,7 +1235,7 @@ Your managers.xml should look like this:
 * DefinitionSpace.put(Definition) is now hidden, to add Definitions you should add a DefinitionProvider to your managers.xml. It's get() method may returned your definitions
 
 # from 0.9.2 to 0.9.3
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 * __[All] Updated to JDK 8__ : Change your JRE in your pom.xml, project IDE config, compile, ant execution, etc...
 * __[All] Renamed vertigo Option to jdk Optional__
 * __[Dynamo] Split DtObject as Entity (persistent) and simple DtObject (non persistent)__ : 
@@ -1290,7 +1292,7 @@ You may need to clear your index directory
 
 
 # from 0.9.1 to 0.9.2
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 * [Core] Aligned vertigo Option api to JDK api. You could use the rename tool, in order to rename previous Option api to the new one rename (`isPresent`, `ofNullable`, `orElse`, `of`, `none`). Note that isEmpty is deprecated and hasn't equivalent in jdk api, replace it by !otp.isPresent()
 * [Core] Splitted App and autoCloseable. You should use try(new AutoCloseableApp() { } in unit tests
 * [Dynamo] Renamed DAOBroker to DAO
@@ -1300,7 +1302,7 @@ You may need to clear your index directory
 * [Dynamo] Create URI public on `DtObjectUtil`
 
 # from 0.9.0 to 0.9.1
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 
 __Important__ : Use v0.9.1a for vertigo quarto. (0.9.1 have a buggy pom.xml)
 
@@ -1388,7 +1390,7 @@ After:
 * Renamed storeName of TaskDefinition to dataSpace
 
 # from 0.8.3 to 0.9.0
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 _Renaming tool doesn't do all renames, you should do them manually !_
 
 * Added params storeDtName to DbFileStorePlugin.
@@ -1487,13 +1489,13 @@ and if your project use ParamContainerManager (it's native yet) replaced 'conf:x
 * Refactored ElasticSearch plugins : ``cores`` params is deprecated, and should be replaced by `envIndex` whith the name of this environment (like : `myApp-prod`)
 
 # from 0.8.2 to 0.8.3
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_
 
 * In your index definitions ksp, use DslListFilterBuilder instead of RegExpListFilterBuilder (before named DefaultListFilterBuilder)
 
 
 # from 0.8.1 to 0.8.2
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_
 
 * Renamed io.vertigo.vega.rest.* to io.vertigo.vega.webservice.* (like io.vertigo.vega.rest.model.UiListState to io.vertigo.vega.webservice.model.UiListState)
 * Renamed io.vertigo.vega.plugins.rest.* to io.vertigo.vega.plugins.webservice.* 
