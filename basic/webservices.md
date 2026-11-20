@@ -349,7 +349,7 @@ Deux features distinctes sont disponibles :
 | `errorCode` | `Optional<Integer>` | `429` |
 | `overRateLimitMode` | `Optional<String>` | `reject` (valeurs : `nothing` / `logOnly` / `reject` / `banish`) |
 | `insertHeaders` | `Optional<Boolean>` | `true` (pose les headers `X-Rate-Limit-Limit` / `X-Rate-Limit-Remaining` / `X-Rate-Limit-Reset`) |
-| `useForwardedFor` | `Optional<Boolean>` | `false` |
+| `useForwardedFor` | `Optional<Boolean>` | `false` (la première adresse de l'en-tête : le premier proxy géré par l'équipe applicative doit l'écraser ; derrière un CDN qui y ajoute, préférer `useHeaderUserIp` avec l'en-tête posé par le CDN) |
 | `useHeaderUserIp` | `Optional<String>` | — (nom d'un en-tête custom, type `True-Client-Ip`) |
 | `useUserIp` | `Optional<Boolean>` | `true` (sinon `sessionId`, sinon `anonymous`) |
 | `logEveryXRequests` | `Optional<Integer>` | `100` |
