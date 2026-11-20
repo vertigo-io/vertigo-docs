@@ -242,7 +242,7 @@ Requires:
 ### Parameter value: text or expression
 A component parameter is written without the `th:` prefix: Vertigo-UI looks at its value to pass it either as a Thymeleaf expression, as the matching `th:` attribute would (`label="${user.name}"` as `th:label="${user.name}"`), or as a text.
 - **Expression**: the value holds `${`, `#{` or `@{` (`${user.name}`, `!${flag}`, `#{welcome.message}`, `'/search?q=' + @{/x}`), or starts with `*{`, `~{`, a literal substitution `|...|` or a text literal `'...'`.
-- **Text**: in every other case, including a `$`, `#` or `@` that opens no expression (`href="#anchor"`, `label="contact@mail.fr"`, `100$`). `true`, `false` and numbers stay Thymeleaf values.
+- **Text**: in every other case, including a `$`, `#` or `@` that opens no expression (`href="#anchor"`, `label="contact@mail.fr"`, `100$`). `true`, `false` and the numbers written in their usual form (`12`, `-5`, `0.5`) stay Thymeleaf values; a number with a leading 0 (`0102030405`) stays a text, as written.
 
 An expression follows the Thymeleaf syntax, with no extension: `label="Hello ${user.name}"` is no more readable by Thymeleaf than `th:label="Hello ${user.name}"`, a text mixed with expressions is written with a literal substitution `label="|Hello ${user.name}|"`.
 `*{` and `~{` are recognized only at the start of the value: a negation goes inside the selection expression (`disabled="*{!#lists.isEmpty(items)}"`).

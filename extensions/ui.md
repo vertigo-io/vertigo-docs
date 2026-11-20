@@ -242,7 +242,7 @@ Nécessite :
 ### Valeur d'un paramètre : texte ou expression
 Un paramètre de composant s'écrit sans préfixe `th:` : Vertigo-UI regarde sa valeur pour savoir s'il la passe comme une expression Thymeleaf, comme le ferait l'attribut `th:` correspondant (`label="${user.name}"` comme `th:label="${user.name}"`), ou comme un texte.
 - **Expression** : la valeur contient `${`, `#{` ou `@{` (`${user.name}`, `!${flag}`, `#{welcome.message}`, `'/search?q=' + @{/x}`), ou commence par `*{`, `~{`, une substitution `|...|` ou un littéral `'...'`.
-- **Texte** : dans tous les autres cas, y compris avec un `$`, `#` ou `@` qui n'ouvre pas d'expression (`href="#anchor"`, `label="contact@mail.fr"`, `100$`). `true`, `false` et les nombres restent des valeurs Thymeleaf.
+- **Texte** : dans tous les autres cas, y compris avec un `$`, `#` ou `@` qui n'ouvre pas d'expression (`href="#anchor"`, `label="contact@mail.fr"`, `100$`). `true`, `false` et les nombres écrits sous leur forme usuelle (`12`, `-5`, `0.5`) restent des valeurs Thymeleaf ; un nombre avec un 0 en tête (`0102030405`) reste un texte, tel qu'il est écrit.
 
 Une expression suit la syntaxe Thymeleaf, sans extension : `label="Bonjour ${user.name}"` n'est pas plus lisible par Thymeleaf que `th:label="Bonjour ${user.name}"`, un texte mêlé d'expressions s'écrit avec une substitution `label="|Bonjour ${user.name}|"`.
 `*{` et `~{` ne sont reconnus qu'en début de valeur : une négation se place dans l'expression de sélection (`disabled="*{!#lists.isEmpty(items)}"`).
