@@ -304,6 +304,96 @@ modules:
             appLoginHandler: monComposantLogin
 ```
 
+## SAML2
+
+Vega délègue l'authentification à un fournisseur d'identité (IdP) SAML 2.0 avec la feature `authentication.saml2` (plugin `SAML2WebAuthenticationPlugin`). La configuration est portée par le connecteur `vertigo-saml2-connector` : celle de l'application (le fournisseur de service, ou SP), ses clés, et la description de l'IdP. Un utilisateur authentifié est ensuite confié au handler de login applicatif (voir [Brancher le handler de login applicatif](/basic/webservices#brancher-le-handler-de-login-applicatif-feature-authentication)).
+
+```yaml
+modules:
+  io.vertigo.connectors.saml2.SAML2Features:
+    features:
+      - saml:
+          clientName: https://mon-app.example.fr/contexte
+          externalUrl: ${externalUrl}
+      - saml.certif.keystore:
+          file: ${samlKeystoreFile}
+          password: ${samlKeystorePassword}
+          aliases: sp
+      - saml.ip.metadata:
+          metadataFile: ${samlIdpMetadataFile}
+  io.vertigo.vega.VegaFeatures:
+    features:
+      - webservices:
+      - authentication:
+          appLoginHandler: monComposantLogin
+      - authentication.saml2:
+```
+
+### Les routes
+
+Le plugin publie trois routes sous `urlHandlerPrefix` (`/saml/` par défaut) :
+- `callback` : l'IdP y poste sa réponse ;
+- `logout` : la déconnexion ;
+- `metadata` : les métadonnées SP de l'application, à fournir à l'IdP (son entityID `clientName`, l'url de callback, ses clés de signature et de chiffrement).
+
+Paramètres du plugin : `urlHandlerPrefix`, `urlPrefix` (`/` par défaut : le plugin traite les requêtes dont le chemin commence par ce préfixe ; avec plusieurs plugins d'authentification, SAML2 et OIDC par exemple, leurs préfixes doivent être distincts) et `connectorName` (`main` par défaut, pour choisir parmi plusieurs connecteurs SAML).
+
+### Feature `saml` : la configuration commune
+
+| Paramètre | Défaut | Rôle |
+|---|---|---|
+| `clientName` | obligatoire | entityID de l'application, aussi l'audience attendue dans les assertions |
+| `externalUrl` | aucun | url publique de l'application, contexte compris, absolue et sans `/` final : l'url de callback vaut `externalUrl` + `urlHandlerPrefix` + `callback`. Sans elle, l'url est déduite de la requête (le schéma lu dans `X-Forwarded-Proto`, l'hôte et le port de la requête), ce qui peut être faux derrière un reverse proxy (hôte ou port internes) |
+| `cryptAssertion` | `true` | exige une assertion chiffrée ; `false` accepte aussi une assertion en clair |
+| `clockSkewSeconds` | `180` | écart d'horloge toléré avec l'IdP, de 0 à 600 secondes |
+| `checkAudience` | `true` | contrôle que l'audience de l'assertion est `clientName` |
+| `checkDestination` | `true` | contrôle que la réponse et la confirmation de l'assertion visent l'url de callback |
+| `checkInResponseTo` | `false` | contrôle que la réponse répond à une requête de la session de l'utilisateur |
+| `signatureType` | `RSA-SHA256` | algorithme de signature des requêtes envoyées à l'IdP (`RSA-SHA1`, `RSA-SHA384`, `RSA-SHA512`) |
+| `extractPublicKeyFromCertificate` | `false` | les métadonnées SP publient le certificat quand la clé est donnée par un certificat (`saml.certif.file`, `saml.certif.string`), sinon la clé publique ; `true` : toujours la clé publique seule |
+| `name` | `main` | nom du connecteur |
+
+`externalUrl`, `clockSkewSeconds` et `signatureType` sont contrôlés au démarrage.
+
+`checkInResponseTo` suppose que le cookie de session arrive au callback, qui est un POST venant d'un autre site (l'IdP) : il faut un cookie `SameSite=None`, alors envoyé avec toute requête venant d'un autre site. Les formulaires doivent garder leur protection CSRF. Une connexion initiée par l'IdP, sans requête de l'application, est alors refusée.
+
+### Les clés de l'application : une feature au choix
+
+| Feature | Paramètres |
+|---|---|
+| `saml.certif.keystore` | `file`, `password`, `aliases`, `keystoreType` (`pkcs12` par défaut) |
+| `saml.certif.file` | `myPublicKeyFile`, `myPrivateKeyFile`, et pour préparer un renouvellement `myNextPublicKeyFile`, `myNextPrivateKeyFile` |
+| `saml.certif.string` | `publicKey`, `privateKey`, et pour préparer un renouvellement `nextPublicKey`, `nextPrivateKey` |
+
+### L'IdP : une feature au choix
+
+| Feature | Paramètres |
+|---|---|
+| `saml.ip.metadata` | `metadataFile` (un fichier, ou une url), `nextMetadataFile`, `nextCertFile`, `simpleLogoutUrl` |
+| `saml.ip.file` | `loginUrl`, `logoutUrl`, `publicKeyFile`, `nextPublicKeyFile` |
+| `saml.ip.string` | `loginUrl`, `logoutUrl`, `publicKey`, `nextPublicKey` |
+| `saml.ip.keystore` | `loginUrl`, `logoutUrl`, `keystoreFile`, `keystorePassword`, `aliases`, `keystoreType` (`pkcs12` par défaut) |
+
+Avec `saml.ip.metadata`, les urls de login et de logout (points d'accès HTTP-POST) et les certificats de signature de l'IdP sont lus dans ses métadonnées ; `simpleLogoutUrl` remplace l'url de logout lue. Le fichier doit décrire un seul IdP SAML 2.0 avec son certificat de signature (un fichier de fédération est accepté s'il ne décrit qu'un IdP) et `nextCertFile` est le chemin d'un fichier de certificat : les deux sont contrôlés au démarrage. Une url de métadonnées est en `https` en production ; `http` n'est acceptable que sur un réseau de confiance (un environnement de test).
+
+Les paramètres `next*` déclarent le certificat suivant de l'IdP, ou la clé suivante de l'application, pour préparer un renouvellement sans coupure. Avec un keystore, `aliases` est une liste séparée par `;` : le premier alias est la clé courante, les suivants préparent le renouvellement.
+
+### Les contrôles de la réponse
+
+La réponse de l'IdP est contrôlée comme le demande le profil SAML 2.0 Web Browser SSO : signature vérifiée avec les certificats de l'IdP, statut, destination, chiffrement de l'assertion, audience, période de validité, confirmation de type bearer, et une assertion n'est acceptée qu'une fois. Une réponse refusée fait échouer la connexion, avec dans les logs un message qui nomme le paramètre en cause :
+
+| Message | Cause et correction |
+|---|---|
+| `SAML response is not signed.` ou `SAML signature check fail.` | la réponse elle-même doit être signée par l'IdP (une signature de l'assertion seule ne suffit pas), avec un certificat déclaré pour l'IdP : faire signer la réponse, vérifier le certificat de l'IdP ou son renouvellement |
+| `SAML assertion is not encrypted : ...` | l'IdP envoie une assertion en clair : le faire chiffrer avec le certificat des métadonnées SP, ou `cryptAssertion=false` |
+| `SAML response destination '...' is not the callback url '...' (param checkDestination)` | l'url où poste l'IdP n'est pas celle que calcule l'application, souvent derrière un reverse proxy : renseigner `externalUrl` |
+| `SAML assertion audience is not '...' (param checkAudience)` | l'IdP donne une autre audience que `clientName` : corriger l'application déclarée dans l'IdP, ou `checkAudience=false` |
+| `... not yet valid` ou `... expired` (param `clockSkewSeconds`) | les horloges de l'IdP et de l'application diffèrent de plus de `clockSkewSeconds` : les synchroniser, ou augmenter `clockSkewSeconds` |
+| `SAML assertion already used` | la même réponse est postée une seconde fois (retour arrière ou rafraîchissement sur le callback) : une nouvelle connexion suffit |
+| `SAML assertion has no valid bearer subject confirmation : ...` | la confirmation de l'assertion n'est pas de type bearer, ne vise pas l'url de callback ou n'a pas d'expiration (avec `checkInResponseTo`, ou ne répond pas à une requête de la session) : corriger l'application déclarée dans l'IdP |
+
+Les réponses d'un IdP ne se testent qu'avec cet IdP : avant une mise en production, vérifier ces points avec l'exploitant de l'IdP de production.
+
 ## SwaggerApi
 
 L'API ainsi créée avec ce module est exposée au format standard Swagger **2.0**. Vertigo inclut la mise à disposition de l'API via l'UI standard de Swagger.

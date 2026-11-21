@@ -304,6 +304,96 @@ modules:
             appLoginHandler: monComposantLogin
 ```
 
+## SAML2
+
+Vega delegates the authentication to a SAML 2.0 identity provider (IdP) with the `authentication.saml2` feature (plugin `SAML2WebAuthenticationPlugin`). The configuration is held by the `vertigo-saml2-connector` connector: the one of the application (the service provider, or SP), its keys, and the description of the IdP. An authenticated user is then handed to the application login handler (see [Wiring Up the Application Login Handler](/en/basic/webservices#wiring-up-the-application-login-handler-feature-authentication)).
+
+```yaml
+modules:
+  io.vertigo.connectors.saml2.SAML2Features:
+    features:
+      - saml:
+          clientName: https://my-app.example.org/context
+          externalUrl: ${externalUrl}
+      - saml.certif.keystore:
+          file: ${samlKeystoreFile}
+          password: ${samlKeystorePassword}
+          aliases: sp
+      - saml.ip.metadata:
+          metadataFile: ${samlIdpMetadataFile}
+  io.vertigo.vega.VegaFeatures:
+    features:
+      - webservices:
+      - authentication:
+          appLoginHandler: myLoginComponent
+      - authentication.saml2:
+```
+
+### The routes
+
+The plugin serves three routes under `urlHandlerPrefix` (`/saml/` by default):
+- `callback`: the IdP posts its response there;
+- `logout`: the logout;
+- `metadata`: the SP metadata of the application, to give to the IdP (its entityID `clientName`, the callback url, its signing and encryption keys).
+
+Params of the plugin: `urlHandlerPrefix`, `urlPrefix` (`/` by default: the plugin handles the requests whose path starts with this prefix; with several authentication plugins, SAML2 and OIDC for instance, their prefixes must be distinct) and `connectorName` (`main` by default, to choose among several SAML connectors).
+
+### Feature `saml`: the common configuration
+
+| Param | Default | Role |
+|---|---|---|
+| `clientName` | mandatory | entityID of the application, also the audience expected in the assertions |
+| `externalUrl` | none | public url of the application, context included, absolute and without final `/`: the callback url is `externalUrl` + `urlHandlerPrefix` + `callback`. Without it, the url is deduced from the request (the scheme read from `X-Forwarded-Proto`, the host and port of the request), which can be wrong behind a reverse proxy (internal host or port) |
+| `cryptAssertion` | `true` | requires an encrypted assertion; `false` also accepts a plain assertion |
+| `clockSkewSeconds` | `180` | clock gap accepted with the IdP, from 0 to 600 seconds |
+| `checkAudience` | `true` | checks that the audience of the assertion is `clientName` |
+| `checkDestination` | `true` | checks that the response and the confirmation of the assertion target the callback url |
+| `checkInResponseTo` | `false` | checks that the response answers a request of the user session |
+| `signatureType` | `RSA-SHA256` | signature algorithm of the requests sent to the IdP (`RSA-SHA1`, `RSA-SHA384`, `RSA-SHA512`) |
+| `extractPublicKeyFromCertificate` | `false` | the SP metadata publish the certificate when the key is given as a certificate (`saml.certif.file`, `saml.certif.string`), otherwise the public key; `true`: always the public key only |
+| `name` | `main` | name of the connector |
+
+`externalUrl`, `clockSkewSeconds` and `signatureType` are checked at startup.
+
+`checkInResponseTo` needs the session cookie to reach the callback, a POST coming from another site (the IdP): it needs a `SameSite=None` cookie, then sent with any request coming from another site. The forms must keep their CSRF protection. A login initiated by the IdP, without a request of the application, is then refused.
+
+### The keys of the application: one feature to choose
+
+| Feature | Params |
+|---|---|
+| `saml.certif.keystore` | `file`, `password`, `aliases`, `keystoreType` (`pkcs12` by default) |
+| `saml.certif.file` | `myPublicKeyFile`, `myPrivateKeyFile`, and to prepare a renewal `myNextPublicKeyFile`, `myNextPrivateKeyFile` |
+| `saml.certif.string` | `publicKey`, `privateKey`, and to prepare a renewal `nextPublicKey`, `nextPrivateKey` |
+
+### The IdP: one feature to choose
+
+| Feature | Params |
+|---|---|
+| `saml.ip.metadata` | `metadataFile` (a file, or an url), `nextMetadataFile`, `nextCertFile`, `simpleLogoutUrl` |
+| `saml.ip.file` | `loginUrl`, `logoutUrl`, `publicKeyFile`, `nextPublicKeyFile` |
+| `saml.ip.string` | `loginUrl`, `logoutUrl`, `publicKey`, `nextPublicKey` |
+| `saml.ip.keystore` | `loginUrl`, `logoutUrl`, `keystoreFile`, `keystorePassword`, `aliases`, `keystoreType` (`pkcs12` by default) |
+
+With `saml.ip.metadata`, the login and logout urls (HTTP-POST endpoints) and the signing certificates of the IdP are read from its metadata; `simpleLogoutUrl` replaces the logout url read. The file must describe a single SAML 2.0 IdP with its signing certificate (a federation file is accepted if it describes only one IdP) and `nextCertFile` is the path of a certificate file: both are checked at startup. A metadata url is `https` in production; `http` is acceptable only on a trusted network (a test environment).
+
+The `next*` params declare the next certificate of the IdP, or the next key of the application, to prepare a renewal without interruption. With a keystore, `aliases` is a list separated by `;`: the first alias is the current key, the next ones prepare the renewal.
+
+### The checks of the response
+
+The response of the IdP is checked as the SAML 2.0 Web Browser SSO profile requires: signature verified with the certificates of the IdP, status, destination, encryption of the assertion, audience, validity period, bearer confirmation, and an assertion is accepted once. A refused response fails the login, with a message in the logs naming the param at stake:
+
+| Message | Cause and fix |
+|---|---|
+| `SAML response is not signed.` or `SAML signature check fail.` | the response itself must be signed by the IdP (a signature of the assertion only is not enough), with a certificate declared for the IdP: have the response signed, check the certificate of the IdP or its renewal |
+| `SAML assertion is not encrypted : ...` | the IdP sends a plain assertion: have it encrypted with the certificate of the SP metadata, or `cryptAssertion=false` |
+| `SAML response destination '...' is not the callback url '...' (param checkDestination)` | the url the IdP posts to is not the one the application computes, often behind a reverse proxy: set `externalUrl` |
+| `SAML assertion audience is not '...' (param checkAudience)` | the IdP gives another audience than `clientName`: fix the application declared in the IdP, or `checkAudience=false` |
+| `... not yet valid` or `... expired` (param `clockSkewSeconds`) | the clocks of the IdP and of the application differ by more than `clockSkewSeconds`: synchronize them, or raise `clockSkewSeconds` |
+| `SAML assertion already used` | the same response is posted a second time (back or refresh on the callback): a new login is enough |
+| `SAML assertion has no valid bearer subject confirmation : ...` | the confirmation of the assertion is not a bearer one, does not target the callback url or has no expiry (with `checkInResponseTo`, or does not answer a request of the session): fix the application declared in the IdP |
+
+The responses of an IdP can only be tested with this IdP: before going to production, check these points with the operator of the production IdP.
+
 ## SwaggerApi
 
 The API created with this module is exposed in the standard Swagger **2.0** format. Vertigo includes making the API available through the standard Swagger UI.
