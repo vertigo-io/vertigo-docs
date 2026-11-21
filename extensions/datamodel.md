@@ -77,7 +77,7 @@ Le tri par défaut (champ et sens) est celui de `DtListState.defaultOf(entityCla
 
 Deux autres limites concernent les listes d'un écran :
 - une liste envoyée à la page compte au plus 1000 lignes, ou `DT_LIST_DEFAULT_MAX_ROWS` s'il est plus grand : une liste chargée par `defaultOf` tient toujours dans la page ;
-- une liste modifiable (`UiListModifiable`) compte au plus 250 lignes, ou la valeur du paramètre `UI_LIST_MODIFIABLE_MAX_ROWS`.
+- une liste modifiable (`UiListModifiable`) compte au plus 250 lignes, ou la valeur du paramètre `UI_LIST_MODIFIABLE_MAX_ROWS` ; au-delà, une erreur : la liste est à filtrer avant, une liste triée tronquée ne serait pas celle attendue.
 <!-- source : DtListState.getDefaultMaxRows (param DT_LIST_DEFAULT_MAX_ROWS, read once, ABSOLUTE_MAX_ROWS 5000) ; AbstractUiListUnmodifiable.getMaxElements (max(1000, default max rows)) ; AbstractUiListModifiable.getModifiableMaxRows (param UI_LIST_MODIFIABLE_MAX_ROWS, 250) -->
 
 

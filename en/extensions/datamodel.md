@@ -77,7 +77,7 @@ The default sort (field and direction) is the one of `DtListState.defaultOf(enti
 
 Two other limits apply to the lists of a screen:
 - a list sent to the page holds at most 1000 rows, or `DT_LIST_DEFAULT_MAX_ROWS` if higher: a list loaded by `defaultOf` always fits in the page;
-- a modifiable list (`UiListModifiable`) holds at most 250 rows, or the value of the `UI_LIST_MODIFIABLE_MAX_ROWS` param.
+- a modifiable list (`UiListModifiable`) holds at most 250 rows, or the value of the `UI_LIST_MODIFIABLE_MAX_ROWS` param ; beyond, an error : the list is to be filtered before, a truncated sorted list would not be the expected one.
 <!-- source : DtListState.getDefaultMaxRows (param DT_LIST_DEFAULT_MAX_ROWS, read once, ABSOLUTE_MAX_ROWS 5000) ; AbstractUiListUnmodifiable.getMaxElements (max(1000, default max rows)) ; AbstractUiListModifiable.getModifiableMaxRows (param UI_LIST_MODIFIABLE_MAX_ROWS, 250) -->
 
 
