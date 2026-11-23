@@ -110,6 +110,7 @@
 
 * [Connectors] jsch 0.2.26 -> 2.28.8 : same library (`com.github.mwiede:jsch`) with a new numbering, nothing to change in your code. If your project declares jsch itself, align its version.
 * [Connectors] BouncyCastle 1.87 in the saml2 connector : if your project sets the BouncyCastle version itself (`bcprov` / `bcpkix`, or the `bc-jdk18on-bom` BOM), align it on 1.87 or remove it.
+* [Database] H2 2.5.252 is the version managed by `vertigo-database` (was 2.2.224) : `org.h2.tools.Console` can no longer be instantiated. To start the H2 web console, use `org.h2.tools.Server` : `Server.createWebServer("-webPort", "8082").start()`, then `stop()` on the returned server.
 
 # from 4.4.0 to 4.4.1
 
