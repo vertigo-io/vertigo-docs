@@ -164,17 +164,21 @@ Versions précédentes :
 
 ### Ajout des messages ressource
 
-La configuration UI de l'application ajoute la ressource des composants au `MessageSource` :
+La configuration UI de l'application ajoute la ressource des composants dans un `MessageSource` parent du sien : Spring cherche une clé dans les ressources de l'application, puis dans le parent.
 
 ```java
 public static MessageSource getMessageSource() {
+    final ResourceBundleMessageSource vertigoMessageSource = new ResourceBundleMessageSource();
+    vertigoMessageSource.addBasenames("io/vertigo/ui/components/planning/planning");
+    vertigoMessageSource.setDefaultEncoding("UTF-8");
     final ResourceBundleMessageSource customMessageSource = new ResourceBundleMessageSource();
-    customMessageSource.addBasenames("io/vertigo/ui/components/planning/planning");
+    customMessageSource.setParentMessageSource(vertigoMessageSource); // the messages of the application are looked up first
+    customMessageSource.addBasenames("com/mycompany/myapp/i18n/messages");
     return customMessageSource;
 }
 ```
 
-Les libellés et les icônes des composants (clés `planning.agendaWeek.*`) peuvent être redéfinis dans un bundle de l'application déclaré avant celui du module.
+Les libellés et les icônes des composants (clés `planning.*`) se redéfinissent ainsi dans les ressources de l'application, quel que soit leur ordre. Le parent a ses propres réglages : les ressources du module sont en UTF-8.
 
 Le formatter des heures du module (`FormatterMinutes`, saisie `HH:mm` ou `HHhmm`, affichage `HH:mm`) utilise un message d'erreur que l'application enregistre dans le `LocaleManager`, par exemple dans un initializer :
 
@@ -210,6 +214,18 @@ __Compléments JavaScript__
 </section>
 ```
 
+?> Les icônes des composants sont des icônes Material, connues de Quasar, déclarées dans `planning.properties` (les clés `planning.*.icon`) : le projet en change en redéfinissant ces clés dans ses messages. Pour une autre bibliothèque, le projet la charge et la déclare à Quasar ; par exemple Remix Icon (`ri-...`) :
+
+```javascript
+window.addEventListener('vui-before-plugins', function() {
+    Quasar.iconSet.iconMapFn = function(iconName) {
+        if (iconName.startsWith('ri-')) {
+            return { cls: iconName, content: ' ' };
+        }
+    };
+});
+```
+
 #### Composants VertigoUi
 
 - `agenda-week` : Composant calendrier complet, à poser pleine page
@@ -220,7 +236,7 @@ __Compléments JavaScript__
   - `eventIconAgenda` : Icône dans la plage (défaut : `event`)
   - `multiEventIconAgenda` : Icône d'agenda multiple dans la plage (défaut : `calendar_month`)
   - `maxMultiEventShow` : Nombre maximum d'agendas présentés avant liste (défaut : 3)
-  - `hasAuthzAdmin` : Si droit d'admin de l'agenda (défaut : true) ; sans ce droit, le calendrier ne propose plus la création d'une plage au clic, ni la modification ou la suppression des plages
+  - `hasAuthzAdmin` : Si droit d'admin de l'agenda (défaut : true) ; sans ce droit, le calendrier ne propose plus la création d'une plage au clic, ni la modification ou la suppression des plages, ni, dans le détail d'une plage, la suppression d'un créneau
 
 - `agenda-create-plage` : Composant de modale création de plage horaire
   - `plage_actions_slot` : Slot des boutons du composant (défaut : bouton de création, selon le mode guichet ou agenda personnel)
@@ -248,11 +264,11 @@ __Compléments JavaScript__
 __Exemple__
 
 ```html
-<vu:agenda-week eventIconAgenda="ri-folder-fill" hasAuthzAdmin="${authz.hasAuthorization('Demarche$agendaPersonnel')}">
+<vu:agenda-week eventIconAgenda="folder" hasAuthzAdmin="${authz.hasAuthorization('Demarche$agendaPersonnel')}">
     <vu:slot name="agenda_actions_slot">
-        <vu:button icon="ri-add-line" label="#{projet.bo.projet.agenda.action.create-plage-horaire}" @click="onCreatePlageHoraireDefault" vu:authz="Projet$agendaPersonnel" />
-        <vu:button icon="ri-file-copy-line" label="#{projet.bo.projet.agenda.action.duplicate-week}" @click="onDuplicateWeek" vu:authz="Projet$agendaPersonnel"/>
-        <vu:button icon="ri-gallery-upload-line" label="#{projet.bo.projet.agenda.action.manage-publication}" @click="onPublishPlageHoraires" :disabled="Quasar.date.extractDate(vueData.agendaRange.lastDate, 'yyyy-MM-dd') < new Date()" vu:authz="Projet$agendaPersonnel"/>
+        <vu:button icon="add" label="#{projet.bo.projet.agenda.action.create-plage-horaire}" @click="onCreatePlageHoraireDefault" vu:authz="Projet$agendaPersonnel" />
+        <vu:button icon="content_copy" label="#{projet.bo.projet.agenda.action.duplicate-week}" @click="onDuplicateWeek" vu:authz="Projet$agendaPersonnel"/>
+        <vu:button icon="event_available" label="#{projet.bo.projet.agenda.action.manage-publication}" @click="onPublishPlageHoraires" :disabled="Quasar.date.extractDate(vueData.agendaRange.lastDate, 'YYYY-MM-DD') < new Date()" vu:authz="Projet$agendaPersonnel"/>
     </vu:slot>
 </vu:agenda-week>
 <vu:agenda-create-plage/>
@@ -285,6 +301,8 @@ initContext(viewContext, agendasDisplay, weekDaysNumber, creationPlageHoraireFor
 - `creationPlageHoraireForm`, `duplicationSemaineForm` : les valeurs initiales des formulaires de création et de duplication (dont la durée des tranches et, hors mode guichet, le nombre de guichets) ;
 - `modeGuichet` : en mode guichet, la création d'une plage demande un nombre de guichets ; sinon, l'agenda à alimenter (voir [Principes](#principes)) ;
 - `modeTranchesHoraire` : le calendrier affiche les tranches horaires plutôt que les plages.
+
+Le composant `vu:agenda-detail-plage` lit la clé `canCreateReservation` du contexte : le contrôleur la publie (un `Boolean`, `false` si la page ne propose pas la prise de rendez-vous).
 
 Le contrôleur peut redéfinir `getInfoCalendrierForRange(viewContext, startDate, endDate)`, qui fournit les informations d'en-tête des jours (`InfoCalendrierDisplay` : libellé, infobulle, style) ; un jour indiqué comme fermé (`siFerme`) n'est pas alimenté par les duplications. `getAgendaLabel()` fournit le libellé du champ de sélection de l'agenda, dans la modale de création (défaut : « Agenda »).
 

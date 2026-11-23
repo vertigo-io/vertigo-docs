@@ -80,6 +80,22 @@
   - Run first the two duplicate-check queries at the top of the script : adding the constraints fails on duplicate data.
   - The script can be run again, but each run rebuilds the unique constraints with a lock on `CRENEAU` and `PLAGE_HORAIRE` : run it during a maintenance window.
 * [Planning] `AbstractAgendaController` now provides the `_editPlage` route. If your agenda controller already declared it, remove it, or keep it only as an override of `editPlage(ViewContext, AgendaDisplayRange, Long, CreationPlageHoraireForm, UiMessageStack)` : another method on the same route fails the startup (`Ambiguous mapping`).
+* [Planning] In mode guichet, the hours of a plage now open it with the keyboard : they are a button, styled by the new rule `.plage-label > button` of `vertigo-planning.css`. Load this stylesheet in your agenda pages :
+  ```html
+  <link th:href="@{/vertigo-ui/static/planning/css/vertigo-planning.css}" rel="stylesheet" type="text/css">
+  ```
+  `vertigo-planning.css` and `vertigo-planning.js` change in this version : make sure your users get the new files.
+* [Planning] The icons of the planning dialogs and of the plage detail are Material icons, known to Quasar, declared in `planning.properties` as the calendar ones : the components no longer need Remix Icon. To keep the Remix Icon icons, declare these keys in the messages of your project (Remix Icon stays loaded and declared to Quasar by your project). Spring uses the first bundle defining a key : if `io/vertigo/ui/components/planning/planning` is among the basenames of your `MessageSource`, move it to a parent `MessageSource`, the keys of your project are then looked up first, see [Planning > Adding resource messages](https://vertigo-io.github.io/vertigo-docs/#/en/modules/planning?id=adding-resource-messages) :
+  ```properties
+  planning.modal.close.icon=ri-close-line
+  planning.detailPlage.reserveNonPublie.icon=ri-error-warning-fill
+  planning.detailPlage.trancheEmpty.icon=ri-checkbox-blank-circle-line
+  planning.detailPlage.trancheSome.icon=ri-contrast-fill
+  planning.detailPlage.trancheFull.icon=ri-checkbox-blank-circle-fill
+  planning.detailPlage.trancheOverbooked.icon=ri-share-circle-fill
+  planning.detailPlage.trancheSupprimee.icon=ri-shut-down-line
+  planning.detailPlage.deleteTranche.icon=ri-delete-bin-2-line
+  ```
 
 * [Orchestra] The Orchestra UI failed to load since 4.4.0 (`process is not defined`). Its files are now served by Vertigo-UI under `/vertigo-ui/static/orchestra/` : if your project ships its own copy (`vertigo-orchestra-ui.umd.js`, `vertigo-orchestra-ui.js`, `vertigo-orchestra-ui.css`), remove it and load the files served by Vertigo, see [Orchestra > Embedded UI](https://vertigo-io.github.io/vertigo-docs/#/en/modules/orchestra?id=embedded-ui).
 

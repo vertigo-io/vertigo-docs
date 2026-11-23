@@ -164,17 +164,21 @@ Previous versions:
 
 ### Adding resource messages
 
-The application UI configuration adds the components resource to the `MessageSource`:
+The application UI configuration adds the components resource to a parent `MessageSource` of its own: Spring looks a key up in the application resources, then in the parent.
 
 ```java
 public static MessageSource getMessageSource() {
+    final ResourceBundleMessageSource vertigoMessageSource = new ResourceBundleMessageSource();
+    vertigoMessageSource.addBasenames("io/vertigo/ui/components/planning/planning");
+    vertigoMessageSource.setDefaultEncoding("UTF-8");
     final ResourceBundleMessageSource customMessageSource = new ResourceBundleMessageSource();
-    customMessageSource.addBasenames("io/vertigo/ui/components/planning/planning");
+    customMessageSource.setParentMessageSource(vertigoMessageSource); // the messages of the application are looked up first
+    customMessageSource.addBasenames("com/mycompany/myapp/i18n/messages");
     return customMessageSource;
 }
 ```
 
-The labels and icons of the components (`planning.agendaWeek.*` keys) can be redefined in an application bundle declared before the module's one.
+The labels and icons of the components (`planning.*` keys) are thus redefined in the application resources, whatever their order. The parent has its own settings: the module resources are in UTF-8.
 
 The module's time formatter (`FormatterMinutes`, input `HH:mm` or `HHhmm`, display `HH:mm`) uses an error message that the application registers in the `LocaleManager`, for example in an initializer:
 
@@ -210,6 +214,18 @@ __JavaScript additions__
 </section>
 ```
 
+?> The icons of the components are Material icons, known to Quasar, declared in `planning.properties` (the `planning.*.icon` keys): the project changes them by redefining these keys in its messages. For another library, the project loads it and declares it to Quasar; for example Remix Icon (`ri-...`):
+
+```javascript
+window.addEventListener('vui-before-plugins', function() {
+    Quasar.iconSet.iconMapFn = function(iconName) {
+        if (iconName.startsWith('ri-')) {
+            return { cls: iconName, content: ' ' };
+        }
+    };
+});
+```
+
 #### VertigoUi Components
 
 - `agenda-week`: Full calendar component, place it full page
@@ -220,7 +236,7 @@ __JavaScript additions__
   - `eventIconAgenda`: Icon in the time period (default: `event`)
   - `multiEventIconAgenda`: Multiple agenda icon in the time period (default: `calendar_month`)
   - `maxMultiEventShow`: Maximum number of agendas shown before list (default: 3)
-  - `hasAuthzAdmin`: If agenda admin rights (default: true); without this right, the calendar no longer offers creating a time period on click, nor modifying or deleting time periods
+  - `hasAuthzAdmin`: If agenda admin rights (default: true); without this right, the calendar no longer offers creating a time period on click, nor modifying or deleting time periods, nor, in the detail of a time period, deleting a time range
 
 - `agenda-create-plage`: Time period creation modal component
   - `plage_actions_slot`: Component buttons slot (default: creation button, depending on counter or personal agenda mode)
@@ -248,11 +264,11 @@ __JavaScript additions__
 __Example__
 
 ```html
-<vu:agenda-week eventIconAgenda="ri-folder-fill" hasAuthzAdmin="${authz.hasAuthorization('Demarche$agendaPersonnel')}">
+<vu:agenda-week eventIconAgenda="folder" hasAuthzAdmin="${authz.hasAuthorization('Demarche$agendaPersonnel')}">
     <vu:slot name="agenda_actions_slot">
-        <vu:button icon="ri-add-line" label="#{projet.bo.projet.agenda.action.create-plage-horaire}" @click="onCreatePlageHoraireDefault" vu:authz="Projet$agendaPersonnel" />
-        <vu:button icon="ri-file-copy-line" label="#{projet.bo.projet.agenda.action.duplicate-week}" @click="onDuplicateWeek" vu:authz="Projet$agendaPersonnel"/>
-        <vu:button icon="ri-gallery-upload-line" label="#{projet.bo.projet.agenda.action.manage-publication}" @click="onPublishPlageHoraires" :disabled="Quasar.date.extractDate(vueData.agendaRange.lastDate, 'yyyy-MM-dd') < new Date()" vu:authz="Projet$agendaPersonnel"/>
+        <vu:button icon="add" label="#{projet.bo.projet.agenda.action.create-plage-horaire}" @click="onCreatePlageHoraireDefault" vu:authz="Projet$agendaPersonnel" />
+        <vu:button icon="content_copy" label="#{projet.bo.projet.agenda.action.duplicate-week}" @click="onDuplicateWeek" vu:authz="Projet$agendaPersonnel"/>
+        <vu:button icon="event_available" label="#{projet.bo.projet.agenda.action.manage-publication}" @click="onPublishPlageHoraires" :disabled="Quasar.date.extractDate(vueData.agendaRange.lastDate, 'YYYY-MM-DD') < new Date()" vu:authz="Projet$agendaPersonnel"/>
     </vu:slot>
 </vu:agenda-week>
 <vu:agenda-create-plage/>
@@ -285,6 +301,8 @@ initContext(viewContext, agendasDisplay, weekDaysNumber, creationPlageHoraireFor
 - `creationPlageHoraireForm`, `duplicationSemaineForm`: the initial values of the creation and duplication forms (including the duration of the time ranges and, outside counter mode, the number of counters);
 - `modeGuichet`: in counter mode, creating a time period asks for a number of counters; otherwise, for the agenda to fill (see [Principles](#principles));
 - `modeTranchesHoraire`: the calendar displays the time ranges rather than the time periods.
+
+The `vu:agenda-detail-plage` component reads the `canCreateReservation` key of the context: the controller publishes it (a `Boolean`, `false` if the page does not offer booking).
 
 The controller can override `getInfoCalendrierForRange(viewContext, startDate, endDate)`, which provides the day header information (`InfoCalendrierDisplay`: label, tooltip, style); a day marked as closed (`siFerme`) is not filled by duplications. `getAgendaLabel()` provides the label of the agenda selection field, in the creation modal (default: "Agenda").
 
