@@ -420,14 +420,14 @@ Content-Type: application/json
 
 The module embeds a Vue.js UI (4 views, labels in French and English), to be integrated into a [Vertigo-UI](/en/extensions/ui) page: a controller and its view, in the layout of the application (see the « Controller: SpringMVC » and « Layout Engine: Thymeleaf Layout » sections of that page). It relies on the REST API: the `orchestra.webapi` feature must be enabled.
 
-- Its files are in the jar, under `io/vertigo/orchestra/static/`: `js/vertigo-orchestra-ui.umd.js` (the components), `js/vertigo-orchestra-ui.js` (which installs them in the Vertigo-UI application, on the `vui-before-plugins` event) and `css/vertigo-orchestra-ui.css`. Vertigo-UI only serves its own resources (`/vertigo-ui/static/`): the application must make these files accessible, for example by copying them into the static resources of its webapp. The example below assumes the JavaScript files copied into `static/js/orchestra/` and the stylesheet into `static/css/orchestra/`.
+- Its files are served by Vertigo-UI, under `/vertigo-ui/static/orchestra/`: `js/vertigo-orchestra-ui.umd.js` (the components), `js/vertigo-orchestra-ui.js` (which installs them in the Vertigo-UI application, on the `vui-before-plugins` event) and `js/vertigo-orchestra-ui.css`. The application does not copy them: it loads them from the jar, like the Vertigo-UI resources.
 - The `vui-orchestra` component displays the list of processes, then the detail of a process: its executions, its activities and their logs, its settings, and the launch of an execution. It receives `api-url`, the address of the Orchestra API (the webservices prefix followed by `/orchestra`), and `read-only`.
 
 ```html
 <head>
-	<link rel="stylesheet" th:href="@{/static/css/orchestra/vertigo-orchestra-ui.css}">
-	<script th:src="@{/static/js/orchestra/vertigo-orchestra-ui.js}"></script>
-	<script th:src="@{/static/js/orchestra/vertigo-orchestra-ui.umd.js}"></script>
+	<link rel="stylesheet" th:href="@{/vertigo-ui/static/orchestra/js/vertigo-orchestra-ui.css}">
+	<script th:src="@{/vertigo-ui/static/orchestra/js/vertigo-orchestra-ui.js}"></script>
+	<script th:src="@{/vertigo-ui/static/orchestra/js/vertigo-orchestra-ui.umd.js}"></script>
 </head>
 <body>
 	<section layout:fragment="content">
@@ -437,7 +437,7 @@ The module embeds a Vue.js UI (4 views, labels in French and English), to be int
 ```
 
 !> `read-only` only hides the modification and launch buttons: the webservices remain callable. If the UI is used in production, access to the page and to the API must be protected on the server side (see [Driving Orchestra through webservices](#driving-orchestra-through-webservices)).
-<!-- source : vertigo-orchestra/src/main/vuejs/src/main.js (composants), src/views/ (4 vues), src/lang/ (fr, en) ; views/VuOApp.vue:L16 (props apiUrl, readOnly) ; views/VuOProcess.vue:L58 (orchestraUiReadOnly) ; resources/io/vertigo/orchestra/static/ ; vuejs/README.md (« If used in production, you must protect access ») ; VSpringWebConfig.java:L341 -->
+<!-- source : vertigo-orchestra/src/main/vuejs/src/main.js (composants), src/views/ (4 vues), src/lang/ (fr, en) ; views/VuOApp.vue:L16 (props apiUrl, readOnly) ; views/VuOProcess.vue:L58 (orchestraUiReadOnly) ; resources/io/vertigo/ui/static/orchestra/ ; vuejs/README.md (« If used in production, you must protect access ») ; VSpringWebConfig.java:L360 -->
 
 Another option, chosen by Mars: building its own process monitoring screens (the [`job`](https://github.com/vertigo-io/vertigo-mars/tree/master/src/main/java/io/mars/job) module: list of processes, detail, executions), with Vertigo-UI, on top of the Orchestra monitoring queries (the PAOs of the `io.vertigo.orchestra.monitoring` package).
 <!-- source : vertigo-mars io/mars/job (JobServices, Job*Controller), views/job/*.html -->
@@ -475,7 +475,7 @@ Another option, chosen by Mars: building its own process monitoring screens (the
 
 ### Orchestra Daemon
 
-?> The `DmnODbProcessExecutorDaemon` daemon (period: `daemonPeriodSeconds`) updates the heartbeat of the Orchestra nodes, that is the signal by which each node indicates that it is alive. A node whose heartbeat has not been updated for more than 2 × `daemonPeriodSeconds` is declared dead. This daemon runs in the daemon pool of the platform, shared with the other daemons of the application: if long daemons occupy all the threads of this pool, the heartbeat can be delayed and cause a dead node detection. Check the execution duration of your daemons through the analytics dashboard. Some Orchestra logs give the node identifier, the activity execution identifier and the state.
+?> The `DmnODbProcessExecutorDaemon` daemon (period: `daemonPeriodSeconds`) updates the heartbeat of the Orchestra nodes, that is the signal by which each node indicates that it is alive. A node whose heartbeat has not been updated for more than 2 × `daemonPeriodSeconds` is declared dead. This daemon runs in the daemon pool of the platform, shared with the other daemons of the application: if long daemons occupy all the threads of this pool, the heartbeat can be delayed and cause a dead node detection. Check the execution duration of your daemons through the analytics dashboard. Some Orchestra logs give the node identifier, the activity execution identifier and the state; the health checks of the daemon pool (`poolUtilization` and `daemonsAlive`) also help with diagnosis.
 <!-- source : DbProcessExecutorPlugin.java:L149, L171, L506-507, L694 ; DaemonManagerImpl.java:L53, L193, L204 -->
 
 ### Scheduler: internal classes

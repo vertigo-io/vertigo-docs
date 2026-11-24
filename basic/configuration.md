@@ -253,7 +253,7 @@ Ces classes sont dans `io.vertigo.core.plugins.param.env`, `.properties`, `.xml`
 
 Dans l'exemple de la section [boot](#boot), le fichier est déclaré avant l'environnement : sa valeur l'emporte sur une variable d'environnement du même nom. Déclaré en premier, `EnvParamPlugin` laisse au contraire l'environnement surcharger les valeurs du fichier.
 
-Les plugins du `boot` sont créés avant le `ParamManager` : un `${NOM}` y est cherché dans les propriétés système, puis dans les variables d'environnement. `${boot.nom}` désigne un paramètre de démarrage (voir [Démarrage d'une application web](#démarrage-dune-application-web)) : il est remplacé à la lecture du YAML, sans valeur par défaut possible, et doit exister. Il s'utilise dans `node` et dans les plugins du `boot`.
+Les plugins du `boot` sont créés avant le `ParamManager` : un `${NOM}` y est cherché dans les propriétés système, puis dans les variables d'environnement. `${boot.nom}` désigne un paramètre de démarrage (voir [Démarrage d'une application web](#démarrage-dune-application-web)) : il est remplacé à la lecture du YAML, sans valeur par défaut possible, et doit exister. Il s'utilise dans `node`, dans les plugins du `boot` et dans les paramètres numériques de `boot.params` (`threadPoolSize`…).
 
 Dans un chemin de fichier, `${user.home}`, `${user.dir}` et `${java.io.tmpdir}` sont remplacés à l'intérieur du chemin (`dbFilePath: ${java.io.tmpdir}/vertigo-ui/ViewContext`). Cette substitution est faite par les plugins qui lisent un fichier (paramètres, KVStore, FileStore) : ce ne sont pas des paramètres.
 
@@ -366,9 +366,9 @@ Ces deux paramètres de démarrage peuvent aussi venir d'autres sources ; de la 
 | Source | Fichiers de configuration | Flags actifs |
 |---|---|---|
 | `web.xml` (`context-param`) | `boot.applicationConfiguration` | `boot.activeFlags` |
-| variable d'environnement | — | `VERTIGO_BOOT_ACTIVE_FLAGS` |
+| variable d'environnement | `VERTIGO_BOOT_APPLICATION_CONFIGURATION` | `VERTIGO_BOOT_ACTIVE_FLAGS` |
 | fichier de propriétés `-Dexternal-properties=<chemin>` | `boot.applicationConfiguration` | `boot.activeFlags` |
-| propriété système | — | `-Dboot.active-flags` |
+| propriété système | `-Dboot.application-configuration` | `-Dboot.active-flags` |
 
 Exemple : `VERTIGO_BOOT_ACTIVE_FLAGS=redis;searchES;analytics`.
 

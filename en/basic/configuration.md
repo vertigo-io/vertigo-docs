@@ -248,7 +248,7 @@ These classes are in `io.vertigo.core.plugins.param.env`, `.properties`, `.xml` 
 
 In the example of the [boot](#boot) section, the file is declared before the environment: its value wins over an environment variable with the same name. Declared first, `EnvParamPlugin` instead lets the environment override the file values.
 
-The `boot` plugins are created before the `ParamManager`: a `${NAME}` there is looked up in the system properties, then in the environment variables. `${boot.name}` designates a startup parameter (see [Starting a web application](#starting-a-web-application)): it is replaced when the YAML is read, with no possible default value, and must exist. It is used in `node` and in the `boot` plugins.
+The `boot` plugins are created before the `ParamManager`: a `${NAME}` there is looked up in the system properties, then in the environment variables. `${boot.name}` designates a startup parameter (see [Starting a web application](#starting-a-web-application)): it is replaced when the YAML is read, with no possible default value, and must exist. It is used in `node`, in the `boot` plugins and in the numeric `boot.params` (`threadPoolSize`…).
 
 In a file path, `${user.home}`, `${user.dir}` and `${java.io.tmpdir}` are replaced inside the path (`dbFilePath: ${java.io.tmpdir}/vertigo-ui/ViewContext`). This substitution is done by the plugins that read a file (parameters, KVStore, FileStore): these are not parameters.
 
@@ -361,9 +361,9 @@ These two startup parameters can also come from other sources; from the weakest 
 | Source | Configuration files | Active flags |
 |---|---|---|
 | `web.xml` (`context-param`) | `boot.applicationConfiguration` | `boot.activeFlags` |
-| environment variable | — | `VERTIGO_BOOT_ACTIVE_FLAGS` |
+| environment variable | `VERTIGO_BOOT_APPLICATION_CONFIGURATION` | `VERTIGO_BOOT_ACTIVE_FLAGS` |
 | properties file `-Dexternal-properties=<path>` | `boot.applicationConfiguration` | `boot.activeFlags` |
-| system property | — | `-Dboot.active-flags` |
+| system property | `-Dboot.application-configuration` | `-Dboot.active-flags` |
 
 Example: `VERTIGO_BOOT_ACTIVE_FLAGS=redis;searchES;analytics`.
 

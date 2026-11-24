@@ -40,11 +40,11 @@ En HTML5, l'autofermeture n'existe pas pour les éléments non-void : le navigat
 La cause est le parsing des templates *in-DOM* par le navigateur (cf. doc Vue « DOM Template Parsing Caveats » : l'autofermeture n'est valable que dans les SFC).
 Les balises traitées côté serveur (`th:*`, `vu:*`) ne sont pas concernées : elles sont expansées par Thymeleaf avant d'arriver au navigateur. L'autofermeture reste donc possible pour `th:block`, les composants `vu:*` et les éléments void HTML (`<br>`, `<img>`, ...).
 
-?> À partir de vertigo-ui 4.5.0, les balises autofermées sont refermées automatiquement au rendu. Le filtre servlet historique `UnAutoCloseTagsFilter` (à déclarer dans le web.xml) est déprécié puis supprimé en 5.0.0 : sa réparation par regex était partielle — il rate toute balise contenant un `>` dans une valeur d'attribut (ex. `:disable="[1,2].length > 5"`) et ne connaît que les préfixes `q-*`/`v-*`.
+?> Vertigo-UI referme automatiquement au rendu les balises autofermées dont le nom commence par `q-`, `v-`, `vui-` ou `dsfr-` (liste étendue en surchargeant `VSpringWebConfig.getAutoCloseTagsPrefixes()`) ; une autre balise autofermée est à corriger dans le gabarit. Le filtre servlet historique `UnAutoCloseTagsFilter` (déclaré dans le web.xml) est déprécié, il n'a plus d'utilité : sa réparation par regex était partielle, il rate toute balise contenant un `>` dans une valeur d'attribut (ex. `:disable="[1,2].length > 5"`).
 
 ## [Ui] Comment modifier mes pages Thymeleaf sans redémarrer le serveur ?
 Le paramètre Spring Boot `spring.thymeleaf.cache=false` est sans effet en vertigo-ui : le cache des templates est piloté par la méthode `isDevMode()` de `VSpringWebConfig` (`setCacheable(!isDevMode())`).
-`isDevMode()` retourne `true` par défaut (cache désactivé) : c'est la surcharge dans le `VSpringWebConfig` du projet qui active le cache en production. En dev, il suffit donc de ne pas surcharger `isDevMode()` à `false`.
+`isDevMode()` suit le paramètre `THYMELEAF_DEV_MODE`, `true` par défaut (cache désactivé) : en production, il est mis à `false`, ce qui active le cache. En dev, il suffit donc de le laisser à `true`. La surcharge de `isDevMode()` dans le `VSpringWebConfig` du projet reste possible.
 Pensez aussi à désactiver l'auto-reload du module web dans le Tomcat d'Eclipse, sinon chaque modification de ressource redémarre la webapp.
 
 ## [Ui] Les boutons `<vu:button-link>` ne fonctionnent que si ils sont placés à l'intérieur de balises `<section>`
@@ -253,7 +253,7 @@ Coté `Controller`, le champ sera une chaine de caractère qui pourra être pers
 
 Coté page :
 ```Html
-<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" th:url="'@{/commons/upload}'" key="baseTmpPictureUris" multiple />   
+<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" url="@{/commons/upload}" key="baseTmpPictureUris" multiple />   
 ```
 
 Coté Controller
@@ -983,7 +983,7 @@ Gardez cette entité en dehors des données de référence.
 **Cause** : Un daemon long (>60s) bloque le pool de threads daemon partagé (2 threads par défaut). Le heartbeat du daemon orchestra n'est plus mis à jour, et un autre nœud considère le nœud comme mort.
 
 **Solutions** :
-1. Rechercher vos daemons longs (>60s) via le dashboard analytics (`/dashboard`, healthcheck `poolUtilization`)
+1. Rechercher vos daemons longs (>60s) via le dashboard analytics (`/dashboard`, durée des traces `daemon`) et le log WARN `Daemon [xxx] took Nms (> period Pms)`. Le healthcheck `poolUtilization` signale un daemon en attente d'un thread libre ; `daemonsAlive` ne signale un daemon trop long qu'au-delà de `min(max(4 x période, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)` (120 s et 2 h par défaut)
 2. Si nécessaire, augmenter `threadPoolSize` dans `boot.params` de `configuration.yaml` (4 recommandé minimum)
 3. Sortir les traitements très longs du pool daemon (exécuter dans un thread dédié)
 

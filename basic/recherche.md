@@ -479,6 +479,29 @@ L'objet de résultat `FacetedQueryResult` fournit de nombreuses informations uti
 La méthode générée dans le SearchClient prend en paramètre un `SelectedFacetValues`.
 Vertigo propose un pont entre cet objet et les IHMs utilisées (WebServices, SpringMVC ou Struts2)
 
+### Ignorer des facettes pour une recherche
+
+La `FacetedQueryDefinition` fixe les facettes calculées par une recherche. Le `SearchQueryBuilder` peut en écarter certaines pour une recherche donnée : leur agrégation n'est pas demandée à ElasticSearch et elles sont absentes du `FacetedQueryResult`. Une même définition sert ainsi plusieurs écrans qui n'affichent pas les mêmes facettes, sans calculer celles qui ne sont pas affichées.
+
+- `withSkippedFacets(Set<DefinitionId<FacetDefinition>>)` : les facettes à ignorer, désignées par leur identifiant
+- `withSkippedFacetFilter(Function<FacetedQueryDefinition, Set<DefinitionId<FacetDefinition>>>)` : une fonction qui choisit les facettes à ignorer parmi celles de la `FacetedQueryDefinition` du builder ; elle n'est disponible que sur un builder créé à partir d'une `FacetedQueryDefinition`, comme celui du SearchClient
+
+Exemple :
+```java
+      final SearchQuery searchQuery = equipmentIndexSearchClient.createSearchQueryBuilderEquipment(criteria, selectedFacetValues)
+	     .withSkippedFacetFilter(facetedQueryDefinition -> facetedQueryDefinition.getFacetDefinitions().stream()
+	           .filter(facetDefinition -> !"FctEquipmentType".equals(facetDefinition.getName())) // seule FctEquipmentType est calculée
+	           .map(FacetDefinition::id)
+	           .collect(Collectors.toSet()))
+	     .build();
+```
+
+- La facette de clustering (`withFacetClustering`) n'est jamais ignorée : les comptages des clusters sont lus dans son résultat.
+- Les valeurs déjà sélectionnées sur une facette ignorée filtrent toujours les résultats, mais Vertigo-UI ne les affiche plus (elles sont absentes de `_selectedFacets`). On n'ignore donc que des facettes que l'utilisateur ne peut pas sélectionner sur l'écran.
+- Les plugins de recherche ElasticSearch 9 et ElasticSearch 7.17 (vertigo-lts-libs) prennent en compte les facettes ignorées.
+
+<!-- source : SearchQueryBuilder.java (withSkippedFacets, withSkippedFacetFilter : assertion "Skipped facets need a FacetedQueryDefinition") ; SearchQuery.java (clustering facet filtered out of skippedFacets) ; ESAggregationBuilder.java:85, ESFacetedQueryResultBuilder.java:203 ; ESSearchQueryBuilder.java (selected values filter every facet) ; ViewContext.java:530-537 (_selectedFacets without skipped facets) ; AbstractSearchManagerTest (testFacetQueryWithSkippedFacet*) ; vertigo-lts-libs AsbtractESSearchRequestBuilder (ES 7.17 RestHL and transport) -->
+
 
 ## Syntaxe VertigoSearchDSL
 

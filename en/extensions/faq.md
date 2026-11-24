@@ -40,11 +40,11 @@ In HTML5, self-closing does not exist for non-void elements: the browser ignores
 The cause is the browser's *in-DOM* template parsing (see Vue doc "DOM Template Parsing Caveats": self-closing is only valid in SFCs).
 Server-side processed tags (`th:*`, `vu:*`) are not affected: they are expanded by Thymeleaf before reaching the browser. Self-closing thus remains fine for `th:block`, `vu:*` components and HTML void elements (`<br>`, `<img>`, ...).
 
-?> Starting with vertigo-ui 4.5.0, self-closed tags are automatically closed at render time. The legacy `UnAutoCloseTagsFilter` servlet filter (declared in web.xml) is deprecated, then removed in 5.0.0: its regex-based repair was partial — it misses any tag holding a `>` inside an attribute value (e.g. `:disable="[1,2].length > 5"`) and only knows the `q-*`/`v-*` prefixes.
+?> Vertigo-UI automatically closes at render time the self-closed tags whose name starts with `q-`, `v-`, `vui-` or `dsfr-` (list extended by overriding `VSpringWebConfig.getAutoCloseTagsPrefixes()`); another self-closed tag is to be fixed in the template. The legacy `UnAutoCloseTagsFilter` servlet filter (declared in web.xml) is deprecated and no longer useful: its regex-based repair was partial, it misses any tag holding a `>` inside an attribute value (e.g. `:disable="[1,2].length > 5"`).
 
 ## [Ui] How to edit my Thymeleaf pages without restarting the server?
 Spring Boot's `spring.thymeleaf.cache=false` has no effect in vertigo-ui: template caching is driven by the `isDevMode()` method of `VSpringWebConfig` (`setCacheable(!isDevMode())`).
-`isDevMode()` returns `true` by default (cache disabled): it is the project's override in its `VSpringWebConfig` that enables the cache in production. In dev, simply do not override `isDevMode()` to `false`.
+`isDevMode()` follows the `THYMELEAF_DEV_MODE` param, `true` by default (cache disabled): in production, it is set to `false`, which enables the cache. In dev, simply leave it to `true`. Overriding `isDevMode()` in the project's `VSpringWebConfig` is still possible.
 Also disable auto-reload of the web module in Eclipse's Tomcat, otherwise every resource change restarts the webapp.
 
 ## [Ui] `<vu:button-link>` buttons only work inside `<section>` tags
@@ -241,7 +241,7 @@ Controller: field is string, can be persisted directly if needed.
 
 Page-side:
 ```Html
-<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" th:url="'@{/commons/upload}'" key="baseTmpPictureUris" multiple />
+<vu:fileupload th:if="${model.modeEdit}" float-label="Add new pictures here" url="@{/commons/upload}" key="baseTmpPictureUris" multiple />
 ```
 
 Controller-side:
@@ -892,7 +892,7 @@ Keep this entity out of reference data.
 **Cause**: A long-running daemon (>60s) blocks the shared daemon thread pool (2 threads default). The orchestra daemon heartbeat is no longer updated, and another node considers this node dead.
 
 **Solutions**:
-1. Find your long-running daemons (>60s) via the analytics dashboard (`/dashboard`, `poolUtilization` healthcheck)
+1. Find your long-running daemons (>60s) via the analytics dashboard (`/dashboard`, `daemon` trace durations) and the WARN log `Daemon [xxx] took Nms (> period Pms)`. The `poolUtilization` healthcheck reports a daemon waiting for a free thread; `daemonsAlive` only reports a daemon running too long beyond `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)` (120 s and 2 h by default)
 2. If necessary, increase `threadPoolSize` in `boot.params` of `configuration.yaml` (minimum 4 recommended)
 3. Move very long-running tasks out of the daemon pool (execute in a dedicated thread)
 

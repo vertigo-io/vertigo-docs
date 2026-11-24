@@ -68,6 +68,18 @@ create DtDefinition DtUsager {
 	- `cardinality` : `?` (0-1), `1` (obligatoire), `*` (multiple)
 - `id` : désigne l'entité persistante et sa clé primaire *(pas de PK multiple, sauf tables d'association N-N)*
 - `sortField` : champ de tri par défaut des listes de l'objet
+- `sortFieldDesc` : `"true"` pour un tri par défaut décroissant *(défaut : croissant)* ; généré en `@SortField(desc = true)`
+
+Le tri par défaut (champ et sens) est celui de `DtListState.defaultOf(entityClass)` et des listes MasterData mises en cache, pour lesquelles le `sortField` est obligatoire.
+<!-- source : DtListState.defaultOf (getSortField, getSortDesc) ; CacheDataStore.loadMDList (sortField mandatory, sortDesc) ; studio KSP sortFieldDesc -> @SortField(desc = true) -->
+
+`DtListState.defaultOf(entityClass)` limite aussi le nombre de lignes chargées : 250 par défaut, ou la valeur du paramètre `DT_LIST_DEFAULT_MAX_ROWS` fourni par le `ParamManager` (5000 au plus), lue une seule fois au premier usage.
+
+Deux autres limites concernent les listes d'un écran :
+- une liste envoyée à la page compte au plus 1000 lignes, ou `DT_LIST_DEFAULT_MAX_ROWS` s'il est plus grand : une liste chargée par `defaultOf` tient toujours dans la page ;
+- une liste modifiable (`UiListModifiable`) compte au plus 250 lignes, ou la valeur du paramètre `UI_LIST_MODIFIABLE_MAX_ROWS` ; au-delà, une erreur : la liste est à filtrer avant, une liste triée tronquée ne serait pas celle attendue.
+<!-- source : DtListState.getDefaultMaxRows (param DT_LIST_DEFAULT_MAX_ROWS, read once, ABSOLUTE_MAX_ROWS 5000) ; AbstractUiListUnmodifiable.getMaxElements (max(1000, default max rows)) ; AbstractUiListModifiable.getModifiableMaxRows (param UI_LIST_MODIFIABLE_MAX_ROWS, 250) -->
+
 
 __StereoType__
 
@@ -195,7 +207,7 @@ Pour les DtObject, les annotations Java sont alternatives au KSP :
 | `@DataSpace` | Espace de données |
 | `@Field` | Champ d'un DtObject |
 | `@DisplayField` | Champ d'affichage |
-| `@SortField` | Champ de tri |
+| `@SortField` | Champ de tri par défaut ; `desc = true` pour un tri décroissant (croissant par défaut) |
 | `@KeyField` | Champ de clé |
 | `@ForeignKey` | Clé étrangère |
 | `@Association` | Association 1-N |

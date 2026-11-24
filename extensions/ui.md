@@ -128,7 +128,7 @@ Pour une application Vue pure (SPA) sans rendu serveur Thymeleaf, Vertigo ne fou
 
 La documentation de Quasar sur [quasar.dev](https://quasar.dev/vue-components/)
 
-!> Vertigo-UI 4.4.1 utilise Quasar **2.21.1** (Vue 3). La migration Quasar 1 → 2 concernait notamment `q-modal` → `q-dialog` (`QModal` est absent de Quasar 2). Pour l'upload de fichiers, ce n'est pas un changement d'API Quasar : `QUploader` existe bien dans Quasar 2.21.1 ; c'est le composant Vertigo-UI qui utilise désormais le composant maison `v-file-upload-quasar` (plutôt que `q-uploader` de Quasar).
+!> Vertigo-UI utilise Quasar **2.35.6** (Vue 3). La migration Quasar 1 → 2 concernait notamment `q-modal` → `q-dialog` (`QModal` est absent de Quasar 2). Pour l'upload de fichiers, ce n'est pas un changement d'API Quasar : `QUploader` existe bien dans Quasar 2 ; c'est le composant Vertigo-UI qui utilise désormais le composant maison `v-file-upload-quasar` (plutôt que `q-uploader` de Quasar).
 
 Les composants les plus courants sont :
 
@@ -142,7 +142,7 @@ Les composants les plus courants sont :
 - `q-knob`
 - `q-slider`
 
-> **Thèmes** : le thème d'un layout se choisit avec `useDsfr` (défaut `false`, disponible sur `vu:head` et `vu:head-meta`), qui charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`). Le paramètre `onlyDsfrStyle` (défaut `false`) est exclusif à `vu:head-meta` : il masque tous les CSS 3rd-party non-DSFR (y compris le CSS Quasar) — passé sur `vu:head`, il est sans effet. Le thème DSFR est complété par une famille de composants `vu:dsfr-*` (boutons, collections, inputs, layout, table), documentée dans la page [Écosystème UI](/extensions/ui-ecosystem).
+> **Thèmes** : le thème d'un layout se choisit avec `useDsfr` (défaut `false`, disponible sur `vu:head` et `vu:head-meta`), qui charge le thème DSFR (`vertigo-dsfr.css` + `vertigo-dsfr.umd.js`). Le paramètre `onlyDsfrStyle` (défaut `false`) est exclusif à `vu:head-meta` : il masque tous les CSS 3rd-party non-DSFR (y compris le CSS Quasar) — passé sur `vu:head`, il est sans effet. Le thème DSFR est complété par une famille de composants `vu:dsfr-*` (boutons, collections, inputs, layout, table), documentée dans la page [Écosystème UI](/extensions/ui-ecosystem).
 
 ## Moteur de templating : Thymeleaf
 
@@ -206,6 +206,28 @@ Vertigo-UI n'a pas vocation à encapsuler ainsi tous les composants d'ihm, la st
 - le composant nécessite des interactions particulières avec le contexte. Par exemple pour sélectionner les données à intégrer dans vueData, et parfois pour les encoder de manière spécifique.
 - le composant propose une API plus ergonomique, plus adaptée ou moins verbeuse pour le développeur
 
+Les composants nommés de Vertigo-UI simplifient et enrichissent le mécanisme des fragments de Thymeleaf : un fragment s'utilise comme une balise HTML, ses paramètres s'écrivent comme des attributs, et le composant apporte en plus la transmission des attributs VueJS, le contenu, les slots et le choix du mode lecture ou édition.
+
+```HTML
+<!-- fragment Thymeleaf de signature text-field(object, field, label, required) -->
+<th:block th:replace="~{components/inputs :: text-field(object='movie', field='title', label='Titre du film', required=true)}"/>
+<!-- composant Vertigo-UI -->
+<vu:text-field object="movie" field="title" label="Titre du film" required/>
+```
+
+| | Fragment Thymeleaf | Composant Vertigo-UI |
+|---|---|---|
+| Appel | une expression `~{fichier :: fragment(...)}` | une balise `<vu:fragment .../>` |
+| Texte | un littéral : `label='Titre du film'` | directement : `label="Titre du film"` |
+| Expression, objet | `items=${movies}` | `items="${movies}"` : le composant reconnaît l'expression et en reçoit la valeur (une liste reste une liste) |
+| Paramètre non donné | à écrire (tous les paramètres de la signature sont attendus) | facultatif (`null`) ; un attribut sans valeur (`required`) vaut `true` |
+| Attributs supplémentaires (VueJS, classes) | à prévoir comme paramètres | recopiés sur la balise interne (`*_attrs`), un préfixe (`label_`, `input_`) choisit laquelle |
+| Contenu | un fragment passé en paramètre (`~{::#bloc}`) | le corps de la balise (`vu:content`) et des slots nommés (`vu:slot`) |
+| Lecture ou édition | un appel par mode | le composant choisit son fragment (`vu:selector`) |
+| `th:if`, `th:each`, `th:with` | sur la balise d'appel | sur la balise du composant |
+
+Sur un composant, un paramètre s'écrit sans `th:` : le composant reconnaît une expression à sa forme (voir [Valeur d'un paramètre : texte ou expression](#valeur-dun-paramètre-texte-ou-expression)) et en reçoit la valeur.
+
 Nécessite :
 ```HTML
 <html xmlns:vu="http://www.morphbit.com/thymeleaf/component">
@@ -217,6 +239,23 @@ Nécessite :
 - `other_attrs` : Agrégation de tous les paramètres non identifiés comme paramètre du composant, et permet de déterminer où ils doivent être placés. (Ex: dans le composant `vu:text-field`, les attributs non identifiés comme paramètre sont placés sur le `q-input` interne, par exemple `<vu:text-field round>` donnera `<q-input round>`)
 - `contentTags` : Paramètre particulier récupérant les tags dans le body du composant lors de l'appel, sous forme de liste de `contentItem`. Ce cas est assez rare, habituellement on utilise plutôt `<vu:content>` qui place tout le body. `contentItem` permet de tester les tags pour faire un traitement spécifique (Ex: `grid` place les tags dans des blocs et `vu:grid-cell` possède un comportement particulier)
 
+### Valeur d'un paramètre : texte ou expression
+Un paramètre de composant s'écrit sans préfixe `th:` : Vertigo-UI regarde sa valeur pour savoir s'il la passe comme une expression Thymeleaf, comme le ferait l'attribut `th:` correspondant (`label="${user.name}"` comme `th:label="${user.name}"`), ou comme un texte.
+- **Expression** : la valeur contient `${`, `#{` ou `@{` (`${user.name}`, `!${flag}`, `#{welcome.message}`, `'/search?q=' + @{/x}`), ou commence par `*{`, `~{`, une substitution `|...|` ou un littéral `'...'`.
+- **Texte** : dans tous les autres cas, y compris avec un `$`, `#` ou `@` qui n'ouvre pas d'expression (`href="#anchor"`, `label="contact@mail.fr"`, `100$`). `true`, `false` et les nombres écrits sous leur forme usuelle (`12`, `-5`, `0.5`) restent des valeurs Thymeleaf ; un nombre avec un 0 en tête (`0102030405`) reste un texte, tel qu'il est écrit.
+
+Une expression suit la syntaxe Thymeleaf, sans extension : `label="Bonjour ${user.name}"` n'est pas plus lisible par Thymeleaf que `th:label="Bonjour ${user.name}"`, un texte mêlé d'expressions s'écrit avec une substitution `label="|Bonjour ${user.name}|"`.
+`*{` et `~{` ne sont reconnus qu'en début de valeur : une négation se place dans l'expression de sélection (`disabled="*{!#lists.isEmpty(items)}"`).
+
+Un lien avec des parties variables s'écrit avec les paramètres de lien de Thymeleaf, qui les encodent : `url="@{/movies/{id}(id=${movie.movId})}"`.
+
+Les attributs non déclarés, regroupés dans les paramètres `*_attrs`, sont recopiés sur la balise interne : leur valeur, souvent du JavaScript pour VueJS (`@click="..."`), est un texte, sauf si elle commence par `${`, `#{`, `@{`, `*{`, `~{` ou une substitution `|...|` (`@click="|openModal(${movie.movId})|"`) : aucun JavaScript ne commence ainsi, alors qu'un texte `'...'` et un gabarit `` `...${...}...` `` restent du JavaScript. Un attribut qui vaut `true` ou `false` est écrit avec `:` pour que VueJS l'évalue, comme un paramètre : `stack-label="false"` donne `:stack-label="false"` (sans `:`, le texte `"false"` vaudrait vrai pour VueJS). Un attribut écrit avec `:` (`:stack-label="vueData.stacked"`, ou `true` / `false`) remplace l'attribut de même nom posé en dur par le composant, et `stack-label="${null}"` le retire ; `class` et `style` s'ajoutent à ceux du composant. Ce que le composant calcule avec un `th:` ne se surcharge pas ainsi : il le propose alors en paramètre (`title` / `v-title`).
+Le préprocesseur `__${...}__` de Thymeleaf s'applique à toutes ces valeurs, texte compris.
+Un texte s'affiche tel qu'il est écrit, `\` comprise (`C:\dir\`, `@click="confirm('l\'effacer ?')"`) ; seul `\_\_` garde son sens Thymeleaf et affiche `__`.
+
+Un attribut écrit avec `th:` (`th:label="${...}"`) est évalué par Thymeleaf avant le composant : le composant reçoit la valeur calculée par Thymeleaf, comme un texte, et la passe telle quelle ; seuls `true`, `false` et les nombres gardent leur type. Il en va de même des valeurs qu'un composant transmet à un composant interne (`label_attrs`) et des attributs posés sur `vu:content`. `th:` sert donc aux expressions sans marque (`th:x="#strings.toUpperCase(...)"`) et aux comportements propres à Thymeleaf (attributs booléens, `th:attr`, `th:classappend`) ; pour une expression simple, l'écriture sans `th:` passe la vraie valeur au composant (`list="${movies}"`, `url="@{/commons/upload}"`).
+Un littéral texte contenant une expression (`th:url="'@{/commons/upload}'"`) donne ce texte, pas le lien : en mode dev (`THYMELEAF_DEV_MODE`), la page échoue avec l'écriture à utiliser (`url="@{/commons/upload}"`), pour un paramètre, ou pour un attribut non déclaré dont le texte commence par une expression. Une valeur donnée par la page et transmise par un composant l'emporte sur celle que le composant écrit sur la même balise.
+
 ### Composants Vertigo-UI : layout
 - `vu:page` : Composant obligatoire encadrant la zone sur laquelle VueJS est actif.
   - `content` : Le body du tag est conservé
@@ -224,34 +263,37 @@ Nécessite :
 - `vu:head` : Pose le tag head et les méta du head html
   - `title`* : Titre de la page
   - `content` : Le body du tag est conservé
-  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.39`)
-  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.18.1`)
+  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.46`)
+  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.21.1`)
   - `vuejsDevMode` : **boolean** (défaut `false`) : passe VueJS en mode dev — charge les builds non minifiés (`vue.global.js` au lieu de `vue.global.prod.js`, et `quasar.umd.js` au lieu de `quasar.umd.prod.js`) *(nous avons noté des bugs sur VueJS dans quelques cas qui n'apparaissent qu'en devMode)*
   - `vuiDevMode` : **boolean** (défaut `false`) : active le mode développeur pour les composants Vertigo-UI (il faut un serveur de dev Vite — `npm run dev`, port 3000 — qui distribue les modules source transformés à la volée)
   - `vuiSsr` : **boolean** (défaut `false`) : Active le mode Server Side Rendering (le serveur Node.js est optionnel ; à défaut, la pré-compilation du template est assurée par le moteur Nashorn embarqué — `vue-template-compiler` browser.js) — charge `vertigo-ui-mpa-ssr.js` au lieu de `vertigo-ui-mpa.js`
-  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.4.1`)
+  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.5.0`)
   - `useQuasar` : **boolean** (défaut `true`) : charge Quasar (CSS, script UMD, locale)
-  - `quasarVersion` : Version du Quasar chargé (défaut `2.21.1`)
+  - `quasarVersion` : Version du Quasar chargé (défaut `2.35.6`)
   - `robotoVersion` : Version de la police Roboto chargée (défaut `51` ; la valeur `null` ne charge pas Roboto)
   - `fontAwesomeVersion` : Version de Font Awesome chargée (défaut `6.7.2` ; la valeur `null` ne charge pas Font Awesome)
-  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`)
+  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `vertigo-dsfr.umd.js`, servis depuis `3rdParty/dsfr/vue-dsfr@8.21.0/` : le dossier porte la version de vue-dsfr compilée avec les composants DSFR de Vertigo)
+  - `vueDsfrVersion` : Version de vue-dsfr du thème DSFR chargé (défaut `8.21.0`)
   - `useWysiwyg` : **boolean** : charge les assets de l'éditeur Vertigo-Wysiwyg (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js` ; non chargé si non précisé
   - `additional_defer_libs_slot` : Slot pour injecter des scripts supplémentaires (deferred), posés après Quasar et avant l'UMD Vertigo-UI
 - `vu:head-meta` : Composant obligatoire posant les éléments **méta** du head (script js, css, ...)
-  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.39`)
-  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.18.1`)
+  - `vueJsVersion` : Version du VueJS chargé (défaut `3.5.46`)
+  - `axiosVersion` : Version de la librairie JS Axios chargée (défaut `1.21.1`)
   - `vuejsDevMode` : **boolean** (défaut `false`) : passe VueJS en mode dev — charge les builds non minifiés (`vue.global.js` au lieu de `vue.global.prod.js`, et `quasar.umd.js` au lieu de `quasar.umd.prod.js`) *(nous avons noté des bugs sur VueJS dans quelques cas qui n'apparaissent qu'en devMode)*
   - `vuiDevMode` : **boolean** (défaut `false`) : active le mode développeur pour les composants Vertigo-UI (il faut un serveur de dev Vite — `npm run dev`, port 3000 — qui distribue les modules source transformés à la volée)
   - `vuiSsr` : **boolean** (défaut `false`) : Active le mode Server Side Rendering — charge `vertigo-ui-mpa-ssr.js` au lieu de `vertigo-ui-mpa.js`
-  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.4.1`)
+  - `vertigoUiVersion` : Version de Vertigo-UI, utilisée en cache-buster `?v=` sur les assets locaux (vertigo-ui.css, vertigo-ui.umd.js, vertigo-ui-mpa, wysiwyg, DSFR) (défaut `4.5.0`)
   - `useQuasar` : **boolean** (défaut `true`) : charge Quasar (CSS, script UMD, locale)
-  - `quasarVersion` : Version du Quasar chargé (défaut `2.21.1`)
+  - `quasarVersion` : Version du Quasar chargé (défaut `2.35.6`)
   - `onlyDsfrStyle` : **boolean** (défaut `false`) : masque tous les CSS 3rd-party non-DSFR (Roboto, Material Icons, Font Awesome, Ionicons, Material Design Icons, Animate.css) ainsi que le CSS Quasar (les scripts JS Quasar restent chargés)
   - `robotoVersion` : Version de la police Roboto chargée (défaut `51` ; la valeur `null` ne charge pas Roboto) — non chargé si `onlyDsfrStyle`
   - `fontAwesomeVersion` : Version de Font Awesome chargée (défaut `6.7.2` ; la valeur `null` ne charge pas Font Awesome) — non chargé si `onlyDsfrStyle`
-  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `dsfr.umd.js`)
+  - `useDsfr` : **boolean** (défaut `false`) : charge le thème DSFR (`vertigo-dsfr.css` + `vertigo-dsfr.umd.js`, servis depuis `3rdParty/dsfr/vue-dsfr@8.21.0/` : le dossier porte la version de vue-dsfr compilée avec les composants DSFR de Vertigo)
+  - `vueDsfrVersion` : Version de vue-dsfr du thème DSFR chargé (défaut `8.21.0`)
   - `useWysiwyg` : **boolean** : charge les assets de l'éditeur Vertigo-Wysiwyg (tiptap) — `vertigo-wysiwyg.css` + `vertigo-wysiwyg.umd.js` ; non chargé si non précisé
   - `additional_defer_libs_slot` : Slot pour injecter des scripts supplémentaires (deferred), posés après Quasar et avant l'UMD Vertigo-UI
+  > Vertigo-UI embarque deux versions de Vue, Quasar, axios et vue-dsfr : celle par défaut et la précédente (Vue `3.5.46` / `3.5.39`, Quasar `2.35.6` / `2.21.1`, axios `1.21.1` / `1.18.1`, vue-dsfr `8.21.0` / `8.17.0`, les deux compilées avec les mêmes composants DSFR de Vertigo). La version précédente permet de décaler la montée de version d'une application, les autres valeurs de `vueJsVersion`, `quasarVersion`, `axiosVersion` et `vueDsfrVersion` ne correspondent à aucun fichier embarqué.
   <!-- source : head.html:1-89 — params exhaustifs extraits du fragment -->
 - `vu:form` : Pose un formulaire et référence le contexte de page associé
   - `content` : Le body du tag est conservé
@@ -379,6 +421,13 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `label` : Surcharge du label
   - `label_attrs` : Liste des attributs à ajouter sur le label (tag `<q-field>`)
   - `input_attrs` : Liste des attributs à ajouter sur le champ de saisie (tag `<q-checkbox>`)  
+- `vu:checkbox-inline` : Case à cocher avec son libellé à côté, sur toute la largeur (« J'accepte les conditions… »), comme pour un recueil de consentement ; `vu:checkbox` place le libellé dans la colonne des libellés du formulaire. En lecture, la case est désactivée (l'accord donné reste visible) et sa valeur n'est pas envoyée. `vu:checkbox-inline-edit` reste modifiable même dans une page en lecture (un consentement à donner sur une page récapitulative) ; `vu:checkbox-confirm`, déprécié (il n'affichait aucune confirmation), en est l'ancien nom
+  - `object`* : Nom de l'objet du contexte
+  - `field`* : Nom du champ
+  - `label` : Surcharge du label
+  - `required` : Surcharge du caractère obligatoire
+  - `label_attrs` : Liste des attributs à ajouter sur le cadre du champ (tag `<q-field>`)
+  - `input_attrs` : Liste des attributs à ajouter sur la case (tag `<q-checkbox>`)
 - `vu:select` : Composant de sélection par une combobox
   - `object`* : Nom de l'objet du contexte
   - `field`* : Nom du champ
@@ -462,6 +511,17 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
   - `uploader_attrs` : Liste des attributs à ajouter sur le composant upload (tag `v-file-upload-quasar`)
 - `vu:fileupload-dropzone` : Zone de dépôt de fichiers par glisser-déposer
   - `fileComponentId`* : Identifiant obligatoire liant la zone de dépôt au composant d'upload correspondant
+- `vu:v-fileupload` : Composant d'ajout de fichiers (composant Vue `v-file-upload`), présenté comme un champ avec son libellé (pendant Quasar de `vu:dsfr-v-fileupload`)
+  - `url`* : Url du WebService d'upload
+  - `downloadUrl` : Url de téléchargement d'un fichier, suivie de son identifiant (défaut : `url` + `/download/`)
+  - `object` + `field` : Champ d'un objet du contexte recevant les fichiers ; le libellé est celui du champ
+  - `key` : Clé du contexte recevant les fichiers (liste de fichiers sans objet) ; `label` est alors obligatoire en édition
+  - `label` : Libellé (surcharge celui du champ)
+  - `required` : Surcharge du caractère obligatoire
+  - `multiple` : Indique si on autorise plusieurs fichiers
+  - `label_attrs` : Liste des attributs à ajouter sur le cadre du champ (tag `<q-field>`)
+  - `uploader_attrs` : Liste des attributs à ajouter sur le composant upload (tag `v-file-upload`)
+- `vu:v-fileupload-simple` (par `key`) et `vu:v-fileupload-simple-object` (par `object` + `field`) : variantes compactes de `vu:v-fileupload`, mêmes paramètres
 
 > Pour adapter leur rendu ces composants utilisent des mécanismes particuliers.
 > Globalement un composant **Vertigo-UI : inputs** s'écrit ainsi :
@@ -484,9 +544,26 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
 
 ### Composants Vertigo-UI : collections
 - `vu:cards` : Génère une liste de card. Lors du rendu d'une card, vous pouvez utiliser l'attribut VueJS `item` pour récupérer l'objet courant.
-- `vu:collection`
+  - `list`* : Nom de la liste du contexte
+  - `componentId`* : Identifiant du composant (état de la pagination côté client)
+  - `rowsPerPage` : Nombre d'éléments par page (défaut `15`)
+  - `showMore` : **boolean** (défaut `false`) : un bouton « voir plus » ajoute les éléments suivants ; sinon une pagination (`q-pagination`) passe d'une page à l'autre
+  - `showMoreLabel` : Libellé du bouton « voir plus » (défaut `Show more`)
+  - `selectable` : **boolean** (défaut `false`) : éléments sélectionnables
+  - `rowKey` : Champ identifiant un élément (défaut : l'identifiant de la liste)
+  - `sortUrl` : Url de tri côté serveur
+  - `cardClass` : Classes du bloc de chaque card (ex. `col-4`, `col-lg-3 col-md-6 col-xs-12`)
+  - `pagination_attrs` : Liste des attributs à ajouter sur la pagination (tag `<q-pagination>`), ex. `pagination_color="secondary"`
+  - `qcard_attrs` : Liste des attributs à ajouter sur chaque card (tag `<q-card>`)
+- `vu:collection` : Base de `vu:list` et `vu:cards` : pose l'état de la liste côté client et, sous le contenu, le bouton « voir plus » ou la pagination. Mêmes paramètres `list`, `componentId`, `rowsPerPage`, `showMore`, `showMoreLabel`, `selectable`, `sortUrl` et `pagination_attrs`
 - `vu:field-read`
-- `vu:list`
+- `vu:list` : Génère une liste (`q-list`) ; chaque élément est un `q-item`, l'objet courant est `item`.
+  - Mêmes paramètres que `vu:cards` (`list`*, `componentId`*, `rowsPerPage`, `showMore`, `showMoreLabel`, `selectable`, `rowKey`, `sortUrl`, `pagination_attrs`)
+  - `separator` : **boolean** : un séparateur entre les éléments
+  - `listClass` : classes ajoutées sur la liste (tag `<q-list>`)
+  - `item_attrs` : Liste des attributs à ajouter sur chaque élément (tag `<q-item>`)
+
+> `vu:list` et `vu:cards` affichent des données de la liste côté client : la page inclut les champs affichés avec `vu:include-data` (ex. `<vu:include-data object="movies" field="title"/>`).
 - `vu:search`
 - `vu:facets`
 
@@ -578,6 +655,12 @@ Les composants en **Edit** gèrent également nativement les messages d'erreurs 
    - labelCancel : libellé du bouton annuler (par défaut Non)
    - other_attrs : tous autres attributs. Posés sur le `<q-btn>` (pas sur le bouton interne de confirmation)
 
+- `vu:buttons-group` : Regroupe les boutons d'action d'une page : selon la place disponible, les premiers sont affichés en ligne, les suivants dans un menu ouvert par un bouton « … »
+   - xs, sm, md, lg, xl : nombre de boutons affichés en ligne pour chaque taille d'écran Quasar (xs < 600px, sm < 1024px, md < 1440px, lg < 1920px, xl) ; tous par défaut, une taille non précisée suit la suivante (ex. `sm="0" md="2"` : aucun bouton en ligne en xs et sm, 2 en md, tous en lg et xl)
+   - moreLabel : libellé du bouton « … » (accessibilité)
+   - color, textColor : couleurs du bouton « … »
+   - btn_attrs : liste des attributs à ajouter sur le bouton « … » (tag `<q-btn>`)
+   - les boutons du groupe sont des composants `vu:` (`vu:button`, `vu:button-link`…) : ils reçoivent les classes de visibilité par taille d'écran. Un bouton écrit directement (`<q-btn>`) ne les reçoit pas : il reste affiché en ligne à toutes les tailles, et il est répété dans le menu « … » quand son rang l'y place
 
 ## Composants VueJS Vertigo-UI
 
@@ -678,6 +761,8 @@ Le module vertigo-ui ne dispose pas de `XxxFeatures.java` dédié. Les composant
 | Utilitaires | `FragmentUtil`, `ResourcePathFinder` |
 
 !> **`vu:authz` en mode développement** : avec la variable de contexte `authz-dev`, les éléments non autorisés ne sont pas supprimés, ils sont affichés en état verrouillé. Cela permet de visualiser les autorisations (quels éléments sont masqués et pourquoi) et de tester la sécurité côté serveur en conditions de développement.
+
+!> **Mode développement des gabarits** : le paramètre `THYMELEAF_DEV_MODE` (`true` par défaut) relit les gabarits à chaque requête (pas de cache : une modification est visible sans redémarrer) et journalise une fois, en WARN, chaque élément `vu:` sans composant (composant retiré ou renommé, faute de frappe : l'élément est sinon écrit tel quel et ignoré par le navigateur). Un WARN au démarrage rappelle ce mode : **en production, mettez `THYMELEAF_DEV_MODE=false`** (variable d'environnement, propriété système ou fichier de paramètres). Un projet peut aussi surcharger `VSpringWebConfig.isDevMode()`.
 
 ### UI Data Wrappers
 

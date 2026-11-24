@@ -30,12 +30,12 @@ Une application est constituée de modules, chacun apportant à la fois ses __d�
 
 ## Run
 
-En partant de la configuration et du paramètrage d'une application il est dès lors possible de créer un noeud d'éxecution (Node).
+En partant de la configuration et du paramétrage d'une application il est dès lors possible de créer un nœud d'exécution (Node).
 Le cycle de démarrage est le suivant :
 
 1. Création de l'ensemble des composants : module par module et en utilisant un mécanisme d'inversion du contrôle pour résoudre les dépendances entre composants
 2. Vérouillage de l'espace des composants (aucun nouveau composant ne peut etre enregistré)
-3. Enregistrerment de l'ensemble des définitions : module par module via les DefinitionProvider, les composants eux-même pouvant être des DefinitionProvider
+3. Enregistrement de l'ensemble des définitions : module par module via les DefinitionProvider, les composants eux-même pouvant être des DefinitionProvider
 4. Vérouillage de l'espace des définitions (aucune nouvelle définition ne peut être enregistrée)
 5. Démarrage de l'ensemble des composants : appel de la méthode start() des composants activables, ils ont alors accès à l'espace des définitions
 (5.bis Création des composants éphémères _Initializer_ pour certains besoins)
@@ -43,9 +43,9 @@ Le cycle de démarrage est le suivant :
 
 A l'issue de ce cycle de démarrage le _Node_ est prêt, et l'ensemble de ses fonctionnalités sont utilisables via ses composants.
 
-Lors de l'arret du noeud de l'application, l'ensemble des composants sont arretés dans l'ordre inverse de leur démarrage.
+Lors de l'arrêt du nœud de l'application, l'ensemble des composants sont arrêtés dans l'ordre inverse de leur démarrage.
 
-D'autre part Vertigo-Core fournit un environnement d'execution dédié aux démons (Daemons en anglais), au sens tache récurrente technique, par le biais du DaemonManager. Pour enregistrer un nouveau démon il suffit de créer la une `DaemonDefinition`.
+D'autre part Vertigo-Core fournit un environnement d'exécution dédié aux démons (Daemons en anglais), au sens tâche récurrente technique, par le biais du DaemonManager. Pour enregistrer un nouveau démon il suffit de créer une `DaemonDefinition`.
 Une manière simplifiée consiste à ajouter l'annotation `@DaemonScheduled` sur une méthode publique d'un composant enregistré dans le ComponentSpace.
 
 > **⚠️ Pool de threads daemon :**
@@ -55,15 +55,22 @@ Une manière simplifiée consiste à ajouter l'annotation `@DaemonScheduled` sur
 >   boot:
 >     params:
 >       threadPoolSize: 4
+>       daemonMinDurationInSeconds: 120   # durée minimale avant de juger qu'un daemon pose problème
+>       daemonMaxDurationInSeconds: 7200  # durée maximale d'un daemon : au-delà, il doit devenir un job Orchestra
 >   ```
 > - Les daemons doivent être **optimisés et simples** : une tâche courte et récurrente. Un daemon dont l'exécution est trop longue peut bloquer les autres daemons (heartbeats, analytics...).
 > - Si des daemons longs sont inévitables, pensez à augmenter `threadPoolSize` (4-6 recommandé si daemons >10s) ou à exécuter les traitements très longs (>60s) dans un thread dédié.
-> - Le pool daemon expose un healthcheck `poolUtilization` et des logs d'alerte si un daemon dépasse sa période ou si des tâches restent en file d'attente.
+> - Un daemon doit durer moins que sa période, et jamais plus de `daemonMaxDurationInSeconds` (2h). Il pose problème au-delà de sa limite : `min(max(4 x période, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
+> - Le DaemonManager expose trois healthchecks (feature `daemons`), qui jugent le moteur de daemons et non le métier :
+>   - `daemonsAlive` : **RED** si un daemon est mort (sa planification a été annulée par une `Error`), **YELLOW** si un daemon tourne depuis plus que sa limite ;
+>   - `poolUtilization` : **YELLOW** si un daemon attend un thread libre depuis plus que sa limite (vérifiez d'abord `daemonsAlive` : un daemon trop long occupe souvent les threads, puis augmentez `threadPoolSize`), **RED** au-delà de 2 x `daemonMaxDurationInSeconds` ou si le pool est arrêté ;
+>   - `lastExecs` : **YELLOW** dès qu'un daemon échoue, jusqu'à deux succès consécutifs ; jamais RED.
+> - Des métriques du pool (taille, exécutions, échecs, durée et retard moyens depuis le dernier relevé) sont publiées toutes les heures, et un log d'alerte signale un daemon qui dépasse sa période.
 
 ## Monitor
 
-Une fois une application démarée il important de suivre son activité et ses performances.
-Un module d'analytics est nativement présent dans Vertigo pour permettre un suivi fin des traitements qui son effectués.
+Une fois une application démarrée, il est important de suivre son activité et ses performances.
+Un module d'analytics est nativement présent dans Vertigo pour permettre un suivi fin des traitements qui sont effectués.
 Il permet de suivre trois types d'indicateurs :
 
 - **HealthStatus** : Permet d'indiquer un état de santé (rouge, orange, vert) pour une fonction précise

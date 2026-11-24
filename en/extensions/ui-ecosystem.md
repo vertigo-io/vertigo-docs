@@ -136,7 +136,7 @@ Each library uses Vite to compile its components:
 | Library | Command | Output |
 |--------------|----------|--------|
 | vertigo-ui-vuejs | `npm run build-lib` | `dist/vertigo-ui.*` → `vertigo-ui/static/js/` |
-| vertigo-ui-dsfr | `npm run build-lib` | `dist/*.*` → `vertigo-ui/static/3rdParty/dsfr/` |
+| vertigo-ui-dsfr | `npm run build-lib` | `dist/vertigo-dsfr.umd.js` (and `.map`), `dist/vertigo-dsfr.css` → `vertigo-ui/static/3rdParty/dsfr/vue-dsfr@<vue-dsfr version>/` (`copy-lib.mjs`) |
 | vertigo-ui-wysiwyg | `npm run build-lib` | `dist/*.*` → `vertigo-ui/static/js/wysiwyg/` |
 
 ### External dependencies by library

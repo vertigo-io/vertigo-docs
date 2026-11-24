@@ -30,9 +30,31 @@
 
 # from 4.4.1 to 4.5.0
 
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_ : target `4.4.1 to 4.5.0` (`th:xxxUrl="'@{...}'"` to `th:xxxUrl="@{...}"`, `th:with="x='#{...}'"` to `th:with="x=#{...}"`, the clickable `q-item` holding a button marked, `vu:checkbox-confirm` to `vu:checkbox-inline-edit`, path of the DSFR bundle of vertigo-ui)<br/>
+
+* **[Ui] The new param `THYMELEAF_DEV_MODE` gives the dev mode, on by default : set `THYMELEAF_DEV_MODE=false` in production.** In dev mode the templates are not cached, they are read again at each request ; a WARN at startup says so. If your project overrides `VSpringWebConfig.isDevMode()`, check it in your project. In this dev mode, each `vu:` element without component is logged once as a WARN (component removed or renamed, typo) : after the upgrade, go through your screens and check the logs.
 * **[Ui] Self-closed custom elements are now closed automatically.** In-DOM templates are parsed by the browser, which per the HTML spec ignores the trailing `/` on anything but a void element : `<q-btn v-if="..." />` stayed open and swallowed the markup that followed it, silently extending the `v-if` scope and turning the next siblings into the component default slot. A Thymeleaf post-processor now rewrites such a tag into `<q-btn ...></q-btn>` before the page is written out. Nothing to configure, and no impact on correct templates.
   - If you declared `io.vertigo.ui.impl.vuejs.filter.UnAutoCloseTagsFilter` in your `web.xml`, you can remove it : it is deprecated, does the same repair less reliably, and now finds nothing left to close. It is **removed** in 5.0.0.
   - The repair is silent by design. Templates keep their faulty tags until you fix them at the source, so a pass on your views is still worth it.
+  - Only the elements whose name starts with `q-`, `v-`, `vui-` or `dsfr-` are rewritten. Another self-closed element (one of your components with another prefix, a standard element like `<div/>`) is not repaired : fix it in the template, or add its prefix by overriding `VSpringWebConfig.getAutoCloseTagsPrefixes()`.
+* **[Ui] A value given to a component by a `th:` attribute is passed as it is : write `url="@{/commons/upload}"`, not `th:url="'@{/commons/upload}'"`.** A `th:` attribute gives its value to the component : a text literal holding an expression (`'@{/commons/upload}'`) gives that text, not the link. The upload url of `vu:fileupload`, `vu:dsfr-v-fileupload`... was often written so (it was the example of the FAQ) : the upload fails, the browser calls `@{/commons/upload}`.
+  - To find them : the renaming tool fixes the url params (`th:url`, `th:downloadUrl`...) ; for the others, in dev mode (`THYMELEAF_DEV_MODE`, true by default) the page fails and gives the writing to use : `<vu:fileupload th:url="'@{/commons/upload}'"> gives the text @{/commons/upload}, not its value : write url="@{/commons/upload}" ...`.
+  - To fix : remove the `th:` and the quotes, `url="@{/commons/upload}"` (a value holding `${`, `#{` or `@{` is an expression for a component) ; `th:url="@{/commons/upload}"`, without quotes, works too.
+  - The same goes for a `th:with` variable : `th:with="blockTitle='#{nav.title}'"` holds the text `#{nav.title}`, the standard Thymeleaf writing `th:with="blockTitle=#{nav.title}"` holds its value. The renaming tool fixes them.
+  - In a component of your own that forwards a `*_attrs` to an inner component and writes the same attribute on its tag, the value given by the page now wins, whatever the order (the last attribute won before).
+* [dsfr-ui] `vu:dsfr-text-area` now displays a character counter and sets `maxlength` when the field has a max length (smartType constraint or `max` attribute). Hide the counter with `showCounter="false"`.
+* [dsfr-ui] The DSFR bundle moved to `/vertigo-ui/static/3rdParty/dsfr/vue-dsfr@8.21.0/` and its script is renamed `vertigo-dsfr.umd.js` (was `dsfr.umd.js`), like `vertigo-dsfr.css` : the folder bears the version of vue-dsfr it is built with ; the previous version `8.17.0` is also shipped, chosen by the `vueDsfrVersion` param of `vu:head` / `vu:head-meta`. `vu:head` / `vu:head-meta` load it, nothing to do unless a page references `3rdParty/dsfr/dsfr.umd.js` or `3rdParty/dsfr/vertigo-dsfr.css` directly. The ES module `dsfr.es.js` is no longer shipped. `dsfr.icons4quasar.js` stays in place.
+* [Ui] `vu:checkbox-confirm` (it never showed a confirmation) is deprecated : it is now `vu:checkbox-inline-edit`, always editable as before, even in a read page (a consent to give on a summary page). Nothing to change ; rename it `vu:checkbox-inline-edit` when you can, the former name will be removed in a future version. The new `vu:checkbox-inline` (the label next to the box) follows the mode of the page : in read mode the box is disabled and its value is not sent.
+* [Ui] `vu:v-fileupload` (and `vu:v-fileupload-simple`, `vu:v-fileupload-simple-object`) is shown as a field, with its label above the uploader as `vu:dsfr-v-fileupload` : the label of the field, or the `label` param (mandatory with `key` in edit mode). If a page set its own label next to it, remove it.
+* **[Ui] An attribute given to a component through its `*_attrs` (not a declared param) set to `true` or `false` is now written with `:`, to be evaluated by VueJS, as a declared param** (`stack-label="false"` gives `:stack-label="false"`) : written as is, VueJS read the text `"false"` as true. A screen where such an attribute had no visible effect (a field still disabled with `disable="false"`, a label still stacked with `stack-label="false"`) now shows what is written ; such an attribute also replaces the attribute of the same name written by the component.
+  - A checkbox, radio or toggle whose model is a text (`"true"` / `"false"`) and that receives `true-value`, `false-value` or `val` set to `true` / `false` : no error, the box shows unchecked (or the radio unselected) although the value is `"true"`, and a click puts the boolean. Write the text yourself with `:` : `:true-value="'true'"`, `:false-value="'false'"`.
+* **[Ui] Quasar 2.35.6, Vue 3.5.46 and axios 1.21.1 are the new defaults of `vu:head` / `vu:head-meta`.** The embedded CDN serves the default versions and the previous ones only (Vue 3.5.39, Quasar 2.21.1, axios 1.18.1) : Vue 3.5.13, Quasar 2.18.1 and axios 1.8.4 are no longer served, a page that sets `vueJsVersion`, `quasarVersion` or `axiosVersion` to one of them no longer loads. Set a served version, or remove the attribute to follow the defaults.
+  - The message zone under a field (hint, error) now takes its place in the layout (Quasar 2.25.1) instead of being drawn over the 20px reserved below the field. Forms keep the same aspect, but in a `vu:table-modifiable` this zone counts in the column width : narrow columns get wider (about 15px) and their rows higher.
+  - A field that contains a popup (calendar of `vu:date` / `vu:datetime`, or a `q-menu` / `q-popup-proxy` of your own) stays highlighted as focused while the popup is open. If you put your own `@blur` / `@focus` listeners on such a field, they no longer fire when the popup opens : `blur` fires when the user leaves the field.
+  - `Quasar.date.extractDate` returns an Invalid Date for a value that does not match the mask, an empty value included (it returned a date in 1900). Check your own code calling it on an optional date : a comparison with an Invalid Date is always `false`, `formatDate` no longer gives a 1900 date. The date column sorts of Vertigo tables are adapted (empty dates first in ascending order, last in descending order).
+  - A `q-item` used as a link (`tag="a"` or `href`) no longer gets `role="listitem"`, and a clickable one (`clickable`, `@click`, `tag="label"`) gets `role="button"` instead : a `q-list` of such items has links or buttons but no list items (accessibility, RGAA 9.3), typically a navigation menu. Prefer a real list : `<q-list tag="ul">` and each `q-item` in a `<li>` (move its `v-if` or `vu:authz` to the `<li>`, reset the list style `list-style: none; padding: 0; margin: 0`, adapt the CSS selectors that targeted the item as a direct child of the list). Otherwise set `role="none"` on the `q-list`. Don't set `role="listitem"` on the `q-item` : it would no longer be announced as a link or a button.
+  - A `q-item clickable` that only wraps a button or a link, as the export or action menus of many shared layouts, becomes a button in a button : remove `clickable`, the inner button carries the action and the item stays a list item. Before : `<q-item clickable v-close-popup><q-item-section><vu:button-submit action="@{_exportCsv}" label="CSV"/></q-item-section></q-item>` ; after : `<q-item v-close-popup><q-item-section><vu:button-submit action="@{_exportCsv}" label="CSV"/></q-item-section></q-item>`. An item with its own `@click` (the whole row is the action) that also holds a button is to be reviewed by hand. The renaming tool marks these items with a comment, not rendered : check the ones of a block already in an HTML comment, the marker ends that comment.
+  - `q-menu` and `q-tooltip` no longer get the internal class `q-position-engine` when the browser supports CSS anchor positioning (recent Chromium) : a project CSS rule on `.q-menu.q-position-engine` (or `:not(.q-position-engine)`) now applies or not depending on the browser. Target `.q-menu` / `.q-tooltip` instead.
 
 * **[Core] Daemon health checks reworked** (feature `daemons` ; a RED status makes `/healthcheck/readiness` fail) :
   - `lastExecs` is no longer RED when all daemons fail : a failing daemon is YELLOW until two consecutive successes.
@@ -40,13 +62,55 @@
   - `daemonsAlive` is new : RED when a daemon is dead (an `Error` cancelled its schedule), YELLOW when a daemon runs longer than its limit `min(max(4 x period, daemonMinDurationInSeconds), daemonMaxDurationInSeconds)`.
   - A daemon must not run more than `daemonMaxDurationInSeconds` (2h by default) : move longer processing to an Orchestra job.
   - Both limits are set in `configuration.yaml` with `boot.params.daemonMinDurationInSeconds` (default 120) and `boot.params.daemonMaxDurationInSeconds` (default 7200), see [Core > Run](https://vertigo-io.github.io/vertigo-docs/#/en/overview/core?id=run).
-* [Core] `boot.params.threadPoolSize` is now actually applied (it was silently ignored) : if you had set it, check the value.
+  - Health checks no longer log : the 4.4.1 `Daemon pool saturated` warning is removed. If you alerted on this log, alert on the `poolUtilization` health status instead.
+* [Core] `boot.params.threadPoolSize` is now actually applied (it was silently ignored : the default, 2 threads, was used) : if you had set it, check the value. Invalid daemon params now fail the startup : `threadPoolSize` or `daemonMinDurationInSeconds` lower than 1, `daemonMinDurationInSeconds` greater than `daemonMaxDurationInSeconds`, or a value that is not an integer.
 
-* **[DataFactory] ES9 index settings are checked again at startup** (the check was broken since 4.4.0) : if an analyzer, tokenizer, filter or normalizer of your index config file is missing or different on the existing index, the startup now fails with `Index settings have changed and are no more compatible, you must remove your index like : curl -X DELETE ...`. If you changed your index config since its creation in 4.4.x, plan to delete the index and reindex your data when you deploy 4.5.0.
+* **[DataFactory] ES9 index settings are checked again at startup** (the check was broken since 4.4.0 ; the ES 7.17 plugins of the LTS libs are not concerned) : if an analyzer, tokenizer, filter or normalizer of your index config file is missing or different on the existing index, the startup now fails with `Index settings have changed and are no more compatible, you must remove your index like : curl -X DELETE ...`. If you changed your index config since its creation in 4.4.x, plan to delete the index and reindex your data when you deploy 4.5.0.
+* [DataFactory] ES 7.17 LTS, transport client plugin (`ClientESSearchServicesPlugin`) : `getMetaData` now returns the `LocalDate`, `Double` and `Long` values with their type, like the RestHL plugin (a `LocalDate` came back as a `String`), and `withHighlight()` is no longer ignored. Check your casts on the search results metadata.
+* [DataModel] The default max rows of `DtListState.defaultOf` (250) can be set with the new param `DT_LIST_DEFAULT_MAX_ROWS` (5000 at most), read once from the `ParamManager` : set it with one of your param plugins (environment variable, system property, properties file).
+  - A list sent to the page holds at most 1000 rows, or `DT_LIST_DEFAULT_MAX_ROWS` if higher. If you extend `AbstractUiListUnmodifiable`, `NB_MAX_ELEMENTS` is replaced by `getMaxElements()`.
+  - The modifiable lists (`UiListModifiable`) hold at most 250 rows, or the value of the new param `UI_LIST_MODIFIABLE_MAX_ROWS` ; beyond, an error : filter the list before, a truncated sorted list would not be the expected one.
 
 * **[Vega] Node configuration files by environment variable or system property : singular names.** Like `boot.applicationConfiguration` in `web.xml`, they are now read from `VERTIGO_BOOT_APPLICATION_CONFIGURATION` or `-Dboot.application-configuration` (a `;` separated list of files). The plural names `VERTIGO_BOOT_APPLICATION_CONFIGURATIONS` and `-Dboot.application-configurations` were silently ignored since 3.4.0 (the `web.xml` value was used) and are no longer read.
   - If your deployment sets a plural name, rename it and check its value : it now overrides your `web.xml`.
   - Precedence : system property, then external properties file (`-Dexternal-properties`), then environment variable, then `web.xml`.
+
+* **[Planning] Database update `planning_update_4.5.0.sql`** (PostgreSQL, in `io/vertigo/planning/sql/` of the vertigo-planning jar ; new databases use `planning_create_init_4.5.0.sql`) : it adds unique constraints (a reservation occupies a single creneau ; one plage per agenda, day and start time) and consultation indexes.
+  - Check your schema first (with Liquibase, your changelogs) : if it already has these constraints and indexes under the same names (`A_RESERVATION_CRENEAU_CRENEAU_RESERVATION_CRENEAU_UNIQUE_FK`, `A_PLAGE_HORAIRE_UNIQUE`, `IDX_TRH_AGE_DATE_PUBLICATION_MINUTE`, `IDX_PLH_AGE_DATE`, `IDX_REC_AGE_DATE`), you don't need the script.
+  - Run first the two duplicate-check queries at the top of the script : adding the constraints fails on duplicate data.
+  - The script can be run again, but each run rebuilds the unique constraints with a lock on `CRENEAU` and `PLAGE_HORAIRE` : run it during a maintenance window.
+* [Planning] `AbstractAgendaController` now provides the `_editPlage` route. If your agenda controller already declared it, remove it, or keep it only as an override of `editPlage(ViewContext, AgendaDisplayRange, Long, CreationPlageHoraireForm, UiMessageStack)` : another method on the same route fails the startup (`Ambiguous mapping`).
+* [Planning] In mode guichet, the hours of a plage now open it with the keyboard : they are a button, styled by the new rule `.plage-label > button` of `vertigo-planning.css`. Load this stylesheet in your agenda pages :
+  ```html
+  <link th:href="@{/vertigo-ui/static/planning/css/vertigo-planning.css}" rel="stylesheet" type="text/css">
+  ```
+  `vertigo-planning.css` and `vertigo-planning.js` change in this version : make sure your users get the new files.
+* [Planning] The icons of the planning dialogs and of the plage detail are Material icons, known to Quasar, declared in `planning.properties` as the calendar ones : the components no longer need Remix Icon. To keep the Remix Icon icons, declare these keys in the messages of your project (Remix Icon stays loaded and declared to Quasar by your project). Spring uses the first bundle defining a key : if `io/vertigo/ui/components/planning/planning` is among the basenames of your `MessageSource`, move it to a parent `MessageSource`, the keys of your project are then looked up first, see [Planning > Adding resource messages](https://vertigo-io.github.io/vertigo-docs/#/en/modules/planning?id=adding-resource-messages) :
+  ```properties
+  planning.modal.close.icon=ri-close-line
+  planning.detailPlage.reserveNonPublie.icon=ri-error-warning-fill
+  planning.detailPlage.trancheEmpty.icon=ri-checkbox-blank-circle-line
+  planning.detailPlage.trancheSome.icon=ri-contrast-fill
+  planning.detailPlage.trancheFull.icon=ri-checkbox-blank-circle-fill
+  planning.detailPlage.trancheOverbooked.icon=ri-share-circle-fill
+  planning.detailPlage.trancheSupprimee.icon=ri-shut-down-line
+  planning.detailPlage.deleteTranche.icon=ri-delete-bin-2-line
+  ```
+
+* [Orchestra] The Orchestra UI failed to load since 4.4.0 (`process is not defined`). Its files are now served by Vertigo-UI under `/vertigo-ui/static/orchestra/` : if your project ships its own copy (`vertigo-orchestra-ui.umd.js`, `vertigo-orchestra-ui.js`, `vertigo-orchestra-ui.css`), remove it and load the files served by Vertigo, see [Orchestra > Embedded UI](https://vertigo-io.github.io/vertigo-docs/#/en/modules/orchestra?id=embedded-ui).
+
+* **[Stella] REST plugins (`withRestMasterPlugin` / `withRestWorkerPlugin`)** : fixed (unusable since 4.3.2) and aligned on the params of the Redis plugins. Upgrade the master and the workers together : the workers now send a heartbeat to a new master route.
+  - Workers : `timeoutSeconds` (mandatory before) was the HTTP read timeout, it is now the node timeout : a node without heartbeat (every 20s) for this time is seen dead and its works are re-queued (60s by default, more than 20s and at most 3600s, checked at startup). Remove it ; if you had raised it for a slow server, put this value in the new `httpTimeoutSeconds` (10s by default, more than 5s : the long poll of the server).
+  - Master : remove `timeoutSeconds` (always ignored, now deprecated). The timeout of the works waiting without an active node for their type (60s) is set with `deadWorkTypeTimeoutSeconds` (5 to 3600s).
+  - Redis plugins : nothing to change.
+
+* **[Vega] SAML2 : the SAML response is checked as required by the SAML 2.0 Web Browser SSO profile, and its assertion must be encrypted, on by default.** Test a login with your IdP after the upgrade : a response that does not comply fails the login, with an error in the logs naming the param of the `saml` feature to adapt ; the [SAML2](https://vertigo-io.github.io/vertigo-docs/#/en/basic/webservices?id=saml2) doc gives each message with its fix. Before going to production, check these points with the operator of the production IdP, whose responses can't be tested elsewhere.
+  - The `cryptAssertion` param (true by default) was not applied, it now is : plain assertions are refused. Have the IdP encrypt them with the SP certificate of the SP metadata, or set `cryptAssertion=false`.
+  - Behind a reverse proxy, set `externalUrl` (the public url of the application) : without it, the callback url is built from the request and `checkDestination` may refuse the response.
+
+* [Connectors] jsch 0.2.26 -> 2.28.8 : same library (`com.github.mwiede:jsch`) with a new numbering, nothing to change in your code. If your project declares jsch itself, align its version.
+* [Connectors] BouncyCastle 1.87 in the saml2 connector : if your project sets the BouncyCastle version itself (`bcprov` / `bcpkix`, or the `bc-jdk18on-bom` BOM), align it on 1.87 or remove it.
+* [Database] H2 2.5.252 is the version managed by `vertigo-database` (was 2.2.224) : `org.h2.tools.Console` can no longer be instantiated. To start the H2 web console, use `org.h2.tools.Server` : `Server.createWebServer("-webPort", "8082").start()`, then `stop()` on the returned server.
 
 # from 4.4.0 to 4.4.1
 
@@ -224,7 +288,7 @@ You may need it, if you have some input component in table. It force a `vue-js c
 
 # from 4.2.0 to 4.3.0
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 
 * **[DataModel] Package renamed `io.vertigo.datamodel.structure.*` → `io.vertigo.datamodel.data.*`**. Update your imports:
 * **[DataModel] `Criteria`, `Task`, and property-related classes moved to DataFactory** module. Update your pom.xml if you import these classes directly (they're no longer in vertigo-datamodel).
@@ -281,7 +345,7 @@ You can use them for example to register vue components :
 
 ⚠️ Do not use 4.2.0 of vertigo-studio, use 4.2.0a instead
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 
 * **[DataModel] Renamings** : (use renaming tool)
   - `DtObject` to `DataObject`
@@ -323,7 +387,7 @@ Example, before `th:` not needed :
 
 # from 3.6.0 to 4.0.0
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 
 * [Core] Update to JDK17
 * [Core] Rename MessageText to LocaleMessageText (included in renaming tool)
@@ -413,7 +477,7 @@ protected String getCustomComponentsPathPrefix() {
 **We encourage to upgrade to 3.1.1 version it contains some important fix**
 
 # from 2.1.0 to 3.0.0
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 * **[Dynamo] Split Dynamo to multiple module : DataStore, DataModel, DataBase, DataFactory**
 * [Core] Update to Java 11
 * [Core] Lots of renames (you should use renaming tools)
@@ -726,7 +790,7 @@ in web.xml :
 
 # from 1.1.3 to 2.0.0
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 This tools is a set of ant's tasks. In case of this 2.0, it comes with two usefull targets :
 
 - CONST Java Entity to CamelCase java : Replace old java definitions to CamelCase definition new in vertigo 2.0
@@ -1102,7 +1166,7 @@ For projects that need to transition from version 1.7 to version 2.4, the indexT
 
 WARN : There is a blocker issue in vertigo-studio use vertigo-studio v0.9.4a
 
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 * Simpler boot declaration in managers.xml *(not in renaming tool)*. 
   - Remove all loaderPlugins 
   - Remove all RegistryPlugin
@@ -1184,7 +1248,7 @@ Your managers.xml should look like this:
 * DefinitionSpace.put(Definition) is now hidden, to add Definitions you should add a DefinitionProvider to your managers.xml. It's get() method may returned your definitions
 
 # from 0.9.2 to 0.9.3
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 * __[All] Updated to JDK 8__ : Change your JRE in your pom.xml, project IDE config, compile, ant execution, etc...
 * __[All] Renamed vertigo Option to jdk Optional__
 * __[Dynamo] Split DtObject as Entity (persistent) and simple DtObject (non persistent)__ : 
@@ -1241,7 +1305,7 @@ You may need to clear your index directory
 
 
 # from 0.9.1 to 0.9.2
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 * [Core] Aligned vertigo Option api to JDK api. You could use the rename tool, in order to rename previous Option api to the new one rename (`isPresent`, `ofNullable`, `orElse`, `of`, `none`). Note that isEmpty is deprecated and hasn't equivalent in jdk api, replace it by !otp.isPresent()
 * [Core] Splitted App and autoCloseable. You should use try(new AutoCloseableApp() { } in unit tests
 * [Dynamo] Renamed DAOBroker to DAO
@@ -1251,7 +1315,7 @@ You may need to clear your index directory
 * [Dynamo] Create URI public on `DtObjectUtil`
 
 # from 0.9.0 to 0.9.1
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 
 __Important__ : Use v0.9.1a for vertigo quarto. (0.9.1 have a buggy pom.xml)
 
@@ -1339,7 +1403,7 @@ After:
 * Renamed storeName of TaskDefinition to dataSpace
 
 # from 0.8.3 to 0.9.0
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_<br/>
 _Renaming tool doesn't do all renames, you should do them manually !_
 
 * Added params storeDtName to DbFileStorePlugin.
@@ -1438,13 +1502,13 @@ and if your project use ParamContainerManager (it's native yet) replaced 'conf:x
 * Refactored ElasticSearch plugins : ``cores`` params is deprecated, and should be replaced by `envIndex` whith the name of this environment (like : `myApp-prod`)
 
 # from 0.8.2 to 0.8.3
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_
 
 * In your index definitions ksp, use DslListFilterBuilder instead of RegExpListFilterBuilder (before named DefaultListFilterBuilder)
 
 
 # from 0.8.1 to 0.8.2
-[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/master/migration-tools/update-renaming-tool.xml) _(beta)_
+[**Renaming tool**](https://raw.githubusercontent.com/vertigo-io/vertigo-tools/main/migration-tools/update-renaming-tool.xml) _(beta)_
 
 * Renamed io.vertigo.vega.rest.* to io.vertigo.vega.webservice.* (like io.vertigo.vega.rest.model.UiListState to io.vertigo.vega.webservice.model.UiListState)
 * Renamed io.vertigo.vega.plugins.rest.* to io.vertigo.vega.plugins.webservice.* 
